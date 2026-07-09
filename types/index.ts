@@ -1,4 +1,4 @@
-export type ArtistType = "individual" | "company" | "project_group";
+export type ArtistType = "individual" | "company" | "project_group" | "group";
 export type ArtistField =
   | "contemporary_dance"
   | "ballet"
@@ -58,6 +58,15 @@ export interface Artist {
     image_url: string;
     video_url: string;
   }>;
+  isDemo?: boolean;
+  role?: string;
+  motionProfile?: {
+    type: "video" | "image";
+    src: string;
+    poster?: string;
+    title?: string;
+    caption?: string;
+  } | null;
 }
 
 export interface Work {

@@ -246,3 +246,80 @@ input:focus, select:focus, textarea:focus {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* 3D Card Flip CSS */
+.flip-card-container {
+  perspective: 1200px;
+  cursor: pointer;
+  user-select: none;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  transform-style: preserve-3d;
+}
+.flip-card-container.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 18px;
+}
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Bottom Sheet Slider CSS */
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(23, 20, 17, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  animation: dimFadeIn 0.3s ease forwards;
+}
+
+.bottom-sheet-panel {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 860px;
+  background-color: #FFFFFF;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  box-shadow: 0 -12px 40px rgba(23, 20, 17, 0.15);
+  z-index: 1001;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (max-width: 768px) {
+  .bottom-sheet-panel {
+    max-height: 92vh;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+}
+
+@keyframes dimFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpSheet {
+  from { transform: translate(-50%, 100%); }
+  to { transform: translate(-50%, 0); }
+}
+
