@@ -1,0 +1,442 @@
+{
+  "summary": {
+    "total": 48,
+    "success": 0,
+    "expired": 22,
+    "empty": 26
+  },
+  "details": [
+    {
+      "name": "윤경근",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/XJ128HaSuqeW6r-AAncE0A/Nv15j5w8GadzPFI62MO3eL3NMqvZ_SvhwrmIaIY27gaTBKIYfyLgxTLsZGnTiF875KctU0xn44OTmogL9ZckD3K2Fl0VCgW9T1xNjpHpabvd1LbNrQ92CPGOr_BXqXtGDvV_iqAMyKjFVwjzG46y8nNEAQQATPJk-yBv8kFCiIs/nFuZZUqWuDAX5vyKEI-60NCdnSAWKI8gWdTy-Z63g9c",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/윤경근-ziohmboq.jpg",
+      "recoverable": "과거 캐시 (/images/artists/윤경근-ziohmboq.jpg) 활용 가능"
+    },
+    {
+      "name": "구자하",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "한재석",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "백연",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "류진욱",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/uh2zxSbvwogc7JTAXODjZA/sQmzI7QKL6gkdTzGKybi-EwMAu5c6HJ9Vlu8RInVt7jxbqjE5TGYkkR1X5U5UmD56mjO9ycoPOJ2-zLG6BU0vT8o1CMr2eDd38lsRKUxq6NLCvy0FrlCiymCQ9F2WDxtTTKCkXZuVw7gKCuSOWu2sa9KCZiQnbXWGHWw7TCVUvg/DOTZWzfb9Ukn27df8zA7pWCYHTdh8N3deD8HEQM_EWQ",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/류진욱-pkbdywfl.jpg",
+      "recoverable": "과거 캐시 (/images/artists/류진욱-pkbdywfl.jpg) 활용 가능"
+    },
+    {
+      "name": "정다슬",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/vZ7ToDLZ3ttXijvNgRVyeg/3qanV2rdgsL2LVa5BFxO9T3i_QFXHXeKrGN3ddoPcSJf5G5FW82sqxV2e52mZLKUnerMXV_NlgyjH3WqhIHfiHF0Aq4yGNgjcireOATt6rSNv1UQPvpiYo68uDz--yTKXFKZoE-8HbRI2ANQ4OP-KEWQ2ZVmTj4nQEs8CjnAg3rY96AMpISS84Y4hhFNayvQ/OENuRHvJ6K0M9YrBOuTGXYW4lTViNS4TGZGMa2aLWQU",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/정다슬-pq27p3ev.jpg",
+      "recoverable": "과거 캐시 (/images/artists/정다슬-pq27p3ev.jpg) 활용 가능"
+    },
+    {
+      "name": "양병현",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "하지혜",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/0Z57Bl0FzTPB2IAy-Gdreg/8JfI-iykoXa3NoCNp9g0Hql17hH2agmoHCtD7cTEVspU8LnCXGk0d-vNFr8Nv4eqbxL2nz1PBO-tsM2yl7Yvrpo2GZmRbGCgDOwrB47ICMD79ocp1oL3nmBjz5w65j_GgrliR-aZ1aXzfSrmdC87015fwFwSrM671dhM-K3_vsY/gRX3RLHzHdXRFXxTSFx6Bf3NNyi-HHVBKBGtziSVosE",
+      "localFileFound": "O",
+      "localFileName": "/images/artists/하지혜-glxtbzhy.png",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/하지혜-glxtbzhy.png",
+      "recoverable": "로컬 이미지 이미 존재"
+    },
+    {
+      "name": "정하늘",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/eVxb3v5j7HPjKEKmAX6zRA/Um2aDcGTVMAQK4b5F8_QhOHuyivy0TO9cq2SNIINJYCEf9jy-0cyH7eKQcW_Au4030BnuM5Wc4b3COmMg4L0PaUe284Zd_i6zbPvRYSj5pHuz3NpkpxnWO0tVXUCn-6En5To_FiwhEKnSkFY048-bRLIly6ARGzmCTw2rSnK5j0/Tm-HFL8FGaiRefj1BeCuH5KaYFheQgrdS8X7Ggb5iQA",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/정하늘-1c7mjmcz.jpg",
+      "recoverable": "과거 캐시 (/images/artists/정하늘-1c7mjmcz.jpg) 활용 가능"
+    },
+    {
+      "name": "안은미",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/We9c8DMa49tST8DfayUNhg/2tUO8TH2sKfSPZKnNxq_gSLasU6GtUvVzk-_5ZIjVIwFwSIAooCx9j-loD25dfPilb-35mMKq4qnAnfqYQ_73lmONlV4vsRFy8srMDz8cFKf0CkP_9-SZdMm3i7-Dzh_qULW_OoKG3enR2QBKW2kMKmDcvmJs9pLlXsoGEgnzz4/JvHblEYBF8W39nNTTEjP2QYlh9CSEHwjAkwmdx-KDUg",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/안은미-pc3difsh.jpg",
+      "recoverable": "과거 캐시 (/images/artists/안은미-pc3difsh.jpg) 활용 가능"
+    },
+    {
+      "name": "함희원",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/GUYJdKDykl8G-ieHbaw6PQ/LFtQrpgnFmqrZnCKt3RW8g92ioi9fDE__208opeipnTk8wEhrMPI9vqjWdvA6djzQC9eOqyrUQsVZF8GlJB5pWMnS1tTJ6ERdojM9tgzzvIg77VwOdXv9AMxX05wfCMSD5MyVy_9sHqRCyS06jnJmM7D7aMf4lf9Ks64Ntk8zQ4/yIMCAAcTkeLGsTHbA329TM_obU0OZvvjht6eouY4jtY",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/함희원-aatfqn79.jpg",
+      "recoverable": "과거 캐시 (/images/artists/함희원-aatfqn79.jpg) 활용 가능"
+    },
+    {
+      "name": "홍경화",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "오형은",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "안성수",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/GcHtu91bMKysEvONWBuQ8Q/groy9R5OAE5YMaCHYEI8f-SwKyMXnzUdGXliYcGkXo-anbEQadZyQzJaWN7IjpfZduv9H3b8TfxfzANOtlIwBDNEex7Md20l_7hyvxuBHZsvS5DBWpbSzV68MeLLqnPhZNFtUmVWmSz4mMF5pFYTI7ff50UNSdoSRm72ciDa0Sg/XpQdk0yhIfUumV86BMiHux0o9PSmYfnPDkVaECE_v5M",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/안성수-myfta8ly.jpg",
+      "recoverable": "과거 캐시 (/images/artists/안성수-myfta8ly.jpg) 활용 가능"
+    },
+    {
+      "name": "양승관",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "차진엽",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/wzecp3YQGZcPqlLuX2u1hw/ZMioWk9__5Bn3e_iZEh7D4F085QjzaLscMFdDYKppb5QfOZQi0ve4lDfp4Onp8MAQt8UHL8c5gsTFQa58nlD_V1xKlHieWbipvtEC9jpA0upLJq0qHLELjEZpjWLm3f6MYCqEwmKzCvb7gs4709_Yla0V6My6YOXuOjAiPWsud0/2bnS1vgJ5DE2uM7k3GrOLO4KWjrvKwl4igWZEA4wrK0",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/차진엽-ntqf8ezx.jpg",
+      "recoverable": "과거 캐시 (/images/artists/차진엽-ntqf8ezx.jpg) 활용 가능"
+    },
+    {
+      "name": "노정식",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김민선",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "이양희",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "성승정",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "장선주",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "이지현",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/ez23rfi33gjph0YliktUBw/b71WF0eKMAvHV2YL41tNfud97AiK0LpN-wl2ViXJY5l0U7dpL9WzMqwNesirkvE-0glHmh-sqCCKOX6sWNxEC70ZjNqKQudo-mKjOTO6lGvhp6XlST_FjV6MdW53wVSFqEEzfE9agjXXPxT7_dL7Ow496qlT-DUjCm_1-mQRHbA/h0BxB4c4d2b36T4qBNj0kjgU1rNB_8alGgf5UdPklg0",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/이지현-2uoifs3d.jpg",
+      "recoverable": "과거 캐시 (/images/artists/이지현-2uoifs3d.jpg) 활용 가능"
+    },
+    {
+      "name": "정수동",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "알티밋",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/Gkkj5fIml-dD-GGH2k_HRQ/XEDbNKifb2B_1iJsqfflzBoU6BqFM4EsiPtXIOqsD92bj5bS6k6PGb4gWqJg_mn6DlIoL69Hi4chdNR1c_1Nw68Rrms7pq8NmxGVf_asPf1y9C7kdlZSgYT5J6q0s6S_G-2kgpYOHDKOoA8aQoKdbMG_8Exdg-nr0F_LLWVWmZs/AXAbx5FTBEFGuyte3eVtlu8jizk9H95UZLB_01ok2io",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/알티밋-awzz9imj.jpg",
+      "recoverable": "과거 캐시 (/images/artists/알티밋-awzz9imj.jpg) 활용 가능"
+    },
+    {
+      "name": "김영찬",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김보라",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김은경",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "정록이",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "이혜인",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김현우",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/8pAa5x4IotYnIafUP9DW5g/H5C7gHJLHSvSIz93jagHM33OLutH67J2S4xOQl5Fd2F-2mm_2SI-0YymNYW7fQvBaRgKOdnCHVq0qtj0TiMcRJL5XGty1v3xcgqOBhHPjmwLMEXwek8B3hc61m-aycKtKRt4i06LhQMuk6BrAAM0ih3o5lqk3itMKMyJuXAMpYM/nSMxxjbdxz2a-mZ1onjg6VLRxj5s6VRaFEeLTPjN3F8",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/김현우-ddirgfnw.jpg",
+      "recoverable": "과거 캐시 (/images/artists/김현우-ddirgfnw.jpg) 활용 가능"
+    },
+    {
+      "name": "김형민",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김형수",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "밝넝쿨",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "송영선",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "조인호",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "장혜림",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/ot-JTtFwu3dd9UX0J2LdIA/RoPq6avqT09Q63eQ_padSU5qwYWVSCWcxV1QtLgTlt-9nhnOp3HBsmlDdCpNgOHVv5074-QqSOUlHXTXWuEwDkb0KymFya1DNadevhGIUhXGuUnbI7RKbEwr0oLy_BaIm7WLSa8BHqz9yMQidfYm-BaqO49OZezP57eqypyQXPE/dUnen5L5XK8uF3WYCqUf5INOXKRM4DcjGX5YzBKyLuI",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "https://v5.airtableusercontent.com/v3/u/54/54/1783159200000/H9Tpa3J-1Hb4PadOaembEA/tNTUYkjyFv9sbTZrHca8HQYpMWe8Xw2jX-b1MkOA-2tCEcO6hayCa1mGZqYfB3B5NL8NoTS70iHhc-iywNUQfZbHN1A2urx18ikb0mQGeK5yRdiGP_9E7AxqwsZOHqTzMqgo4CjGPRn7PxG2GDCSRR9toxCHzHDhtHGbSLASFsI/0h43SKqa0zHQh0lQs8qL-QUWA_RDqxtI6KvbXgsRrS4",
+      "recoverable": "불가 (과거 백업 URL도 만료: 410)"
+    },
+    {
+      "name": "이가영",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김주빈",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/VzVUgDpIS4qwTKauAaNsqg/ZMWpjMXVifbHTrtKr3mn4GEKVUwsdqiFrEiWGId4iza7oan1tdu9zTXKMRx_5aVX2vcnUuCNgvdCUR3nLgeJpZrD1XyBbm-0DxQI_Ph5_jRx3LIRyxA3ZJPAeorY4cSmzWJAsIE4T4WV99sqXovqwJP3nWtDg3GxFkc0TE_4s6g/zRXgvlcIDDTle05BEXuN7kF0GPWTKVICgzjCbcmvGA8",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/김주빈-fbpamwwy.jpg",
+      "recoverable": "과거 캐시 (/images/artists/김주빈-fbpamwwy.jpg) 활용 가능"
+    },
+    {
+      "name": "위보라",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/w1SoVhKruCiVVUB9SarBZg/vYqKh1qIJ8FN-EefNb1nLgpuFrEkoV6x-NeKtZivRHNXJ1ERRQkUoYrHtnC42Nw_-g1rdyqCUIYuiNC5OSvyUWTBXjd-huBXsmKGLmSUxjImCzdi2h3hTnlXdTbwQN9jXOIzgMfd_Wnh2L-lJ6GDobaqlkJzGu18JMmuah06jx4/LyWwjuBUbB6aRRVN5-2ZqH3PBCDGkshGAbYCtq3Tp78",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/위보라-wbcjo5r1.jpg",
+      "recoverable": "과거 캐시 (/images/artists/위보라-wbcjo5r1.jpg) 활용 가능"
+    },
+    {
+      "name": "류장현",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "김민",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/dw-Wtt81pSnFDyIgIztIdQ/4yzy7ROosIcNRu_AMUT03H586Do2st3aK9L6cS2sF8-4JoCSaUKgq1g9xGRQ_8g5vGDf5awvZRzf-dSeV0bADGtvC8kzpOhTU7a3fXTA3oGpVERMABUdCu_dgyFqRxSCFi6caF_9OQWutT2Q5fAM0yll-nZyv8dmllChI91E4xg/lPodp4EbRK8WbXtLUAgzd2iXNJgNwPqFp1jJbRV1eXw",
+      "localFileFound": "O",
+      "localFileName": "/images/artists/김민-a1ttsmzi.jpeg",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/김민-a1ttsmzi.jpeg",
+      "recoverable": "로컬 이미지 이미 존재"
+    },
+    {
+      "name": "김모든",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/ogxbO8Nuvi0gwFTVSlovqw/TxPxQvU-PFsvslYOjKUsKxILderFrNaan3ONmSTHSS0yJ0ZYHYTAolc7XQ9SzbgwfWVhvwLdOGI5ngVPfpEGzQW4qDYL-DvzbHXsBveDsDM559fl6pYh5pnHHm39oeRaRymjDr8Iy_03S3_YG0_1slkc1pftmId51jcvW9otmc0/p_T1OfcwIDrxIhr1cgaK2AcFg_AGnnNL4TEuuzsEiG8",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/김모든-kucmw1yh.jpg",
+      "recoverable": "과거 캐시 (/images/artists/김모든-kucmw1yh.jpg) 활용 가능"
+    },
+    {
+      "name": "이경은",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/sY4cXKdY17laSilA9MBvTg/aTTlHmk8M9MyPdrR74PFvYJHCf2D0HYMUC-kJCOB1yVw2B-g1qi6Tc3996lD49OCFeCWHXoab_s6BwOYnYBprI8Q0z3-Z9e1cpSsaPB7xTaqOyLQ1fQshW1k_ttbimjuTmKfm27OfS_KjBuP_GguJkpF_ExGZXK2huDN9b67QNU/qnTWMkqjIh_t7cF9eebgEF2xTBjlyB4DP_g1RN2UWz0",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/이경은-rludqisk.jpg",
+      "recoverable": "과거 캐시 (/images/artists/이경은-rludqisk.jpg) 활용 가능"
+    },
+    {
+      "name": "김보람",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/37UYpUtFtnGsFqcO7T6z1A/fVgWNpFsqjcOOOPXL96QN4RQjDOYTNnQ2ZzvsktexaSMFYGal6_kEKFiYHLHEZzvTjvFXp7sgu6Z4iso0L1IpxlPbEYIme9C9PeiD212xD9ousSXOZ5-QeTWxMwdEX5rW5HLiYXHzDTz-n8Yq7QNEqld17c5amPqXCy13mpsqt4/f-VvztsUKR7N3JrDJYiplEO0RNlKn9WiPV7RJeV9GCg",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/김보람-x3axbqjx.jpg",
+      "recoverable": "과거 캐시 (/images/artists/김보람-x3axbqjx.jpg) 활용 가능"
+    },
+    {
+      "name": "이해니",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/nGbCtFmrlMjbeBDku3ZpLA/7wJTdY9lG81uD6TrYXzN6ffbYWWTIDXqplyiX_0l4hrqJttXFnaskQWZirfJmTcSsrUSakYFRgjsMhH33p4fBtDtveVdjrsVsy6U20TRuAjLAgLn5MnXlWJUDK8hJPCMPl_wwSRBjASF-ea-_CYRrhOtU3rkj_kZNqcoCGGMSeY/PD-LEZ4qioXT2Vs9vFpDvmlrrQfYoIE8xHc9H_SiRSk",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "https://v5.airtableusercontent.com/v3/u/54/54/1783159200000/T2mrZ11dnqAGh3yXAVqxCw/N5xagVPDmZwsSb60x4zdJKCxV90lzer5FQ503sX2_4lb4PYuV4cp9ZF3jl-LnbIJPDii0q5EEyWr19-Y9TQGxX3EphtaCD7a1zA_xjZdddMPqYrgu9dDdBjqlnNM1_0A_8D2iRM8CZ_lJQhi1yUX93Glu2rwoVJSSKKsUyh1Vbg/6fsZfa7a9KmW9iTiGUGznuxLpz7LYmiwecbV4McWl-c",
+      "recoverable": "불가 (과거 백업 URL도 만료: 410)"
+    },
+    {
+      "name": "배진호",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/ujetV1OqqkwDMCNFFJt3kA/oDQM4AOar7vDXcji54lkDP4Xcs_B3oAv58q3zoJt2yYnbAuVrxfOqDgSRWOlLqgPhJ6C2IaLCF7vStpbrv-aT0ph6mMs2DSVDybKd0DywQ2aT_KenByuzo52WwycZ0683d7KrovIQmCj9o0Ac8mKxw/O4Waj7TP-iACGkrh2TWRCnkCTl_KJSC-1aCZ9_Gp8R0",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/배진호-bxsxwwcg.jpg",
+      "recoverable": "과거 캐시 (/images/artists/배진호-bxsxwwcg.jpg) 활용 가능"
+    },
+    {
+      "name": "정훈목",
+      "currentUrl": "",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Empty",
+      "pastProfileImage": "",
+      "recoverable": "불가"
+    },
+    {
+      "name": "허성임",
+      "currentUrl": "https://v5.airtableusercontent.com/v3/u/54/54/1783231200000/sO16_6FqXfrvDCS6z3316A/K7xnVfyqpzsFd-8IVa-eKXKcKjf7MD8S0gMv4-aBTu1sbBMg3noG5rjTuVKu00HJ2elKEip0HwYUMXtLUsIPUQforqf9xn5Gi3JgzUuJjZPiHnQ65KrgOEVJBsb9MmMiE7vRrJp3Y4vhYQCqRckV5MhfuLFEcEXoE_K99tEWgQg/_dKdGgGBoJ5q_ceDAW4heCe3g-DwyzzSSO6WXdtd4Zw",
+      "localFileFound": "X",
+      "localFileName": "-",
+      "statusText": "Expired (HTTP 410)",
+      "pastProfileImage": "/images/artists/허성임-ovgw1els.jpg",
+      "recoverable": "과거 캐시 (/images/artists/허성임-ovgw1els.jpg) 활용 가능"
+    }
+  ]
+}

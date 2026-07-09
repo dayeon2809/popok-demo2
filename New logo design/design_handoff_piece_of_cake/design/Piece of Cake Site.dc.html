@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/piece-of-cake-ui-d81c9205-2e4a-46bd-a0a7-4195b1400f35/fonts/fonts.css">
+  <link rel="stylesheet" href="_ds/piece-of-cake-ui-d81c9205-2e4a-46bd-a0a7-4195b1400f35/_ds_bundle.css">
+  <link rel="stylesheet" href="_ds/piece-of-cake-ui-d81c9205-2e4a-46bd-a0a7-4195b1400f35/styles.css">
+  <script src="_ds/piece-of-cake-ui-d81c9205-2e4a-46bd-a0a7-4195b1400f35/_ds_bundle.js"></script>
+  <style>
+    body { margin: 0; background: var(--bg-warm); font-family: 'Pretendard Variable','Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif; }
+    .pc-navlink { border: none; background: none; cursor: pointer; font: 700 0.85rem 'Pretendard Variable',sans-serif; padding: 8px 4px; color: var(--ink-muted); border-bottom: 2px solid transparent; }
+    .pc-navlink[data-active="true"] { color: var(--navy); border-bottom-color: var(--accent); }
+    .pc-input { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font: 500 0.92rem 'Pretendard Variable',sans-serif; color: var(--ink); }
+    .pc-input:focus { outline: none; border-color: var(--accent); }
+    .pc-btn-primary { background: var(--navy); color: #fff; border: none; border-radius: 22px; padding: 12px 26px; font: 700 0.88rem 'Pretendard Variable',sans-serif; cursor: pointer; }
+    .pc-btn-primary:hover { background: var(--accent-dark); }
+    .pc-btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); border-radius: 22px; padding: 12px 26px; font: 700 0.88rem 'Pretendard Variable',sans-serif; cursor: pointer; }
+    .pc-btn-outline:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent-dark); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;">
+
+  <!-- HEADER -->
+  <header style="position:sticky;top:0;z-index:20;background:rgba(254,252,248,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);">
+    <div style="max-width:1120px;margin:0 auto;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;">
+      <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0;" data-screen-label="brand">
+        <div style="width:40px;height:40px;position:relative;flex:none;">
+          <div style="position:absolute;top:50%;left:50%;width:240px;height:240px;transform:translate(-50%,-50%) scale(0.16667);">
+            <x-import component-from-global-scope="PocApp.Logo3D" hint-size="240px,240px"></x-import>
+          </div>
+        </div>
+        <span class="display" style="font-size:1.15rem;color:var(--navy);">piece of cake</span>
+      </button>
+
+      <nav style="display:flex;gap:28px;">
+        <button class="pc-navlink" data-active="{{ isHome }}" onClick="{{ goHome }}">Home</button>
+        <button class="pc-navlink" data-active="{{ isArtists }}" onClick="{{ goArtists }}">Artists</button>
+        <button class="pc-navlink" data-active="{{ isPerformances }}" onClick="{{ goPerformances }}">Performances</button>
+      </nav>
+
+      <div onClick="{{ interceptAuthNav }}">
+        <x-import component-from-global-scope="PocApp.AuthNav" hint-size="90px,36px"></x-import>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <main data-screen-label="Home" style="flex:1;">
+      <section style="max-width:1120px;margin:0 auto;padding:96px 32px 72px;display:flex;align-items:center;gap:64px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:320px;">
+          <div class="mono" style="color:var(--accent-dark);margin-bottom:14px;">무용 · 공연 플랫폼</div>
+          <h1 class="display" style="font-size:3rem;color:var(--navy);margin:0 0 20px;line-height:1.15;">
+            무대는 어렵지 않아요,<br/>피스 오브 케이크.
+          </h1>
+          <p style="font-size:1.05rem;color:var(--ink-muted);line-height:1.7;margin:0 0 32px;max-width:440px;">
+            현대무용, 발레, 한국무용의 아티스트와 공연을 한곳에서 발견하고 예매하세요.
+          </p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <button class="pc-btn-primary" onClick="{{ goPerformances }}">공연 둘러보기</button>
+            <button class="pc-btn-outline" onClick="{{ goArtists }}">아티스트 찾기</button>
+          </div>
+        </div>
+        <div style="flex:none;width:280px;display:flex;justify-content:center;">
+          <div style="width:220px;height:200px;position:relative;">
+            <div style="position:absolute;top:50%;left:50%;width:240px;height:240px;transform:translate(-50%,-50%) scale(0.9);">
+              <x-import component-from-global-scope="PocApp.Logo3D" hint-size="240px,240px"></x-import>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1120px;margin:0 auto;padding:0 32px 96px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;">
+          <h2 class="display" style="font-size:1.4rem;color:var(--navy);margin:0;">이번 시즌 공연</h2>
+          <button class="pc-navlink" onClick="{{ goPerformances }}">전체 보기 →</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+          <sc-for list="{{ featuredPerformances }}" as="p" hint-placeholder-count="3">
+            <x-import component-from-global-scope="PocApp.PerformanceCard" performance="{{ p }}" hint-size="100%,340px"></x-import>
+          </sc-for>
+        </div>
+      </section>
+    </main>
+  </sc-if>
+
+  <!-- ARTISTS -->
+  <sc-if value="{{ isArtists }}">
+    <main data-screen-label="Artists" style="flex:1;max-width:1120px;margin:0 auto;padding:56px 32px 96px;width:100%;box-sizing:border-box;">
+      <h1 class="display" style="font-size:2rem;color:var(--navy);margin:0 0 8px;">아티스트</h1>
+      <p style="color:var(--ink-muted);margin:0 0 32px;">현대무용, 발레, 한국무용 분야의 안무가와 무용단을 만나보세요.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">
+        <sc-for list="{{ artists }}" as="a" hint-placeholder-count="6">
+          <x-import component-from-global-scope="PocApp.ArtistCard" artist="{{ a }}" on-click="{{ a.onClick }}" hint-size="100%,280px"></x-import>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- PERFORMANCES -->
+  <sc-if value="{{ isPerformances }}">
+    <main data-screen-label="Performances" style="flex:1;max-width:1120px;margin:0 auto;padding:56px 32px 96px;width:100%;box-sizing:border-box;">
+      <h1 class="display" style="font-size:2rem;color:var(--navy);margin:0 0 8px;">공연</h1>
+      <p style="color:var(--ink-muted);margin:0 0 32px;">가까운 시일 내 열리는 공연을 확인하고 예매하세요.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">
+        <sc-for list="{{ performances }}" as="p" hint-placeholder-count="6">
+          <x-import component-from-global-scope="PocApp.PerformanceCard" performance="{{ p }}" hint-size="100%,340px"></x-import>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- LOGIN -->
+  <sc-if value="{{ isLogin }}">
+    <main data-screen-label="Login" style="flex:1;display:flex;align-items:center;justify-content:center;padding:56px 32px;">
+      <div class="card" style="width:100%;max-width:380px;padding:36px 32px;background:var(--bg-card);">
+        <sc-if value="{{ loginSuccess }}">
+          <div style="text-align:center;">
+            <div style="font-size:2.4rem;margin-bottom:12px;">🎉</div>
+            <h2 class="display" style="font-size:1.3rem;color:var(--navy);margin:0 0 8px;">환영합니다, {{ loginNickname }}님</h2>
+            <p style="color:var(--ink-muted);font-size:0.9rem;margin:0 0 24px;">로그인되었습니다.</p>
+            <button class="pc-btn-primary" style="width:100%;" onClick="{{ goHome }}">홈으로</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ notLoginSuccess }}">
+          <h2 class="display" style="font-size:1.4rem;color:var(--navy);margin:0 0 6px;">로그인</h2>
+          <p style="color:var(--ink-muted);font-size:0.85rem;margin:0 0 24px;">피스 오브 케이크 계정으로 로그인하세요.</p>
+          <sc-if value="{{ loginError }}">
+            <div style="margin-bottom:16px;">
+              <x-import component-from-global-scope="PocApp.ErrorMessage" message="{{ loginError }}" hint-size="100%,80px"></x-import>
+            </div>
+          </sc-if>
+          <form onSubmit="{{ handleLogin }}" style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <label style="display:block;font-size:0.78rem;font-weight:700;color:var(--ink-muted);margin-bottom:6px;">이메일</label>
+              <input class="pc-input" type="email" value="{{ loginEmail }}" onChange="{{ setLoginEmail }}" placeholder="you@example.com"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:0.78rem;font-weight:700;color:var(--ink-muted);margin-bottom:6px;">비밀번호</label>
+              <input class="pc-input" type="password" value="{{ loginPassword }}" onChange="{{ setLoginPassword }}" placeholder="••••••••"/>
+            </div>
+            <button class="pc-btn-primary" type="submit" style="width:100%;margin-top:8px;">로그인</button>
+          </form>
+        </sc-if>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- ARTIST MODAL -->
+  <sc-if value="{{ selectedArtist }}">
+    <x-import component-from-global-scope="PocApp.ArtistModal" artist="{{ selectedArtist }}" loading="{{ false }}" error="{{ null }}" on-close="{{ closeArtist }}" hint-size="100%,100%"></x-import>
+  </sc-if>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid var(--border);padding:28px 32px;">
+    <div style="max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:10px;color:var(--ink-faint);font-size:0.8rem;">
+      <div style="width:20px;height:20px;position:relative;flex:none;opacity:0.8;">
+        <div style="position:absolute;top:50%;left:50%;width:240px;height:240px;transform:translate(-50%,-50%) scale(0.08333);">
+          <x-import component-from-global-scope="PocApp.Logo3D" hint-size="240px,240px"></x-import>
+        </div>
+      </div>
+      <span>© 2026 piece of cake</span>
+    </div>
+  </footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    page: 'home',
+    selectedArtist: null,
+    loginEmail: '',
+    loginPassword: '',
+    loginError: '',
+    loginSuccess: false,
+    artists: [
+      { id: 1, name: '김서연', name_en: 'Kim Seoyeon', field: 'contemporary_dance', type: 'individual', works: ['균열', '숨_틈'], verified: true, instagram: true },
+      { id: 2, name: '무용단 결', name_en: 'Dance Company Gyeol', field: 'contemporary_dance', type: 'company', works: ['물의 결', '겹겹'], verified: true, website: true },
+      { id: 3, name: '박도윤', name_en: 'Park Doyoon', field: 'ballet', type: 'individual', works: ['백조의 호수 Re:'], verified: false, instagram: true },
+      { id: 4, name: '한국무용단 이음', name_en: 'Korean Dance Company Ieum', field: 'korean_dance', type: 'company', works: ['살풀이 2026', '태평무 연작'], verified: true, website: true, instagram: true },
+      { id: 5, name: '프로젝트 소요', name_en: 'Project Soyo', field: 'interdisciplinary', type: 'project_group', works: ['경계 없음'], verified: false },
+      { id: 6, name: '이하늘', name_en: 'Lee Haneul', field: 'contemporary_dance', type: 'individual', works: ['잔상', '느린 낙하', '봄의 형태'], verified: true, instagram: true }
+    ],
+    performances: [
+      { id: 1, title: '균열: 다시 쓰는 몸', company: '김서연', startDate: '2026.08.14', endDate: '2026.08.16', venue: '대학로예술극장 대극장', genre: ['현대무용'] },
+      { id: 2, title: '백조의 호수 Re:', company: '박도윤 발레단', startDate: '2026.09.02', endDate: '2026.09.07', venue: '세종문화회관 M씨어터', genre: ['발레', '고전'] },
+      { id: 3, title: '살풀이 2026', company: '한국무용단 이음', startDate: '2026.07.25', endDate: '2026.07.26', venue: '국립극장 달오름', genre: ['한국무용'] },
+      { id: 4, title: '경계 없음', company: '프로젝트 소요', startDate: '2026.08.30', endDate: null, venue: '아르코예술극장 소극장', genre: ['인터디시플리너리'] },
+      { id: 5, title: '물의 결', company: '무용단 결', startDate: '2026.10.11', endDate: '2026.10.13', venue: '예술의전당 자유소극장', genre: ['현대무용'] },
+      { id: 6, title: '태평무 연작', company: '한국무용단 이음', startDate: '2026.11.05', endDate: '2026.11.06', venue: '국립국악원 예악당', genre: ['한국무용', '전통'] }
+    ]
+  };
+
+  go(page) {
+    this.setState({ page, selectedArtist: null });
+    window.scrollTo(0, 0);
+  }
+
+  interceptAuthNav = (e) => {
+    const a = e.target.closest && e.target.closest('a');
+    if (a) {
+      e.preventDefault();
+      this.go('login');
+    }
+  };
+
+  handleLogin = (e) => {
+    e.preventDefault();
+    const { loginEmail, loginPassword } = this.state;
+    if (!loginEmail || !loginPassword) {
+      this.setState({ loginError: '이메일과 비밀번호를 모두 입력해주세요.' });
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginEmail)) {
+      this.setState({ loginError: '올바른 이메일 형식이 아닙니다.' });
+      return;
+    }
+    this.setState({ loginError: '', loginSuccess: true });
+  };
+
+  renderVals() {
+    const { page, artists, performances, selectedArtist, loginEmail, loginPassword, loginError, loginSuccess } = this.state;
+    const artistsWithHandlers = artists.map(a => ({ ...a, onClick: () => this.setState({ selectedArtist: a }) }));
+    return {
+      isHome: page === 'home',
+      isArtists: page === 'artists',
+      isPerformances: page === 'performances',
+      isLogin: page === 'login',
+      goHome: () => this.go('home'),
+      goArtists: () => this.go('artists'),
+      goPerformances: () => this.go('performances'),
+      interceptAuthNav: this.interceptAuthNav,
+      closeArtist: () => this.setState({ selectedArtist: null }),
+      artists: artistsWithHandlers,
+      performances,
+      featuredPerformances: performances.slice(0, 3),
+      selectedArtist,
+      loginEmail,
+      loginPassword,
+      loginError,
+      loginSuccess,
+      notLoginSuccess: !loginSuccess,
+      loginNickname: loginEmail ? loginEmail.split('@')[0] : '',
+      setLoginEmail: (e) => this.setState({ loginEmail: e.target.value }),
+      setLoginPassword: (e) => this.setState({ loginPassword: e.target.value }),
+      handleLogin: this.handleLogin
+    };
+  }
+}
+</script>
+</body>
+</html>

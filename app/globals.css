@@ -1,0 +1,248 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #FFFFFF;
+  --bg-warm: #F5F1E8;
+  --bg-card: #FFFFFF;
+  --ink: #171411;
+  --ink-muted: #6B6865;
+  --ink-faint: #C5C2BD;
+  --accent: #C8EE52;
+  --accent-dark: #8CAB1E;
+  --accent-light: #F2FAA6;
+  --accent-yellow: #FFD84D;
+  --border: #E3DDD3;
+  --border-dark: #B5AFA4;
+  --tag-bg: #EAE6DD;
+  --navy: #171411;
+  --verified: #2A6B3A;
+  --needs-review: #7A5C2E;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg-warm); color: var(--ink); scroll-behavior: smooth; }
+
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  background: var(--bg-warm);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.display { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+.mono {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-muted);
+}
+
+/* 카드 */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.card:hover {
+  border-color: var(--navy);
+  box-shadow: 0 12px 24px rgba(23,20,17,0.06);
+  transform: translateY(-4px);
+}
+
+/* 태그 */
+.tag {
+  display: inline-block;
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  font-size: 0.67rem; font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 3px 9px; border-radius: 20px;
+}
+.tag-navy {
+  display: inline-block;
+  background: var(--navy); color: #fff;
+  font-size: 0.67rem; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+}
+.tag-outline {
+  display: inline-block;
+  border: 1.5px solid var(--border-dark); color: var(--ink-muted);
+  font-size: 0.67rem; font-weight: 600;
+  padding: 3px 9px; border-radius: 20px;
+  cursor: pointer; transition: all 0.15s;
+}
+.tag-outline:hover, .tag-outline.active {
+  border-color: var(--accent); background: var(--accent-light); color: var(--accent-dark);
+}
+.tag-outline.active { background: var(--accent); color: var(--navy); border-color: var(--accent); }
+
+.divider { width: 100%; height: 1.5px; background: var(--border); }
+
+input, select, textarea {
+  font-family: inherit; font-size: 0.95rem;
+  background: #fff; color: var(--ink);
+  border: 1.5px solid var(--border);
+  border-radius: 10px; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(245,166,35,0.14);
+}
+
+/* 모달 */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(20,30,48,0.6);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.16s ease;
+}
+.modal-box {
+  background: #fff; border-radius: 22px;
+  width: 100%; max-width: 700px; max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 32px 100px rgba(20,30,48,0.28);
+  animation: slideUp 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+@keyframes slideUp { from { transform:translateY(28px);opacity:0 } to { transform:translateY(0);opacity:1 } }
+
+/* 카드 이미지 플레이스홀더 */
+.card-img {
+  width: 100%; aspect-ratio: 4/3;
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--tag-bg) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem; color: var(--accent);
+  position: relative; overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 4px; }
+
+/* ── 모바일 & 태블릿 반응형 (≤768px). 데스크톱(>768px)은 기존 그대로. ── */
+@media (max-width: 768px) {
+  /* Header: 데스크톱 nav 링크 숨기고 햄버거 버튼 표시 */
+  .header-nav-links { display: none !important; }
+  .header-burger-btn { display: flex !important; }
+  .header-inner { padding: 0 16px !important; }
+
+  /* Home / Performance Detail: 2단 그리드 → 1단 */
+  .responsive-stack-320 { grid-template-columns: 1fr !important; }
+  .home-about-grid { grid-template-columns: 1fr !important; padding: 28px 24px !important; }
+  .home-stats-panel { padding: 28px 20px !important; }
+  .home-hero-logo { width: 140px !important; height: 134px !important; }
+
+  /* Submit: 폼 필드 2단 → 1단 */
+  .form-row-2col { grid-template-columns: 1fr !important; }
+}
+
+/* ── POPOK Custom Motion & Interactions ── */
+.seen-highlight {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  white-space: nowrap;
+}
+.seen-highlight::after {
+  content: "";
+  position: absolute;
+  bottom: 0.1em;
+  left: -2%;
+  width: 104%;
+  height: 0.35em;
+  background-color: var(--accent);
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: drawHighlight 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+@keyframes drawHighlight {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes float1 {
+  0% { transform: translateY(0px) rotate(-3deg); }
+  50% { transform: translateY(-10px) rotate(-1.5deg); }
+  100% { transform: translateY(0px) rotate(-3deg); }
+}
+
+@keyframes float2 {
+  0% { transform: translateY(0px) rotate(5deg); }
+  50% { transform: translateY(10px) rotate(3.5deg); }
+  100% { transform: translateY(0px) rotate(5deg); }
+}
+
+.float-card-1 {
+  animation: float1 6s ease-in-out infinite;
+}
+
+.float-card-2 {
+  animation: float2 7s ease-in-out infinite;
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fadeUpActive 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.fade-up-delay-1 { animation-delay: 0.15s; }
+.fade-up-delay-2 { animation-delay: 0.3s; }
+.fade-up-delay-3 { animation-delay: 0.45s; }
+
+@keyframes fadeUpActive {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hover-scale-img {
+  overflow: hidden;
+}
+.hover-scale-img img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-scale-img:hover img {
+  transform: scale(1.04);
+}
+
+.btn-lime {
+  background-color: var(--accent);
+  color: var(--navy);
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.btn-lime:hover {
+  background-color: var(--navy);
+  color: #FFFFFF;
+  border-color: var(--navy);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--navy);
+  border: 1px solid var(--navy);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.btn-outline:hover {
+  background-color: var(--navy);
+  color: #FFFFFF;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

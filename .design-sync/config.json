@@ -1,0 +1,25 @@
+{
+  "projectId": "d81c9205-2e4a-46bd-a0a7-4195b1400f35",
+  "pkg": "poc-app",
+  "shape": "package",
+  "srcDir": "components",
+  "tsconfig": ".design-sync/tsconfig.ds.json",
+  "entry": ".design-sync/entry.tsx",
+  "cssEntry": ".design-sync/tokens.css",
+  "extraFonts": [".design-sync/fonts/pretendard.css"],
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "ArtistModal": { "cardMode": "single", "primaryStory": "Default" }
+  },
+  "componentSrcMap": {
+    "CountUp": "components/CountUp.tsx",
+    "Logo3D": "components/Logo3D.tsx",
+    "LoadingSpinner": "components/ui/States.tsx",
+    "ErrorMessage": "components/ui/States.tsx",
+    "EmptyState": "components/ui/States.tsx",
+    "ArtistCard": "components/ArtistCard.tsx",
+    "ArtistModal": "components/ArtistModal.tsx",
+    "AuthNav": "components/AuthNav.tsx",
+    "PerformanceCard": "components/PerformanceCard.tsx"
+  }
+}

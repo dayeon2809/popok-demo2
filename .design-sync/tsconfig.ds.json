@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "@/lib/supabase": ["./.design-sync/mocks/supabase.ts"],
+      "@/types": ["./types/index.ts"],
+      "next/link": ["./.design-sync/mocks/next-link.tsx"],
+      "@/*": ["./*"]
+    }
+  }
+}
