@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { faqItems } from "@/data/faq";
 
 export default function FAQSection() {
@@ -11,7 +12,7 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="home-section" style={{ background: "var(--bg-warm)", padding: "100px 32px" }}>
+    <section id="faq" className="home-section" style={{ background: "var(--bg-warm)", padding: "100px 32px" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
@@ -79,10 +80,27 @@ export default function FAQSection() {
                     fontSize: "0.9rem",
                     color: "var(--ink-muted)",
                     lineHeight: 1.65,
-                    padding: "0 4px 22px",
+                    padding: item.ctaHref ? "0 4px 10px" : "0 4px 22px",
                   }}>
                     A. {item.answer}
                   </p>
+                  {item.ctaHref && (
+                    <div style={{ padding: "0 4px 22px" }}>
+                      <Link
+                        href={item.ctaHref}
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 800,
+                          color: "var(--navy)",
+                          textDecoration: "none",
+                          borderBottom: "1.5px solid var(--navy)",
+                          paddingBottom: "2px",
+                        }}
+                      >
+                        {item.ctaLabel || "자세히 보기 →"}
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             );

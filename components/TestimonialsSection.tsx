@@ -6,7 +6,7 @@ export default function TestimonialsSection() {
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="home-section" style={{
+    <section id="testimonials" className="home-section" style={{
       background: "var(--navy)",
       padding: "100px 0",
       overflow: "hidden",

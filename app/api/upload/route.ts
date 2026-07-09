@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
+
+const UPLOAD_FAILURE_MESSAGE = "이미지 업로드에 실패했어요. 다시 시도해주세요.";
+
+function devError(label: string, err: unknown) {
+  if (process.env.NODE_ENV !== "production") {
+    console.error(label, err);
+  }
+}
+
+// Storage object key에는 영문 소문자 / 숫자 / 하이픈 / 언더스코어 / 슬래시만 남기고,
+// 사용자가 입력한 이름 등 원본 문자열이 섞여 들어와도 항상 안전한 경로만 생성되도록 한다.
+function sanitizeStoragePath(input: string): string {
+  return input
+    .toLowerCase()
+    .split("/")
+    .map((segment) =>
+      segment
+        .replace(/[^a-z0-9\-_]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "")
+    )
+    .filter(Boolean)
+    .join("/");
+}
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const pathPrefix = (formData.get("path") as string || "submissions").trim().replace(/^\/+|\/+$/g, "");
+    const rawPathPrefix = (formData.get("path") as string) || "submissions";
     const bucket = (formData.get("bucket") as string || "artist-media").trim();
 
     if (!file) {
@@ -22,10 +47,12 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseServer();
 
-    // Create a unique filename
-    const fileExt = file.name.split(".").pop() || "jpg";
-    const cleanFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}.${fileExt}`;
-    const filePath = pathPrefix ? `${pathPrefix}/${cleanFileName}` : cleanFileName;
+    // 파일명은 사용자가 올린 원본 파일명을 절대 사용하지 않고 랜덤 UUID로 대체한다.
+    const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const safeFileName = `${randomUUID()}.${fileExt}`;
+
+    const pathPrefix = sanitizeStoragePath(rawPathPrefix) || "submissions";
+    const filePath = `${pathPrefix}/${safeFileName}`;
 
     const { error } = await supabase.storage
       .from(bucket)
@@ -35,9 +62,9 @@ export async function POST(req: NextRequest) {
       });
 
     if (error) {
-      console.error("[Upload] Supabase Storage upload error:", error);
+      devError("[Upload] Supabase Storage upload error:", error);
       return NextResponse.json(
-        { success: false, error: `스토리지 업로드 실패: ${error.message}` },
+        { success: false, error: UPLOAD_FAILURE_MESSAGE },
         { status: 500 }
       );
     }
@@ -53,9 +80,9 @@ export async function POST(req: NextRequest) {
       path: filePath,
     });
   } catch (err: any) {
-    console.error("[POST /api/upload] Error:", err);
+    devError("[POST /api/upload] Error:", err);
     return NextResponse.json(
-      { success: false, error: "서버 업로드 처리 중 오류가 발생했습니다.", detail: String(err) },
+      { success: false, error: UPLOAD_FAILURE_MESSAGE },
       { status: 500 }
     );
   }

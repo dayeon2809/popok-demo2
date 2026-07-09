@@ -1,6 +1,9 @@
 export interface FaqItem {
   question: string;
   answer: string;
+  // 결제/구독 관련 질문처럼 별도 페이지로 안내가 필요한 경우에만 채웁니다.
+  ctaHref?: string;
+  ctaLabel?: string;
 }
 
 // FAQ 질문/답변을 수정하려면 이 배열만 편집하면 됩니다.
@@ -28,5 +31,7 @@ export const faqItems: FaqItem[] = [
   {
     question: "POPOK Premium은 무엇인가요?",
     answer: "새로운 공연과 작품 활동을 POPOK 팀이 주기적으로 확인하고 정리해 아티스트 프로필을 최신 상태로 유지해주는 관리 서비스입니다.",
+    ctaHref: "/premium",
+    ctaLabel: "Premium 요금제 보기 →",
   },
 ];

@@ -154,6 +154,9 @@ input:focus, select:focus, textarea:focus {
 
   /* Home Testimonials: 카드 너비 축소 (모바일 스와이프 시 여러 장 보이도록) */
   .testimonial-card { width: 240px !important; }
+
+  /* Premium 페이지: 섹션 상하 여백 축소 */
+  .premium-section { padding-top: 56px !important; padding-bottom: 56px !important; }
 }
 
 /* ── POPOK Custom Motion & Interactions ── */

@@ -34,6 +34,14 @@ export interface Submission {
   portfolio_url: string;
   status: string;
   submitted_at: string;
+  created_at?: string | null;
+  genre?: string | null;
+  additional_requests?: string | null;
+  profile_image_url?: string | null;
+  profile_image_urls?: string[] | null;
+  youtube_url?: string | null;
+  youtube_preview_start?: number | null;
+  youtube_preview_end?: number | null;
   name_en?: string;
   city_or_region?: string;
   bio_short?: string;
@@ -58,6 +66,12 @@ export interface SubmissionRow {
   city_or_region: string | null;
   bio_short: string | null;
   portfolio_works: any | null;
+  additional_requests: string | null;
+  profile_image_url: string | null;
+  profile_image_urls: string[] | null;
+  youtube_url: string | null;
+  youtube_preview_start: number | null;
+  youtube_preview_end: number | null;
 }
 
 export interface SubmissionInsert {
@@ -181,6 +195,14 @@ export async function getSubmissions(): Promise<Submission[]> {
     portfolio_url: row.portfolio_url || "",
     status:        row.status || "pending",
     submitted_at:  row.created_at || "",
+    created_at:    row.created_at || "",
+    genre:         row.genre || undefined,
+    additional_requests: row.additional_requests || undefined,
+    profile_image_url: row.profile_image_url || undefined,
+    profile_image_urls: row.profile_image_urls || undefined,
+    youtube_url:   row.youtube_url || undefined,
+    youtube_preview_start: row.youtube_preview_start ?? undefined,
+    youtube_preview_end: row.youtube_preview_end ?? undefined,
     name_en:       row.name_en || undefined,
     city_or_region: row.city_or_region || undefined,
     bio_short:     row.bio_short || undefined,

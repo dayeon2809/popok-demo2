@@ -80,9 +80,20 @@ export default function SubmitPage() {
     });
     const data = await res.json();
     if (!res.ok || !data.success) {
-      throw new Error(data.error || "파일 업로드에 실패했습니다.");
+      throw new Error(data.error || "이미지 업로드에 실패했어요. 다시 시도해주세요.");
     }
     return data.url as string;
+  };
+
+  // Storage 경로에는 사용자가 입력한 이름 등 원본 문자열을 절대 사용하지 않는다.
+  // 아직 submission row가 생성되기 전이라 실제 submissionId가 없으므로,
+  // 타임스탬프 + 랜덤 ID 조합의 안전한 임시 폴더명을 만들어 사용한다.
+  const generateSafeSubmissionId = () => {
+    const random =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID().split("-")[0]
+        : Math.random().toString(36).slice(2, 10);
+    return `${Date.now()}-${random}`;
   };
 
   const cleanInstagramHandle = (url: string) => {
@@ -125,11 +136,12 @@ export default function SubmitPage() {
     setSubmitting(true);
 
     try {
-      const uploadBasePath = `submissions/${Date.now()}-${name.replace(/[^\w가-힣-]/g, "-").toLowerCase()}`;
-      
-      // Upload multiple profile images
-      const uploadPromises = profileImageFiles.map((file, idx) =>
-        uploadOptionalFile(file, "artist-media", `${uploadBasePath}/profile_${idx}`)
+      // 경로에 이름 등 사용자 입력 원본 문자열을 넣지 않는다 — 실제 이름은 submissions 테이블의 name 필드에만 저장한다.
+      const uploadBasePath = `submissions/${generateSafeSubmissionId()}/profile`;
+
+      // Upload multiple profile images (파일명은 서버에서 랜덤 UUID로 생성됨)
+      const uploadPromises = profileImageFiles.map((file) =>
+        uploadOptionalFile(file, "artist-media", uploadBasePath)
       );
       const profileImageUrls = await Promise.all(uploadPromises);
 
@@ -167,6 +179,9 @@ export default function SubmitPage() {
       }, 2200);
 
     } catch (err: any) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[Submit] Failed:", err);
+      }
       setErrorMsg(err?.message || "네트워크 연결 실패. 다시 시도해 주세요.");
       setSubmitting(false);
     }

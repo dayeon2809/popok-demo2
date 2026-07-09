@@ -17,6 +17,16 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
     label: { ko: "아티스트", en: "Artists" },
     match: (pathname) => pathname === "/artists" || pathname.startsWith("/artists/"),
   },
+  {
+    href: "/#testimonials",
+    label: { ko: "이용 후기", en: "Testimonials" },
+    match: () => false,
+  },
+  {
+    href: "/#faq",
+    label: { ko: "QnA", en: "QnA" },
+    match: () => false,
+  },
 ];
 
 export default function Header() {
@@ -174,6 +184,20 @@ export default function Header() {
             }}
           >
             {language === "ko" ? "내 포퐄 확인하기" : "My POPOK"}
+          </Link>
+          <Link
+            href="/premium"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              textDecoration: "none",
+              padding: "14px 6px",
+              fontSize: "0.95rem",
+              fontWeight: 700,
+              color: pathname === "/premium" ? "var(--navy)" : "var(--ink-muted)",
+              borderBottom: "1px solid var(--border)",
+            }}
+          >
+            Premium
           </Link>
           <Link
             href="/submit"
