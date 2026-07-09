@@ -56,7 +56,20 @@ export interface Artist {
     description: string;
     role: string;
     image_url: string;
-    video_url: string;
+    video_url?: string;
+    videoUrl?: string;
+    previewStart?: number;
+    previewEnd?: number;
+    previewAspectRatio?: "16 / 9" | "9 / 16";
+    media?: {
+      type: "youtube" | "vimeo" | "video" | "image";
+      url?: string;
+      src?: string;
+      poster?: string;
+      previewStart?: number;
+      previewEnd?: number;
+      aspectRatio?: "16 / 9" | "9 / 16";
+    };
   }>;
   isDemo?: boolean;
   role?: string;
@@ -185,5 +198,4 @@ export interface ArtistComment {
   likesCount?: number;
   likesUsers?: string[];
 }
-
 

@@ -20,9 +20,7 @@ export async function GET(req: NextRequest) {
   try {
     // 1. Get submissions statistics
     const submissions = await getSubmissions();
-    const pendingSubmissions = submissions.filter(s => s.status === "pending").length;
-    const approvedSubmissions = submissions.filter(s => s.status === "approved").length;
-    const rejectedSubmissions = submissions.filter(s => s.status === "rejected").length;
+    const totalSubmissions = submissions.length;
 
     // 2. Get published artists count
     let publishedArtists = 0;
@@ -35,19 +33,6 @@ export async function GET(req: NextRequest) {
       }
     } catch (err) {
       console.warn("Failed to read artists.json for statistics", err);
-    }
-
-    // Get published performances count
-    let publishedPerformances = 0;
-    try {
-      const performancesPath = path.join(process.cwd(), "data/performances.json");
-      if (fs.existsSync(performancesPath)) {
-        const fileContent = fs.readFileSync(performancesPath, "utf8");
-        const performances = JSON.parse(fileContent);
-        publishedPerformances = performances.filter((p: any) => !p.status || p.status === "published").length;
-      }
-    } catch (err) {
-      console.warn("Failed to read performances.json for statistics", err);
     }
 
     // 3. Get last sync metadata
@@ -66,11 +51,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       stats: {
-        pendingSubmissions,
-        approvedSubmissions,
-        rejectedSubmissions,
+        totalSubmissions,
         publishedArtists,
-        publishedPerformances,
         lastSync
       }
     });

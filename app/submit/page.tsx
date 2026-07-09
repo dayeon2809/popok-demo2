@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
+import { getVimeoEmbedUrl, isSupportedMotionVideoUrl, isVimeoUrl } from "@/lib/videoLinks";
+import { isYouTubeUrl } from "@/lib/youtube";
+
+import QRCode from "qrcode";
 
 const GENRE_OPTS = [
   { value: "Dancer", label: "DANCER" },
@@ -14,16 +18,72 @@ const GENRE_OPTS = [
 ];
 
 export default function SubmitPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [genre, setGenre] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [email, setEmail] = useState("");
+  
+  // Multi-image upload states
+  const [profileImageFiles, setProfileImageFiles] = useState<File[]>([]);
+  const [profileImagePreviews, setProfileImagePreviews] = useState<string[]>([]);
+  
+  const [motionVideoUrl, setMotionVideoUrl] = useState("");
+  const [additionalRequests, setAdditionalRequests] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
   
   // Interaction steps: "form" | "animating" | "success"
   const [flowState, setFlowState] = useState<"form" | "animating" | "success">("form");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [generatedId, setGeneratedId] = useState("");
+
+  useEffect(() => {
+    return () => {
+      profileImagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [profileImagePreviews]);
+
+  // QR Code generation trigger when success
+  useEffect(() => {
+    if (flowState === "success" && generatedId) {
+      const publicPath = `/p/${generatedId}`;
+      const fullUrl = `${window.location.origin}${publicPath}`;
+      QRCode.toDataURL(fullUrl, { width: 160, margin: 1 })
+        .then(url => setQrDataUrl(url))
+        .catch(err => console.error("[QRCode] generation failed", err));
+    }
+  }, [flowState, generatedId]);
+
+  const handleProfileImagesChange = (files: FileList | null) => {
+    // Clear old previews
+    profileImagePreviews.forEach((url) => URL.revokeObjectURL(url));
+    
+    if (!files) {
+      setProfileImageFiles([]);
+      setProfileImagePreviews([]);
+      return;
+    }
+    const arr = Array.from(files);
+    setProfileImageFiles(arr);
+    setProfileImagePreviews(arr.map(f => URL.createObjectURL(f)));
+  };
+
+  const uploadOptionalFile = async (file: File, bucket: string, path: string) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("bucket", bucket);
+    formData.append("path", path);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "파일 업로드에 실패했습니다.");
+    }
+    return data.url as string;
+  };
 
   const cleanInstagramHandle = (url: string) => {
     if (!url) return "@username";
@@ -51,18 +111,42 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !genre || !instagram) {
+    if (!name || !genre || !instagram || !email) {
       setErrorMsg("모든 필드를 입력해 주세요.");
       return;
     }
+    const cleanMotionVideoUrl = motionVideoUrl.trim();
+    if (cleanMotionVideoUrl && !isSupportedMotionVideoUrl(cleanMotionVideoUrl)) {
+      setErrorMsg("Motion Profile Video는 YouTube 또는 Vimeo 링크만 입력할 수 있습니다.");
+      return;
+    }
+
     setErrorMsg("");
     setSubmitting(true);
 
     try {
+      const uploadBasePath = `submissions/${Date.now()}-${name.replace(/[^\w가-힣-]/g, "-").toLowerCase()}`;
+      
+      // Upload multiple profile images
+      const uploadPromises = profileImageFiles.map((file, idx) =>
+        uploadOptionalFile(file, "artist-media", `${uploadBasePath}/profile_${idx}`)
+      );
+      const profileImageUrls = await Promise.all(uploadPromises);
+
       const res = await fetch("/api/popok-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, genre, instagram }),
+        body: JSON.stringify({
+          name,
+          genre,
+          instagram,
+          email,
+          profileImageUrls,
+          motionVideoUrl: cleanMotionVideoUrl,
+          additionalRequests,
+          youtubePreviewStart: 0,
+          youtubePreviewEnd: 15
+        }),
       });
 
       const data = await res.json();
@@ -82,13 +166,8 @@ export default function SubmitPage() {
         setFlowState("success");
       }, 2200);
 
-      // Step 3: Redirect to result page (3.8s total)
-      setTimeout(() => {
-        router.push(`/p/${data.id}`);
-      }, 3800);
-
-    } catch (err) {
-      setErrorMsg("네트워크 연결 실패. 다시 시도해 주세요.");
+    } catch (err: any) {
+      setErrorMsg(err?.message || "네트워크 연결 실패. 다시 시도해 주세요.");
       setSubmitting(false);
     }
   };
@@ -138,6 +217,30 @@ export default function SubmitPage() {
                   />
                 </div>
 
+                {/* 1-2. Email */}
+                <div>
+                  <label htmlFor="email" style={{ display: "block", marginBottom: "8px", fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.05em" }}>
+                    이메일 주소
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    style={{
+                      width: "100%", padding: "14px 18px", border: "1px solid var(--border)", borderRadius: "12px",
+                      fontSize: "0.95rem", outline: "none", background: "#FFFFFF", color: "var(--navy)"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = "var(--navy)"}
+                    onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                  />
+                  <p style={{ fontSize: "0.72rem", color: "var(--ink-muted)", marginTop: "4px" }}>
+                    포퐄 페이지가 준비되면 입력하신 이메일로 안내드릴게요.
+                  </p>
+                </div>
+
                 {/* 2. Genre / Role */}
                 <div>
                   <label htmlFor="genre" style={{ display: "block", marginBottom: "8px", fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.05em" }}>
@@ -177,6 +280,107 @@ export default function SubmitPage() {
                     style={{
                       width: "100%", padding: "14px 18px", border: "1px solid var(--border)", borderRadius: "12px",
                       fontSize: "0.95rem", outline: "none", background: "#FFFFFF", color: "var(--navy)"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = "var(--navy)"}
+                    onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                  />
+                </div>
+
+                <div style={{
+                  border: "1px solid var(--border)",
+                  borderRadius: "14px",
+                  background: "#FFFFFF",
+                  padding: "18px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}>
+                  <div>
+                    <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 850, color: "var(--accent-dark)", letterSpacing: "0.08em", marginBottom: "4px" }}>
+                      OPTIONAL MEDIA
+                    </span>
+                    <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0 }}>
+                      파일을 올리지 않아도 POPOK 생성은 가능합니다.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="profileImage" style={{ display: "block", marginBottom: "6px", fontSize: "0.72rem", fontWeight: 800, color: "var(--navy)" }}>
+                      Profile Images (여러 장 선택 가능)
+                    </label>
+                    <input
+                      id="profileImage"
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={(e) => handleProfileImagesChange(e.target.files)}
+                      style={{ width: "100%", fontSize: "0.82rem", color: "var(--ink-muted)" }}
+                    />
+                    <p style={{ fontSize: "0.7rem", color: "var(--ink-faint)", marginTop: "5px" }}>
+                      jpg, jpeg, png, webp (첫 번째 이미지가 대표 프로필로 지정됩니다)
+                    </p>
+                    
+                    {profileImagePreviews.length > 0 && (
+                      <div style={{ display: "flex", gap: "8px", overflowX: "auto", padding: "8px 0" }} className="no-scrollbar">
+                        {profileImagePreviews.map((url, idx) => (
+                          <div key={idx} style={{ position: "relative", width: "60px", height: "60px", borderRadius: "8px", overflow: "hidden", border: "1px solid var(--border)", flexShrink: 0 }}>
+                            <img src={url} alt={`preview_${idx}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            {idx === 0 && (
+                              <span style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "var(--navy)", color: "#FFF", fontSize: "0.55rem", textAlign: "center", fontWeight: 700, padding: "2px 0" }}>대표</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="motionVideoUrl" style={{ display: "block", marginBottom: "6px", fontSize: "0.72rem", fontWeight: 800, color: "var(--navy)" }}>
+                      Motion Profile Video Link
+                    </label>
+                    <input
+                      id="motionVideoUrl"
+                      type="url"
+                      value={motionVideoUrl}
+                      onChange={(e) => setMotionVideoUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=... 또는 https://vimeo.com/..."
+                      style={{
+                        width: "100%",
+                        padding: "12px 14px",
+                        border: "1px solid var(--border)",
+                        borderRadius: "10px",
+                        fontSize: "0.86rem",
+                        outline: "none",
+                        background: "#FFFFFF",
+                        color: "var(--navy)",
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = "var(--navy)"}
+                      onBlur={(e) => e.target.style.borderColor = "var(--border)"}
+                    />
+                    <p style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "5px" }}>
+                      가장 잘 보여주는 영상 링크를 남겨주세요. 포퐄에 어울리는 하이라이트 구간은 페이지 제작 과정에서 정리해드려요. (YouTube / Vimeo 지원)
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Additional Requests */}
+                <div>
+                  <label htmlFor="additionalRequests" style={{ display: "block", marginBottom: "8px", fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.05em" }}>
+                    추가 요청사항
+                  </label>
+                  <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "0 0 8px 0" }}>
+                    사진, 영상, 링크 업로드가 어렵거나 추가로 반영하고 싶은 내용이 있다면 자유롭게 남겨주세요.
+                  </p>
+                  <textarea
+                    id="additionalRequests"
+                    value={additionalRequests}
+                    onChange={(e) => setAdditionalRequests(e.target.value)}
+                    placeholder="예: 유튜브 링크가 잘 안 올라가요. / 프로필 사진 2장을 추가하고 싶어요. / 작품 소개를 나중에 더 넣고 싶어요."
+                    rows={4}
+                    style={{
+                      width: "100%", padding: "14px 18px", border: "1px solid var(--border)", borderRadius: "12px",
+                      fontSize: "0.92rem", outline: "none", background: "#FFFFFF", color: "var(--navy)", resize: "vertical",
+                      fontFamily: "inherit", lineHeight: 1.5
                     }}
                     onFocus={(e) => e.target.style.borderColor = "var(--navy)"}
                     onBlur={(e) => e.target.style.borderColor = "var(--border)"}
@@ -245,9 +449,9 @@ export default function SubmitPage() {
                     border: "1px solid var(--border)"
                   }}>
                     <img
-                      src={`https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name || "popok")}`}
+                      src={profileImagePreviews[0] || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name || "popok")}`}
                       alt="Art avatar"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", opacity: profileImagePreviews[0] ? 1 : 0.8 }}
                     />
                   </div>
                   
@@ -276,6 +480,36 @@ export default function SubmitPage() {
                   </div>
                 </div>
               </div>
+              {motionVideoUrl.trim() && isSupportedMotionVideoUrl(motionVideoUrl) && (
+                <div style={{
+                  marginTop: "18px",
+                  width: "118px",
+                  aspectRatio: "9 / 16",
+                  borderRadius: "14px",
+                  overflow: "hidden",
+                  border: "1.5px solid var(--border)",
+                  background: "#111",
+                  boxShadow: "0 10px 24px rgba(23,20,17,0.08)",
+                }}>
+                  {isYouTubeUrl(motionVideoUrl) ? (
+                    <YouTubeMotionPreview
+                      videoUrl={motionVideoUrl}
+                      title="Motion Profile preview"
+                      aspectRatio="9 / 16"
+                      playMode="always"
+                      fill
+                    />
+                  ) : isVimeoUrl(motionVideoUrl) ? (
+                    <iframe
+                      src={getVimeoEmbedUrl(motionVideoUrl, true) || ""}
+                      title="Motion Profile preview"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      style={{ width: "100%", height: "100%", border: 0, display: "block" }}
+                    />
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -284,134 +518,116 @@ export default function SubmitPage() {
         {(flowState === "animating" || flowState === "success") && (
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            minHeight: "60vh", width: "100%", animation: "fadeIn 0.5s ease"
+            minHeight: "50vh", width: "100%", animation: "fadeIn 0.5s ease"
           }}>
             {/* Visual Assembly Stage */}
-            <div style={{
-              position: "relative", width: "320px", height: "400px",
-              display: "flex", alignItems: "center", justifyContent: "center"
-            }}>
-              
-              {/* Back Card (Lime) */}
+            {flowState === "animating" ? (
               <div style={{
-                position: "absolute", width: "240px", height: "340px", background: "var(--accent)",
-                border: "1.5px solid var(--navy)", borderRadius: "18px", padding: "20px",
-                display: "flex", flexDirection: "column", justifyContent: "space-between",
-                boxShadow: "0 8px 32px rgba(23, 20, 17, 0.08)",
-                
-                // Animation states
-                transform: flowState === "success" 
-                  ? "rotate(5deg) translate(30px, 0)" 
-                  : "rotate(0deg) translate(0, 0) scale(0.9)",
-                opacity: flowState === "animating" ? 0.5 : 1,
-                zIndex: flowState === "success" ? 1 : 2,
-                transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1)"
-              }}>
-                <div style={{ fontWeight: 950, fontSize: "1.1rem", color: "var(--navy)", letterSpacing: "-0.04em" }}>
-                  POPOK<span style={{ color: "var(--navy)" }}>.</span>
-                </div>
-                <div>
-                  <p style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--navy)", lineHeight: 1.25, letterSpacing: "-0.03em" }}>
-                    Your work,<br />connected.
-                  </p>
-                </div>
-                <div style={{ fontFamily: "monospace", fontSize: "0.75rem", color: "var(--navy)", fontWeight: 700 }}>
-                  popok.kr/p/{getSlugifiedName(name)}
-                </div>
-              </div>
-
-              {/* Front Card (White) */}
-              <div style={{
-                position: "absolute", width: "240px", height: "340px", background: "#FFFFFF",
-                border: "1.5px solid var(--border)", borderRadius: "18px", padding: "16px",
-                display: "flex", flexDirection: "column", justifyContent: "space-between",
-                boxShadow: "0 16px 40px rgba(23, 20, 17, 0.08)",
-                
-                // Animation states
-                transform: flowState === "success" 
-                  ? "rotate(-3deg) translate(-30px, 0)" 
-                  : "rotate(0deg) translate(0, 0) scale(1)",
-                zIndex: flowState === "success" ? 2 : 3,
-                transition: "all 1s cubic-bezier(0.16, 1, 0.3, 1)"
+                position: "relative", width: "320px", height: "150px",
+                display: "flex", alignItems: "center", justifyContent: "center"
               }}>
                 <div style={{
-                  width: "100%", height: "180px", borderRadius: "10px", overflow: "hidden",
-                  background: "#F5F1E8", display: "flex", alignItems: "center", justifyContent: "center",
-                  border: "1px solid var(--border)"
-                }}>
-                  <img
-                    src={`https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name || "popok")}`}
-                    alt="Art avatar"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }}
-                  />
-                </div>
-                
-                <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, justifyContent: "space-between", paddingTop: "12px" }}>
-                  <div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                      <h3 style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--navy)" }}>{name}</h3>
-                      <span className="mono" style={{ fontSize: "0.58rem", color: "var(--accent-dark)", fontWeight: 700 }}>
-                        {genre}
-                      </span>
-                    </div>
-                    <p style={{ fontSize: "0.72rem", color: "var(--ink-muted)", marginTop: "4px" }}>
-                      {cleanInstagramHandle(instagram)}
-                    </p>
-                  </div>
-                  <div style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    borderTop: "1px solid var(--border)", paddingTop: "8px", fontSize: "0.7rem", fontWeight: 700
-                  }}>
-                    <span>View Works</span>
-                    <span>→</span>
-                  </div>
-                </div>
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "50%",
+                  border: "4px solid var(--border)",
+                  borderTopColor: "var(--navy)",
+                  animation: "spin 1s linear infinite"
+                }} />
               </div>
-
-              {/* QR Badge popup */}
+            ) : (
               <div style={{
-                position: "absolute", bottom: "40px", right: "10px",
-                width: "70px", height: "70px", borderRadius: "50%",
-                background: "#FFFFFF", border: "1.5px solid var(--navy)",
-                boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                
-                // Animation states
-                transform: flowState === "success" 
-                  ? "scale(1) rotate(-12deg)" 
-                  : "scale(0) rotate(0deg)",
-                opacity: flowState === "success" ? 1 : 0,
-                transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s",
-                zIndex: 3
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "#ECFDF5",
+                border: "1.5px solid #10B981",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "10px",
+                color: "#10B981",
+                fontSize: "2.2rem",
+                fontWeight: 900
               }}>
-                <span style={{ fontSize: "0.42rem", fontWeight: 900, color: "var(--navy)", textTransform: "uppercase" }}>SCAN</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: "var(--navy)" }}>
-                  <rect x="3" y="3" width="7" height="7" />
-                  <rect x="14" y="3" width="7" height="7" />
-                  <rect x="14" y="14" width="7" height="7" />
-                  <rect x="3" y="14" width="7" height="7" />
-                </svg>
-                <span style={{ fontSize: "0.42rem", fontWeight: 900, color: "var(--navy)", textTransform: "uppercase" }}>POPOK</span>
+                ✓
               </div>
-            </div>
+            )}
 
             {/* Success message indicators */}
-            <div style={{ textAlign: "center", marginTop: "32px" }}>
+            <div style={{ textAlign: "center", marginTop: "24px" }}>
               <h2 className="display" style={{
                 fontSize: "1.8rem", color: "var(--navy)", fontWeight: 900,
                 opacity: flowState === "success" ? 1 : 0.3,
                 transform: flowState === "success" ? "translateY(0)" : "translateY(10px)",
                 transition: "all 0.6s ease 0.2s"
               }}>
-                {flowState === "success" ? "Your POPOK is ready." : "Generating your card..."}
+                {flowState === "success" ? "포퐄 등록이 완료되었어요." : "Generating your card..."}
               </h2>
-              <p style={{
-                color: "var(--ink-muted)", fontSize: "0.85rem", marginTop: "8px",
-                opacity: flowState === "success" ? 1 : 0,
-                transition: "all 0.6s ease 0.4s"
-              }}>
-                디지털 명함 화면으로 이동하고 있습니다. 잠시만 기다려주세요.
-              </p>
+              
+              {flowState === "success" && (
+                <>
+                  <p style={{
+                    color: "var(--ink-muted)", fontSize: "0.88rem", marginTop: "12px", lineHeight: "1.6",
+                    maxWidth: "460px", margin: "12px auto 0"
+                  }}>
+                    아직 공개 전이에요. 포퐄 팀이 제출해주신 내용을 정리한 뒤 입력하신 이메일로 안내드릴게요.
+                  </p>
+                  
+                  <div style={{ marginTop: "20px" }}>
+                    <div style={{
+                      color: "var(--ink-muted)", fontSize: "0.82rem",
+                      background: "#FAF8F5", border: "1px solid var(--border)", borderRadius: "12px",
+                      padding: "14px 20px", display: "inline-block", textAlign: "left", lineHeight: "1.5"
+                    }}>
+                      <span style={{ display: "block", fontSize: "0.74rem", color: "var(--accent-dark)", fontWeight: 800, marginBottom: "4px" }}>STATUS INQUIRY INFO</span>
+                      등록번호는 <strong style={{ color: "var(--navy)", fontSize: "0.95rem" }}>{generatedId}</strong> 입니다.<br />
+                      이 등록번호는 <strong style={{ color: "var(--navy)" }}>내 포퐄 확인하기</strong>에서 상태를 조회할 때 사용할 수 있어요.
+                    </div>
+                  </div>
+                  
+                  <div style={{
+                    display: "flex",
+                    gap: "10px",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    marginTop: "30px",
+                  }}>
+                    <Link
+                      href="/my-popok"
+                      className="btn-lime"
+                      style={{
+                        textDecoration: "none",
+                        padding: "14px 28px",
+                        borderRadius: "12px",
+                        fontSize: "0.92rem",
+                        fontWeight: 900,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      내 포퐄 확인하기
+                    </Link>
+                    <Link
+                      href="/artists"
+                      className="btn-outline"
+                      style={{
+                        textDecoration: "none",
+                        padding: "14px 28px",
+                        borderRadius: "12px",
+                        fontSize: "0.92rem",
+                        fontWeight: 900,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      아티스트 둘러보기
+                    </Link>
+                  </div>
+                </>
+              )}
             </div>
 
           </div>

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import PopokCard from "@/components/PopokCard";
+import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
+import { getVimeoEmbedUrl, isVimeoUrl } from "@/lib/videoLinks";
+import { isYouTubeUrl } from "@/lib/youtube";
 
 interface Props {
   record: {
@@ -11,13 +14,22 @@ interface Props {
     genre: string | null;
     instagram: string | null;
     created_at: string | null;
+    profile_image_url?: string | null;
+    profile_image_urls?: Array<string> | null;
+    youtube_url?: string | null;
+    youtube_preview_start?: number | null;
+    youtube_preview_end?: number | null;
+    portfolio_works?: Array<{
+      kind?: string;
+      profile_image_url?: string | null;
+      motion_video_url?: string | null;
+    }> | null;
   };
 }
 
 export default function ClientCard({ record }: Props) {
   const [currentUrl, setCurrentUrl] = useState("");
   const [toastMsg, setToastMsg] = useState("");
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -33,17 +45,6 @@ export default function ClientCard({ record }: Props) {
   const handleShare = () => {
     navigator.clipboard.writeText(currentUrl);
     triggerToast("Link copied to clipboard!");
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: x * 12, y: -y * 12 });
-  };
-
-  const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
   };
 
   const cleanInstagramHandle = (url: string | null) => {
@@ -65,14 +66,37 @@ export default function ClientCard({ record }: Props) {
     if (!url) return "https://instagram.com";
     const cleaned = url.trim();
     if (cleaned.startsWith("http")) return cleaned;
-    // Extract handle if it is starting with @
     if (cleaned.startsWith("@")) {
       return `https://instagram.com/${cleaned.substring(1)}`;
     }
     return `https://instagram.com/${cleaned}`;
   };
 
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+  const registrationMedia = Array.isArray(record.portfolio_works)
+    ? record.portfolio_works.find((item) => item?.kind === "popok_registration_media")
+    : null;
+  const legacyProfileImageUrl = registrationMedia?.profile_image_url || undefined;
+  
+  // Resolve image list
+  const images = useMemo(() => {
+    if (Array.isArray(record.profile_image_urls) && record.profile_image_urls.length > 0) {
+      return record.profile_image_urls;
+    }
+    const single = record.profile_image_url || legacyProfileImageUrl;
+    return single ? [single] : [];
+  }, [record.profile_image_urls, record.profile_image_url, legacyProfileImageUrl]);
+
+  const [selectedImage, setSelectedImage] = useState("");
+
+  useEffect(() => {
+    if (images.length > 0) {
+      setSelectedImage(images[0]);
+    }
+  }, [images]);
+
+  const motionVideoUrl = record.youtube_url || registrationMedia?.motion_video_url || "";
+  const youtubePreviewStart = record.youtube_preview_start ?? 0;
+  const youtubePreviewEnd = record.youtube_preview_end ?? 15;
 
   return (
     <div style={{
@@ -103,15 +127,84 @@ export default function ClientCard({ record }: Props) {
       </div>
 
       {/* Enlarged Popok Card */}
-      <div style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "40px" }}>
+      <div style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "20px" }}>
         <PopokCard
           name={record.name}
           genre={record.genre}
           instagram={record.instagram}
           id={String(record.id)}
           cardUrl={currentUrl}
+          profileImage={selectedImage || undefined}
         />
       </div>
+
+      {/* Multi-images gallery thumbnails */}
+      {images.length > 1 && (
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "40px", flexWrap: "wrap", maxWidth: "480px" }}>
+          {images.map((imgUrl, idx) => (
+            <button
+              key={idx}
+              onClick={() => setSelectedImage(imgUrl)}
+              style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "10px",
+                overflow: "hidden",
+                border: selectedImage === imgUrl ? "2px solid var(--navy)" : "1px solid var(--border)",
+                padding: 0,
+                cursor: "pointer",
+                background: "none",
+                flexShrink: 0,
+                transition: "all 0.2s ease"
+              }}
+            >
+              <img src={imgUrl} alt={`gallery_${idx}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {motionVideoUrl && (isYouTubeUrl(motionVideoUrl) || isVimeoUrl(motionVideoUrl)) && (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", marginBottom: "34px" }}>
+          <div style={{ textAlign: "center" }}>
+            <span style={{ display: "block", fontSize: "0.85rem", fontWeight: 800, color: "var(--navy)", letterSpacing: "0.02em" }}>
+              Motion Profile Preview
+            </span>
+            <span style={{ display: "block", fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
+              {youtubePreviewStart}초 ~ {youtubePreviewEnd}초 구간 재생
+            </span>
+          </div>
+          <div style={{
+            width: "min(180px, 52vw)",
+            aspectRatio: "9 / 16",
+            borderRadius: "16px",
+            overflow: "hidden",
+            border: "1.5px solid var(--border)",
+            background: "#111",
+            boxShadow: "0 12px 28px rgba(23,20,17,0.08)",
+          }}>
+            {isYouTubeUrl(motionVideoUrl) ? (
+              <YouTubeMotionPreview
+                videoUrl={motionVideoUrl}
+                title={`${record.name} motion profile`}
+                aspectRatio="9 / 16"
+                playMode="always"
+                previewStart={youtubePreviewStart}
+                previewEnd={youtubePreviewEnd}
+                fill
+              />
+            ) : (
+              <iframe
+                src={getVimeoEmbedUrl(motionVideoUrl, true) || ""}
+                title={`${record.name} motion profile`}
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                style={{ width: "100%", height: "100%", border: 0, display: "block" }}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Sharing & Details action buttons */}
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center" }}>

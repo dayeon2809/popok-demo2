@@ -14,7 +14,10 @@ function mapDbRecordToArtist(record: any) {
   // parse works (stored as "role" column in the db as newline separated text)
   let worksList: string[] = [];
   if (record.role && typeof record.role === "string") {
-    worksList = record.role.split("\n").map((w: string) => w.trim()).filter(Boolean);
+    worksList = record.role.split(/,|\n/).map((w: string) => w.replace(/[<>]/g, "").trim()).filter(Boolean);
+  }
+  if (worksList.length === 0 && Array.isArray(record.portfolio_works)) {
+    worksList = record.portfolio_works.map((pw: any) => pw.title || pw).filter(Boolean);
   }
   
   let field = 'unknown';
@@ -40,7 +43,12 @@ function mapDbRecordToArtist(record: any) {
   }
 
   // profile image mapping
-  const profileImage = record.profile_image || '';
+  let profileImage = record.profile_image || '';
+  if (!profileImage && Array.isArray(record.profile_image_urls) && record.profile_image_urls[0]) {
+    profileImage = record.profile_image_urls[0];
+  } else if (!profileImage && Array.isArray(record.portfolio_works) && record.portfolio_works[0]?.image_url) {
+    profileImage = record.portfolio_works[0].image_url;
+  }
 
   const aiSummary = record.ai_summary || '';
   const reviewLinksRaw = record.review_links || '';

@@ -130,6 +130,7 @@ input:focus, select:focus, textarea:focus {
   .header-nav-links { display: none !important; }
   .header-burger-btn { display: flex !important; }
   .header-inner { padding: 0 16px !important; }
+  .auth-nav { display: none !important; }
 
   /* Home / Performance Detail: 2단 그리드 → 1단 */
   .responsive-stack-320 { grid-template-columns: 1fr !important; }
@@ -139,6 +140,20 @@ input:focus, select:focus, textarea:focus {
 
   /* Submit: 폼 필드 2단 → 1단 */
   .form-row-2col { grid-template-columns: 1fr !important; }
+
+  /* Home: 섹션 상하 여백 축소 */
+  .home-section { padding-top: 56px !important; padding-bottom: 56px !important; }
+
+  /* Home Discover: 타이틀 줄 줄바꿈 + 화살표 축소 */
+  .discover-header { align-items: flex-start !important; }
+  .discover-arrow-btns button { width: 32px !important; height: 32px !important; font-size: 0.85rem !important; }
+
+  /* Home Hero: 우측 카드 비주얼 축소 */
+  .hero-visual-stage { height: 340px !important; }
+  .hero-float-card { width: 190px !important; height: 275px !important; }
+
+  /* Home Testimonials: 카드 너비 축소 (모바일 스와이프 시 여러 장 보이도록) */
+  .testimonial-card { width: 240px !important; }
 }
 
 /* ── POPOK Custom Motion & Interactions ── */
@@ -322,4 +337,3 @@ input:focus, select:focus, textarea:focus {
   from { transform: translate(-50%, 100%); }
   to { transform: translate(-50%, 0); }
 }
-

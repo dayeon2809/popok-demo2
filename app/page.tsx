@@ -1,16 +1,167 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import artistsData from "@/data/artists.json";
 import type { Artist } from "@/types";
+import { useLanguage } from "@/lib/useLanguage";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import FAQSection from "@/components/FAQSection";
+
+const HOME_COPY = {
+  ko: {
+    eyebrow: "POPOK FOR CREATORS",
+    heroTitleA: "당신의 포트폴리오를,",
+    heroTitleB: "더 가볍게. 포퐄.",
+    heroSubhead: "당신의 작업이 하나로 연결됩니다.",
+    heroBody:
+      "POPOK은 아티스트와 크리에이터를 위한 디지털 명함이자 포트폴리오입니다. 프로필, 프로젝트, 경력, 링크를 하나의 주소에 모아 당신의 작업을 더 쉽게 보여주세요.",
+    getMyPopok: "내 포퐄 만들기",
+    seeExamples: "예시 보기",
+    backCardTitle: "당신의 작업이\n연결됩니다.",
+    sampleBio: "몸의 언어와 공간을 통해 감정의 구조를 탐구합니다.",
+    viewWorks: "작품 보기",
+    howEyebrow: "HOW POPOK WORKS",
+    howTitle: "만들고. 공유하고. 연결되고. 확장하세요.",
+    steps: [
+      {
+        meta: "01 CREATE",
+        title: "나만의 명함 시작",
+        body: "프로필, 대표 작업, 경력과 링크를 선명하게 모아 당신만의 POPOK 카드를 완성합니다.",
+      },
+      {
+        meta: "02 SHARE",
+        title: "어디서나 간편하게",
+        body: "개인 맞춤 QR 코드 또는 하나의 공유 URL로 당신의 포트폴리오를 빠르게 전달합니다.",
+      },
+      {
+        meta: "03 CONNECT",
+        title: "작업 기회와 연결",
+        body: "작품과 아티스트를 찾는 기획자, 연출가, 브랜드와 만나 새로운 협업의 가능성을 만듭니다.",
+      },
+      {
+        meta: "04 GROW",
+        title: "발견을 이어가기",
+        body: "당신의 프로필이 어떻게 발견되는지 확인하고, 작업의 흐름을 계속 업데이트하세요.",
+      },
+    ],
+    stripTitle: "POPOK은 모든 아티스트를 위한 공간입니다.",
+    discoverEyebrow: "DISCOVER",
+    discoverTitle: "POPOK에서 아티스트를 만나보세요.",
+    exploreAll: "전체 아티스트 보기",
+    fallbackBio: "고유한 예술 세계와 포트폴리오를 확인해 보세요.",
+    viewPopok: "POPOK 보기",
+    finalTitle: "당신의 작업이\n머물 자리를 만드세요.",
+    finalBody: "포퐄을 만들고,\n하나의 링크로 당신을 보여주세요.",
+    createMyPopok: "내 포퐄 만들기",
+  },
+  en: {
+    eyebrow: "POPOK FOR CREATORS",
+    heroTitleA: "A new way for artists",
+    heroTitleB: "to be seen and remembered.",
+    heroSubhead: "Your work, connected.",
+    heroBody:
+      "POPOK is a digital business card and portfolio platform for artists and creators. Gather your profile, projects, experiences, and links into one single link. Showcase yourself instantly with a unique link and scan-to-save QR cards.",
+    getMyPopok: "Get my POPOK",
+    seeExamples: "See examples",
+    backCardTitle: "Your work,\nconnected.",
+    sampleBio: "Exploring human emotions through fluid body language and architecture space.",
+    viewWorks: "View Works",
+    howEyebrow: "HOW POPOK WORKS",
+    howTitle: "Create. Share. Connect. Grow.",
+    steps: [
+      {
+        meta: "01 CREATE",
+        title: "Start your own card",
+        body: "Gather your profile, projects, experiences, and links into a clean POPOK card.",
+      },
+      {
+        meta: "02 SHARE",
+        title: "Easy anywhere",
+        body: "Share your portfolio through a personalized QR card or one simple URL.",
+      },
+      {
+        meta: "03 CONNECT",
+        title: "Connect with opportunities",
+        body: "Meet producers, directors, brands, and collaborators looking for artists and works.",
+      },
+      {
+        meta: "04 GROW",
+        title: "Grow your presence",
+        body: "Track how your profile is discovered and keep your work updated.",
+      },
+    ],
+    stripTitle: "POPOK is for every artist.",
+    discoverEyebrow: "DISCOVER",
+    discoverTitle: "Meet artists on POPOK.",
+    exploreAll: "Explore all artists",
+    fallbackBio: "Explore a unique artistic world and portfolio.",
+    viewPopok: "View POPOK",
+    finalTitle: "Your work deserves\na place of its own.",
+    finalBody: "Create your POPOK.\nShare one link. Be discovered.",
+    createMyPopok: "Create my POPOK",
+  },
+};
 
 export default function HomePage() {
+  const { language } = useLanguage();
+  const t = HOME_COPY[language];
   const artists = artistsData as Artist[];
 
   // Get artists who have valid profile images for high-fidelity discovery section
   const featuredArtists = artists
     .filter((a) => a.profileImage && a.profileImage !== "" && (a.status === "published" || !a.status))
     .slice(0, 6);
+
+  // Discover section sliding carousel (auto-slide + manual arrows)
+  const discoverSliderRef = useRef<HTMLDivElement>(null);
+  const discoverPausedRef = useRef(false);
+  const discoverResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const pauseDiscoverTemporarily = (delay = 2600) => {
+    discoverPausedRef.current = true;
+    if (discoverResumeTimerRef.current) clearTimeout(discoverResumeTimerRef.current);
+    discoverResumeTimerRef.current = setTimeout(() => { discoverPausedRef.current = false; }, delay);
+  };
+
+  const setDiscoverPaused = (paused: boolean) => {
+    discoverPausedRef.current = paused;
+    if (discoverResumeTimerRef.current) clearTimeout(discoverResumeTimerRef.current);
+    discoverResumeTimerRef.current = null;
+  };
+
+  const scrollDiscover = (dir: "left" | "right") => {
+    pauseDiscoverTemporarily();
+    discoverSliderRef.current?.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (featuredArtists.length === 0) return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    let lastTs: number | null = null;
+    let rafId: number;
+    const speed = 24; // px per second
+
+    const step = (ts: number) => {
+      if (lastTs === null) lastTs = ts;
+      const dt = Math.min(ts - lastTs, 50) / 1000;
+      lastTs = ts;
+      const node = discoverSliderRef.current;
+      if (node && !discoverPausedRef.current && node.scrollWidth > node.clientWidth) {
+        const next = node.scrollLeft + speed * dt;
+        node.scrollLeft = next + node.clientWidth >= node.scrollWidth - 1 ? 0 : next;
+      }
+      rafId = requestAnimationFrame(step);
+    };
+    rafId = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (discoverResumeTimerRef.current) clearTimeout(discoverResumeTimerRef.current);
+    };
+  }, [featuredArtists.length]);
 
   // Helper to translate genre tags to professional English/Korean labels
   const getGenreLabel = (genre?: string) => {
@@ -32,7 +183,7 @@ export default function HomePage() {
   return (
     <div style={{ background: "var(--bg-warm)", minHeight: "100vh", overflowX: "hidden" }}>
       {/* ── 1. HERO SECTION ── */}
-      <section id="about" style={{
+      <section id="about" className="home-section" style={{
         maxWidth: "1120px",
         margin: "0 auto",
         padding: "80px 32px 100px",
@@ -58,7 +209,7 @@ export default function HomePage() {
             }}>
               <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-dark)", display: "inline-block" }} />
               <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.02em" }}>
-                POPOK FOR CREATORS
+                {t.eyebrow}
               </span>
             </div>
 
@@ -71,8 +222,17 @@ export default function HomePage() {
               fontWeight: 900,
               letterSpacing: "-0.04em"
             }}>
-              A new way for artists<br />
-              to be <span className="seen-highlight">seen</span> and remembered.
+              {language === "ko" ? (
+                <>
+                  당신의 포트폴리오를,<br />
+                  더 가볍게. <span className="seen-highlight">포퐄.</span>
+                </>
+              ) : (
+                <>
+                  {t.heroTitleA}<br />
+                  to be <span className="seen-highlight">seen</span> and remembered.
+                </>
+              )}
             </h1>
 
             {/* Secondary Headline / Subtext */}
@@ -84,7 +244,7 @@ export default function HomePage() {
               marginBottom: "12px",
               letterSpacing: "-0.02em"
             }}>
-              Your work, connected.
+              {t.heroSubhead}
             </p>
 
             <p style={{
@@ -94,9 +254,7 @@ export default function HomePage() {
               maxWidth: "520px",
               marginBottom: "40px",
             }}>
-              POPOK is a digital business card and portfolio platform for artists and creators.
-              Gather your profile, projects, experiences, and links into one single link.
-              Showcase yourself instantly with a unique link and scan-to-save QR cards.
+              {t.heroBody}
             </p>
 
             {/* CTA Buttons */}
@@ -112,7 +270,7 @@ export default function HomePage() {
                 gap: "8px",
                 boxShadow: "0 4px 14px rgba(200, 238, 82, 0.2)"
               }}>
-                Get my POPOK <span style={{ fontSize: "1.1rem" }}>→</span>
+                {t.getMyPopok} <span style={{ fontSize: "1.1rem" }}>→</span>
               </Link>
               <Link href="/artists" className="btn-outline" style={{
                 textDecoration: "none",
@@ -123,13 +281,13 @@ export default function HomePage() {
                 display: "inline-flex",
                 alignItems: "center"
               }}>
-                See examples
+                {t.seeExamples}
               </Link>
             </div>
           </div>
 
           {/* Hero Right Visuals (Product Cards Showcase) */}
-          <div style={{
+          <div className="hero-visual-stage" style={{
             position: "relative",
             height: "480px",
             display: "flex",
@@ -152,7 +310,7 @@ export default function HomePage() {
             </svg>
 
             {/* Back Card (Card 2) */}
-            <div className="float-card-2" style={{
+            <div className="float-card-2 hero-float-card" style={{
               position: "absolute",
               width: "250px",
               height: "360px",
@@ -191,7 +349,12 @@ export default function HomePage() {
                   lineHeight: 1.25,
                   letterSpacing: "-0.03em"
                 }}>
-                  Your work,<br />connected.
+                  {t.backCardTitle.split("\n").map((line, index) => (
+                    <span key={line}>
+                      {line}
+                      {index === 0 && <br />}
+                    </span>
+                  ))}
                 </p>
               </div>
               <div style={{
@@ -206,7 +369,7 @@ export default function HomePage() {
             </div>
 
             {/* Front Card (Card 1) */}
-            <div className="float-card-1" style={{
+            <div className="float-card-1 hero-float-card" style={{
               position: "absolute",
               width: "250px",
               height: "360px",
@@ -241,7 +404,7 @@ export default function HomePage() {
                 position: "relative"
               }}>
                 <img
-                  src="/images/artists/윤경근-ziohmboq.jpg"
+                  src="/artists/yoon-kyungkeun.jpg"
                   alt="JIAN CHOI"
                   style={{
                     width: "100%",
@@ -260,7 +423,7 @@ export default function HomePage() {
                     <span className="mono" style={{ fontSize: "0.62rem", color: "var(--accent-dark)", fontWeight: 700 }}>Choreographer</span>
                   </div>
                   <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.4 }}>
-                    Exploring human emotions through fluid body language and architecture space.
+                    {t.sampleBio}
                   </p>
                 </div>
                 <div style={{
@@ -273,7 +436,7 @@ export default function HomePage() {
                   fontWeight: 700,
                   color: "var(--navy)"
                 }}>
-                  <span>View Works</span>
+                  <span>{t.viewWorks}</span>
                   <span>→</span>
                 </div>
               </div>
@@ -311,7 +474,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 2. HOW POPOK WORKS ── */}
-      <section id="features" style={{
+      <section id="how-it-works" className="home-section" style={{
         borderTop: "1px solid var(--border)",
         background: "#FFFFFF",
         padding: "100px 32px",
@@ -320,7 +483,7 @@ export default function HomePage() {
           {/* Header */}
           <div style={{ marginBottom: "64px" }}>
             <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-              HOW POPOK WORKS
+              {t.howEyebrow}
             </span>
             <h2 className="display" style={{
               fontSize: "clamp(2rem, 4vw, 2.8rem)",
@@ -328,7 +491,7 @@ export default function HomePage() {
               fontWeight: 900,
               letterSpacing: "-0.03em"
             }}>
-              Create. Share. Connect. Grow.
+              {t.howTitle}
             </h2>
           </div>
 
@@ -341,10 +504,10 @@ export default function HomePage() {
             {/* Card 01 */}
             <div className="card" style={{ padding: "32px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "380px" }}>
               <div>
-                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>01 CREATE</span>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>나만의 명함 제작</h3>
+                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>{t.steps[0].meta}</span>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>{t.steps[0].title}</h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6 }}>
-                  프로필, 대표 작품, 경력과 외부 링크를 한곳에 정갈하게 모아 나만의 POPOK 카드를 완성합니다.
+                  {t.steps[0].body}
                 </p>
               </div>
 
@@ -369,10 +532,10 @@ export default function HomePage() {
             {/* Card 02 */}
             <div className="card" style={{ padding: "32px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "380px" }}>
               <div>
-                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>02 SHARE</span>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>어디서나 간편하게</h3>
+                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>{t.steps[1].meta}</span>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>{t.steps[1].title}</h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6 }}>
-                  개인 맞춤형 QR코드 스캔 또는 하나의 고유한 URL 링크로 나의 포트폴리오를 빠르게 보여주고 전달합니다.
+                  {t.steps[1].body}
                 </p>
               </div>
 
@@ -407,10 +570,10 @@ export default function HomePage() {
             {/* Card 03 */}
             <div className="card" style={{ padding: "32px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "380px" }}>
               <div>
-                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>03 CONNECT</span>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>협업 기회와 연결</h3>
+                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>{t.steps[2].meta}</span>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>{t.steps[2].title}</h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6 }}>
-                  작품과 아티스트를 탐색하는 기획자, 연출가, 브랜드 및 관람객들과 만나고 새로운 협업의 기회를 발견합니다.
+                  {t.steps[2].body}
                 </p>
               </div>
 
@@ -442,10 +605,10 @@ export default function HomePage() {
             {/* Card 04 */}
             <div className="card" style={{ padding: "32px 24px", display: "flex", flexDirection: "column", justifyContent: "space-between", height: "380px" }}>
               <div>
-                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>04 GROW</span>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>더 넓은 도달과 도약</h3>
+                <span className="mono" style={{ fontSize: "0.85rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "16px" }}>{t.steps[3].meta}</span>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--navy)", marginBottom: "12px", letterSpacing: "-0.02em" }}>{t.steps[3].title}</h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6 }}>
-                  내 프로필이 어떻게 발견되는지 간결한 통계 지표로 확인하고, 마케팅 데이터를 축적해 활동 영역을 넓힙니다.
+                  {t.steps[3].body}
                 </p>
               </div>
 
@@ -474,7 +637,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 3. ARTIST CATEGORY STRIP ── */}
-      <section id="how-it-works" style={{
+      <section id="artist-categories" style={{
         background: "var(--accent)",
         borderTop: "1px solid var(--navy)",
         borderBottom: "1px solid var(--navy)",
@@ -498,7 +661,7 @@ export default function HomePage() {
             marginRight: "16px",
             whiteSpace: "nowrap"
           }}>
-            POPOK is for every artist.
+            {t.stripTitle}
           </span>
 
           <div style={{
@@ -527,21 +690,23 @@ export default function HomePage() {
       </section>
 
       {/* ── 4. ARTIST DISCOVERY SECTION ── */}
-      <section style={{
+      <section className="home-section" style={{
         padding: "100px 32px",
         maxWidth: "1120px",
         margin: "0 auto",
       }}>
         {/* Title */}
-        <div style={{
+        <div className="discover-header" style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
-          marginBottom: "48px"
+          marginBottom: "48px",
+          gap: "16px",
+          flexWrap: "wrap"
         }}>
           <div>
             <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-              DISCOVER
+              {t.discoverEyebrow}
             </span>
             <h2 className="display" style={{
               fontSize: "clamp(2rem, 4vw, 2.8rem)",
@@ -549,30 +714,55 @@ export default function HomePage() {
               fontWeight: 900,
               letterSpacing: "-0.03em"
             }}>
-              Meet artists on POPOK.
+              {t.discoverTitle}
             </h2>
           </div>
-          <Link href="/artists" style={{
-            textDecoration: "none",
-            color: "var(--navy)",
-            fontWeight: 800,
-            fontSize: "0.9rem",
-            borderBottom: "1.5px solid var(--navy)",
-            paddingBottom: "2px",
-          }}>
-            Explore all artists
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <Link href="/artists" style={{
+              textDecoration: "none",
+              color: "var(--navy)",
+              fontWeight: 800,
+              fontSize: "0.9rem",
+              borderBottom: "1.5px solid var(--navy)",
+              paddingBottom: "2px",
+              whiteSpace: "nowrap"
+            }}>
+              {t.exploreAll}
+            </Link>
+            <div className="discover-arrow-btns" style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => scrollDiscover("left")}
+                aria-label="scroll left"
+                className="btn-outline"
+                style={{ width: "36px", height: "36px", borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.95rem", cursor: "pointer" }}
+              >←</button>
+              <button
+                onClick={() => scrollDiscover("right")}
+                aria-label="scroll right"
+                className="btn-outline"
+                style={{ width: "36px", height: "36px", borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.95rem", cursor: "pointer" }}
+              >→</button>
+            </div>
+          </div>
         </div>
 
-        {/* Horizontal Card List */}
-        <div className="no-scrollbar" style={{
-          display: "flex",
-          gap: "24px",
-          overflowX: "auto",
-          paddingBottom: "24px",
-          scrollSnapType: "x mandatory",
-          WebkitOverflowScrolling: "touch"
-        }}>
+        {/* Horizontal Card List (auto-slides; hover/touch pauses, drag/swipe or arrows to browse) */}
+        <div
+          ref={discoverSliderRef}
+          onMouseEnter={() => setDiscoverPaused(true)}
+          onMouseLeave={() => setDiscoverPaused(false)}
+          onPointerDown={() => pauseDiscoverTemporarily()}
+          onTouchStart={() => pauseDiscoverTemporarily()}
+          className="no-scrollbar"
+          style={{
+            display: "flex",
+            gap: "24px",
+            overflowX: "auto",
+            paddingBottom: "24px",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch"
+          }}
+        >
           {featuredArtists.map((a) => (
             <div key={a.id} style={{
               minWidth: "260px",
@@ -627,7 +817,7 @@ export default function HomePage() {
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
                       }}>
-                        {a.bio || a.aiSummary || `${a.name}의 고유한 예술 세계와 포트폴리오를 확인해 보세요.`}
+                        {a.bio || a.aiSummary || (language === "ko" ? `${a.name}의 ${t.fallbackBio}` : t.fallbackBio)}
                       </p>
                     </div>
 
@@ -641,7 +831,7 @@ export default function HomePage() {
                       fontWeight: 800,
                       color: "var(--navy)"
                     }}>
-                      <span>View POPOK</span>
+                      <span>{t.viewPopok}</span>
                       <span>→</span>
                     </div>
                   </div>
@@ -653,7 +843,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 5. FINAL CTA SECTION ── */}
-      <section style={{
+      <section className="home-section" style={{
         background: "var(--accent)",
         borderTop: "1px solid var(--navy)",
         borderBottom: "1px solid var(--navy)",
@@ -694,8 +884,12 @@ export default function HomePage() {
             letterSpacing: "-0.04em",
             marginBottom: "24px"
           }}>
-            Your work deserves<br />
-            a place of its own.
+            {t.finalTitle.split("\n").map((line, index) => (
+              <span key={line}>
+                {line}
+                {index === 0 && <br />}
+              </span>
+            ))}
           </h2>
 
           <p style={{
@@ -707,8 +901,12 @@ export default function HomePage() {
             maxWidth: "600px",
             letterSpacing: "-0.02em"
           }}>
-            Create your POPOK.<br />
-            Share one link. Be discovered.
+            {t.finalBody.split("\n").map((line, index) => (
+              <span key={line}>
+                {line}
+                {index === 0 && <br />}
+              </span>
+            ))}
           </p>
 
           <Link href="/submit" style={{
@@ -733,10 +931,16 @@ export default function HomePage() {
             e.currentTarget.style.transform = "translateY(0)";
             e.currentTarget.style.boxShadow = "0 6px 20px rgba(23, 20, 17, 0.15)";
           }}>
-            Create my POPOK <span style={{ fontSize: "1.15rem" }}>→</span>
+            {t.createMyPopok} <span style={{ fontSize: "1.15rem" }}>→</span>
           </Link>
         </div>
       </section>
+
+      {/* ── 6. TESTIMONIALS ── */}
+      <TestimonialsSection />
+
+      {/* ── 7. FAQ ── */}
+      <FAQSection />
     </div>
   );
 }

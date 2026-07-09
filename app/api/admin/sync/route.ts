@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { syncArtistsFromAirtable } from "@/lib/syncArtists";
-import { syncPerformancesFromAirtable } from "@/lib/syncPerformances";
 import fs from "fs";
 import path from "path";
 
@@ -32,7 +31,6 @@ export async function POST(req: NextRequest) {
 
   try {
     let artistResult = { success: false, totalRecords: 0, savedArtists: 0, lastSync: "" };
-    let performanceResult = { success: false, totalRecords: 0, savedPerformances: 0, lastSync: "" };
     let syncError: string | null = null;
 
     // 1. Sync Artists
@@ -48,21 +46,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Sync Performances
-    if (type === "all" || type === "performances") {
-      try {
-        performanceResult = await syncPerformancesFromAirtable();
-      } catch (perfErr: any) {
-        console.error("Performance sync error:", perfErr.message || perfErr);
-        syncError = perfErr.message || "공연 동기화 실패";
-        if (type === "performances") {
-          return NextResponse.json({ success: false, error: syncError }, { status: 500 });
-        }
-      }
-    }
-
     // If "all" was requested and both failed, return error
-    if (type === "all" && !artistResult.success && !performanceResult.success) {
+    if (type === "all" && !artistResult.success) {
       return NextResponse.json({ success: false, error: syncError || "동기화 실패" }, { status: 500 });
     }
 
@@ -78,13 +63,11 @@ export async function POST(req: NextRequest) {
     }
 
     const savedArtists = artistResult.success ? artistResult.savedArtists : (currentMeta.savedArtists || 0);
-    const savedPerformances = performanceResult.success ? performanceResult.savedPerformances : (currentMeta.savedPerformances || 0);
-    const totalRecords = (artistResult.success ? artistResult.totalRecords : 0) + (performanceResult.success ? performanceResult.totalRecords : 0);
+    const totalRecords = artistResult.success ? artistResult.totalRecords : 0;
 
     fs.writeFileSync(metaPath, JSON.stringify({
       lastSync,
       savedArtists,
-      savedPerformances,
       totalRecords
     }, null, 2), 'utf8');
 
@@ -92,7 +75,6 @@ export async function POST(req: NextRequest) {
       success: true,
       totalRecords,
       savedArtists,
-      savedPerformances,
       lastSync
     });
   } catch (err: any) {

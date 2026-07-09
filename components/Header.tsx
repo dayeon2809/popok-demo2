@@ -4,17 +4,25 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import AuthNav from "@/components/AuthNav";
+import { useLanguage, type Language } from "@/lib/useLanguage";
 
-const NAV_ITEMS = [
-  { href: "/#about", label: "About" },
-  { href: "/#features", label: "Features" },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/artists", label: "Artists" },
+const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (pathname: string) => boolean }> = [
+  {
+    href: "/#how-it-works",
+    label: { ko: "이용 방법", en: "How it works" },
+    match: () => false,
+  },
+  {
+    href: "/artists",
+    label: { ko: "아티스트", en: "Artists" },
+    match: (pathname) => pathname === "/artists" || pathname.startsWith("/artists/"),
+  },
 ];
 
 export default function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { language, setLanguage } = useLanguage();
 
   return (
     <nav style={{
@@ -37,7 +45,7 @@ export default function Header() {
 
         <div className="header-nav-links" style={{ display: "flex", justifyContent: "center", gap: "28px" }}>
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href;
+            const active = item.match(pathname);
             return (
               <Link
                 key={item.href}
@@ -51,13 +59,53 @@ export default function Header() {
                   paddingBottom: "2px",
                 }}
               >
-                {item.label}
+                {item.label[language]}
               </Link>
             );
           })}
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div
+            aria-label="Language selector"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "2px",
+              flexShrink: 0,
+            }}
+          >
+            {(["ko", "en"] as Language[]).map((item, idx) => {
+              const active = language === item;
+              return (
+                <span key={item} style={{ display: "inline-flex", alignItems: "center", gap: "2px" }}>
+                  {idx > 0 && (
+                    <span style={{ color: "var(--ink-faint)", fontSize: "0.7rem", fontWeight: 300, userSelect: "none", padding: "0 1px" }}>/</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setLanguage(item)}
+                    aria-pressed={active}
+                    style={{
+                      border: 0,
+                      background: "transparent",
+                      color: active ? "var(--navy)" : "var(--ink-faint)",
+                      fontFamily: "inherit",
+                      fontSize: active ? "0.8rem" : "0.75rem",
+                      fontWeight: active ? 800 : 400,
+                      letterSpacing: "0.04em",
+                      padding: "4px 3px",
+                      cursor: "pointer",
+                      transition: "color 0.15s ease, font-weight 0.15s ease",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {item.toUpperCase()}
+                  </button>
+                </span>
+              );
+            })}
+          </div>
           <button
             type="button"
             className="header-burger-btn"
@@ -94,7 +142,7 @@ export default function Header() {
           }}
         >
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const active = item.match(pathname);
             return (
               <Link
                 key={item.href}
@@ -109,10 +157,40 @@ export default function Header() {
                   borderBottom: "1px solid var(--border)",
                 }}
               >
-                {item.label}
+                {item.label[language]}
               </Link>
             );
           })}
+          <Link
+            href="/my-popok"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              textDecoration: "none",
+              padding: "14px 6px",
+              fontSize: "0.95rem",
+              fontWeight: 700,
+              color: pathname === "/my-popok" ? "var(--navy)" : "var(--ink-muted)",
+              borderBottom: "1px solid var(--border)",
+            }}
+          >
+            {language === "ko" ? "내 포퐄 확인하기" : "My POPOK"}
+          </Link>
+          <Link
+            href="/submit"
+            onClick={() => setMenuOpen(false)}
+            className="btn-lime"
+            style={{
+              textDecoration: "none",
+              marginTop: "12px",
+              padding: "13px 16px",
+              borderRadius: "12px",
+              fontSize: "0.9rem",
+              fontWeight: 850,
+              textAlign: "center",
+            }}
+          >
+            {language === "ko" ? "내 포퐄 만들기" : "Get my POPOK"}
+          </Link>
         </div>
       )}
     </nav>

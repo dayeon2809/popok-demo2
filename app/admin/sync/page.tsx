@@ -92,7 +92,7 @@ export default function AdminSyncPage() {
         color: "#92400E",
         lineHeight: "1.5"
       }}>
-        💡 <strong>안내:</strong> 신청서 승인 후에는 <strong>반드시 동기화(Sync)를 실행</strong>해야 공개 웹사이트의 아티스트 목록에 최종적으로 반영됩니다.
+        💡 <strong>안내:</strong> 등록 완료 즉시 개인 카드 페이지는 생성됩니다. 단, <strong>/artists 목록 갤러리 화면</strong>에 신규 노출시키기 위해서는 이곳에서 동기화(Sync)를 실행해야 합니다.
       </div>
 
       <div style={{

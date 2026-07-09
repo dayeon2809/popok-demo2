@@ -181,7 +181,7 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
   }
 
   const outputDir = path.join(process.cwd(), 'data');
-  const imagesDir = path.join(process.cwd(), 'public/images/artists');
+  const imagesDir = path.join(process.cwd(), 'public/artists');
 
   // Ensure directories exist
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
@@ -270,13 +270,13 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
 
       const isAirtableUrl = profileImageUrl.includes("airtableusercontent.com");
       if (fs.existsSync(destPath)) {
-        profileImage = `/images/artists/${filename}`;
+        profileImage = `/artists/${filename}`;
       } else if (!isAirtableUrl) {
         try {
           const isArko = profileImageUrl.includes("arko") || profileImageUrl.includes("arko.or.kr");
           const timeout = isArko ? 30000 : 10000;
           await downloadFile(profileImageUrl, destPath, timeout);
-          profileImage = `/images/artists/${filename}`;
+          profileImage = `/artists/${filename}`;
         } catch (downloadErr: any) {
           const errMsg = downloadErr.message || String(downloadErr);
           const is410 = errMsg.includes("HTTP 410");

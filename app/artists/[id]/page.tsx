@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
 import MotionProfile from "@/components/MotionProfile";
+import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
+import { getYouTubePreviewAspectRatio, isYouTubeUrl } from "@/lib/youtube";
 
 interface WorkItem {
   id: string;
@@ -16,11 +18,17 @@ interface WorkItem {
   image: string;
   videoUrl: string;
   credits: string;
+  previewStart?: number;
+  previewEnd?: number;
+  previewAspectRatio?: "16 / 9" | "9 / 16";
   media?: {
     type: "youtube" | "vimeo" | "video" | "image";
     url?: string;
     src?: string;
     poster?: string;
+    previewStart?: number;
+    previewEnd?: number;
+    aspectRatio?: "16 / 9" | "9 / 16";
   };
 }
 
@@ -32,6 +40,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null);
 
   const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
+  const [openReviews, setOpenReviews] = useState<Record<string, boolean>>({});
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
 
@@ -147,19 +156,35 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   // Compile works list
   const displayWorks: WorkItem[] = (() => {
-    const parseWorksIntoTitles = (w: string): string[] => {
-      const bracketMatches = Array.from(w.matchAll(/<([^>]+)>/g)).map(m => m[1].trim());
-      if (bracketMatches.length > 0) {
-        return bracketMatches;
+    const parseWorksIntoTitles = (w: any): string[] => {
+      if (!w) return [];
+      
+      let targetString = "";
+      if (typeof w === "string") {
+        targetString = w;
+      } else if (typeof w === "object") {
+        targetString = w.title || w.name || "";
       }
-      return w.split(/[,\n]/).map(item => item.trim()).filter(Boolean);
+
+      if (!targetString) return [];
+
+      try {
+        const bracketMatches = Array.from(targetString.matchAll(/<([^>]+)>/g)).map(m => m[1].trim());
+        if (bracketMatches.length > 0) {
+          return bracketMatches;
+        }
+        return targetString.split(/[,\n]/).map(item => item.trim()).filter(Boolean);
+      } catch (e) {
+        return [String(targetString)];
+      }
     };
 
     const list: WorkItem[] = [];
 
-    if (artist.portfolio_works && artist.portfolio_works.length > 0) {
+    if (artist.portfolio_works && Array.isArray(artist.portfolio_works) && artist.portfolio_works.length > 0) {
       artist.portfolio_works.forEach((w: any, idx: number) => {
-        const titles = parseWorksIntoTitles(w.title);
+        if (!w) return;
+        const titles = parseWorksIntoTitles(w.title || w);
         titles.forEach((title, tIdx) => {
           list.push({
             id: `work-p-${idx}-${tIdx}`,
@@ -170,6 +195,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             image: w.image_url || "/images/placeholders/cake-placeholder.png",
             videoUrl: w.video_url || "",
             credits: w.role || "창작",
+            previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
+            previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
+            previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
             media: w.media || null
           });
         });
@@ -177,8 +205,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       return list;
     }
 
-    if (artist.works && artist.works.length > 0) {
-      artist.works.forEach((w: string, idx: number) => {
+    if (artist.works && Array.isArray(artist.works) && artist.works.length > 0) {
+      artist.works.forEach((w: any, idx: number) => {
+        if (!w) return;
         const titles = parseWorksIntoTitles(w);
         titles.forEach((title, tIdx) => {
           let cleanTitle = title.trim();
@@ -210,21 +239,33 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   // Compile career timeline
   const careerList: string[] = (() => {
     const list: string[] = [];
-    if (artist.residency && artist.residency.length > 0) {
-      artist.residency.forEach((r: string) => list.push(`Residency: ${r}`));
+    if (artist.residency && Array.isArray(artist.residency) && artist.residency.length > 0) {
+      artist.residency.forEach((r: any) => {
+        if (r) list.push(`Residency: ${String(r)}`);
+      });
     }
-    if (artist.festival && artist.festival.length > 0) {
-      artist.festival.forEach((f: string) => list.push(`Festival: ${f}`));
+    if (artist.festival && Array.isArray(artist.festival) && artist.festival.length > 0) {
+      artist.festival.forEach((f: any) => {
+        if (f) list.push(`Festival: ${String(f)}`);
+      });
     }
-    if (artist.works && artist.works.length > 0) {
-      artist.works.slice(0, 3).forEach((w: string) => list.push(`Presented piece: ${w}`));
+    if (artist.works && Array.isArray(artist.works) && artist.works.length > 0) {
+      artist.works.slice(0, 3).forEach((w: any) => {
+        if (w) list.push(`Presented piece: ${typeof w === "object" ? (w.title || w.name || String(w)) : String(w)}`);
+      });
     }
     list.push("POPOK Registry Verification Completed");
     return list;
   })();
 
-  const englishName = artist.name_en || artist.name.toUpperCase();
-  const tags = artist.tags || [artist.field, artist.genre].filter(Boolean);
+  // Representative video for the Motion Profile reel — same priority order used
+  // for the artist card previews on the /artists list (video_url, then first work's video).
+  const firstPortfolioWork = Array.isArray(artist.portfolio_works) ? (artist.portfolio_works[0] as any) : null;
+  const representativeVideoUrl: string =
+    artist.video_url || firstPortfolioWork?.video_url || firstPortfolioWork?.videoUrl || firstPortfolioWork?.media?.url || "";
+
+  const englishName = artist.name_en || (artist.name ? artist.name.toUpperCase() : "CREATIVE");
+  const tags = Array.isArray(artist.tags) ? artist.tags : [artist.field, artist.genre].filter(Boolean);
 
   const getCoordinates = () => {
     let hash = 0;
@@ -277,13 +318,24 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   const parsedActiveMedia = activeWork ? (() => {
     if (activeWork.media && typeof activeWork.media === "object") {
-      return activeWork.media;
+      return {
+        ...activeWork.media,
+        previewStart: activeWork.media.previewStart ?? activeWork.previewStart ?? 0,
+        previewEnd: activeWork.media.previewEnd ?? activeWork.previewEnd ?? 15,
+        aspectRatio: activeWork.media.aspectRatio ?? activeWork.previewAspectRatio,
+      };
     }
     const videoUrl = activeWork.videoUrl || "";
     if (videoUrl.trim()) {
       const url = videoUrl.trim();
       if (url.includes("youtube.com") || url.includes("youtu.be") || url.includes("youtube-nocookie.com")) {
-        return { type: "youtube" as const, url };
+        return {
+          type: "youtube" as const,
+          url,
+          previewStart: activeWork.previewStart ?? 0,
+          previewEnd: activeWork.previewEnd ?? 15,
+          aspectRatio: activeWork.previewAspectRatio,
+        };
       }
       if (url.includes("vimeo.com")) {
         return { type: "vimeo" as const, url };
@@ -341,26 +393,33 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
       <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "40px 32px" }}>
         
-        {/* Back Link */}
-        <Link href="/artists" style={{
-          textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px",
-          color: "var(--ink-muted)", fontSize: "0.85rem", fontWeight: 700, marginBottom: "40px"
-        }}>
-          ← Explore Showcase
-        </Link>
+        {/* Back Link — returns to whichever /artists filter view the user came from */}
+        <button
+          onClick={() => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              router.back();
+            } else {
+              router.push("/artists");
+            }
+          }}
+          style={{
+            background: "none", border: "none", padding: 0, cursor: "pointer",
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px",
+            color: "var(--ink-muted)", fontSize: "0.85rem", fontWeight: 700, marginBottom: "40px"
+          }}
+        >
+          ← 아티스트 둘러보기
+        </button>
 
         {/* ──────────────── 1. MOTION PROFILE (Reels-like vertical preview - TOP) ──────────────── */}
-        <section style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "80px" }}>
-          <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "32px" }}>
+        <section style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "60px" }}>
+          <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "24px" }}>
             <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-              MOTION PROFILE SHOWCASE
+              Motion Profile Preview
             </span>
-            <h3 style={{ fontSize: "1.6rem", fontWeight: 900, color: "var(--navy)", marginTop: "6px", letterSpacing: "-0.02em" }}>
-              15 Sec Quick Mood Reel
+            <h3 style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--navy)", marginTop: "4px", letterSpacing: "-0.02em" }}>
+              15초 모션 프로필 미리보기
             </h3>
-            <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>
-              카메라 움직임과 기하학적 텍스트를 결합하여 아티스트의 고유한 분위기를 전달합니다.
-            </p>
           </div>
 
           <MotionProfile
@@ -369,6 +428,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             image={artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
             quote={artist.bio_short}
             motionProfile={artist.motionProfile}
+            representativeVideoUrl={representativeVideoUrl}
           />
         </section>
 
@@ -394,7 +454,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               borderRadius: "4px", fontSize: "0.7rem", color: "var(--ink-muted)",
               padding: "2px 24px", fontFamily: "monospace"
             }}>
-              popok.kr/p/{artist.id}
+              popok.kr/artists/{artist.id}
             </div>
           </div>
 
@@ -530,7 +590,17 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 >
                   {/* Visual Preview Banner */}
                   <div style={{ position: "relative", width: "100%", aspectRatio: "1.4", overflow: "hidden", background: "#F5F1E8" }}>
-                    {work.image && !work.image.includes("cake-placeholder") ? (
+                    {isYouTubeUrl(work.videoUrl || work.media?.url) ? (
+                      <YouTubeMotionPreview
+                        videoUrl={work.videoUrl || work.media?.url}
+                        title={`${work.title} motion preview`}
+                        previewStart={work.media?.previewStart ?? work.previewStart ?? 0}
+                        previewEnd={work.media?.previewEnd ?? work.previewEnd ?? 15}
+                        aspectRatio={work.media?.aspectRatio || work.previewAspectRatio || getYouTubePreviewAspectRatio(work.videoUrl || work.media?.url)}
+                        playMode="hover"
+                        fill
+                      />
+                    ) : work.image && !work.image.includes("cake-placeholder") ? (
                       <img
                         src={work.image}
                         alt={work.title}
@@ -628,49 +698,127 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </section>
 
-        {/* ──────────────── 5. REVIEWS & ARTICLES (With Live Links) ──────────────── */}
-        {artist.reviews && artist.reviews.length > 0 && (
-          <section style={{ marginBottom: "80px" }}>
-            <h3 className="display" style={{
-              fontSize: "1.15rem", color: "var(--navy)", textTransform: "uppercase",
-              borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "24px"
-            }}>
-              Reviews & Articles
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {artist.reviews.map((rev: any, idx: number) => (
-                <a
-                  key={idx}
-                  href={rev.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "18px 16px", borderBottom: "1px solid var(--border)", textDecoration: "none",
-                    color: "inherit", transition: "background 0.2s ease"
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--tag-bg)"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                >
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <span style={{ fontSize: "1rem", fontWeight: 800, color: "var(--navy)" }}>
-                      &lt;{rev.workTitle}&gt; 관련 평론 및 언론 보도
-                    </span>
-                    <span style={{ fontSize: "0.78rem", color: "var(--ink-muted)", display: "flex", gap: "8px" }}>
-                      <span>게재지: {rev.source}</span>
-                    </span>
-                  </div>
-                  <span style={{
-                    fontSize: "0.75rem", border: "1px solid var(--navy)", borderRadius: "20px",
-                    padding: "6px 14px", color: "var(--navy)", background: "#FFFFFF", fontWeight: 800
-                  }}>
-                    Read Article ↗
-                  </span>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* ──────────────── 5. REVIEWS & ARTICLES (작품별 토글 Accordion) ──────────────── */}
+        {artist.reviews && Array.isArray(artist.reviews) && artist.reviews.length > 0 && (() => {
+          // Group reviews by workTitle
+          const reviewsByWork: Record<string, typeof artist.reviews> = {};
+          artist.reviews.forEach((rev: any) => {
+            const key = rev.workTitle || "기타";
+            if (!reviewsByWork[key]) reviewsByWork[key] = [];
+            reviewsByWork[key].push(rev);
+          });
+          const workTitles = Object.keys(reviewsByWork);
+
+          return (
+            <section style={{ marginBottom: "80px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "8px" }}>
+                <h3 className="display" style={{
+                  fontSize: "1.15rem", color: "var(--navy)", textTransform: "uppercase", margin: 0
+                }}>
+                  Reviews & Articles
+                </h3>
+                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)" }}>
+                  {artist.reviews.length} ITEMS
+                </span>
+              </div>
+
+              {/* Per-work accordion rows */}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {workTitles.map((workTitle, wIdx) => {
+                  const isOpen = !!openReviews[workTitle];
+                  const items = reviewsByWork[workTitle];
+                  return (
+                    <div key={workTitle} style={{ borderBottom: "1px solid var(--border)" }}>
+                      {/* Accordion Header — clickable */}
+                      <button
+                        onClick={() => setOpenReviews(prev => ({ ...prev, [workTitle]: !isOpen }))}
+                        style={{
+                          width: "100%", background: "none", border: "none", cursor: "pointer",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          padding: "18px 4px", textAlign: "left"
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                          <span style={{
+                            width: "22px", height: "22px", borderRadius: "50%",
+                            background: isOpen ? "var(--accent)" : "var(--border)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: "0.6rem", fontWeight: 900, color: "var(--navy)",
+                            transition: "background 0.2s", flexShrink: 0
+                          }}>
+                            {String(wIdx + 1).padStart(2, "0")}
+                          </span>
+                          <span style={{ fontSize: "1rem", fontWeight: 800, color: "var(--navy)" }}>
+                            &lt;{workTitle}&gt;
+                          </span>
+                          <span style={{
+                            fontSize: "0.72rem", fontWeight: 700, color: "var(--ink-muted)",
+                            background: "var(--tag-bg)", padding: "2px 8px", borderRadius: "10px"
+                          }}>
+                            {items.length}건
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: "1rem", color: "var(--navy)",
+                          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                          transition: "transform 0.25s ease",
+                          display: "inline-block"
+                        }}>
+                          ↓
+                        </span>
+                      </button>
+
+                      {/* Collapsible content */}
+                      <div style={{
+                        overflow: "hidden",
+                        maxHeight: isOpen ? `${items.length * 80}px` : "0",
+                        transition: "max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        opacity: isOpen ? 1 : 0,
+                      }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0", paddingBottom: "12px" }}>
+                          {items.map((rev: any, rIdx: number) => (
+                            <a
+                              key={rIdx}
+                              href={rev.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: "flex", justifyContent: "space-between", alignItems: "center",
+                                padding: "14px 4px 14px 34px",
+                                borderTop: rIdx > 0 ? "1px solid var(--border)" : "none",
+                                textDecoration: "none", color: "inherit",
+                                transition: "background 0.15s",
+                                borderRadius: "8px"
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--tag-bg)")}
+                              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                            >
+                              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--navy)" }}>
+                                  {rev.source}
+                                </span>
+                                <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>
+                                  관련 평론 및 언론 보도
+                                </span>
+                              </div>
+                              <span style={{
+                                fontSize: "0.72rem", border: "1px solid var(--navy)", borderRadius: "20px",
+                                padding: "5px 12px", color: "var(--navy)", background: "#FFFFFF",
+                                fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0
+                              }}>
+                                Read ↗
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ──────────────── 6. DIGITAL ARTIST CARD HERO (맨 밑에 배치) ──────────────── */}
         <section style={{
@@ -776,7 +924,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 {/* Left: Embedded Video Player / Project Image / Logo Placeholder */}
                 <div style={{
                   width: "100%",
-                  aspectRatio: (parsedActiveMedia.type === "youtube" || parsedActiveMedia.type === "vimeo" || parsedActiveMedia.type === "video") ? "1.777" : "1.33",
+                  aspectRatio: parsedActiveMedia.type === "youtube"
+                    ? ((parsedActiveMedia as any).aspectRatio || getYouTubePreviewAspectRatio(parsedActiveMedia.url || ""))
+                    : (parsedActiveMedia.type === "vimeo" || parsedActiveMedia.type === "video") ? "16 / 9" : "4 / 3",
                   borderRadius: "12px",
                   overflow: "hidden",
                   border: "1px solid var(--border)",
@@ -786,13 +936,15 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   justifyContent: "center",
                   position: "relative"
                 }}>
-                  {parsedActiveMedia.type === "youtube" && getYoutubeEmbedUrl(parsedActiveMedia.url || "") ? (
-                    <iframe
-                      src={getYoutubeEmbedUrl(parsedActiveMedia.url || "") || ""}
-                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
+                  {parsedActiveMedia.type === "youtube" && isYouTubeUrl(parsedActiveMedia.url || "") ? (
+                    <YouTubeMotionPreview
+                      videoUrl={parsedActiveMedia.url || ""}
                       title={activeWork.title}
+                      previewStart={(parsedActiveMedia as any).previewStart ?? activeWork.previewStart ?? 0}
+                      previewEnd={(parsedActiveMedia as any).previewEnd ?? activeWork.previewEnd ?? 15}
+                      aspectRatio={(parsedActiveMedia as any).aspectRatio || activeWork.previewAspectRatio || getYouTubePreviewAspectRatio(parsedActiveMedia.url || "")}
+                      playMode="always"
+                      fill
                     />
                   ) : parsedActiveMedia.type === "vimeo" && getVimeoEmbedUrl(parsedActiveMedia.url || "") ? (
                     <iframe
@@ -896,7 +1048,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       borderRadius: "24px", fontSize: "0.85rem", fontWeight: 800, cursor: "pointer"
                     }}
                   >
-                    Watch External Video Showcase ↗
+                    Watch Video Profile ↗
                   </a>
                 ) : (
                   <button

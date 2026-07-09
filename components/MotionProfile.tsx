@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import YouTubeMotionPreview from "./YouTubeMotionPreview";
+import { extractYouTubeVideoId } from "@/lib/youtube";
 
 interface MotionProfileData {
   type: "video" | "image";
@@ -16,18 +18,22 @@ interface MotionProfileProps {
   image: string;
   quote?: string;
   motionProfile?: MotionProfileData | null;
+  representativeVideoUrl?: string;
 }
 
-export default function MotionProfile({ name, genre, image, quote, motionProfile }: MotionProfileProps) {
+export default function MotionProfile({ name, genre, image, quote, motionProfile, representativeVideoUrl }: MotionProfileProps) {
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Time progress bar loops automatically for static images
+  const youtubeVideoId = extractYouTubeVideoId(representativeVideoUrl);
+  const isYoutubePlayback = Boolean(youtubeVideoId);
+
+  // Time progress bar loops automatically for static images / youtube embeds
   useEffect(() => {
     const isVideo = motionProfile?.type === "video" && motionProfile.src && !videoError;
-    if (isVideo) return; // handled by HTML5 onTimeUpdate
+    if (isVideo || isYoutubePlayback) return; // handled by HTML5 onTimeUpdate / YouTube's own loop
     if (!playing) return;
 
     const intervalTime = 100; // update every 100ms
@@ -44,7 +50,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [playing, motionProfile, videoError]);
+  }, [playing, motionProfile, videoError, isYoutubePlayback]);
 
   // Video playhead play/pause synchronization
   useEffect(() => {
@@ -69,7 +75,8 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
   };
 
   const displayQuote = quote || "예술을 통해 세상과 소통하고 나만의 움직임을 연결합니다.";
-  const isVideoPlayback = motionProfile?.type === "video" && motionProfile.src && !videoError;
+  const isVideoPlayback = isYoutubePlayback || (motionProfile?.type === "video" && motionProfile.src && !videoError);
+  const pausedYoutubePoster = youtubeVideoId ? `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg` : image;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
@@ -99,7 +106,32 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
           overflow: "hidden",
           background: "#171411"
         }}>
-          {isVideoPlayback ? (
+          {isYoutubePlayback ? (
+            playing ? (
+              <div style={{ width: "100%", height: "100%", filter: "grayscale(0.5) contrast(1.1) brightness(0.85)" }}>
+                <YouTubeMotionPreview
+                  videoId={youtubeVideoId}
+                  title={`${name} representative video`}
+                  aspectRatio="9 / 16"
+                  playMode="always"
+                  fill
+                  previewStart={0}
+                  previewEnd={15}
+                />
+              </div>
+            ) : (
+              <img
+                src={pausedYoutubePoster}
+                alt={`${name} Motion Profile`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  filter: "grayscale(0.6) contrast(1.15) brightness(0.85)",
+                }}
+              />
+            )
+          ) : motionProfile?.type === "video" && motionProfile.src && !videoError ? (
             <video
               ref={videoRef}
               src={motionProfile?.src}
