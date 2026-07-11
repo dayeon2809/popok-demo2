@@ -14,11 +14,6 @@ type SubmissionRecord = {
   name_en?: string | null;
   city_or_region?: string | null;
   bio_short?: string | null;
-  portfolio_works?: Array<{
-    kind?: string;
-    profile_image_url?: string | null;
-    motion_video_url?: string | null;
-  }> | null;
   works?: Array<{
     kind?: string;
     profile_image_url?: string | null;
@@ -67,7 +62,7 @@ function getStatusLabel(status?: string | null) {
 
 function getRegistrationMedia(record: SubmissionRecord | null) {
   if (!record) return null;
-  const worksList = record.works ?? record.portfolio_works;
+  const worksList = record.works;
   if (!Array.isArray(worksList)) return null;
   return worksList.find((item) => item?.kind === "popok_registration_media") || null;
 }

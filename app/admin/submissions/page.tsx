@@ -13,12 +13,11 @@ interface Submission {
   instagram: string | null;
   email?: string | null;
   status?: string | null;
-  youtube_url?: string | null;
-  youtube_preview_start?: number | null;
-  youtube_preview_end?: number | null;
+  motion_video_url?: string | null;
   profile_image_url?: string | null;
   profile_image_urls?: string[] | null;
   additional_requests?: string | null;
+  bio_short?: string | null;
   created_at: string | null;
 }
 
@@ -40,12 +39,11 @@ export default function AdminSubmissionsPage() {
     genre: "",
     instagram: "",
     email: "",
-    youtube_url: "",
-    youtube_preview_start: 0,
-    youtube_preview_end: 15,
+    motion_video_url: "",
     profile_image_url: "",
     profile_image_urls_raw: "",
     additional_requests: "",
+    bio_short: "",
   });
 
   useEffect(() => {
@@ -100,12 +98,11 @@ export default function AdminSubmissionsPage() {
       genre: sub.genre || "",
       instagram: sub.instagram || "",
       email: sub.email || "",
-      youtube_url: sub.youtube_url || "",
-      youtube_preview_start: sub.youtube_preview_start ?? 0,
-      youtube_preview_end: sub.youtube_preview_end ?? 15,
+      motion_video_url: sub.motion_video_url || "",
       profile_image_url: sub.profile_image_url || "",
       profile_image_urls_raw: Array.isArray(sub.profile_image_urls) ? sub.profile_image_urls.join("\n") : "",
       additional_requests: sub.additional_requests || "",
+      bio_short: sub.bio_short || "",
     });
   };
 
@@ -134,12 +131,11 @@ export default function AdminSubmissionsPage() {
             genre: editForm.genre,
             instagram: editForm.instagram,
             email: editForm.email,
-            youtube_url: editForm.youtube_url,
-            youtube_preview_start: Number(editForm.youtube_preview_start),
-            youtube_preview_end: Number(editForm.youtube_preview_end),
+            motion_video_url: editForm.motion_video_url,
             profile_image_url: editForm.profile_image_url || profile_image_urls[0] || null,
             profile_image_urls,
             additional_requests: editForm.additional_requests,
+            bio_short: editForm.bio_short,
           },
         }),
       });
@@ -376,19 +372,13 @@ export default function AdminSubmissionsPage() {
               </div>
 
               <div style={{ border: "1px solid var(--border)", borderRadius: "10px", padding: "12px", background: "#FAF8F5" }}>
-                <label style={labelStyle}>Motion Video Link (유튜브)</label>
-                <input value={editForm.youtube_url} onChange={e => setEditForm({ ...editForm, youtube_url: e.target.value })} placeholder="https://youtube.com/watch?v=..." style={inputStyle} />
-                
-                <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ ...labelStyle, fontSize: "0.65rem" }}>하이라이트 시작 (초)</label>
-                    <input type="number" value={editForm.youtube_preview_start} onChange={e => setEditForm({ ...editForm, youtube_preview_start: Number(e.target.value) })} style={inputStyle} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ ...labelStyle, fontSize: "0.65rem" }}>하이라이트 종료 (초)</label>
-                    <input type="number" value={editForm.youtube_preview_end} onChange={e => setEditForm({ ...editForm, youtube_preview_end: Number(e.target.value) })} style={inputStyle} />
-                  </div>
-                </div>
+                <label style={labelStyle}>Motion Profile Video Link</label>
+                <input value={editForm.motion_video_url} onChange={e => setEditForm({ ...editForm, motion_video_url: e.target.value })} placeholder="https://youtube.com/watch?v=... 또는 https://vimeo.com/..." style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={labelStyle}>간단한 이력 (Bio Short)</label>
+                <textarea rows={3} value={editForm.bio_short} onChange={e => setEditForm({ ...editForm, bio_short: e.target.value })} style={inputStyle} />
               </div>
 
               <div>

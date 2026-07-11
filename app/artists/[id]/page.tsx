@@ -422,9 +422,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)" }}>
               Artists
             </Link>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
+            <Link href="/submit" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
               Register
-            </a>
+            </Link>
           </div>
         </div>
       </header>

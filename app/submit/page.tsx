@@ -9,12 +9,14 @@ import { isYouTubeUrl } from "@/lib/youtube";
 import QRCode from "qrcode";
 
 const GENRE_OPTS = [
-  { value: "Dancer", label: "DANCER" },
-  { value: "Choreographer", label: "CHOREOGRAPHER" },
-  { value: "Performing Artist", label: "PERFORMING ARTIST" },
-  { value: "Visual Artist", label: "VISUAL ARTIST" },
-  { value: "Musician", label: "MUSICIAN" },
-  { value: "Creator", label: "CREATOR" },
+  { value: "Dancer", label: "dancer" },
+  { value: "Choreographer", label: "choreographer" },
+  { value: "Performing Artist", label: "performing artist" },
+  { value: "Visual Artist", label: "visual artist" },
+  { value: "Musician", label: "musician" },
+  { value: "Creator", label: "creator" },
+  { value: "Painting", label: "painting" },
+  { value: "Theater", label: "theater" },
 ];
 
 export default function SubmitPage() {
@@ -156,8 +158,7 @@ export default function SubmitPage() {
           profileImageUrls,
           motionVideoUrl: cleanMotionVideoUrl,
           additionalRequests,
-          youtubePreviewStart: 0,
-          youtubePreviewEnd: 15
+          bio_short: additionalRequests,
         }),
       });
 
@@ -378,19 +379,19 @@ export default function SubmitPage() {
                   </div>
                 </div>
 
-                {/* 4. Additional Requests */}
+                {/* 4. Brief History */}
                 <div>
                   <label htmlFor="additionalRequests" style={{ display: "block", marginBottom: "8px", fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.05em" }}>
-                    추가 요청사항
+                    간단한 이력
                   </label>
                   <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "0 0 8px 0" }}>
-                    사진, 영상, 링크 업로드가 어렵거나 추가로 반영하고 싶은 내용이 있다면 자유롭게 남겨주세요.
+                    대표적인 활동이나 경력을 간단히 적어주세요. (예: 공연 이력, 수상 경력 등)
                   </p>
                   <textarea
                     id="additionalRequests"
                     value={additionalRequests}
                     onChange={(e) => setAdditionalRequests(e.target.value)}
-                    placeholder="예: 유튜브 링크가 잘 안 올라가요. / 프로필 사진 2장을 추가하고 싶어요. / 작품 소개를 나중에 더 넣고 싶어요."
+                    placeholder="예: 2026 OOO 무용단 단원 / 2025 OOO 페스티벌 참가 / OOO 대학교 무용과 졸업"
                     rows={4}
                     style={{
                       width: "100%", padding: "14px 18px", border: "1px solid var(--border)", borderRadius: "12px",

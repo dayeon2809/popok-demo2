@@ -80,12 +80,13 @@ export async function POST(
           genre: fields.genre,
           instagram: fields.instagram,
           email: fields.email || null,
-          youtube_url: fields.youtube_url || null,
-          youtube_preview_start: typeof fields.youtube_preview_start === "number" ? fields.youtube_preview_start : 0,
-          youtube_preview_end: typeof fields.youtube_preview_end === "number" ? fields.youtube_preview_end : 15,
+          motion_video_url: fields.motion_video_url || null,
           profile_image_url: fields.profile_image_url || null,
           profile_image_urls: Array.isArray(fields.profile_image_urls) ? fields.profile_image_urls : [],
           additional_requests: fields.additional_requests || null,
+          bio_short: typeof fields.bio_short === "string"
+            ? fields.bio_short.trim() || null
+            : null,
         })
         .eq("id", numericId);
 
@@ -109,24 +110,61 @@ export async function POST(
       }
 
       const name = (subData.name || "").trim();
+      // name_en 컬럼은 현재 submissions에 존재하지 않아 항상 undefined로 전달되며,
+      // slugify()는 이 경우 한글 로마자 변환 경로로 자연히 폴백한다.
       const slug = slugify(name, subData.name_en, numericId);
 
-      // Map portfolio works JSON
+      // 1. submissions.works를 그대로 복사한다 — artists.works의 source of truth
+      const works: any[] = Array.isArray(subData.works) ? [...subData.works] : [];
+
+      // 3. 중복 생성 방지: works가 이미 image_url/video_url(Work 규격)로 담고 있는 URL만 수집한다.
+      //    submissions.works의 원본 항목(예: kind:"popok_registration_media")은 profile_image_url/motion_video_url
+      //    키를 쓰므로 여기서는 매치되지 않고, 아래에서 image_url/video_url 규격의 호환 Work가 별도로 병합된다.
+      const existingImageUrls = new Set<string>();
+      const existingVideoUrls = new Set<string>();
+      works.forEach((w: any) => {
+        if (!w || typeof w !== "object") return;
+        if (typeof w.image_url === "string" && w.image_url) existingImageUrls.add(w.image_url);
+        if (typeof w.video_url === "string" && w.video_url) existingVideoUrls.add(w.video_url);
+      });
+
+      // 2. 대표 이미지 / 모션 영상은 기존 기능(artists 목록·상세 페이지의 대표 이미지 렌더링) 호환을 위해
+      //    image_url/video_url 규격의 Work로 배열 뒤에 merge (동일 URL이 이미 있으면 생략)
       const mainImg = subData.profile_image_url || (Array.isArray(subData.profile_image_urls) ? subData.profile_image_urls[0] : null);
-      const portfolioWorks = [
-        {
+      const motionUrl = subData.motion_video_url || null;
+      const needsImageWork = !!mainImg && !existingImageUrls.has(mainImg);
+      const needsVideoWork = !!motionUrl && !existingVideoUrls.has(motionUrl);
+
+      if (needsImageWork || needsVideoWork) {
+        works.push({
           id: `${slug}-001`,
           slug: "official-motion-profile",
           title: "공식 모션 프로필",
           year: new Date().getFullYear().toString(),
           description: "POPOK 등록 모션 프로필 비디오 및 이미지 아카이브",
           role: "아티스트",
-          image_url: mainImg || null,
-          video_url: subData.youtube_url || null,
-          preview_start: subData.youtube_preview_start ?? 0,
-          preview_end: subData.youtube_preview_end ?? 15,
-        }
-      ];
+          image_url: needsImageWork ? mainImg : null,
+          video_url: needsVideoWork ? motionUrl : null,
+        });
+      }
+
+      // artists 테이블에 실제로 존재하는 컬럼만 사용한다.
+      // attachment 컬럼은 더 이상 존재하지 않으므로 instagram/website 분리 컬럼에 각각 저장한다.
+      // submissions에는 website 소스 컬럼이 없어 저장할 값이 없다 — 있을 때만 저장하라는 요구사항상 항상 null.
+      const artistPayload = {
+        name,
+        role: `<${subData.genre}>`,
+        genre: "dance,contemporary",
+        instagram: subData.instagram || null,
+        website: null as string | null,
+        email: subData.email || null,
+        bio_short: subData.bio_short || subData.additional_requests || `${name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
+        profile_image_url: subData.profile_image_url || null,
+        profile_image_urls: Array.isArray(subData.profile_image_urls) ? subData.profile_image_urls : [],
+        motion_video_url: subData.motion_video_url || null,
+        works,
+        status: "published",
+      };
 
       // 2. Check if artist already exists for this submission
       const { data: existingArtist } = await (supabase.from("artists" as any) as any)
@@ -135,38 +173,22 @@ export async function POST(
         .maybeSingle();
 
       let artistErr: any = null;
+      let artistId: string | null = existingArtist?.id ?? null;
 
       if (existingArtist) {
-        // Update existing artist
+        // Update existing artist — artists.id는 uuid 문자열이므로 그대로 사용하고 Number()로 변환하지 않는다.
         const { error } = await (supabase.from("artists" as any) as any)
-          .update({
-            name,
-            role: `<${subData.genre}>`,
-            genre: "dance,contemporary",
-            attachment: subData.instagram || "",
-            email: subData.email || null,
-            bio_short: subData.additional_requests || `${name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
-            works: portfolioWorks,
-            status: "published"
-          })
+          .update(artistPayload)
           .eq("id", existingArtist.id);
         artistErr = error;
       } else {
-        // Insert new artist
-        const { error } = await (supabase.from("artists" as any) as any)
-          .insert({
-            submission_id: numericId,
-            name,
-            role: `<${subData.genre}>`,
-            genre: "dance,contemporary",
-            attachment: subData.instagram || "",
-            email: subData.email || null,
-            slug,
-            bio_short: subData.additional_requests || `${name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
-            works: portfolioWorks,
-            status: "published"
-          });
+        // Insert new artist — id는 DB default(gen_random_uuid())로 생성되므로 직접 지정하지 않는다.
+        const { data: insertedArtist, error } = await (supabase.from("artists" as any) as any)
+          .insert({ submission_id: numericId, slug, ...artistPayload })
+          .select("id")
+          .single();
         artistErr = error;
+        artistId = insertedArtist?.id ?? null;
       }
 
       if (artistErr) {
@@ -174,17 +196,17 @@ export async function POST(
         return NextResponse.json({ success: false, error: "아티스트 페이지 공개에 실패했습니다.", detail: artistErr.message }, { status: 500 });
       }
 
-      // 3. Update submission status to approved
+      // 3. submissions.status를 approved로 갱신하고, 공개된 아티스트 slug를 public_slug에 저장한다.
       const { error: updateSubErr } = await (supabase.from("submissions" as any) as any)
-        .update({ status: "approved" })
+        .update({ status: "approved", public_slug: slug })
         .eq("id", numericId);
 
       if (updateSubErr) {
         console.warn("Submissions status update failed:", updateSubErr);
       }
 
-      return NextResponse.json({ success: true, slug });
-    } 
+      return NextResponse.json({ success: true, slug, artistId });
+    }
     
     else {
       return NextResponse.json({ success: false, error: "올바르지 않은 작업 액션입니다." }, { status: 400 });

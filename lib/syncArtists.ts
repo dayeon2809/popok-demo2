@@ -181,22 +181,24 @@ export interface SyncResult {
 }
 
 export interface DbArtistRow {
-  id: string | number;
+  id: string; // artists.id는 uuid
   name: string;
   slug?: string | null;
   company?: string | null;
-  ai_summary?: string | null;
+  bio?: string | null;
   role?: string | null;
   genre?: string | null;
-  attachment?: string | null;
-  profile_image?: string | null;
+  instagram?: string | null;
+  website?: string | null;
+  profile_image_url?: string | null;
+  profile_image_urls?: string[] | null;
+  motion_video_url?: string | null;
   review_links?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
   name_en?: string | null;
   city_or_region?: string | null;
   bio_short?: string | null;
-  portfolio_works?: any | null;
   works?: any | null;
 }
 
@@ -260,7 +262,7 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
     }
 
     const company = record.company || '';
-    const bio = record.ai_summary || '';
+    const bio = record.bio || '';
     const worksList = parseStringToArray(record.role || '');
 
     let field = 'unknown';
@@ -281,19 +283,12 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
       else genre = 'contemporary';
     }
 
-    let instagram = '';
-    let website = '';
-    const attachment = record.attachment || '';
-    if (attachment && typeof attachment === 'string') {
-      if (attachment.includes('instagram.com')) {
-        instagram = attachment;
-      } else {
-        website = attachment;
-      }
-    }
+    // attachment 컬럼은 더 이상 존재하지 않음 — instagram / website 분리 컬럼을 그대로 사용한다.
+    const instagram = record.instagram || '';
+    const website = record.website || '';
 
     let profileImage = '';
-    const profileImageUrl = record.profile_image || '';
+    const profileImageUrl = record.profile_image_url || '';
     if (profileImageUrl) {
       let ext = '.jpg';
       if (profileImageUrl.includes('.png')) ext = '.png';
@@ -354,7 +349,7 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
       }
     }
 
-    const aiSummary = record.ai_summary || '';
+    const aiSummary = record.bio || '';
     const reviewLinksRaw = record.review_links || '';
     const reviews: any[] = [];
     if (reviewLinksRaw && typeof reviewLinksRaw === 'string') {
@@ -374,8 +369,8 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
       }
     }
 
-    // ── Smart Merge Works ──
-    let worksData = record.works ?? record.portfolio_works ?? [];
+    // ── Smart Merge Works ── (portfolio_works 컬럼은 더 이상 존재하지 않음)
+    let worksData = record.works ?? [];
     if (typeof worksData === 'string') {
       try {
         worksData = JSON.parse(worksData);

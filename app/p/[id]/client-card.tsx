@@ -16,14 +16,7 @@ interface Props {
     created_at: string | null;
     profile_image_url?: string | null;
     profile_image_urls?: Array<string> | null;
-    youtube_url?: string | null;
-    youtube_preview_start?: number | null;
-    youtube_preview_end?: number | null;
-    portfolio_works?: Array<{
-      kind?: string;
-      profile_image_url?: string | null;
-      motion_video_url?: string | null;
-    }> | null;
+    motion_video_url?: string | null;
     works?: Array<{
       kind?: string;
       profile_image_url?: string | null;
@@ -77,7 +70,7 @@ export default function ClientCard({ record }: Props) {
     return `https://instagram.com/${cleaned}`;
   };
 
-  const worksList = record.works ?? record.portfolio_works;
+  const worksList = record.works;
   const registrationMedia = Array.isArray(worksList)
     ? worksList.find((item) => item?.kind === "popok_registration_media")
     : null;
@@ -100,9 +93,9 @@ export default function ClientCard({ record }: Props) {
     }
   }, [images]);
 
-  const motionVideoUrl = record.youtube_url || registrationMedia?.motion_video_url || "";
-  const youtubePreviewStart = record.youtube_preview_start ?? 0;
-  const youtubePreviewEnd = record.youtube_preview_end ?? 15;
+  const motionVideoUrl = record.motion_video_url || registrationMedia?.motion_video_url || "";
+  const youtubePreviewStart = 0;
+  const youtubePreviewEnd = 15;
 
   return (
     <div style={{

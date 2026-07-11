@@ -197,9 +197,9 @@ export default function PremiumPage() {
             준비가 완료되면 등록 시 기입하신 이메일로 빠르게 안내드릴게요!
           </p>
           <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" className="btn-lime" style={{ textDecoration: "none", padding: "13px 24px", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 900 }}>
+            <Link href="/submit" className="btn-lime" style={{ textDecoration: "none", padding: "13px 24px", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 900 }}>
               기본 아티스트 무료 등록하기
-            </a>
+            </Link>
           </div>
         </div>
       </section>

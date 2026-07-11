@@ -30,18 +30,22 @@ export async function GET(req: NextRequest) {
           gValue = parts[1] || "contemporary";
         }
 
+        // works는 jsonb 컬럼 — 항상 배열로 정규화 (portfolio_works 컬럼은 더 이상 존재하지 않음)
+        const dbWorks: any[] = Array.isArray(record.works) ? record.works : [];
+
         // Works titles array
         let worksList: string[] = [];
-        const dbWorks = record.works ?? record.portfolio_works ?? [];
         if (record.role && typeof record.role === "string") {
           worksList = record.role.split(",").map((w: string) => w.replace(/[<>]/g, "").trim()).filter(Boolean);
-        } else if (Array.isArray(dbWorks)) {
+        } else {
           worksList = dbWorks.map((pw: any) => pw.title).filter(Boolean);
         }
 
-        // Main Profile Image mapping
-        let profileImage = "";
-        if (Array.isArray(dbWorks) && dbWorks[0]?.image_url) {
+        // Main Profile Image mapping — profile_image_url 컬럼을 최우선으로 사용
+        let profileImage = record.profile_image_url || "";
+        if (!profileImage && Array.isArray(record.profile_image_urls) && record.profile_image_urls[0]) {
+          profileImage = record.profile_image_urls[0];
+        } else if (!profileImage && dbWorks[0]?.image_url) {
           profileImage = dbWorks[0].image_url;
         }
 
@@ -51,15 +55,15 @@ export async function GET(req: NextRequest) {
           name: record.name,
           name_en: record.name_en || null,
           company: record.company || null,
-          bio: record.bio_short || `${record.name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
+          bio: record.bio_short || record.bio || `${record.name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
           bio_short: record.bio_short || null,
           works: worksList,
           field: fValue,
           genre: gValue,
           role: record.role || `${fValue} 아티스트`,
           type: record.role?.includes("단체") || record.company ? "group" : "individual",
-          instagram: record.attachment?.includes("instagram.com") ? record.attachment : "",
-          website: !record.attachment?.includes("instagram.com") ? (record.attachment || "") : "",
+          instagram: record.instagram || "",
+          website: record.website || "",
           profileImage: profileImage || "/images/placeholders/cake-placeholder.png",
           residency: [],
           festival: [],
@@ -67,7 +71,7 @@ export async function GET(req: NextRequest) {
           verified: true,
           aiSummary: record.bio_short || "",
           reviews: [],
-          isDemo: false,
+          isDemo: !!record.is_demo,
           tags: [fValue === "dance" ? "무용" : fValue === "music" ? "음악" : "시각예술", gValue, "검증됨"].filter(Boolean)
         });
       });

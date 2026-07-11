@@ -259,7 +259,7 @@ export default function HomePage() {
 
             {/* CTA Buttons */}
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" className="btn-lime" style={{
+              <Link href="/submit" className="btn-lime" style={{
                 textDecoration: "none",
                 padding: "16px 32px",
                 borderRadius: "12px",
@@ -271,7 +271,7 @@ export default function HomePage() {
                 boxShadow: "0 4px 14px rgba(200, 238, 82, 0.2)"
               }}>
                 {t.getMyPopok} <span style={{ fontSize: "1.1rem" }}>→</span>
-              </a>
+              </Link>
               <Link href="/artists/kim-boram" className="btn-outline" style={{
                 textDecoration: "none",
                 padding: "16px 32px",
@@ -669,7 +669,7 @@ export default function HomePage() {
             gap: "12px",
             flexWrap: "nowrap"
           }}>
-            {["DANCER", "CHOREOGRAPHER", "PERFORMING ARTIST", "VISUAL ARTIST", "MUSICIAN", "CREATOR"].map((cat) => (
+            {["dancer", "choreographer", "performing artist", "visual artist", "musician", "creator"].map((cat) => (
               <span key={cat} style={{
                 display: "inline-block",
                 padding: "6px 16px",
@@ -910,7 +910,7 @@ export default function HomePage() {
             ))}
           </p>
 
-          <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" style={{
+          <Link href="/submit" style={{
             textDecoration: "none",
             background: "var(--navy)",
             color: "#FFFFFF",
@@ -933,7 +933,7 @@ export default function HomePage() {
             e.currentTarget.style.boxShadow = "0 6px 20px rgba(23, 20, 17, 0.15)";
           }}>
             {t.createMyPopok} <span style={{ fontSize: "1.15rem" }}>→</span>
-          </a>
+          </Link>
         </div>
       </section>
 

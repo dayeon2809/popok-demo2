@@ -17,31 +17,22 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
   }
 
-  const { id } = await params;
-  const artistIdNum = Number(id);
+  // artists.id는 uuid 문자열이다 — Number()로 변환하지 않고 그대로 다룬다.
+  const { id: artistId } = await params;
 
-  if (isNaN(artistIdNum)) {
+  if (!artistId) {
     return NextResponse.json({ success: false, error: "유효하지 않은 아티스트 ID입니다." }, { status: 400 });
   }
 
   try {
     const supabase = getSupabaseServer();
 
-    // 1. Disconnect performances referencing this artist (set artist_id to null)
-    const { error: perfErr } = await (supabase.from("performances") as any)
-      .update({ artist_id: null })
-      .eq("artist_id", artistIdNum);
+    // performances 테이블은 현재 스키마에 존재하지 않으므로 연결 해제 단계는 더 이상 필요하지 않다.
 
-    if (perfErr) {
-      console.error("[DELETE /api/admin/artists/[id]] Disconnect performances error:", perfErr);
-      return NextResponse.json({ success: false, error: `공연 연결 해제 실패: ${perfErr.message}` }, { status: 500 });
-    }
-
-    // 2. Delete the artist from the database
     const { error: deleteErr } = await supabase
       .from("artists")
       .delete()
-      .eq("id", artistIdNum);
+      .eq("id", artistId);
 
     if (deleteErr) {
       console.error("[DELETE /api/admin/artists/[id]] Delete artist error:", deleteErr);
@@ -63,23 +54,23 @@ export async function POST(
     return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
   }
 
-  const { id } = await params;
-  const artistIdNum = Number(id);
+  // artists.id는 uuid 문자열이다 — Number()로 변환하지 않고 그대로 다룬다.
+  const { id: artistId } = await params;
 
-  if (isNaN(artistIdNum)) {
+  if (!artistId) {
     return NextResponse.json({ success: false, error: "유효하지 않은 아티스트 ID입니다." }, { status: 400 });
   }
 
   try {
     const supabase = getSupabaseServer();
-    
+
     // Generate a random claim code: poc_xxxxxxxx
     const randomHex = Math.random().toString(16).substring(2, 10);
     const generatedCode = `poc_${randomHex}`;
 
     const { error: updateErr } = await (supabase.from("artists") as any)
       .update({ claim_code: generatedCode })
-      .eq("id", artistIdNum);
+      .eq("id", artistId);
 
     if (updateErr) {
       console.error("[POST /api/admin/artists/[id]] Generate claim code error:", updateErr);

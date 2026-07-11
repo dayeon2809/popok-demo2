@@ -16,9 +16,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const supabase = getSupabaseServer();
+    // artists.id는 uuid(gen_random_uuid())라 id 기준 정렬은 더 이상 최신순을 의미하지 않는다 — created_at으로 정렬한다.
     const { data: artists, error } = await (supabase.from("artists") as any)
-      .select("id, name, name_en, company, genre, slug, claim_code, verified, profile_image")
-      .order("id", { ascending: false });
+      .select("id, name, name_en, company, genre, slug, claim_code, verified, profile_image_url")
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("[GET /api/admin/artists] Supabase error:", error);
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
         name: a.name,
         name_en: a.name_en,
         company: a.company,
-        profileImage: a.profile_image || "",
+        profileImage: a.profile_image_url || "",
         field: field,
         claim_code: a.claim_code || "",
         verified: a.verified,

@@ -199,10 +199,8 @@ export default function Header() {
           >
             Premium (준비중)
           </Link>
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href="/submit"
             onClick={() => setMenuOpen(false)}
             className="btn-lime"
             style={{
@@ -216,7 +214,7 @@ export default function Header() {
             }}
           >
             {language === "ko" ? "내 포퐄 만들기" : "Get my POPOK"}
-          </a>
+          </Link>
         </div>
       )}
     </nav>
