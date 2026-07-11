@@ -185,20 +185,7 @@ export default function Header() {
           >
             {language === "ko" ? "내 포퐄 확인하기" : "My POPOK"}
           </Link>
-          <Link
-            href="/premium"
-            onClick={() => setMenuOpen(false)}
-            style={{
-              textDecoration: "none",
-              padding: "14px 6px",
-              fontSize: "0.95rem",
-              fontWeight: 700,
-              color: pathname === "/premium" ? "var(--navy)" : "var(--ink-muted)",
-              borderBottom: "1px solid var(--border)",
-            }}
-          >
-            Premium (준비중)
-          </Link>
+
           <Link
             href="/submit"
             onClick={() => setMenuOpen(false)}

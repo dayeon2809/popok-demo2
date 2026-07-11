@@ -327,14 +327,14 @@ export default function HomePage() {
               transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
               cursor: "pointer",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "rotate(2deg) scale(1.03) translateX(30px)";
-              e.currentTarget.style.zIndex = "3";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "rotate(6deg) translateX(40px)";
-              e.currentTarget.style.zIndex = "1";
-            }}>
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "rotate(2deg) scale(1.03) translateX(30px)";
+                e.currentTarget.style.zIndex = "3";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "rotate(6deg) translateX(40px)";
+                e.currentTarget.style.zIndex = "1";
+              }}>
               <div>
                 <div style={{ fontWeight: 950, fontSize: "1.2rem", color: "var(--navy)", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
                   POPOK
@@ -385,14 +385,14 @@ export default function HomePage() {
               transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
               cursor: "pointer",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "rotate(0deg) scale(1.03) translateX(-30px)";
-              e.currentTarget.style.zIndex = "3";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "rotate(-3deg) translateX(-40px)";
-              e.currentTarget.style.zIndex = "2";
-            }}>
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "rotate(0deg) scale(1.03) translateX(-30px)";
+                e.currentTarget.style.zIndex = "3";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "rotate(-3deg) translateX(-40px)";
+                e.currentTarget.style.zIndex = "2";
+              }}>
               {/* Photo Area */}
               <div style={{
                 width: "100%",
@@ -924,14 +924,14 @@ export default function HomePage() {
             transition: "all 0.2s ease",
             boxShadow: "0 6px 20px rgba(23, 20, 17, 0.15)"
           }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 24px rgba(23, 20, 17, 0.25)";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 6px 20px rgba(23, 20, 17, 0.15)";
-          }}>
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 8px 24px rgba(23, 20, 17, 0.25)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(23, 20, 17, 0.15)";
+            }}>
             {t.createMyPopok} <span style={{ fontSize: "1.15rem" }}>→</span>
           </Link>
         </div>

@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
           field: fValue,
           genre: gValue,
           role: record.role || `${fValue} 아티스트`,
-          type: record.role?.includes("단체") || record.company ? "group" : "individual",
+          type: record.artist_type || "individual",
           instagram: record.instagram || "",
           website: record.website || "",
           profileImage: profileImage || "/images/placeholders/cake-placeholder.png",
@@ -118,10 +118,14 @@ export async function GET(req: NextRequest) {
     // 2. Fetch local JSON + Demo artists
     const localArtists = searchArtists(query, type, field);
 
-    // 3. Merge both sets and deduplicate on name/slug to avoid visual duplicate cards
+    // 3. Merge both sets and deduplicate (Supabase first, slug/id based)
     const merged: any[] = [...filteredDbArtists];
     localArtists.forEach(la => {
-      const isDup = merged.some(ma => ma.name.trim() === la.name.trim() || ma.id === la.id);
+      const isDup = merged.some(ma => {
+        if (ma.id && la.id && ma.id === la.id) return true;
+        if (ma.recordId && la.recordId && ma.recordId === la.recordId) return true;
+        return ma.name.trim() === la.name.trim();
+      });
       if (!isDup) {
         merged.push(la);
       }
