@@ -48,3 +48,6 @@ ds-bundle/
 next-env.d.ts
 
 .vercel
+
+.vercel
+.env*

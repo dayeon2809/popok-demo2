@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontWeight: 800, fontSize: "0.95rem", letterSpacing: "-0.01em" }}>Piece of Cake Admin</span>
+          <span style={{ fontWeight: 800, fontSize: "0.95rem", letterSpacing: "-0.01em" }}>POPOK Admin</span>
           <span style={{ fontSize: "0.72rem", background: "rgba(255,255,255,0.15)", padding: "2px 8px", borderRadius: "12px", fontWeight: 600 }}>MVP</span>
         </div>
         <button

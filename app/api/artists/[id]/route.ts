@@ -44,10 +44,11 @@ function mapDbRecordToArtist(record: any) {
 
   // profile image mapping
   let profileImage = record.profile_image || '';
+  const dbWorks = record.works ?? record.portfolio_works ?? [];
   if (!profileImage && Array.isArray(record.profile_image_urls) && record.profile_image_urls[0]) {
     profileImage = record.profile_image_urls[0];
-  } else if (!profileImage && Array.isArray(record.portfolio_works) && record.portfolio_works[0]?.image_url) {
-    profileImage = record.portfolio_works[0].image_url;
+  } else if (!profileImage && Array.isArray(dbWorks) && dbWorks[0]?.image_url) {
+    profileImage = dbWorks[0].image_url;
   }
 
   const aiSummary = record.ai_summary || '';
@@ -74,7 +75,7 @@ function mapDbRecordToArtist(record: any) {
     name,
     company: typeof company === 'string' ? company.trim() : String(company),
     bio: typeof bio === 'string' ? bio.trim() : String(bio),
-    works: worksList,
+    works: dbWorks,
     field,
     genre,
     instagram,
@@ -92,7 +93,7 @@ function mapDbRecordToArtist(record: any) {
     name_en: record.name_en || '',
     city_or_region: record.city_or_region || '',
     bio_short: record.bio_short || '',
-    portfolio_works: record.portfolio_works || [],
+    portfolio_works: dbWorks,
     owner_user_id: record.owner_user_id || null
   };
 }

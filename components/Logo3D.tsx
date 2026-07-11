@@ -28,7 +28,7 @@ export default function Logo3D({ size = 240 }: { size?: number }) {
         TODO: 향후 실제 3D 로고 파일 도입 시 아래 경로 이미지로 교체해주세요:
         - public/images/logo-3d.png
         - public/logo.svg
-        예: <img src="/images/logo-3d.png" alt="Piece of Cake 3D Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+        예: <img src="/images/logo-3d.png" alt="POPOK 3D Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
       */}
       
       {/* 3D Cake Slice Container */}
@@ -40,7 +40,7 @@ export default function Logo3D({ size = 240 }: { size?: number }) {
         transform: "rotateX(60deg) rotateY(0deg) rotateZ(-45deg)",
         animation: "floatCake 4s ease-in-out infinite"
       }}>
-        {/* Top Frosting (Piece of Cake signature yellow-orange) */}
+        {/* Top Frosting (POPOK signature yellow-orange) */}
         <div style={{
           position: "absolute",
           width: "120px",

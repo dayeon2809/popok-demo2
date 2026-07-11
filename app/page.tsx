@@ -118,7 +118,7 @@ export default function HomePage() {
   const discoverPausedRef = useRef(false);
   const discoverResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pauseDiscoverTemporarily = (delay = 2600) => {
+  const pauseDiscoverTemporarily = (delay = 8000) => {
     discoverPausedRef.current = true;
     if (discoverResumeTimerRef.current) clearTimeout(discoverResumeTimerRef.current);
     discoverResumeTimerRef.current = setTimeout(() => { discoverPausedRef.current = false; }, delay);
@@ -259,7 +259,7 @@ export default function HomePage() {
 
             {/* CTA Buttons */}
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <Link href="/submit" className="btn-lime" style={{
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" className="btn-lime" style={{
                 textDecoration: "none",
                 padding: "16px 32px",
                 borderRadius: "12px",
@@ -271,8 +271,8 @@ export default function HomePage() {
                 boxShadow: "0 4px 14px rgba(200, 238, 82, 0.2)"
               }}>
                 {t.getMyPopok} <span style={{ fontSize: "1.1rem" }}>→</span>
-              </Link>
-              <Link href="/artists" className="btn-outline" style={{
+              </a>
+              <Link href="/artists/kim-boram" className="btn-outline" style={{
                 textDecoration: "none",
                 padding: "16px 32px",
                 borderRadius: "12px",
@@ -404,7 +404,7 @@ export default function HomePage() {
                 position: "relative"
               }}>
                 <img
-                  src="/artists/yoon-kyungkeun.jpg"
+                  src="/media/artists/yoon-kyungkeun/profile.jpg"
                   alt="JIAN CHOI"
                   style={{
                     width: "100%",
@@ -753,6 +753,7 @@ export default function HomePage() {
           onMouseLeave={() => setDiscoverPaused(false)}
           onPointerDown={() => pauseDiscoverTemporarily()}
           onTouchStart={() => pauseDiscoverTemporarily()}
+          onWheel={() => pauseDiscoverTemporarily()}
           className="no-scrollbar"
           style={{
             display: "flex",
@@ -909,7 +910,7 @@ export default function HomePage() {
             ))}
           </p>
 
-          <Link href="/submit" style={{
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" style={{
             textDecoration: "none",
             background: "var(--navy)",
             color: "#FFFFFF",
@@ -932,7 +933,7 @@ export default function HomePage() {
             e.currentTarget.style.boxShadow = "0 6px 20px rgba(23, 20, 17, 0.15)";
           }}>
             {t.createMyPopok} <span style={{ fontSize: "1.15rem" }}>→</span>
-          </Link>
+          </a>
         </div>
       </section>
 

@@ -1,0 +1,3855 @@
+[
+  {
+    "id": "yoon-kyungkeun",
+    "name": "윤경근",
+    "company": "공원(GONGWON)",
+    "bio": "",
+    "works": [
+      "추락에도 포옹",
+      "모서리",
+      "식탁",
+      "ODBY"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/gongwon____/",
+    "website": "",
+    "profileImage": "/artists/yoon-kyungkeun.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [
+      {
+        "workTitle": "ODBY",
+        "source": "dancewebzine",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=221&board_name=interview&page=6"
+      }
+    ],
+    "recordId": "5",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.357Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "추락에도 포옹",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "모서리",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "식탁",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "ODBY",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "baek-yeon",
+    "name": "백연",
+    "company": "백연발레프로젝트와이",
+    "bio": "백연의 백연발레프로젝트와이는 기후위기와 언어, 신체의 관계를 실험적인 발레 언어로 풀어내는 작업을 이어간다. 〈MELTING〉은 빙하의 녹아내림을 통해 환경 위기와 인간의 관계를 재인식시키고, 〈랭귀지〉는 언어의 기원과 발레의 규칙을 새롭게 모색하는 작업으로 평가받는다.",
+    "works": [
+      "훈민정음",
+      "MELTING",
+      "랭귀지"
+    ],
+    "field": "dance",
+    "genre": "ballet",
+    "instagram": "https://www.instagram.com/white990315/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "백연의 백연발레프로젝트와이는 기후위기와 언어, 신체의 관계를 실험적인 발레 언어로 풀어내는 작업을 이어간다. 〈MELTING〉은 빙하의 녹아내림을 통해 환경 위기와 인간의 관계를 재인식시키고, 〈랭귀지〉는 언어의 기원과 발레의 규칙을 새롭게 모색하는 작업으로 평가받는다.",
+    "reviews": [
+      {
+        "workTitle": "MELTING",
+        "source": "빙하의 녹아내림에 투영된 자연과 인간의 관계성: 백연발레프로젝트와이 〈MELTING〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=2&b_idx=740"
+      },
+      {
+        "workTitle": "랭귀지",
+        "source": "백연발레프로젝트와이 〈랭귀지〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=682&board_name=review&page=10"
+      },
+      {
+        "workTitle": "MELTING",
+        "source": "백연발레프로젝트와이 〈MELTING〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=744&board_name=review&page=3"
+      },
+      {
+        "workTitle": "MELTING",
+        "source": "[공연리뷰] 백연 'MELTING': 녹아내리는 정치성과 균열하는 신체",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=12131"
+      }
+    ],
+    "recordId": "7",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.358Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "훈민정음",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "MELTING",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "랭귀지",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "project_group",
+    "tags": [
+      "프로젝트팀",
+      "발레",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "ryu-jinwook",
+    "name": "류진욱",
+    "company": "고스트그룹",
+    "bio": "류진욱과 고스트그룹은 인류의 진화와 신체의 관계를 탐구하는 실험적 작업을 선보이는 무용단이다. 〈Brachiation(브래키에이션)〉은 진화적 시간의 경계에 위치한 '현재의 몸'을 다루며, 무용수들의 움직임을 통해 과거와 미래를 연결하는 진화적 행동을 재구성한다.",
+    "works": [
+      "브레키에이션",
+      "Brachiation(브래키에이션)"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/ghostgroup_official/",
+    "website": "",
+    "profileImage": "/artists/ryu-jinwook.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "류진욱과 고스트그룹은 인류의 진화와 신체의 관계를 탐구하는 실험적 작업을 선보이는 무용단이다. 〈Brachiation(브래키에이션)〉은 진화적 시간의 경계에 위치한 '현재의 몸'을 다루며, 무용수들의 움직임을 통해 과거와 미래를 연결하는 진화적 행동을 재구성한다.",
+    "reviews": [
+      {
+        "workTitle": "Brachiation(브래키에이션)",
+        "source": "진화적 시간의 경계선에 위치한 '현재의 몸' - 고스트그룹 신작 'Brachiation'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10155"
+      }
+    ],
+    "recordId": "4",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.359Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "브레키에이션",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "Brachiation(브래키에이션)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "jung-daseul",
+    "name": "정다슬",
+    "company": "정다슬파운데이션",
+    "bio": "정다슬은 정다슬파운데이션을 통해 신체와 기록, 기술의 관계를 실험적으로 탐구하는 안무가다. 〈공공하는 몸 I.〉은 여성 신체의 대상화를, 〈무용보읽기: 사관장과 전사들〉은 무보법의 원본성과 재현의 한계를 질문하며, 무용과 기술의 융합을 모색하는 작업을 이어가고 있다.",
+    "works": [
+      "문문문",
+      "2025 무용×기술 오픈위크",
+      "공공하는 몸 I.",
+      "무용보읽기: 사관장과 전사들"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/dasoulchung.foundation/",
+    "website": "",
+    "profileImage": "/artists/jung-daseul.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "정다슬은 정다슬파운데이션을 통해 신체와 기록, 기술의 관계를 실험적으로 탐구하는 안무가다. 〈공공하는 몸 I.〉은 여성 신체의 대상화를, 〈무용보읽기: 사관장과 전사들〉은 무보법의 원본성과 재현의 한계를 질문하며, 무용과 기술의 융합을 모색하는 작업을 이어가고 있다.",
+    "reviews": [
+      {
+        "workTitle": "공공하는 몸 I.",
+        "source": "[시대스2020 프리뷰] 국내 프로그램-7 (11월 12-13일 방영분)",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=4085"
+      },
+      {
+        "workTitle": "2025 무용×기술 오픈위크",
+        "source": "국립현대무용단, 2025 ‘무용×기술 오픈위크’ 개최",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11670"
+      },
+      {
+        "workTitle": "무용보읽기: 사관장과 전사들",
+        "source": "정다슬파운데이션 〈무용보읽기: 사관장과 전사들〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=634&board_name=review&page=20"
+      }
+    ],
+    "recordId": "17",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.360Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "문문문",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "2025 무용×기술 오픈위크",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "공공하는 몸 I.",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "무용보읽기: 사관장과 전사들",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "양병현-7hoeredv",
+    "name": "양병현",
+    "company": "초록고래",
+    "bio": "양병현과 초록고래는 '파도-되기' 개념을 통해 신체와 자연의 관계를 탐구하는 신생 단체다. 〈조형하는 파〉는 수행적 체화를 통해 한국 현대무용의 새로운 지평을 제안하며, 영상 프로젝트 '헤엄쳐고래!'를 통해 공연 외 매체로도 작업을 확장하고 있다.",
+    "works": [
+      "조형하는 파",
+      "헤엄쳐고래!"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/chorok_whale/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "양병현과 초록고래는 '파도-되기' 개념을 통해 신체와 자연의 관계를 탐구하는 신생 단체다. 〈조형하는 파〉는 수행적 체화를 통해 한국 현대무용의 새로운 지평을 제안하며, 영상 프로젝트 '헤엄쳐고래!'를 통해 공연 외 매체로도 작업을 확장하고 있다.",
+    "reviews": [
+      {
+        "workTitle": "조형하는 파",
+        "source": "파도를 수행하다, 파도를 조형하다: 초록고래의 〈조형하는 파〉",
+        "url": "https://dancepostkorea.com/new/board/review/group_view.php?search_part=b_title&search_group=&page=1&b_idx=692"
+      },
+      {
+        "workTitle": "헤엄쳐고래!",
+        "source": "꿈을 이루는 잠망경 1. 초록고래",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=215&board_name=interview&page=8"
+      }
+    ],
+    "recordId": "16",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.360Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "조형하는 파",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "헤엄쳐고래!",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "ha-jihye",
+    "name": "하지혜",
+    "company": "아하무브먼트",
+    "bio": "",
+    "works": [
+      "맨땅",
+      "음-파"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/_ahamovement_/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "9",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.360Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "맨땅",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "음-파",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "jung-haneul",
+    "name": "정하늘",
+    "company": "CONTEMPORARYSKY",
+    "bio": "",
+    "works": [
+      "𝑷𝒐𝒌𝒆𝒓 𝑭𝒂𝒄𝒆",
+      "정서적 거리"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/contemporarysky/",
+    "website": "",
+    "profileImage": "/artists/jung-haneul.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "14",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.361Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "𝑷𝒐𝒌𝒆𝒓 𝑭𝒂𝒄𝒆",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "정서적 거리",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "ahn-eunmi",
+    "name": "안은미",
+    "company": "안은미컴퍼니",
+    "bio": "안은미는 한국 현대무용을 대표하는 안무가로, 대담한 시각언어와 사회적 메시지를 결합한 작업으로 잘 알려져 있다. 〈드래곤즈〉는 아시아의 용을 모티브로 한 실험적 안무로 영국 등 해외 순회공연을 이어갔고, 〈여자야 여자야〉는 한국 근대 신여성의 삶을 화려한 무대와 음악으로 조명한다.",
+    "works": [
+      "조상님께 바치는 댄스",
+      "대심땅쓰",
+      "동방미래특급",
+      "드래곤즈",
+      "슈퍼바이러스",
+      "아저씨를 위한 무책임한 땅쓰",
+      "안은미의 북한춤",
+      "여자야 여자야"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/ahneunmecompany/",
+    "website": "",
+    "profileImage": "/artists/ahn-eunmi.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "안은미는 한국 현대무용을 대표하는 안무가로, 대담한 시각언어와 사회적 메시지를 결합한 작업으로 잘 알려져 있다. 〈드래곤즈〉는 아시아의 용을 모티브로 한 실험적 안무로 영국 등 해외 순회공연을 이어갔고, 〈여자야 여자야〉는 한국 근대 신여성의 삶을 화려한 무대와 음악으로 조명한다.",
+    "reviews": [
+      {
+        "workTitle": "드래곤즈",
+        "source": "안은미 컴퍼니 '드래곤즈' 영국 8개 도시 순회공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10485"
+      },
+      {
+        "workTitle": "여자야 여자야",
+        "source": "안은미 〈여자야 여자야〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=611&board_name=review&page=25"
+      },
+      {
+        "workTitle": "여자야 여자야",
+        "source": "국립현대무용단, 안은미 ‘여자야 여자야’ 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=8061"
+      },
+      {
+        "workTitle": "드래곤즈",
+        "source": "[공연리뷰] Welcome to 안은미’s World - ‘드래곤즈’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=5927"
+      },
+      {
+        "workTitle": "드래곤즈",
+        "source": "안은미컴퍼니 ‘드래곤즈’ 공연 - 용띄 무용수들의 ‘몸으로 말하는 미래’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=5787"
+      },
+      {
+        "workTitle": "동방미래특급",
+        "source": "어디를 향해 달리는, 적재 중량 초과 기차인가: 안은미의 〈동방미래특급〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=8&b_idx=652"
+      },
+      {
+        "workTitle": "여자야 여자야",
+        "source": "안은미는 안무가인가? 과도함은, 과감함이 아니다!: 서도와 은미 <만병통치樂>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=17&b_idx=508"
+      },
+      {
+        "workTitle": "드래곤즈",
+        "source": "안은미 <드래곤즈>: 네트워크로 전화(轉化)하는 춤",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=24&b_idx=396"
+      },
+      {
+        "workTitle": "슈퍼바이러스",
+        "source": "60분간의 신명나는 도깜비 난장 - 안은미컴퍼니 〈슈퍼바이러스〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=32&b_idx=222"
+      },
+      {
+        "workTitle": "안은미의 북한춤",
+        "source": "〈안은미의 북한춤〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=373&board_name=review&page=69"
+      },
+      {
+        "workTitle": "대심땅쓰",
+        "source": "안은미무용단 〈大心땅쓰〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=320&board_name=review&page=79"
+      },
+      {
+        "workTitle": "아저씨를 위한 무책임한 땅쓰",
+        "source": "안은미 〈아저씨를 위한 무책임한 땅쓰〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=81&board_name=review&page=126"
+      },
+      {
+        "workTitle": "드래곤즈",
+        "source": "[공연리뷰] '드래곤즈'는 무엇을 비상하려 했을까",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11563"
+      },
+      {
+        "workTitle": "동방미래특급",
+        "source": "안은미 신작 '동방미래특급' 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10866"
+      }
+    ],
+    "recordId": "11",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.361Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "조상님께 바치는 댄스",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "대심땅쓰",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "동방미래특급",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "드래곤즈",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "슈퍼바이러스",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "아저씨를 위한 무책임한 땅쓰",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "안은미의 북한춤",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "여자야 여자야",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "현대무용",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "ham-heewon",
+    "name": "함희원",
+    "company": "함희원시어터",
+    "bio": "",
+    "works": [
+      "아기"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/hamheewon_theater/",
+    "website": "",
+    "profileImage": "/artists/ham-heewon.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "13",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.362Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "아기",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "홍경화-p79hpa6d",
+    "name": "홍경화",
+    "company": "홍경화현대무용단",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "24",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.363Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "오형은-gni5lw68",
+    "name": "오형은",
+    "company": "바라로프트",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/baraloftseoul/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "20",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.363Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "ahn-sungsoo",
+    "name": "안성수",
+    "company": "안성수픽업그룹",
+    "bio": "안성수는 안성수픽업그룹을 중심으로 현대무용 대중화를 이끌어 온 대표적 안무가다. 〈검은 돌: 모래의 기억〉, 〈스윙〉 등은 해외 초청과 재공연을 거치며 호평받았고, 〈단(壇)〉이나 〈신들의 만찬〉처럼 전통과 현대를 교차시키는 작업에서는 소통의 방식을 둘러싼 다양한 비평적 시선도 함께 따라왔다.",
+    "works": [
+      "rose",
+      "볼레로",
+      "2 in Two",
+      "검은 돌: 모래의 기억",
+      "단",
+      "댄서 하우스",
+      "라벨과 스트라빈스키",
+      "스윙",
+      "신들의 만찬",
+      "제전악-장미의 잔상",
+      "투오넬라의 백조",
+      "포이즈",
+      "스윙"
+    ],
+    "field": "dance",
+    "genre": "ballet",
+    "instagram": "https://www.instagram.com/ssa.pickup/",
+    "website": "",
+    "profileImage": "/artists/ahn-sungsoo.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "안성수는 안성수픽업그룹을 중심으로 현대무용 대중화를 이끌어 온 대표적 안무가다. 〈검은 돌: 모래의 기억〉, 〈스윙〉 등은 해외 초청과 재공연을 거치며 호평받았고, 〈단(壇)〉이나 〈신들의 만찬〉처럼 전통과 현대를 교차시키는 작업에서는 소통의 방식을 둘러싼 다양한 비평적 시선도 함께 따라왔다.",
+    "reviews": [
+      {
+        "workTitle": "검은 돌: 모래의 기억",
+        "source": "국립현대무용단 \"현대무용 대중화\" 자평",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=2853"
+      },
+      {
+        "workTitle": "검은 돌: 모래의 기억",
+        "source": "'검은 돌: 모래의 기억' 상파울로서 성황리 초연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=2671"
+      },
+      {
+        "workTitle": "검은 돌: 모래의 기억",
+        "source": "국립현대무용단 신작 ‘검은 돌: 모래의 기억’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=2401"
+      },
+      {
+        "workTitle": "스윙",
+        "source": "국립현대무용단 ‘스윙’ 재공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=1857"
+      },
+      {
+        "workTitle": "라벨과 스트라빈스키",
+        "source": "'라벨과 스트라빈스키' 오픈-업 종료",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=1224"
+      },
+      {
+        "workTitle": "스윙",
+        "source": "대중과의 즘거운 호흡 - 국립현대무용단 〈스윙〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=33&b_idx=205"
+      },
+      {
+        "workTitle": "댄서 하우스",
+        "source": "춤의 말에서 댄서의 집까지, 무용수는 무엇을 이야기하는가 - 국립현대무용단 〈댄서 하우스〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=34&b_idx=195"
+      },
+      {
+        "workTitle": "2 in Two",
+        "source": "안성수 정구호의 춤 - <2 in Two>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=47&b_idx=57"
+      },
+      {
+        "workTitle": "신들의 만찬",
+        "source": "죽음과 귀신에 대한 유쿸한 해석 - 국립무용단 <신들의 만찬>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=48&b_idx=79"
+      },
+      {
+        "workTitle": "단",
+        "source": "안성수의 <단(壇)>이 보여준 소통의 부재",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=49&b_idx=86"
+      },
+      {
+        "workTitle": "검은 돌: 모래의 기억",
+        "source": "국립현대무용단 〈검은 돌: 모래의 기억〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=424&board_name=review&page=59"
+      },
+      {
+        "workTitle": "스윙",
+        "source": "국립현대무용단 〈스윙〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=367&board_name=review&page=70"
+      },
+      {
+        "workTitle": "제전악-장미의 잔상",
+        "source": "국립현대무용단 〈제전악-장미의 잔상〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=335&board_name=review&page=76"
+      },
+      {
+        "workTitle": "투오넬라의 백조",
+        "source": "안성수픽업그룹 & 핀란드 WHS 〈투오넬라의 백조〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=253&board_name=review&page=92"
+      },
+      {
+        "workTitle": "포이즈",
+        "source": "국립발레단 〈포이즈〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=50&board_name=review&page=132"
+      }
+    ],
+    "recordId": "18",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.363Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "rose",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "볼레로",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "2 in Two",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "검은 돌: 모래의 기억",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "단",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "댄서 하우스",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "라벨과 스트라빈스키",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "스윙",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "신들의 만찬",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "제전악-장미의 잔상",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "투오넬라의 백조",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "포이즈",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "스윙",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "발레",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "양승관-y7ifeds7",
+    "name": "양승관",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "27",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.363Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "cha-jinyeop",
+    "name": "차진엽",
+    "company": "콜렉티브A",
+    "bio": "차진엽과 콜렉티브A는 예술과 기술의 융합을 통한 혼합현실 퍼포먼스로 잘 알려진 안무가/단체다. 〈원형하는 몸〉 연작은 물의 순환과 신체·존재의 관계를 시청각적으로 증폭시키며, 〈몵유도원무〉와 〈Roots Hz 뱌리의 주파수〉 등에서는 전통과 동시대성을 교차시키는 작업을 지속해왔다.",
+    "works": [
+      "원형하는 몸",
+      "Roots Hz 뱌리의 주파수",
+      "가온: 세상의 시작",
+      "더블빌",
+      "로튼 애플(Rotten Apple)",
+      "리버런: 불완전한 몸의 경계",
+      "몵유도원무",
+      "미인",
+      "백조의 잘수",
+      "원형하는 몸: round1",
+      "원형하는 몸: round2",
+      "체이스(Chase)",
+      "춤",
+      "그녀... 미치다"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/collective_a/",
+    "website": "",
+    "profileImage": "/artists/cha-jinyeop.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "차진엽과 콜렉티브A는 예술과 기술의 융합을 통한 혼합현실 퍼포먼스로 잘 알려진 안무가/단체다. 〈원형하는 몸〉 연작은 물의 순환과 신체·존재의 관계를 시청각적으로 증폭시키며, 〈몵유도원무〉와 〈Roots Hz 뱌리의 주파수〉 등에서는 전통과 동시대성을 교차시키는 작업을 지속해왔다.",
+    "reviews": [
+      {
+        "workTitle": "원형하는 몸: round1",
+        "source": "차진엽 콜렉티브A '원형하는 몸: round1' 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=6758"
+      },
+      {
+        "workTitle": "더블빌",
+        "source": "차진엽, 고블린파티와 함께하는 국립무용단 ‘더블빌’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=5949"
+      },
+      {
+        "workTitle": "원형하는 몸: round2",
+        "source": "차진엽 collective A ‘원형하는 몸: round2’ 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=5623"
+      },
+      {
+        "workTitle": "리버런: 불완전한 몸의 경계",
+        "source": "제35회 한국현대춤작가 12인전",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=4449"
+      },
+      {
+        "workTitle": "Roots Hz 뱌리의 주파수",
+        "source": "변용을 넘어 창의적 해석으로: 서울시무용단 <미메시스>, 서울남산국악당 〈Roots Hz 뱌리의 주파수〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=4&b_idx=721"
+      },
+      {
+        "workTitle": "Roots Hz 뱌리의 주파수",
+        "source": "놀이에서 시작되어 삶에 다다르다: 차진엽x심은용x권송희 〈Roots Hz 뱌리의 주파수〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=4&b_idx=715"
+      },
+      {
+        "workTitle": "원형하는 몸",
+        "source": "차진엽 〈원형하는 몸: round 1, 2〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=521&board_name=review&page=42"
+      },
+      {
+        "workTitle": "백조의 잘수",
+        "source": "지금 여기의 발레에 대한 대답: 서울시발레단 더블빌 〈백조의 잘수〉 & 〈캄머발레〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=11&b_idx=607"
+      },
+      {
+        "workTitle": "몵유도원무",
+        "source": "관조에서 실존으로, 다른 시각으로 빚어낸 몸의 철학: 국립무용단 〈몵유도원무〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=12&b_idx=585"
+      },
+      {
+        "workTitle": "원형하는 몸: round2",
+        "source": "생명은 어디로부터 와서 무엇이 되는가 - 콜렉티브에이 <원형하는 몸: round 2>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=24&b_idx=378"
+      },
+      {
+        "workTitle": "가온: 세상의 시작",
+        "source": "전통의 부재가 가져온 혼란 - 〈가온: 세상의 시작〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=39&b_idx=143"
+      },
+      {
+        "workTitle": "미인",
+        "source": "차진엽 + 대런 존스톤 〈미인〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=344&board_name=review&page=74"
+      },
+      {
+        "workTitle": "춤, 그녀... 미치다",
+        "source": "차진엽 〈춤, 그녀... 미치다〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=212&board_name=review&page=100"
+      },
+      {
+        "workTitle": "로튼 애플(Rotten Apple)",
+        "source": "차진엽 〈Rotten Apple〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=72&board_name=review&page=128"
+      },
+      {
+        "workTitle": "체이스(Chase)",
+        "source": "제9회 서울무용영화제(SeDaFF) ‘Every Body Moves’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=12318"
+      }
+    ],
+    "recordId": "21",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.364Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "원형하는 몸",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "Roots Hz 뱌리의 주파수",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "가온: 세상의 시작",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "더블빌",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "로튼 애플(Rotten Apple)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "리버런: 불완전한 몸의 경계",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "몵유도원무",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "미인",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "백조의 잘수",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "원형하는 몸: round1",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "원형하는 몸: round2",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "체이스(Chase)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "춤",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "그녀... 미치다",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "노정식-5nhekpqh",
+    "name": "노정식",
+    "company": "Roh Dance Project",
+    "bio": "노정식과 로댄스프로젝트는 기억과 진실, 인간관계의 불편함을 미니마올한 동작으로 풀어내는 작업을 한다. 〈왜곡〉은 기억의 왜곡을 주제로 정보의 진실성에 대한 질문을 던지는 현대무용극으로, 서울문화재단의 지원을 받아 재공연되었다.",
+    "works": [
+      "사물의 가치",
+      "왜곡"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "노정식과 로댄스프로젝트는 기억과 진실, 인간관계의 불편함을 미니마올한 동작으로 풀어내는 작업을 한다. 〈왜곡〉은 기억의 왜곡을 주제로 정보의 진실성에 대한 질문을 던지는 현대무용극으로, 서울문화재단의 지원을 받아 재공연되었다.",
+    "reviews": [
+      {
+        "workTitle": "왜곡",
+        "source": "로댄스프로젝트, 현대무용극 ‘왜곡’ 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=7539"
+      }
+    ],
+    "recordId": "26",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.364Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "사물의 가치",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "왜곡",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "project_group",
+    "tags": [
+      "프로젝트팀",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "김민선-li953fou",
+    "name": "김민선",
+    "company": "",
+    "bio": "",
+    "works": [
+      "위대한 정오"
+    ],
+    "field": "dance",
+    "genre": "korean",
+    "instagram": "https://www.instagram.com/sssun__nny/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "35",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.364Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "위대한 정오",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "한국무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "이양희-fwsd4tc7",
+    "name": "이양희",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "51",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.364Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "성승정-wtybplcr",
+    "name": "성승정",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/sseungjung/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "34",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.364Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "장선주-jjbakbot",
+    "name": "장선주",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "korean",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "32",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.364Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "한국무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "lee-jihyun",
+    "name": "이지현",
+    "company": "22콜렉티브랩",
+    "bio": "이지현은 현대 사회의 속도와 자기 탐색을 주제로 한 작업을 이어가는 안무가다. 〈호모 노마드〉는 느린 템포와 독특한 무대 표현을 통해 정지와 감속을 통한 삶의 질서 재구성을 제안하는 공연으로 소개된다.",
+    "works": [
+      "호모 노마드"
+    ],
+    "field": "dance",
+    "genre": "korean",
+    "instagram": "",
+    "website": "",
+    "profileImage": "/artists/lee-jihyun.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "이지현은 현대 사회의 속도와 자기 탐색을 주제로 한 작업을 이어가는 안무가다. 〈호모 노마드〉는 느린 템포와 독특한 무대 표현을 통해 정지와 감속을 통한 삶의 질서 재구성을 제안하는 공연으로 소개된다.",
+    "reviews": [
+      {
+        "workTitle": "호모 노마드",
+        "source": "이지현 〈호모 노마드〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=612&board_name=review&page=24"
+      }
+    ],
+    "recordId": "31",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.365Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "호모 노마드",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "한국무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "정수동-7ngpzphy",
+    "name": "정수동",
+    "company": "SDCO Company",
+    "bio": "정수동은 일상의 혼란을 신체 리듬으로 그려내는 작업을 하는 안무가다. 〈리듬 속에〉는 크리틱스 초이스 프로그램에 소개되며 주목받았다.",
+    "works": [
+      "리듬 속에"
+    ],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "정수동은 일상의 혼란을 신체 리듬으로 그려내는 작업을 하는 안무가다. 〈리듬 속에〉는 크리틱스 초이스 프로그램에 소개되며 주목받았다.",
+    "reviews": [
+      {
+        "workTitle": "리듬 속에",
+        "source": "일상의 혼란을 신체리듬으로 그려내다 - 크리틱스 초이스 中 정수동 〈리듬 속에〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=3&b_idx=718"
+      }
+    ],
+    "recordId": "50",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.365Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "리듬 속에",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "ultimate",
+    "name": "알티밋",
+    "company": "알티밋",
+    "bio": "알티밋은 정기공연을 통해 세대별 안무가들의 작품을 한 무대에 올리며 한국춤의 동시대성을 탐구한다. 제2회 공연에서는 젊은 세대의 발랑하고 도발적인 감각과, 중견 세대의 견고한 컨셉이 대조를 이루며, 완성도 높은 작품으로 주목되었다. 제3회 공연은 20대부터 40대까지 연령대별 안무가들이 인간의 삶과 사회를 탐구하는 자신만의 시각을 보여주었다.",
+    "works": [
+      "2·3회 정기공연",
+      "3회 정기공연 '3rd ALTIMEETS'"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "/artists/ultimate.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "알티밋은 정기공연을 통해 세대별 안무가들의 작품을 한 무대에 올리며 한국춤의 동시대성을 탐구한다. 제2회 공연에서는 젊은 세대의 발랑하고 도발적인 감각과, 중견 세대의 견고한 컨셉이 대조를 이루며, 완성도 높은 작품으로 주목되었다. 제3회 공연은 20대부터 40대까지 연령대별 안무가들이 인간의 삶과 사회를 탐구하는 자신만의 시각을 보여주었다.",
+    "reviews": [
+      {
+        "workTitle": "2·3회 정기공연",
+        "source": "알티밋무용단 2·3회 정기공연",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=516&board_name=review&page=43"
+      },
+      {
+        "workTitle": "3회 정기공연 '3rd ALTIMEETS'",
+        "source": "알티밋무용단 제3회 정기공연 ‘3rd ALTIMEETS’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=5523"
+      }
+    ],
+    "recordId": "33",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "2·3회 정기공연",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "3회 정기공연 '3rd ALTIMEETS'",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "김영찬-nt04huvm",
+    "name": "김영찬",
+    "company": "",
+    "bio": "김영찬은 아프리카 민속춤의 원초적 요소와 한국적 정서를 결합해 감각의 본질을 탐구하는 안무가다. 〈감각의 분모〉는 청각의 부재를 전제로 감각과 존재의 관계를 실험하며, 신체의 근원적 소통 방식을 묻는 작업으로 평가받는다.",
+    "works": [
+      "감각의 분모"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "김영찬은 아프리카 민속춤의 원초적 요소와 한국적 정서를 결합해 감각의 본질을 탐구하는 안무가다. 〈감각의 분모〉는 청각의 부재를 전제로 감각과 존재의 관계를 실험하며, 신체의 근원적 소통 방식을 묻는 작업으로 평가받는다.",
+    "reviews": [
+      {
+        "workTitle": "감각의 분모",
+        "source": "[인터뷰] 한계 너머의 감각을 표현한 '감각의 분모' 김영찬 안무가",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11686"
+      }
+    ],
+    "recordId": "28",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "감각의 분모",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "이다연-optykpmc",
+    "name": "이다연",
+    "company": "",
+    "bio": "",
+    "works": [
+      "test1 (2026)"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/moti_lab.offical/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "122",
+    "createdAt": "2026-07-07T01:00:01.071138+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "role": "",
+        "year": "2026",
+        "title": "test1",
+        "image_url": "https://qbqozpjasykiuzuajzqh.supabase.co/storage/v1/object/public/portfolio-images/works/1783385920868/1783385921049-7wczmkmn.jpg",
+        "video_url": "https://youtu.be/2Pei9yGR6v0",
+        "description": ""
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "김보라-o3xsj8x2",
+    "name": "김보라",
+    "company": "아트프로젝트보라",
+    "bio": "김보라와 아트프로젝트보라는 신체, 자연, 존재의 관계를 철학적 맥락에서 탐구하는 작업으로 잘 알려진 안무가다. 〈내가 물에서 본 것〉은 국립현대무용단과 협업한 대표작으로 다수의 리뷰를 받았으며, 〈소무〉는 철학적 키워드로 재독한 공연으로 깚은 울림을 준다는 평을 받는다.",
+    "works": [
+      "내가 물에서 본 것",
+      "소무"
+    ],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "https://www.instagram.com/art_project_bora?igsh=MWl3aHJzd2Y5aGs4Yg==",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "김보라와 아트프로젝트보라는 신체, 자연, 존재의 관계를 철학적 맥락에서 탐구하는 작업으로 잘 알려진 안무가다. 〈내가 물에서 본 것〉은 국립현대무용단과 협업한 대표작으로 다수의 리뷰를 받았으며, 〈소무〉는 철학적 키워드로 재독한 공연으로 깚은 울림을 준다는 평을 받는다.",
+    "reviews": [
+      {
+        "workTitle": "내가 물에서 본 것",
+        "source": "[공연리뷰] 국립현대무용단-김보라 '내가 물에서 본 것'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=12009"
+      },
+      {
+        "workTitle": "소무",
+        "source": "[철학 키워드로 다시 읽는 춤공연-11] 아트프로젝트보라 '소무'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11981"
+      },
+      {
+        "workTitle": "내가 물에서 본 것",
+        "source": "국립현대무용단 신작 '내가 물에서 본 것'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11898"
+      },
+      {
+        "workTitle": "소무",
+        "source": "아트프로젝트보라 〈소무〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=732&board_name=review&page=5"
+      },
+      {
+        "workTitle": "내가 물에서 본 것",
+        "source": "아트프로젝트보라 〈내가 물에서 본 것〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=722&board_name=review&page=6"
+      }
+    ],
+    "recordId": "48",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "내가 물에서 본 것",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "소무",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "project_group",
+    "tags": [
+      "프로젝트팀",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "김은경-xbyxtaph",
+    "name": "김은경",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/kimeunkyoung2014/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "40",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "정록이-bnu9oudm",
+    "name": "정록이",
+    "company": "",
+    "bio": "정록이는 메타버스 플랫폼을 활용한 현대무용 작업을 시도해온 안무가다. 미디어아트와 현대무용을 결합한 비대면 공동창작 프로젝트를 통해 디지털 환경에서 무용의 새로운 접근 방식을 모색했다.",
+    "works": [
+      "메타버스로 소환된 힙한 현대무용"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/ddng_noii/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "정록이는 메타버스 플랫폼을 활용한 현대무용 작업을 시도해온 안무가다. 미디어아트와 현대무용을 결합한 비대면 공동창작 프로젝트를 통해 디지털 환경에서 무용의 새로운 접근 방식을 모색했다.",
+    "reviews": [
+      {
+        "workTitle": "메타버스로 소환된 힙한 현대무용",
+        "source": "메타버스 최초, 미디어아트-현대무용 공동창작",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=5263"
+      }
+    ],
+    "recordId": "38",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "메타버스로 소환된 힙한 현대무용",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "이혜인-io8lyvcu",
+    "name": "이혜인",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "44",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.366Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "kim-hyunwoo",
+    "name": "김현우",
+    "company": "곰시선",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "korean",
+    "instagram": "https://www.instagram.com/gomsisun/",
+    "website": "",
+    "profileImage": "/artists/kim-hyunwoo.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "42",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "한국무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "김형민-nxpuzus0",
+    "name": "김형민",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "46",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "김형수-ajdwan5u",
+    "name": "김형수",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "39",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "밝넝쿨-ng8ks8fa",
+    "name": "밝넝쿨",
+    "company": "오마이라이프무브먼트시어터",
+    "bio": "",
+    "works": [],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "45",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "송영선-eazdhbdy",
+    "name": "송영선",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "49",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "조인호-zzdzhmwt",
+    "name": "조인호",
+    "company": "우보만리",
+    "bio": "",
+    "works": [],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "https://www.instagram.com/ubomanli?igsh=c2RiY214bjRkbXdq",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "47",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "장혜림-xkxrnaps",
+    "name": "장혜림",
+    "company": "99댄스컴퍼니",
+    "bio": "장혜림은 99아트컴퍼니를 이끌며 한국적 정서와 노동, 역사를 동시대 감각으로 풀어내는 안무가다. 〈타오르는 삶〉 연작은 익명의 노동과 일상을 정교한 춤 구성으로 환기시켜 2023 춤비평가상 올해의 작품상을 수상했고, 〈피안의 여행자들〉과 〈회랑에서〉는 한국 춤의 근간과 총체성을 탐구하는 작업으로 평가받는다.",
+    "works": [
+      "심연",
+      "피안의 여행자들",
+      "타오르는 삶",
+      "마음으로 읽는 역사: 유관순편",
+      "스웨덴 커넥션Ⅱ",
+      "춘천아트페스티벌",
+      "침묵",
+      "회랑에서",
+      "총체성으로의 회귀"
+    ],
+    "field": "dance",
+    "genre": "korean",
+    "instagram": "https://www.instagram.com/99artcompany/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "장혜림은 99아트컴퍼니를 이끌며 한국적 정서와 노동, 역사를 동시대 감각으로 풀어내는 안무가다. 〈타오르는 삶〉 연작은 익명의 노동과 일상을 정교한 춤 구성으로 환기시켜 2023 춤비평가상 올해의 작품상을 수상했고, 〈피안의 여행자들〉과 〈회랑에서〉는 한국 춤의 근간과 총체성을 탐구하는 작업으로 평가받는다.",
+    "reviews": [
+      {
+        "workTitle": "회랑에서; 총체성으로의 회귀",
+        "source": "99아트컴퍼니 '회랑(回廊)에서; 총체성으로의 회귀'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10145"
+      },
+      {
+        "workTitle": "타오르는 삶",
+        "source": "2023 춤비평가상 '올해의 작품상'에 장혜림의 '제 ver.3 타오르는 삶'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=8862"
+      },
+      {
+        "workTitle": "침묵",
+        "source": "장혜림의 '침묵' - 삶을 지속하는 모든 이들을 위한 헌시",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=6845"
+      },
+      {
+        "workTitle": "침묵",
+        "source": "99아트컴퍼니 〈침묵〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=575&board_name=review&page=31"
+      },
+      {
+        "workTitle": "타오르는 삶",
+        "source": "몸짓과 소리를 제물로 바치니: 99아트컴퍼니 作 <祭, 타오르는 삶>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=5&b_idx=701"
+      },
+      {
+        "workTitle": "피안의 여행자들",
+        "source": "동질성의 회복을 노래하는 몽유(夢遊)의 무대: 99아트컴퍼니 〈피안의 여행자들〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=9&b_idx=639"
+      },
+      {
+        "workTitle": "피안의 여행자들",
+        "source": "이야기는 어디서 와서 어디로 가는가: 99아트컴퍼니 〈피안의 여행자들〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=9&b_idx=632"
+      },
+      {
+        "workTitle": "춘천아트페스티벌",
+        "source": "춘천아트페스티벌(CCAF) 개막",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=2071"
+      },
+      {
+        "workTitle": "타오르는 삶",
+        "source": "치열한 삶의 현장을 숭고하게 그려낸: 99아트컴퍼니 <제ver 3. 타오르는 삶>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=16&b_idx=532"
+      },
+      {
+        "workTitle": "스웨덴 커넥션Ⅱ",
+        "source": "한-스웨덴 현대무용 교류 <스웨덴 커넥션II> 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=887"
+      },
+      {
+        "workTitle": "마음으로 읽는 역사: 유관순편",
+        "source": "역사강의와 춤이 어우러지는 독특한 무대",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=247"
+      },
+      {
+        "workTitle": "타오르는 삶",
+        "source": "노동을 태워 도달한 삶 어딘가 - 99아트컴퍼니 <타오르는 삶>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=25&b_idx=374"
+      },
+      {
+        "workTitle": "타오르는 삶",
+        "source": "한국춤비평가협회 2023 춤비평가상 수상자 인터뷰",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=227&board_name=interview&page=5"
+      },
+      {
+        "workTitle": "침묵",
+        "source": "코로나 길찾기: 99 아트 컴퍼니 장혜림",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=199&board_name=interview&page=10"
+      }
+    ],
+    "recordId": "19",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "심연",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "피안의 여행자들",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "타오르는 삶",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "마음으로 읽는 역사: 유관순편",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "스웨덴 커넥션Ⅱ",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "춘천아트페스티벌",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "침묵",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "회랑에서",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "총체성으로의 회귀",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "한국무용",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "이가영-yvpt9iqn",
+    "name": "이가영",
+    "company": "",
+    "bio": "이가영은 일상의 소재와 공간을 활용해 신체와 감정의 관계를 풀어내는 안무가다. 〈안간힘〉은 버티며 살아가는 인간 존재의 힘겨움을, 〈빨래방〉은 세탁기가 돌아가는 일상적 공간에서 꽃는 꽃을 탐구하는 작업으로 소개된다.",
+    "works": [
+      "안간힘(The Struggle)",
+      "빨래방"
+    ],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "이가영은 일상의 소재와 공간을 활용해 신체와 감정의 관계를 풀어내는 안무가다. 〈안간힘〉은 버티며 살아가는 인간 존재의 힘겨움을, 〈빨래방〉은 세탁기가 돌아가는 일상적 공간에서 꽃는 꽃을 탐구하는 작업으로 소개된다.",
+    "reviews": [
+      {
+        "workTitle": "안간힘(The Struggle)",
+        "source": "[공연모니터] 이가영 안무 '안간힘(The Struggle)'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10394"
+      },
+      {
+        "workTitle": "빨래방",
+        "source": "세탁기가 돌아가는 동안 꽃는 꽃: 이가영 <빨래방>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=3&b_idx=719"
+      },
+      {
+        "workTitle": "안간힘(The Struggle)",
+        "source": "존재의 터서군을 힣는 신체: 이가영 <안간힘(The Struggle)>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=4&b_idx=710"
+      }
+    ],
+    "recordId": "52",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "안간힘(The Struggle)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "빨래방",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "dayeon-park-4qok13ss",
+    "name": "Dayeon Park",
+    "company": "",
+    "bio": "",
+    "works": [],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://instagram.com/dayeon",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "",
+    "reviews": [],
+    "recordId": "124",
+    "createdAt": "2026-07-09T17:25:52.366861+00:00",
+    "updatedAt": "2026-07-09T17:25:58.367Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "kind": "popok_registration_media",
+        "motion_video_url": null,
+        "profile_image_url": "https://qbqozpjasykiuzuajzqh.supabase.co/storage/v1/object/public/artist-media/submissions/1783613714730-dayeon-park/profile/1783613714885-3q8pilbi.png"
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "kim-jubin",
+    "name": "김주빈",
+    "company": "주빈컴퍼니",
+    "bio": "김주빈과 주빈컴퍼니는 한국적 정서와 제의적 상상력을 현대 무용 언어로 풀어내는 작업을 이어간다. 〈귀신날〉과 〈새다림〉 같은 작품에서는 죽음과 의식, 기억을 소재로 삼으며, 〈오늘 꾸는 꿈〉은 과거·현재·미래의 공존을 탐구한 작업으로 소개된다.",
+    "works": [
+      "귀신날",
+      "마주하기까지 - 순간",
+      "새다림",
+      "오늘 꾸는 꿈"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/kim_jubin/",
+    "website": "",
+    "profileImage": "/artists/kim-jubin.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "김주빈과 주빈컴퍼니는 한국적 정서와 제의적 상상력을 현대 무용 언어로 풀어내는 작업을 이어간다. 〈귀신날〉과 〈새다림〉 같은 작품에서는 죽음과 의식, 기억을 소재로 삼으며, 〈오늘 꾸는 꿈〉은 과거·현재·미래의 공존을 탐구한 작업으로 소개된다.",
+    "reviews": [
+      {
+        "workTitle": "귀신날",
+        "source": "주빈컴퍼니 〈귀신날〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=627&board_name=review&page=22"
+      },
+      {
+        "workTitle": "새다림",
+        "source": "김주빈 〈새다림〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=492&board_name=review&page=46"
+      },
+      {
+        "workTitle": "오늘 꾸는 꿈",
+        "source": "과거와 현재 미래의 현재적 대화 김주빈, 이정섭 <공존할 수 없는 시간의…>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=36&b_idx=177"
+      },
+      {
+        "workTitle": "마주하기까지 - 순간",
+        "source": "한국춤의 어딜라와 지금 - 김주빈 〈마주하기까지…–…〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=38&b_idx=151"
+      }
+    ],
+    "recordId": "41",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.368Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "귀신날",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "마주하기까지 - 순간",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "새다림",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "오늘 꾸는 꿈",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "wi-bora",
+    "name": "위보라",
+    "company": "알.에이 컴퍼니",
+    "bio": "위보라와 알.에이컴퍼니는 몸의 언어, 시선, 호흡, 오브제를 통해 보이는 것과 보이지 않는 것 사이의 감각을 탐구하는 안무 작업을 이어간다. 〈격(隔)〉과 〈숨〉 계열의 작업에서는 반복되는 움직임과 공간 구성, 돌·얼음·철제 구조물 같은 물질적 요소를 통해 관계, 생명, 간격의 감각을 무대 위에 축적한다. 리뷰들은 이들의 작업이 명확한 서사보다 신체의 현존감과 시청각적 경험을 통해 관객에게 사유와 여운을 남긴다고 평가한다.",
+    "works": [
+      "격",
+      "숨"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "/artists/wi-bora.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "위보라와 알.에이컴퍼니는 몸의 언어, 시선, 호흡, 오브제를 통해 보이는 것과 보이지 않는 것 사이의 감각을 탐구하는 안무 작업을 이어간다. 〈격(隔)〉과 〈숨〉 계열의 작업에서는 반복되는 움직임과 공간 구성, 돌·얼음·철제 구조물 같은 물질적 요소를 통해 관계, 생명, 간격의 감각을 무대 위에 축적한다. 리뷰들은 이들의 작업이 명확한 서사보다 신체의 현존감과 시청각적 경험을 통해 관객에게 사유와 여운을 남긴다고 평가한다.",
+    "reviews": [
+      {
+        "workTitle": "격",
+        "source": "알.에이(R.A)컴퍼니 〈격(隔)〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=626&board_name=review&page=22"
+      },
+      {
+        "workTitle": "숨",
+        "source": "간격 위에 새겨진 생명의 리듬: <격 隔_다른 사이의 그것, 숨>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=2&b_idx=737"
+      }
+    ],
+    "recordId": "29",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.368Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "격",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "숨",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "현대무용",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "류장현-l0qri20r",
+    "name": "류장현",
+    "company": "류장현과친구들",
+    "bio": "류장현과 친구들은 문학적 소재를 현대무용으로 번안하고, 인간의 욕망과 변화를 역동적인 춤으로 표현하는 단체다. 〈블랙〉은 변혁의 에너지와 욕망이 들끼는 춤판으로, 〈변신〉은 카프카의 소설을 무용으로 재해석한 작품으로 평가받는다.",
+    "works": [
+      "GRAVITY",
+      "변신",
+      "블랙",
+      "산양의 노래",
+      "예기치 않게 종료되었습니다",
+      "주름이 많은 소리"
+    ],
+    "field": "unknown",
+    "genre": "unknown",
+    "instagram": "https://www.instagram.com/ryuandfriends/",
+    "website": "",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "류장현과 친구들은 문학적 소재를 현대무용으로 번안하고, 인간의 욕망과 변화를 역동적인 춤으로 표현하는 단체다. 〈블랙〉은 변혁의 에너지와 욕망이 들끼는 춤판으로, 〈변신〉은 카프카의 소설을 무용으로 재해석한 작품으로 평가받는다.",
+    "reviews": [
+      {
+        "workTitle": "블랙",
+        "source": "[공연리뷰] 변혁의 에너지와 욕망이 들끼는 춤판, 류장현과 친구들 '블랙'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11027"
+      },
+      {
+        "workTitle": "GRAVITY",
+        "source": "흥미로운 주제와 해석, 그러나 꺔끔하지 못한 전개가 아쉬운 작품: 류장현과 친구들 〈GRAVITY〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=3&b_idx=723"
+      },
+      {
+        "workTitle": "변신",
+        "source": "카프카의 소설을 춤으로",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=618&board_name=review&page=24"
+      },
+      {
+        "workTitle": "블랙",
+        "source": "류장현과 친구들 〈블랙(BLACK)〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=585&board_name=review&page=30"
+      },
+      {
+        "workTitle": "산양의 노래",
+        "source": "류장현과 친구들 〈산양의 노래〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=558&board_name=review&page=34"
+      },
+      {
+        "workTitle": "예기치 않게 종료되었습니다",
+        "source": "류장현과 친구들 〈예기치 않게 종료되었습니다〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=549&board_name=review&page=36"
+      },
+      {
+        "workTitle": "주름이 많은 소리",
+        "source": "류장현과 친구들 〈주름이 많은 소리〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=413&board_name=review&page=62"
+      }
+    ],
+    "recordId": "43",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.368Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "GRAVITY",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "변신",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "블랙",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "산양의 노래",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "예기치 않게 종료되었습니다",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "주름이 많은 소리",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "kim-min",
+    "name": "김민",
+    "company": "TOB GROUP",
+    "bio": "김민의 TOB GROUP은 인간 내면의 죄의식과 자본주의적 소비사회의 병폐를 경고하면서도 날카로운 몸짓으로 풀어낸다. 〈Are You Guilty?〉는 죄의식과 윤리적 만남을 다루고, 〈BARCODE〉는 과잉 노동과 소비 욕구를 풍자적으로 그려내며 접은 감각의 사회 비평으로 평가받는다.",
+    "works": [
+      "Are You Guilty?",
+      "light in the basement",
+      "BARCODE"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/grouptob/",
+    "website": "",
+    "profileImage": "/artists/kim-min.jpeg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "김민의 TOB GROUP은 인간 내면의 죄의식과 자본주의적 소비사회의 병폐를 경고하면서도 날카로운 몸짓으로 풀어낸다. 〈Are You Guilty?〉는 죄의식과 윤리적 만남을 다루고, 〈BARCODE〉는 과잉 노동과 소비 욕구를 풍자적으로 그려내며 접은 감각의 사회 비평으로 평가받는다.",
+    "reviews": [
+      {
+        "workTitle": "Are You Guilty?",
+        "source": "[공연모니터] 인간이라는 죄, TOB그룹 'Are You Guilty?'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10090"
+      },
+      {
+        "workTitle": "BARCODE",
+        "source": "TOP GROUP 〈BARCODE〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=621&board_name=review&page=23"
+      },
+      {
+        "workTitle": "Are You Guilty?",
+        "source": "[공연리뷰] TOB GROUP 'Are You Guilty?'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=9479"
+      }
+    ],
+    "recordId": "6",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.368Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "Are You Guilty?",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "light in the basement",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "BARCODE",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "kim-modeun",
+    "name": "김모든",
+    "company": "모든컴퍼니",
+    "bio": "김모든과 모든컴퍼니는 스포츠와 신체적 한계를 소재로 경쟁사회 속 인간을 탐구하는 작업을 이어간다. 〈피스트: 여덟 개의 순간〉은 펜싱을 소재로 내면과 외부의 경쟁을 영상 기술과 결합해 무대화했고, 〈On the Rock〉은 클라이밍을 통해 인간관계와 초월 의지를 표현한다.",
+    "works": [
+      "씨름",
+      "창조력",
+      "NEXT MOVE",
+      "On the Rock",
+      "모던한 모든 모험",
+      "자메뷰(JAMAIS VU)",
+      "피스트: 여덟 개의 순간"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/modeun_company/",
+    "website": "",
+    "profileImage": "/artists/kim-modeun.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "김모든과 모든컴퍼니는 스포츠와 신체적 한계를 소재로 경쟁사회 속 인간을 탐구하는 작업을 이어간다. 〈피스트: 여덟 개의 순간〉은 펜싱을 소재로 내면과 외부의 경쟁을 영상 기술과 결합해 무대화했고, 〈On the Rock〉은 클라이밍을 통해 인간관계와 초월 의지를 표현한다.",
+    "reviews": [
+      {
+        "workTitle": "피스트: 여덟 개의 순간",
+        "source": "모든컴퍼니의 '피스트: 여덟 개의 순간' 6개 도시 순회공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=8333"
+      },
+      {
+        "workTitle": "On the Rock",
+        "source": "[공연모니터] \"클라이밍: 시지프스가 가진 유일한 저항의 언어\"",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=7408"
+      },
+      {
+        "workTitle": "On the Rock",
+        "source": "모든컴퍼니 〈On the Rock〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=580&board_name=review&page=31"
+      },
+      {
+        "workTitle": "자메뷰(JAMAIS VU)",
+        "source": "지역예술의 교두보 - ‘춘천아트페스티벌’",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=35&b_idx=186"
+      },
+      {
+        "workTitle": "모던한 모든 모험",
+        "source": "모든 컴퍼니의 ‘모던한 모든 모험’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=12477"
+      }
+    ],
+    "recordId": "3",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.369Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "씨름",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "창조력",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "NEXT MOVE",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "On the Rock",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "모던한 모든 모험",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "자메뷰(JAMAIS VU)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "피스트: 여덟 개의 순간",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "현대무용",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "lee-kyungeun",
+    "name": "이경은",
+    "company": "리케이댄스",
+    "bio": "이경은과 리케이댄스는 현대무용과 스트릿댄스를 넘나들며 신체의 다양성과 공존을 탐구하는 작업으로 잘 알려져 있다. 〈올더월즈〉는 다양한 무용수가 각자의 춤을 통해 새로운 '나'를 발견하는 과정을, 〈복(BOK)〉는 처용 설화를 현대적으로 재해석하며 팜데믹 시대 행복의 가능성을 질문한다.",
+    "works": [
+      "샤마",
+      "TWO",
+      "복(BOK)",
+      "올더월즈(All the World's)",
+      "이것은 꽀이 아니다: 산행",
+      "판"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "https://www.instagram.com/leekdancecom/",
+    "website": "",
+    "profileImage": "/artists/lee-kyungeun.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "이경은과 리케이댄스는 현대무용과 스트릿댄스를 넘나들며 신체의 다양성과 공존을 탐구하는 작업으로 잘 알려져 있다. 〈올더월즈〉는 다양한 무용수가 각자의 춤을 통해 새로운 '나'를 발견하는 과정을, 〈복(BOK)〉는 처용 설화를 현대적으로 재해석하며 팜데믹 시대 행복의 가능성을 질문한다.",
+    "reviews": [
+      {
+        "workTitle": "올더월즈(All the World's)",
+        "source": "현대무용과 스트릿댄스의 도발적인 만남, 리케이댄스 '올더월즈 ALL THE WORLD'S'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=9211"
+      },
+      {
+        "workTitle": "복(BOK)",
+        "source": "리케이댄스 창단 20년 공연 BOK<복>-사람과 사물이 공존하는 춤세상",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=6225"
+      },
+      {
+        "workTitle": "복(BOK)",
+        "source": "리케이댄스 〈bOK〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=544&board_name=review&page=37"
+      },
+      {
+        "workTitle": "올더월즈(All the World's)",
+        "source": "소우주들이 펼치는 춤의 만화경: 리케이댄스 〈올더월즈〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=6&b_idx=680"
+      },
+      {
+        "workTitle": "올더월즈(All the World's)",
+        "source": "AI 시대 안무가가 살아남는 법: 리케이댄스 〈All the World’s〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=6&b_idx=677"
+      },
+      {
+        "workTitle": "올더월즈(All the World's)",
+        "source": "경계를 넘어선 춤으로 자유를 만끝하다: 2024 리케이댄스 신작 〈올더월즈 ALL THE WORLD’S〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=14&b_idx=564"
+      },
+      {
+        "workTitle": "판",
+        "source": "현실, 상상 그 경계의 일상적 놀이판 - 리케이댄스 〈판〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=29&b_idx=262"
+      },
+      {
+        "workTitle": "TWO",
+        "source": "리케이댄스 〈TWO〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=349&board_name=review&page=73"
+      },
+      {
+        "workTitle": "이것은 꽀이 아니다: 산행",
+        "source": "이경은 리케이댄스 〈이것은 꽀이 아니다: 산행〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=76&board_name=review&page=127"
+      },
+      {
+        "workTitle": "샤마",
+        "source": "리케이댄스 〈샤마〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=745&board_name=review&page=3"
+      }
+    ],
+    "recordId": "22",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.370Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "샤마",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "TWO",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "복(BOK)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "올더월즈(All the World's)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "이것은 꽀이 아니다: 산행",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "판",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "kim-boram",
+    "name": "김보람",
+    "company": "엠비규어스댄스컴퍼니",
+    "bio": "김보람과 앵비규어스댄스컴퍼니는 전통과 대중문화, 교육적 요소를 넘나드는 실험적 작업으로 잘 알려져 있다. 〈무교육적 대스〉는 안무 과정을 직접 보여주는 렉처퍼포먼스 형식을 취하고, 이날치와 협업한 무대는 전통과 현대를 결합해 대중문화의 중심에 서기도 했다.",
+    "works": [
+      "바디콘서트",
+      "99.9",
+      "ASAC 몸짓콘서트",
+      "무교육적 대스",
+      "언어학(Linguistics)",
+      "틈",
+      "홈라당"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "",
+    "profileImage": "/artists/kim-boram.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "김보람과 앵비규어스댄스컴퍼니는 전통과 대중문화, 교육적 요소를 넘나드는 실험적 작업으로 잘 알려져 있다. 〈무교육적 대스〉는 안무 과정을 직접 보여주는 렉처퍼포먼스 형식을 취하고, 이날치와 협업한 무대는 전통과 현대를 결합해 대중문화의 중심에 서기도 했다.",
+    "reviews": [
+      {
+        "workTitle": "무교육적 대스",
+        "source": "앵비규어스댄스컴퍼니 〈무교육적 대스〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=548&board_name=review&page=37"
+      },
+      {
+        "workTitle": "홈라당",
+        "source": "앵비규어스댄스컴퍼니 〈홈라당!〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=528&board_name=review&page=41"
+      },
+      {
+        "workTitle": "바디콘서트",
+        "source": "더 끞끞하게 더 묵질하게, All That Body Concert: 앵비규어스댄스컴퍼니 〈바디콘서트〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=9&b_idx=638"
+      },
+      {
+        "workTitle": "바디콘서트",
+        "source": "몸과 마음을 움직이는 역동적 시공간 - 앵비규어스 댄스 컴퍼니의 〈바디 콘서트〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=38&b_idx=155"
+      },
+      {
+        "workTitle": "ASAC 몸짓콘서트",
+        "source": "경계 허물기에 대한 실례(實例) - ‘ASAC 몸짓콘서트’",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=44&b_idx=28"
+      },
+      {
+        "workTitle": "틈",
+        "source": "앵비규어스 〈틈〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=371&board_name=review&page=69"
+      },
+      {
+        "workTitle": "언어학(Linguistics)",
+        "source": "앵비규어스댄스컴퍼니 〈언어학 Linguistics〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=275&board_name=review&page=88"
+      },
+      {
+        "workTitle": "99.9",
+        "source": "앵비규어스 〈99.9〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=659&board_name=review&page=15"
+      }
+    ],
+    "recordId": "30",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.372Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "엠비규어스댄스컴퍼니 공연",
+        "year": "2026",
+        "description": "엠비규어스댄스컴퍼니 대표 비디오",
+        "role": "아티스트",
+        "image_url": "/artists/kim-boram.jpg",
+        "video_url": "https://www.youtube.com/watch?v=3P1CnWI62Ik",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "바디콘서트",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "99.9",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "ASAC 몸짓콘서트",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "무교육적 대스",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "언어학(Linguistics)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "틈",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "홈라당",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "company",
+    "tags": [
+      "무용단",
+      "현대무용",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "이해니-eerbmblv",
+    "name": "이해니",
+    "company": "해니쉬발레(haenish_ballet)",
+    "bio": "이해니는 발레블랑과 해니쉬발레를 중심으로 신체와 인식의 경계를 탐구하는 작업을 이어간다. 〈Pan_Opticon: [Unseen_Code]〉에서는 감시 구조 속 몸의 존재 방식을 관객 참여로 풀어내며 자유와 통제의 경계를 체험하게 하고, 〈되돌이표: 두 개의 숨〉에서는 숨을 모티브로 생명과 죽음의 순환적 구조를 다루다.",
+    "works": [
+      "egg",
+      "꼬-끼오",
+      "Pan_Opticon - [Unseen_Code]",
+      "Pan_Opticon",
+      "RE",
+      "되돌이표"
+    ],
+    "field": "dance",
+    "genre": "ballet",
+    "instagram": "https://www.instagram.com/haenish_ballet/",
+    "website": "",
+    "profileImage": "/artists/hanish_ballet.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "이해니는 발레블랑과 해니쉬발레를 중심으로 신체와 인식의 경계를 탐구하는 작업을 이어간다. 〈Pan_Opticon: [Unseen_Code]〉에서는 감시 구조 속 몸의 존재 방식을 관객 참여로 풀어내며 자유와 통제의 경계를 체험하게 하고, 〈되돌이표: 두 개의 숨〉에서는 숨을 모티브로 생명과 죽음의 순환적 구조를 다루다.",
+    "reviews": [
+      {
+        "workTitle": "RE",
+        "source": "발레블랑의 역사를 기억하다: 발레블랑 45주년 기념공연 〈RE: 〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=9&b_idx=643"
+      },
+      {
+        "workTitle": "Pan_Opticon",
+        "source": "[공연리뷰] 이해니 안무가의 'Pan_Opticon: [Unseen_Code]'",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11787"
+      },
+      {
+        "workTitle": "되돌이표",
+        "source": "해니쉬발레 〈되돌이표: 두 개의 숨〉, 발레블랑 〈시향〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=644&board_name=review&page=18"
+      },
+      {
+        "workTitle": "Pan_Opticon",
+        "source": "[인터뷰] 'Pan_Opticon: [Unseen_Code]'의 이해니 안무가",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=11618"
+      }
+    ],
+    "recordId": "8",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.372Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "Pan_Opticon",
+        "year": "2025",
+        "description": "Pan_Opticon",
+        "role": "아티스트",
+        "image_url": "/images/pan_opticon.jpg",
+        "video_url": "https://www.youtube.com/watch?v=ygKLDGESI9s",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "egg",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "꼬-끼오",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "Pan_Opticon - [Unseen_Code]",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "RE",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "되돌이표",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "발레",
+      "SNS",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "bae-jinho",
+    "name": "배진호",
+    "company": "SAL(subvertedanatomicallandscape)",
+    "bio": "배진호는 성적 본능과 인간관계의 이면을 직설적이고 그로테스크한 방식으로 무대화하는 안무가다. 〈212.21222〉와 〈갈라〉는 성적 표현을 통해 전통적 윤리에 도전하며, 〈내장과 가죽〉은 제사를 소재로 현대 사회의 폭력성과 인간 본성을 파고든다.",
+    "works": [
+      "x",
+      "죽여버리기",
+      "gamma",
+      "2122.21222",
+      "X",
+      "갈라",
+      "내장과 가죽"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "https://thesal.art/index",
+    "profileImage": "/artists/bae-jinho.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "published",
+    "verified": true,
+    "aiSummary": "배진호는 성적 본능과 인간관계의 이면을 직설적이고 그로테스크한 방식으로 무대화하는 안무가다. 〈212.21222〉와 〈갈라〉는 성적 표현을 통해 전통적 윤리에 도전하며, 〈내장과 가죽〉은 제사를 소재로 현대 사회의 폭력성과 인간 본성을 파고든다.",
+    "reviews": [
+      {
+        "workTitle": "2122.21222",
+        "source": "[공연리뷰] 저돌적으로 성의 의문을 주저없이 제기한 문제작",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=9760"
+      },
+      {
+        "workTitle": "갈라",
+        "source": "배진호 〈갈라(GALA)〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=608&board_name=review&page=25"
+      },
+      {
+        "workTitle": "내장과 가죽",
+        "source": "[공연모니터] 가죽 위에 피어난 페르소나와 내장 속 인간성에 대한 그로테스크한 시선",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=7768"
+      },
+      {
+        "workTitle": "죽여버리기",
+        "source": "배진호 〈죽여버리기〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=658&board_name=review&page=15"
+      },
+      {
+        "workTitle": "X",
+        "source": "전복된 해부학적 풍경(SAL) 〈X〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=743&board_name=review&page=3"
+      }
+    ],
+    "recordId": "15",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.373Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "SAL 공연",
+        "year": "2026",
+        "description": "SAL 대표 공연 비디오",
+        "role": "아티스트",
+        "image_url": "/artists/bae-jinho.jpg",
+        "video_url": "https://www.youtube.com/watch?v=p4SMu_UXO2g",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "x",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "죽여버리기",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "gamma",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "2122.21222",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "X",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "갈라",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "내장과 가죽",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "웹사이트",
+      "다수작품",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "정훈목-xufn8qpl",
+    "name": "정훈목",
+    "company": "주목댄스시어터",
+    "bio": "정훈목은 벨기에 피핑탐무용단 출신으로, 현대 문명 속 고립과 존재의 고통을 영화·연극적 요소와 결합해 표현하는 안무가다. 〈아난(ANON)〉은 다양한 인간 군상을 통해 세대 간 갈등과 고립을, 〈야라스(Yaras)〉는 포스트휴먼적 신체와 통제 불능의 상태를 탐구한다.",
+    "works": [
+      "아난(ANON)",
+      "야라스(Yaras)",
+      "에즈라스"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "https://www.jumok.art/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGn9Gfwltq4Yps09k10LVGiUoaVtlx2qFbswRY_mDFJQ3tnAm1FihPKuWAtD3g_aem_zMyn3yOOeLhXiM3KRwORfw",
+    "profileImage": "",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "정훈목은 벨기에 피핑탐무용단 출신으로, 현대 문명 속 고립과 존재의 고통을 영화·연극적 요소와 결합해 표현하는 안무가다. 〈아난(ANON)〉은 다양한 인간 군상을 통해 세대 간 갈등과 고립을, 〈야라스(Yaras)〉는 포스트휴먼적 신체와 통제 불능의 상태를 탐구한다.",
+    "reviews": [
+      {
+        "workTitle": "아난(ANON)",
+        "source": "[공연리뷰] 노회한 문명 속 불구적 삶 –정훈목 ‘아난(ANON)’",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=6431"
+      },
+      {
+        "workTitle": "아난(ANON)",
+        "source": "피핑탐의 크리연이터/대서 정훈목, 국내 복귀작 ‘ANON(아난)’ 공연",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=6249"
+      },
+      {
+        "workTitle": "야라스(Yaras)",
+        "source": "미래의 인류상에 대한 개인적 상상: 정훈목 <야라스(Yaras)>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=3&b_idx=727"
+      },
+      {
+        "workTitle": "야라스(Yaras)",
+        "source": "통제 불능의 신체들이 그려낸 포스트휴먼: 정훈목 〈Yaras〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=15&b_idx=545"
+      },
+      {
+        "workTitle": "에즈라스",
+        "source": "정훈목 〈에즈라스〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=673&board_name=review&page=12"
+      },
+      {
+        "workTitle": "아난(ANON)",
+        "source": "벨기에 피핑탐무용단 정훈목",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=220&board_name=interview&page=7"
+      }
+    ],
+    "recordId": "23",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.373Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "아난(ANON)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "야라스(Yaras)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "에즈라스",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "individual",
+    "tags": [
+      "안무가",
+      "현대무용",
+      "웹사이트",
+      "검증됨"
+    ]
+  },
+  {
+    "id": "huh-sungim",
+    "name": "허성임",
+    "company": "허프로젝트",
+    "bio": "허성임과 허프로젝트는 죽음, 시간, 신체를 대담하게 탐구하며 국내외에서 활발히 활동하는 안무가다. 〈내일은지금이고오늘은어제이다〉와 〈사라지는 모든 것은 극적이다〉는 한영수교 기념 코리안댄스페스티벌 등을 통해 유럽에 소개되었고, 〈토끼는 어디로 갔나요?〉는 낫설고 어두운 모험을 그린 작업으로 평가받는다.",
+    "works": [
+      "1도씨",
+      "내일은지금이고오늘은어제이다",
+      "넷크러셔",
+      "사라지는 모든 것은 극적이다",
+      "시간과 시간 사이",
+      "토끼는 어디로 갔나요?(Where is the Rabbit?)"
+    ],
+    "field": "dance",
+    "genre": "contemporary",
+    "instagram": "",
+    "website": "https://www.sungimher.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQPOTM2NjE5NzQzMzkyNDU5AAGn8dmrlYNLfYgSl27x8VesH48pU8fMfk3QoyrAM-1fjgApAkO61-egXD0K06Q_aem_uQ_hVVm4GOwAtLASV1P4YQ",
+    "profileImage": "/artists/huh-sungim.jpg",
+    "residency": [],
+    "festival": [],
+    "status": "draft",
+    "verified": true,
+    "aiSummary": "허성임과 허프로젝트는 죽음, 시간, 신체를 대담하게 탐구하며 국내외에서 활발히 활동하는 안무가다. 〈내일은지금이고오늘은어제이다〉와 〈사라지는 모든 것은 극적이다〉는 한영수교 기념 코리안댄스페스티벌 등을 통해 유럽에 소개되었고, 〈토끼는 어디로 갔나요?〉는 낫설고 어두운 모험을 그린 작업으로 평가받는다.",
+    "reviews": [
+      {
+        "workTitle": "내일은지금이고오늘은어제이다",
+        "source": "2025 영국 더플레이스 A Festival of Korean Dance 참가작 확정",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=10455"
+      },
+      {
+        "workTitle": "내일은지금이고오늘은어제이다",
+        "source": "제7회 코리안댄스페스티벌, 영국 5개 도시에서 개최",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=9256"
+      },
+      {
+        "workTitle": "사라지는 모든 것은 극적이다",
+        "source": "런던 코리안 댄스 페스티벌 개최",
+        "url": "http://www.thepreview.co.kr/news/articleView.html?idxno=7567"
+      },
+      {
+        "workTitle": "토끼는 어디로 갔나요?(Where is the Rabbit?)",
+        "source": "토끼를 따라가는 낫설고 어두운 모험: 허프로젝트 〈토끼는 어디로 갔나요?〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=15&b_idx=549"
+      },
+      {
+        "workTitle": "내일은지금이고오늘은어제이다",
+        "source": "사라진 몸 그리고 남겨진 입: 허프로젝트 <내일은지금이고오늘은어제이다>",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=16&b_idx=524"
+      },
+      {
+        "workTitle": "넷크러셔",
+        "source": "여성의 몸에 대한 고정관념의 해체 - 허성임의 〈넷크러셔(NUTCRUSHER)〉",
+        "url": "https://dancepostkorea.com/new/board/review/pfm_view.php?search_part=b_title&search_pfm=&page=31&b_idx=237"
+      },
+      {
+        "workTitle": "시간과 시간 사이",
+        "source": "코로나 길찾기: 허성임",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=200&board_name=interview&page=10"
+      },
+      {
+        "workTitle": "토끼는 어디로 갔나요?(Where is the Rabbit?)",
+        "source": "허 프로젝트 〈토끼는 어디로 갔나요?〉",
+        "url": "http://koreadance.kr/board/board_view.php?view_id=642&board_name=review&page=18"
+      }
+    ],
+    "recordId": "10",
+    "createdAt": "2026-07-05T05:19:52.150303+00:00",
+    "updatedAt": "2026-07-09T17:25:58.373Z",
+    "name_en": "",
+    "city_or_region": "",
+    "bio_short": "",
+    "portfolio_works": [
+      {
+        "title": "1도씨",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "내일은지금이고오늘은어제이다",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "넷크러셔",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "사라지는 모든 것은 극적이다",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "시간과 시간 사이",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      },
+      {
+        "title": "토끼는 어디로 갔나요?(Where is the Rabbit?)",
+        "year": "연도미상",
+        "description": "",
+        "role": "아티스트",
+        "image_url": "",
+        "video_url": "",
+        "preview_start": 0,
+        "preview_end": 15
+      }
+    ],
+    "type": "project_group",
+    "tags": [
+      "프로젝트팀",
+      "현대무용",
+      "웹사이트",
+      "다수작품",
+      "검증됨"
+    ]
+  }
+]

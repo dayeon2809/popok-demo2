@@ -12,8 +12,8 @@ import type { ArtistFilter, ArtistField, ArtistType, Artist } from "@/types";
 const CATEGORIES = [
   { key: "all", label: "ALL" },
   { key: "dance", label: "DANCE" },
-  { key: "music", label: "MUSIC (준비중)" },
-  { key: "visual", label: "VISUAL (준비중)" },
+  { key: "music", label: "MUSIC" },
+  { key: "visual", label: "VISUAL" },
 ];
 
 const DANCE_SUB_FIELDS = [
@@ -86,7 +86,7 @@ export default function ArtistsClient() {
   const pausedRowsRef = useRef<Record<string, boolean>>({ dance: false, music: false, visual: false });
   const resumeTimersRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>({ dance: null, music: null, visual: null });
 
-  const pauseRowTemporarily = (row: "dance" | "music" | "visual", delay = 2600) => {
+  const pauseRowTemporarily = (row: "dance" | "music" | "visual", delay = 8000) => {
     pausedRowsRef.current[row] = true;
     const t = resumeTimersRef.current[row];
     if (t) clearTimeout(t);
@@ -122,23 +122,24 @@ export default function ArtistsClient() {
 
   const { artists, loading, error } = useArtists(filter);
 
-  // RAF auto-scroll — only active in ALL mode
+  // RAF auto-scroll — active for visible rows
   useEffect(() => {
-    if (selectedField !== "all") return;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
-    const rows = [
+
+    const activeRows = [
       { key: "dance" as const, ref: danceSliderRef, speed: 28 },
       { key: "music" as const, ref: musicSliderRef, speed: 22 },
       { key: "visual" as const, ref: visualSliderRef, speed: 25 },
-    ];
+    ].filter((row) => selectedField === "all" || selectedField === row.key);
+
     let lastTs: number | null = null;
     let rafId: number;
     const step = (ts: number) => {
       if (lastTs === null) lastTs = ts;
       const dt = Math.min(ts - lastTs, 50) / 1000;
       lastTs = ts;
-      rows.forEach(({ key, ref, speed }) => {
+      activeRows.forEach(({ key, ref, speed }) => {
         const node = ref.current;
         if (!node || pausedRowsRef.current[key] || node.scrollWidth <= node.clientWidth) return;
         const next = node.scrollLeft + speed * dt;
@@ -206,10 +207,148 @@ export default function ArtistsClient() {
   const visualArtists = allFetched.filter((a) => a.field === "visual");
 
   const totalResultsCount = selectedField === "all"
-    ? allFetched.length
+    ? (danceArtists.length + musicArtists.length + visualArtists.length)
     : selectedField === "dance"
       ? danceArtists.length
-      : 1; // Force 1 so that the under construction placeholder renders instead of EmptyState
+      : selectedField === "music"
+        ? musicArtists.length
+        : visualArtists.length;
+
+  const renderSliderRow = (
+    title: string,
+    key: "dance" | "music" | "visual",
+    artistsList: Artist[],
+    sliderRef: React.RefObject<HTMLDivElement | null>
+  ) => {
+    if (artistsList.length === 0) return null;
+
+    return (
+      <div key={key} style={{ marginBottom: "56px" }}>
+        {/* Row Header */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          marginBottom: "20px",
+        }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+            <h3 style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--navy)", textTransform: "uppercase" }}>
+              {title}
+            </h3>
+            <span style={{ fontSize: "0.85rem", color: "var(--ink-muted)", fontWeight: 600 }}>
+              ({artistsList.length})
+            </span>
+          </div>
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => scrollSlider(key, "left")}
+              aria-label={`scroll left ${title}`}
+              className="btn-outline"
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.95rem",
+                cursor: "pointer",
+              }}
+            >
+              ←
+            </button>
+            <button
+              onClick={() => scrollSlider(key, "right")}
+              aria-label={`scroll right ${title}`}
+              className="btn-outline"
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.95rem",
+                cursor: "pointer",
+              }}
+            >
+              →
+            </button>
+          </div>
+        </div>
+
+        {/* Horizontal Slider */}
+        <div
+          ref={sliderRef}
+          onMouseEnter={() => setRowPaused(key, true)}
+          onMouseLeave={() => setRowPaused(key, false)}
+          onPointerDown={() => pauseRowTemporarily(key)}
+          onTouchStart={() => pauseRowTemporarily(key)}
+          onWheel={() => pauseRowTemporarily(key)}
+          className="no-scrollbar"
+          style={{
+            display: "flex",
+            gap: "24px",
+            overflowX: "auto",
+            paddingBottom: "24px",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {artistsList.map((artist) => (
+            <ShowcaseCard
+              key={artist.id}
+              artist={artist}
+              slider={true}
+              cleanInstagramHandle={cleanInstagramHandle}
+              getGenreLabel={getGenreLabel}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderGallery = (title: string, artistsList: Artist[]) => {
+    if (artistsList.length === 0) return null;
+
+    return (
+      <div style={{ marginBottom: "56px" }}>
+        {/* Gallery Header */}
+        <div style={{
+          display: "flex",
+          alignItems: "baseline",
+          gap: "8px",
+          marginBottom: "28px",
+          borderBottom: "1.5px solid var(--border)",
+          paddingBottom: "12px"
+        }}>
+          <h3 style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--navy)", textTransform: "uppercase" }}>
+            {title}
+          </h3>
+          <span style={{ fontSize: "0.85rem", color: "var(--ink-muted)", fontWeight: 600 }}>
+            ({artistsList.length})
+          </span>
+        </div>
+
+        {/* Gallery Grid */}
+        <div className="gallery-grid">
+          {artistsList.map((artist) => (
+            <ShowcaseCard
+              key={artist.id}
+              artist={artist}
+              slider={false}
+              cleanInstagramHandle={cleanInstagramHandle}
+              getGenreLabel={getGenreLabel}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 32px 80px" }}>
@@ -233,6 +372,42 @@ export default function ArtistsClient() {
           color: var(--navy) !important;
           border-color: transparent !important;
         }
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          gap: 28px 24px;
+        }
+        .gallery-card-wrapper {
+          aspect-ratio: 0.68;
+          min-height: 320px;
+        }
+        @media (max-width: 768px) {
+          .gallery-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 16px 12px !important;
+          }
+          .gallery-card-wrapper {
+            min-height: 200px !important;
+          }
+          .gallery-card-wrapper .showcase-card-meta {
+            padding: 12px 10px !important;
+            gap: 6px !important;
+          }
+          .gallery-card-wrapper .showcase-card h4 {
+            font-size: 0.95rem !important;
+          }
+          .gallery-card-wrapper .showcase-card p {
+            font-size: 0.6rem !important;
+          }
+          .gallery-card-wrapper .showcase-card .arrow-btn {
+            width: 22px !important;
+            height: 22px !important;
+            font-size: 0.65rem !important;
+          }
+          .gallery-card-wrapper .showcase-card span.mono {
+            font-size: 0.58rem !important;
+          }
+        }
       `}} />
 
       {/* Page Headline */}
@@ -243,269 +418,152 @@ export default function ArtistsClient() {
         <h1 className="display" style={{ fontSize: "clamp(2rem, 5vw, 3rem)", color: "var(--navy)", fontWeight: 900, letterSpacing: "-0.03em" }}>
           Creative Showcase.
         </h1>
-        <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", marginTop: "8px" }}>
-          다양한 장르의 크리에이터가 선보이는 디지털 명함을 탐색하고 네트워크를 연결해 보세요.
-        </p>
       </div>
 
-      {/* Filters Panel */}
-      <div style={{
-        background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "16px",
-        padding: "24px", marginBottom: "56px", display: "flex", flexDirection: "column", gap: "20px",
-        boxShadow: "0 4px 20px rgba(23, 20, 17, 0.02)"
-      }}>
-        {/* Search */}
-        <div>
-          <label style={{ display: "block", fontSize: "0.7rem", fontWeight: 800, color: "var(--navy)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-            Search Creator Name
-          </label>
+      {/* ── FILTER & SEARCH BAR ── */}
+      <div style={{ marginBottom: "32px", display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+        {/* Search Input */}
+        <div style={{ position: "relative", flexGrow: 1, minWidth: "280px" }}>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="아티스트명, 단체명, 장르 또는 키워드 검색..."
+            placeholder="이름, 장르, 대표작 등으로 검색..."
             style={{
-              width: "100%", padding: "12px 16px", border: "1px solid var(--border)",
-              borderRadius: "10px", outline: "none", fontSize: "0.95rem", color: "var(--navy)", background: "#FFFFFF"
+              width: "100%",
+              padding: "12px 16px",
+              fontSize: "0.95rem",
+              borderRadius: "12px",
+              border: "1.5px solid var(--border)",
+              background: "#FFFFFF",
             }}
-            onFocus={(e) => e.target.style.borderColor = "var(--navy)"}
-            onBlur={(e) => e.target.style.borderColor = "var(--border)"}
           />
         </div>
-
-        {/* Category Selector Tabs */}
-        <div>
-          <label style={{ display: "block", fontSize: "0.7rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-            Category
-          </label>
-          <div style={{ overflowX: "auto" }} className="no-scrollbar">
-            <div style={{ display: "flex", gap: "8px", whiteSpace: "nowrap" }}>
-              {CATEGORIES.map((c) => {
-                const active = selectedField === c.key;
-                return (
-                  <button
-                    key={c.key}
-                    onClick={() => {
-                      setSelectedField(c.key);
-                      setSelectedSubField("all");
-                      setSelectedConsonant("all");
-                    }}
-                    style={{
-                      padding: "8px 18px", borderRadius: "20px", fontSize: "0.78rem", fontWeight: 800,
-                      border: active ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                      cursor: "pointer",
-                      background: active ? "var(--navy)" : "transparent",
-                      color: active ? "#FFFFFF" : "var(--navy)",
-                      transition: "all 0.18s ease"
-                    }}
-                  >
-                    {c.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        
+        {/* Category Pill Buttons */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => {
+                setSelectedField(cat.key);
+                setSelectedSubField("all");
+                setSelectedConsonant("all");
+              }}
+              style={{
+                padding: "10px 18px",
+                borderRadius: "20px",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                border: selectedField === cat.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                backgroundColor: selectedField === cat.key ? "var(--navy)" : "#FFFFFF",
+                color: selectedField === cat.key ? "#FFFFFF" : "var(--navy)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
-
-        {/* Conditionally Rendered Dance Sub-Filters */}
-        {selectedField === "dance" && (
-          <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "12px" }}>
-            <label style={{ display: "block", fontSize: "0.62rem", fontWeight: 800, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-              Dance Genre
-            </label>
-            <div style={{ overflowX: "auto" }} className="no-scrollbar">
-              <div style={{ display: "flex", gap: "8px", whiteSpace: "nowrap" }}>
-                {DANCE_SUB_FIELDS.map((sub) => {
-                  const active = selectedSubField === sub.key;
-                  return (
-                    <button
-                      key={sub.key}
-                      onClick={() => {
-                        setSelectedSubField(sub.key);
-                        setSelectedConsonant("all");
-                      }}
-                      style={{
-                        padding: "6px 14px", borderRadius: "20px", fontSize: "0.72rem", fontWeight: 700,
-                        border: active ? "1.5px solid var(--ink-muted)" : "1px solid var(--border)",
-                        cursor: "pointer",
-                        background: active ? "var(--ink-muted)" : "transparent",
-                        color: active ? "#FFFFFF" : "var(--ink-muted)",
-                        transition: "all 0.18s ease"
-                      }}
-                    >
-                      {sub.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Conditionally Rendered Name Consonant (초성) Filter */}
-        {selectedField === "dance" && (
-          <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "12px" }}>
-            <label style={{ display: "block", fontSize: "0.62rem", fontWeight: 800, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-              이름 초성 필터
-            </label>
-            <div style={{ overflowX: "auto" }} className="no-scrollbar">
-              <div style={{ display: "flex", gap: "6px", whiteSpace: "nowrap" }}>
-                {CHOSUNGS.map((cho) => {
-                  const active = selectedConsonant === cho;
-                  return (
-                    <button
-                      key={cho}
-                      onClick={() => setSelectedConsonant(cho)}
-                      style={{
-                        padding: "5px 11px", borderRadius: "12px", fontSize: "0.72rem", fontWeight: active ? 800 : 500,
-                        border: active ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                        cursor: "pointer",
-                        background: active ? "var(--navy)" : "transparent",
-                        color: active ? "#FFFFFF" : "var(--navy)",
-                        transition: "all 0.18s ease",
-                        minWidth: cho === "all" || cho === "A-Z" ? "42px" : "28px"
-                      }}
-                    >
-                      {cho === "all" ? "전체" : cho}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Type Selector Tabs */}
-        <div>
-          <label style={{ display: "block", fontSize: "0.7rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
-            Type
-          </label>
-          <div style={{ overflowX: "auto" }} className="no-scrollbar">
-            <div style={{ display: "flex", gap: "8px", whiteSpace: "nowrap" }}>
-              {TYPES.map((t) => {
-                const active = selectedType === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    onClick={() => setSelectedType(t.key)}
-                    style={{
-                      padding: "6px 14px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: 800,
-                      border: active ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                      cursor: "pointer",
-                      background: active ? "var(--navy)" : "transparent",
-                      color: active ? "#FFFFFF" : "var(--navy)",
-                      transition: "all 0.18s ease"
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      {/* Main List Container */}
-      {loading ? (
-        <LoadingSpinner message="아티스트 리스트를 불러오고 있습니다..." />
-      ) : error ? (
-        <ErrorMessage message={error} />
-      ) : totalResultsCount === 0 ? (
-        <EmptyState message="필터링 조건에 부합하는 아티스트가 없습니다." />
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "64px" }}>
-
-          {/* ─── 01. DANCE ─── */}
-          {(selectedField === "all" || selectedField === "dance") && danceArtists.length > 0 && (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "24px" }}>
-                <div>
-                  <h3 className="display" style={{ fontSize: "1.35rem", color: "var(--navy)", textTransform: "uppercase", margin: 0, fontWeight: 950 }}>01. DANCE</h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "4px 0 0 0" }}>Bodies in motion.</p>
-                </div>
-                {selectedField === "all" && (
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button onClick={() => scrollSlider("dance", "left")} className="btn-outline" style={{ width: "32px", height: "32px", borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem", cursor: "pointer" }}>←</button>
-                    <button onClick={() => scrollSlider("dance", "right")} className="btn-outline" style={{ width: "32px", height: "32px", borderRadius: "50%", padding: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem", cursor: "pointer" }}>→</button>
-                  </div>
-                )}
-              </div>
-              {selectedField === "all" ? (
-                <div
-                  ref={danceSliderRef}
-                  onMouseEnter={() => setRowPaused("dance", true)}
-                  onMouseLeave={() => setRowPaused("dance", false)}
-                  onPointerDown={() => pauseRowTemporarily("dance")}
-                  style={{ display: "flex", gap: "20px", overflowX: "auto", padding: "8px 0 24px", scrollSnapType: "x mandatory" }}
-                  className="no-scrollbar"
-                >
-                  {danceArtists.map((a) => <ShowcaseCard key={a.id} artist={a} slider cleanInstagramHandle={cleanInstagramHandle} getGenreLabel={getGenreLabel} />)}
-                </div>
-              ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
-                  {danceArtists.map((a) => <ShowcaseCard key={a.id} artist={a} cleanInstagramHandle={cleanInstagramHandle} getGenreLabel={getGenreLabel} />)}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ─── 02. MUSIC ─── */}
-          {(selectedField === "all" || selectedField === "music") && (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "24px" }}>
-                <div>
-                  <h3 className="display" style={{ fontSize: "1.35rem", color: "var(--navy)", textTransform: "uppercase", margin: 0, fontWeight: 950 }}>02. MUSIC (준비중)</h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "4px 0 0 0" }}>Artists of sound.</p>
-                </div>
-              </div>
-              <div style={{
-                background: "#FAF8F5",
-                border: "1.5px dashed var(--border)",
+      {/* Sub-genre Filters for DANCE */}
+      {selectedField === "dance" && (
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "20px", padding: "0 4px" }}>
+          {DANCE_SUB_FIELDS.map((sub) => (
+            <button
+              key={sub.key}
+              onClick={() => setSelectedSubField(sub.key)}
+              style={{
+                padding: "8px 14px",
                 borderRadius: "16px",
-                padding: "36px 20px",
-                textAlign: "center",
-                marginTop: "8px",
-                marginBottom: "24px"
-              }}>
-                <span style={{ fontSize: "1.8rem", display: "block", marginBottom: "12px" }}>🎵</span>
-                <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", margin: 0, fontWeight: 600, wordBreak: "keep-all" }}>
-                  준비중입니다! 조금만 기다려주세요..
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* ─── 03. VISUAL ─── */}
-          {(selectedField === "all" || selectedField === "visual") && (
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "24px" }}>
-                <div>
-                  <h3 className="display" style={{ fontSize: "1.35rem", color: "var(--navy)", textTransform: "uppercase", margin: 0, fontWeight: 950 }}>03. VISUAL (준비중)</h3>
-                  <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "4px 0 0 0" }}>Ways of seeing.</p>
-                </div>
-              </div>
-              <div style={{
-                background: "#FAF8F5",
-                border: "1.5px dashed var(--border)",
-                borderRadius: "16px",
-                padding: "36px 20px",
-                textAlign: "center",
-                marginTop: "8px",
-                marginBottom: "24px"
-              }}>
-                <span style={{ fontSize: "1.8rem", display: "block", marginBottom: "12px" }}>🎨</span>
-                <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", margin: 0, fontWeight: 600, wordBreak: "keep-all" }}>
-                  준비중입니다! 조금만 기다려주세요..
-                </p>
-              </div>
-            </div>
-          )}
-
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                border: selectedSubField === sub.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                backgroundColor: selectedSubField === sub.key ? "var(--navy)" : "transparent",
+                color: selectedSubField === sub.key ? "#FFFFFF" : "var(--ink-muted)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              {sub.label}
+            </button>
+          ))}
         </div>
       )}
 
+      {/* Korean Consonant/Alphabet Filters for DANCE */}
+      {selectedField === "dance" && (
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "32px", padding: "0 4px", borderBottom: "1px solid var(--border)", paddingBottom: "16px" }}>
+          {CHOSUNGS.map((cho) => (
+            <button
+              key={cho}
+              onClick={() => setSelectedConsonant(cho)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: "6px",
+                fontSize: "0.75rem",
+                fontWeight: selectedConsonant === cho ? 800 : 500,
+                border: "none",
+                backgroundColor: selectedConsonant === cho ? "var(--border-dark)" : "transparent",
+                color: selectedConsonant === cho ? "var(--navy)" : "var(--ink-muted)",
+                cursor: "pointer",
+              }}
+            >
+              {cho}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Type Filters (ALL TYPES, INDIVIDUAL, GROUP/TEAM) */}
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "40px" }}>
+        {TYPES.map((type) => (
+          <button
+            key={type.key}
+            onClick={() => setSelectedType(type.key)}
+            style={{
+              padding: "8px 14px",
+              borderRadius: "20px",
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              border: selectedType === type.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+              backgroundColor: selectedType === type.key ? "var(--navy)" : "transparent",
+              color: selectedType === type.key ? "#FFFFFF" : "var(--ink-muted)",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            {type.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── ARTISTS DIRECTORY RESULT LIST ── */}
+      {loading ? (
+        <LoadingSpinner message="아티스트 목록을 불러오는 중..." />
+      ) : error ? (
+        <ErrorMessage message={error} />
+      ) : totalResultsCount === 0 ? (
+        <EmptyState message="검색 결과가 없습니다." />
+      ) : (
+        <div style={{ minHeight: "400px" }}>
+          {selectedField === "all" ? (
+            <>
+              {renderSliderRow("DANCE", "dance", danceArtists, danceSliderRef)}
+              {renderSliderRow("MUSIC", "music", musicArtists, musicSliderRef)}
+              {renderSliderRow("VISUAL", "visual", visualArtists, visualSliderRef)}
+            </>
+          ) : selectedField === "dance" ? (
+            renderGallery("DANCE", danceArtists)
+          ) : selectedField === "music" ? (
+            renderGallery("MUSIC", musicArtists)
+          ) : (
+            renderGallery("VISUAL", visualArtists)
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -517,16 +575,18 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
   cleanInstagramHandle: (url: string | null | undefined) => string;
   getGenreLabel: (genre?: string) => string;
 }) {
-  const firstWork = Array.isArray(artist.portfolio_works) ? (artist.portfolio_works[0] as any) : null;
+  const worksList = artist.works ?? artist.portfolio_works;
+  const firstWork = Array.isArray(worksList) ? (worksList[0] as any) : null;
   const previewUrl = artist.video_url || firstWork?.videoUrl || firstWork?.video_url || firstWork?.media?.url || "";
   const hasYoutubePreview = isYouTubeUrl(previewUrl);
 
   return (
     <div
+      className={slider ? "" : "gallery-card-wrapper"}
       style={{
         ...(slider ? { flexShrink: 0, width: "260px", scrollSnapAlign: "start" } : {}),
         aspectRatio: "0.68",
-        minHeight: "320px",
+        minHeight: slider ? "320px" : undefined,
       }}
     >
       <Link
@@ -590,7 +650,7 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
           </div>
 
           {/* Metadata overlays at bottom */}
-          <div style={{
+          <div className="showcase-card-meta" style={{
             position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px",
             zIndex: 2, display: "flex", flexDirection: "column", gap: "12px"
           }}>

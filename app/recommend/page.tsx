@@ -140,11 +140,12 @@ export default function RecommendPage() {
       const tags = artist.tags || [];
       const works = artist.works || [];
       const reviews = artist.reviews || [];
+      const worksStringList = works.map((w: any) => typeof w === "string" ? w : w.title || "");
 
       // 매칭에 사용할 아티스트의 정보 텍스트 집합
       const bioText = `${bio} ${aiSummary}`.toLowerCase();
       const worksText = [
-        ...works,
+        ...worksStringList,
         ...reviews.map(r => `${r.workTitle} ${r.source}`)
       ].join(" ").toLowerCase();
       const metaText = `${name} ${company} ${field} ${genre} ${tags.join(" ")}`.toLowerCase();
@@ -231,7 +232,7 @@ export default function RecommendPage() {
           나에게 맞는 공연 찾기
         </h1>
         <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", marginTop: "10px", lineHeight: "1.6" }}>
-          몇 가지 질문에 답하면 Piece of Cake가 당신의 취향에 가까운 안무가와 작품을 추천합니다.
+          몇 가지 질문에 답하면 POPOK이 당신의 취향에 가까운 안무가와 작품을 추천합니다.
         </p>
       </div>
 
@@ -382,10 +383,12 @@ export default function RecommendPage() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               {results.map(({ artist, score, matchedKeywords }) => {
-                const worksToShow = (artist.works || []).slice(0, 3);
+                const worksToShow = (artist.works || [])
+                  .slice(0, 3)
+                  .map((w: any) => typeof w === "string" ? w : w.title || "");
                 
                 // 추천 이유 문구 빌드
-                let reason = "Piece of Cake가 추천하는 아티스트입니다.";
+                let reason = "POPOK이 추천하는 아티스트입니다.";
                 if (matchedKeywords.length > 0) {
                   const itemsText = matchedKeywords.map(k => `‘${k}’`).join(", ");
                   reason = `선택한 키워드 ${itemsText}과 이 아티스트의 작업 설명이 잘 맞습니다.`;

@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Piece of Cake — Artist's Domain",
+  title: "POPOK — Artist's Domain",
   description: "한국 무용계 아티스트와 작품을 발견하는 가장 쉬운 방법.",
 };
 

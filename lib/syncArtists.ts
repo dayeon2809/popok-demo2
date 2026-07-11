@@ -25,6 +25,40 @@ function slugify(name: string, recordId?: string): string {
   return `${clean}-${suffix}`.toLowerCase();
 }
 
+// Hangul Romanization Helper
+function romanizeKorean(str: string): string {
+  const choMap = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'ch', 'k', 't', 'p', 'h'];
+  const jungMap = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'ye', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i'];
+  const jongMap = ['', 'g', 'kk', 'gs', 'n', 'nj', 'nh', 'd', 'l', 'lg', 'lm', 'lb', 'ls', 'lt', 'lp', 'lh', 'm', 'b', 'bs', 's', 'ss', 'ng', 'j', 'ch', 'k', 't', 'p', 'h'];
+
+  let result = '';
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code >= 0xAC00 && code <= 0xD7A3) {
+      const offset = code - 0xAC00;
+      const jong = offset % 28;
+      const jung = Math.floor((offset % (21 * 28)) / 28);
+      const cho = Math.floor(offset / (21 * 28));
+      result += choMap[cho] + jungMap[jung] + jongMap[jong];
+    } else {
+      result += str[i];
+    }
+  }
+  return result;
+}
+
+// Work Slugifier
+function slugifyWork(text: string): string {
+  if (!text) return '';
+  let rom = romanizeKorean(text);
+  return rom
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-');
+}
+
 import http from "http";
 
 // Download helper using http/https (with redirect, timeout and protocol support)
@@ -163,6 +197,7 @@ export interface DbArtistRow {
   city_or_region?: string | null;
   bio_short?: string | null;
   portfolio_works?: any | null;
+  works?: any | null;
 }
 
 export async function syncArtistsFromAirtable(): Promise<SyncResult> {
@@ -265,18 +300,25 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
       else if (profileImageUrl.includes('.jpeg')) ext = '.jpeg';
       else if (profileImageUrl.includes('.webp')) ext = '.webp';
 
-      const filename = `${id}${ext}`;
-      const destPath = path.join(imagesDir, filename);
+      const artistMediaDir = path.join(process.cwd(), 'public/media/artists', id);
+      const destPath = path.join(artistMediaDir, `profile${ext}`);
+      const webPath = `/media/artists/${id}/profile${ext}`;
 
       const isAirtableUrl = profileImageUrl.includes("airtableusercontent.com");
+      
+      // Ensure target folder exists
+      if (!fs.existsSync(artistMediaDir)) {
+        fs.mkdirSync(artistMediaDir, { recursive: true });
+      }
+
       if (fs.existsSync(destPath)) {
-        profileImage = `/artists/${filename}`;
+        profileImage = webPath;
       } else if (!isAirtableUrl) {
         try {
           const isArko = profileImageUrl.includes("arko") || profileImageUrl.includes("arko.or.kr");
           const timeout = isArko ? 30000 : 10000;
           await downloadFile(profileImageUrl, destPath, timeout);
-          profileImage = `/artists/${filename}`;
+          profileImage = webPath;
         } catch (downloadErr: any) {
           const errMsg = downloadErr.message || String(downloadErr);
           const is410 = errMsg.includes("HTTP 410");
@@ -332,12 +374,79 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
       }
     }
 
+    // ── Smart Merge Works ──
+    let worksData = record.works ?? record.portfolio_works ?? [];
+    if (typeof worksData === 'string') {
+      try {
+        worksData = JSON.parse(worksData);
+      } catch (e) {
+        worksData = [];
+      }
+    }
+    if (!Array.isArray(worksData)) {
+      worksData = [];
+    }
+
+    const matchedArtist = existingArtists.find(
+      (ea) => ea.id === id || (ea.recordId !== undefined && String(ea.recordId) === recordId)
+    );
+
+    let mergedWorks: any[] = [];
+    if (matchedArtist && (matchedArtist.works || matchedArtist.portfolio_works)) {
+      const localWorks = matchedArtist.works ?? matchedArtist.portfolio_works ?? [];
+      mergedWorks = worksData.map((dbWork: any, idx: number) => {
+        if (!dbWork || typeof dbWork === 'string') return dbWork;
+
+        // Try matching:
+        // 1. Stable ID
+        // 2. Slug
+        // 3. Title + Year combo
+        // 4. Title only
+        const match = localWorks.find((localWork: any) => {
+          if (!localWork || typeof localWork === 'string') return false;
+          if (dbWork.id && localWork.id && dbWork.id === localWork.id) return true;
+          if (dbWork.slug && localWork.slug && dbWork.slug === localWork.slug) return true;
+          if (dbWork.title && localWork.title && dbWork.title === localWork.title) {
+            if (dbWork.year && localWork.year && dbWork.year === localWork.year) return true;
+          }
+          if (dbWork.title && localWork.title && dbWork.title === localWork.title) return true;
+          return false;
+        });
+
+        if (match && typeof match !== 'string') {
+          return {
+            ...dbWork,
+            id: match.id || dbWork.id || `${id}-${String(idx + 1).padStart(3, '0')}`,
+            slug: match.slug || dbWork.slug || slugifyWork(dbWork.title) || `work-${idx + 1}`,
+            image_url: match.image_url || dbWork.image_url,
+          };
+        }
+
+        const workIndex = idx + 1;
+        return {
+          ...dbWork,
+          id: dbWork.id || `${id}-${String(workIndex).padStart(3, '0')}`,
+          slug: dbWork.slug || slugifyWork(dbWork.title) || `work-${workIndex}`,
+        };
+      });
+    } else {
+      mergedWorks = worksData.map((dbWork: any, idx: number) => {
+        if (!dbWork || typeof dbWork === 'string') return dbWork;
+        const workIndex = idx + 1;
+        return {
+          ...dbWork,
+          id: dbWork.id || `${id}-${String(workIndex).padStart(3, '0')}`,
+          slug: dbWork.slug || slugifyWork(dbWork.title) || `work-${workIndex}`,
+        };
+      });
+    }
+
     const artist: any = {
       id,
       name,
       company: typeof company === 'string' ? company.trim() : String(company),
       bio: typeof bio === 'string' ? bio.trim() : String(bio),
-      works: worksList,
+      works: mergedWorks.length > 0 ? mergedWorks : worksList,
       field,
       genre,
       instagram,
@@ -354,8 +463,7 @@ export async function syncArtistsFromAirtable(): Promise<SyncResult> {
       updatedAt: record.updated_at || new Date().toISOString(),
       name_en: record.name_en || '',
       city_or_region: record.city_or_region || '',
-      bio_short: record.bio_short || '',
-      portfolio_works: record.portfolio_works || []
+      bio_short: record.bio_short || ''
     };
 
     let type = 'individual';

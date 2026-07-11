@@ -12,7 +12,7 @@ export interface Artist {
   name: string;
   company?: string;                   // 소속/단체명
   bio?: string;                       // 소개글
-  works: string[];                    // 대표작 목록 (문자열 배열)
+  works?: Array<string | Work>;       // 대표작 목록 (문자열 또는 상세 객체 배열)
   field?: string;                     // 분야 (dance, interdisciplinary 등)
   genre?: string;                     // 장르 (contemporary, ballet, korean 등)
   instagram?: string;                 // 인스타그램 주소
@@ -50,27 +50,7 @@ export interface Artist {
   verification_status?: VerificationStatus;
   created_at?: string;
   updated_at?: string;
-  portfolio_works?: Array<{
-    title: string;
-    year: string;
-    description: string;
-    role: string;
-    image_url: string;
-    video_url?: string;
-    videoUrl?: string;
-    previewStart?: number;
-    previewEnd?: number;
-    previewAspectRatio?: "16 / 9" | "9 / 16";
-    media?: {
-      type: "youtube" | "vimeo" | "video" | "image";
-      url?: string;
-      src?: string;
-      poster?: string;
-      previewStart?: number;
-      previewEnd?: number;
-      aspectRatio?: "16 / 9" | "9 / 16";
-    };
-  }>;
+  portfolio_works?: Work[];
   isDemo?: boolean;
   role?: string;
   motionProfile?: {
@@ -83,16 +63,40 @@ export interface Artist {
 }
 
 export interface Work {
-  id: string;                          // Airtable record ID
-  artist_id: string;                   // fields.id (김경숙-b0431df7) — Artist.id와 매칭
-  artist_name: string;
+  id: string;
+  slug?: string;
   title: string;
-  year: number | null;
-  role: string;
-  venue: string;
-  festival: string;
-  source_url: string;
-  artistRecordIds?: string[];          // Airtable linked record ID 배열
+  year?: string | number | null;
+  description?: string;
+  role?: string;
+  image_url?: string;
+  video_url?: string;
+  videoUrl?: string;
+  preview_start?: number;
+  preview_end?: number;
+  previewStart?: number;
+  previewEnd?: number;
+  previewAspectRatio?: "16 / 9" | "9 / 16";
+  media?: {
+    type: string;
+    url?: string;
+    src?: string;
+    poster?: string;
+    previewStart?: number;
+    previewEnd?: number;
+    aspectRatio?: "16 / 9" | "9 / 16";
+  } | null;
+
+  created_at?: string;
+  updated_at?: string;
+
+  // Legacy Airtable properties for backward compatibility
+  artist_id?: string;
+  artist_name?: string;
+  venue?: string;
+  festival?: string;
+  source_url?: string;
+  artistRecordIds?: string[];
 }
 
 export type ArtistWithWorks = Artist;

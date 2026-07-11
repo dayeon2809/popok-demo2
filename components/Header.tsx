@@ -14,7 +14,7 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
   },
   {
     href: "/artists",
-    label: { ko: "아티스트", en: "Artists" },
+    label: { ko: "아티스트 (준비중)", en: "Artists (Preparing)" },
     match: (pathname) => pathname === "/artists" || pathname.startsWith("/artists/"),
   },
   {
@@ -197,10 +197,12 @@ export default function Header() {
               borderBottom: "1px solid var(--border)",
             }}
           >
-            Premium
+            Premium (준비중)
           </Link>
-          <Link
-            href="/submit"
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={() => setMenuOpen(false)}
             className="btn-lime"
             style={{
@@ -214,7 +216,7 @@ export default function Header() {
             }}
           >
             {language === "ko" ? "내 포퐄 만들기" : "Get my POPOK"}
-          </Link>
+          </a>
         </div>
       )}
     </nav>

@@ -1,220 +1,98 @@
 # POPOK Media Asset Management Guide
 
-This guide explains where POPOK artist data, registration data, images, and videos live in the current codebase.
+This guide explains where POPOK artist data, registration data, images, and videos live in the codebase and defines directory structures and reference mapping rules.
 
-## Current Data Flow
+---
 
-### 1. Existing Showcase Artists
+## 1. Directory Structure Standards
 
-Existing artists shown in `/artists` are loaded from:
+To ensure scalability and keep assets organized, all local media assets live under `public/media/` grouped by artist ID and work slugs.
 
+### Artist Basic Media
+Artist-specific profile and motion assets:
 ```text
-data/artists.json
+public/media/artists/[artist-id]/
+├── profile.[ext]       (Profile image, e.g. profile.jpg, profile.png, profile.webp)
+└── motion.[ext]        (Motion profile video/file, preserving original extension e.g. motion.mp4, motion.mov)
 ```
+- **profile.[ext]**: Standard name for the main profile image. The original extension (`.jpg`, `.png`, `.webp`, etc.) is preserved.
+- **motion.[ext]**: Standard name for local motion profile files. The original extension (`.mp4`, `.mov`, etc.) is preserved.
 
-This file contains the current DANCE / MUSIC / VISUAL showcase data, including profile images, artist fields, selected works, career text, and motion profile metadata.
-
-To edit an existing showcase artist, update that artist object in `data/artists.json`.
-
-### 2. New POPOK Registrations
-
-New registrations created from `/submit` are saved in Supabase:
-
+### Works Portfolio Assets
+Representative images and documents for individual works:
 ```text
-submissions table
+public/media/works/[artist-id]/[work-slug]/
+├── image.[ext]         (Representative image/poster/thumbnail, e.g. image.jpg, image.gif)
+├── video.mp4           (Direct MP4 work video - optional/future)
+└── program.pdf         (Program book - optional/future)
 ```
+- **image.[ext]**: Representative work image. Do not name it `poster.jpg` since works may represent exhibitions, videos, or archives that are not posters. The original extension (`.jpg`, `.png`, `.gif`, etc.) is preserved.
+- **work-slug**: A URL-friendly, lowercase, hyphen-separated string unique to each work under the artist (e.g., `body-concert`).
 
-The `/api/popok-submit` route inserts the required fields:
+---
 
-```text
-name
-genre
-instagram
-email
-status
-portfolio_works
-```
+## 2. Standard Works Data Model
 
-`/p/[id]` reads the saved record back from the Supabase `submissions` table and renders the generated POPOK card.
-
-### 3. How To Add A New Registration To Artists Showcase
-
-Current behavior:
-
-1. A user submits `/submit`.
-2. The data is stored in Supabase `submissions` with `status: pending`.
-3. Admin approval can create an artist record through the existing admin flow.
-4. The public `/artists` showcase still uses `data/artists.json`, so showcase publication requires adding or syncing the approved artist into that file.
-
-Do not add random new files or duplicate artist records. For now, keep `data/artists.json` as the source for public showcase artists.
-
-## Profile Image
-
-For existing showcase artists, profile images are referenced from `data/artists.json`:
-
-```json
-"profileImage": "/images/artists/artist-file.jpg"
-```
-
-The image file should live in:
-
-```text
-public/images/artists/
-```
-
-For new `/submit` registrations, optional profile images are uploaded to Supabase Storage:
-
-```text
-bucket: artist-media
-path: submissions/[generated-name]/profile/[file]
-```
-
-The resulting public URL is stored in `submissions.portfolio_works` as:
+The JSON works field is standardized from `portfolio_works` to `works` inside `data/artists.json` (and matching TypeScript types):
 
 ```json
 {
-  "kind": "popok_registration_media",
-  "profile_image_url": "https://...",
-  "motion_video_url": null
-}
-```
-
-## Motion Profile Video
-
-For existing showcase artists, motion profile metadata is edited in `data/artists.json`:
-
-```json
-"motionProfile": {
-  "type": "video",
-  "src": "/media/motion/[artist-id]/motion.mp4",
-  "poster": "/media/motion/[artist-id]/cover.jpg",
-  "title": "Motion Profile",
-  "caption": "15 sec artist intro"
-}
-```
-
-Local motion files should live in:
-
-```text
-public/media/motion/[artist-id]/
-```
-
-For new `/submit` registrations, optional Motion Profile videos are stored as YouTube or Vimeo links only. Users do not upload video files from `/submit`.
-
-```text
-YouTube: https://www.youtube.com/watch?v=...
-YouTube short link: https://youtu.be/...
-YouTube Shorts: https://www.youtube.com/shorts/...
-Vimeo: https://vimeo.com/123456789
-```
-
-The original URL is stored in `submissions.portfolio_works` under `motion_video_url`.
-
-```json
-{
-  "kind": "popok_registration_media",
-  "profile_image_url": "https://...",
-  "motion_video_url": "https://www.youtube.com/watch?v=MXjZ34I_mCk",
-  "motion_video_provider": "youtube"
-}
-```
-
-## Selected Works
-
-Selected works for existing showcase artists are edited in `data/artists.json`, usually in `portfolio_works`.
-
-Example:
-
-```json
-"portfolio_works": [
-  {
-    "title": "Work Title",
-    "year": "2026",
-    "description": "Work description",
-    "role": "Choreographer",
-    "image_url": "/media/works/work-id/cover.jpg",
-    "media": {
-      "type": "youtube",
-      "url": "https://www.youtube.com/watch?v=..."
+  "id": "kim-boram",
+  "name": "김보람",
+  "profileImage": "/media/artists/kim-boram/profile.jpg",
+  "works": [
+    {
+      "id": "kim-boram-001",
+      "slug": "body-concert",
+      "title": "바디콘서트",
+      "year": "2026",
+      "description": "엠비규어스 대표작",
+      "role": "안무",
+      "image_url": "/media/works/kim-boram/body-concert/image.gif",
+      "media": {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=..."
+      },
+      "created_at": "2026-07-11T03:00:00.000Z",
+      "updated_at": "2026-07-11T03:00:00.000Z"
     }
-  }
-]
-```
-
-## Work Images
-
-Work images should live in:
-
-```text
-public/media/works/[work-id]/
-```
-
-Then reference them from the matching work object:
-
-```json
-"image_url": "/media/works/[work-id]/cover.jpg"
-```
-
-## Work Videos
-
-The bottom sheet media player supports YouTube, Vimeo, direct MP4, and image media. Add video data to the relevant work object in `data/artists.json`.
-
-### YouTube
-
-```json
-"media": {
-  "type": "youtube",
-  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  ]
 }
 ```
 
-### Vimeo
+### Allowed `media.type` Values
+The bottom sheet media player and components support the following values for `media.type`:
+- **`youtube`**: YouTube video link (renders YouTube player).
+- **`vimeo`**: Vimeo video link (renders Vimeo player).
+- **`instagram`**: Instagram post link (renders post preview/link).
+- **`video`**: Direct video file path or URL (renders custom `<video>` player).
+- **`url`**: Generic external website or archive page (renders link or iframe).
+- **`pdf`**: Program book or portfolio PDF file (renders view/download link).
 
-```json
-"media": {
-  "type": "vimeo",
-  "url": "https://vimeo.com/84938491"
-}
-```
+### ID and Slug Rules
+1. **Stable ID (`id`)**: A unique data identifier prefixed with the artist ID (e.g. `kim-boram-001`, `kim-boram-002`). This ID is permanent and **must never change** even if the work title or slug changes in the future.
+2. **Slug (`slug`)**: A lowercase alphanumeric + hyphen string used in directory names and URL pathways (e.g., `body-concert`). Slugs must be unique per artist.
 
-### Direct MP4
+---
 
-Store the MP4 file in:
+## 3. Path Versatility & Support
 
-```text
-public/media/works/[work-id]/
-```
+The codebase supports three different path structures dynamically. Output components directly render these values without hardcoded prefixes:
 
-Then reference it:
+1. **Local public paths**: `/media/artists/kim-boram/profile.jpg`
+2. **Supabase Storage URLs**: `https://xxxx.supabase.co/storage/v1/object/public/media/artists/kim-boram/profile.jpg`
+3. **Crawled external URLs**: `https://external-site.com/images/poster.jpg`
 
-```json
-"media": {
-  "type": "video",
-  "src": "/media/works/[work-id]/video.mp4",
-  "poster": "/media/works/[work-id]/cover.jpg"
-}
-```
+---
 
-### Image Only
+## 4. Smart Merge Sync Safeguard
 
-```json
-"media": {
-  "type": "image",
-  "src": "/media/works/[work-id]/cover.jpg"
-}
-```
-
-## Quick Reference
-
-| CONTENT TYPE | WHERE TO STORE | WHERE TO EDIT |
-| --- | --- | --- |
-| Existing Artist Info | `data/artists.json` | Edit the matching artist object in `data/artists.json` |
-| New POPOK Registration | Supabase `submissions` table | Use `/submit`; review in admin submissions |
-| Registration Profile Image | Supabase Storage `artist-media` bucket | Uploaded from `/submit`; public URL stored in `submissions.portfolio_works` |
-| Registration Motion Profile | YouTube or Vimeo original URL | Enter from `/submit`; URL stored in `submissions.portfolio_works.motion_video_url` |
-| Existing Artist Motion Profile | `public/media/motion/[artist-id]/` | Edit `data/artists.json` `motionProfile` |
-| Work Info | `data/artists.json` | Edit `portfolio_works` or selected work fields |
-| Work Image | `public/media/works/[work-id]/` | Reference with `image_url` or `media.src` |
-| YouTube Work Video | YouTube URL | Add to `data/artists.json` work `media.url` with `type: "youtube"` |
-| Vimeo Work Video | Vimeo URL | Add to `data/artists.json` work `media.url` with `type: "vimeo"` |
-| Direct MP4 Work Video | `public/media/works/[work-id]/` | Add to `data/artists.json` work `media.src` with `type: "video"` |
+During Supabase database synchronization (`lib/syncArtists.ts`):
+- Local edits (work `id`, `slug`, `image_url`, `profileImage`, `motion_url`) are protected.
+- Synced DB records are merged with local records using matching order priority:
+  1. Stable ID (`id`) matching
+  2. URL Slug (`slug`) matching
+  3. Title + Year combo matching
+  4. Title only matching
+- DB inputs from Airtable/legacy tables are parsed from `record.works ?? record.portfolio_works ?? []` and saved to file under the standardized `works` key.
+- Updates and inserts to the database only save the standard `works` key, leaving the legacy `portfolio_works` field untouched.

@@ -24,6 +24,11 @@ interface Props {
       profile_image_url?: string | null;
       motion_video_url?: string | null;
     }> | null;
+    works?: Array<{
+      kind?: string;
+      profile_image_url?: string | null;
+      motion_video_url?: string | null;
+    }> | null;
   };
 }
 
@@ -72,8 +77,9 @@ export default function ClientCard({ record }: Props) {
     return `https://instagram.com/${cleaned}`;
   };
 
-  const registrationMedia = Array.isArray(record.portfolio_works)
-    ? record.portfolio_works.find((item) => item?.kind === "popok_registration_media")
+  const worksList = record.works ?? record.portfolio_works;
+  const registrationMedia = Array.isArray(worksList)
+    ? worksList.find((item) => item?.kind === "popok_registration_media")
     : null;
   const legacyProfileImageUrl = registrationMedia?.profile_image_url || undefined;
   

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ArtistsClient from "./ArtistsClient";
 import { LoadingSpinner } from "@/components/ui/States";
 
-export const metadata = { title: "아티스트 — Piece of Cake" };
+export const metadata = { title: "아티스트 — POPOK" };
 
 export default function ArtistsPage() {
   return (

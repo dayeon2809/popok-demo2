@@ -112,7 +112,7 @@ export default function AdminPage() {
             textAlign: "center",
             marginBottom: "10px"
           }}>
-            Piece of Cake Admin
+            POPOK Admin
           </h1>
           <p style={{
             fontSize: "0.85rem",
@@ -191,7 +191,7 @@ export default function AdminPage() {
     <div>
       <div style={{ marginBottom: "30px", borderBottom: "1.5px solid var(--border)", paddingBottom: "16px" }}>
         <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)" }}>관리자 대시보드 (Dashboard)</h1>
-        <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>Piece of Cake 플랫폼의 주요 상태 통계입니다.</p>
+        <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>POPOK 플랫폼의 주요 상태 통계입니다.</p>
       </div>
 
       {statsLoading && <div style={{ padding: "40px 0" }}><LoadingSpinner message="통계 정보를 조회하는 중..." /></div>}

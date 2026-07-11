@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         youtube_url: motionVideoUrl || null,
         youtube_preview_start: youtubePreviewStart,
         youtube_preview_end: youtubePreviewEnd,
-        portfolio_works: profileImageUrl || motionVideoUrl ? [
+        works: profileImageUrl || motionVideoUrl ? [
           {
             kind: "popok_registration_media",
             profile_image_url: profileImageUrl || null,

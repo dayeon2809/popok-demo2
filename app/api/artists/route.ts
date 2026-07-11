@@ -32,16 +32,17 @@ export async function GET(req: NextRequest) {
 
         // Works titles array
         let worksList: string[] = [];
+        const dbWorks = record.works ?? record.portfolio_works ?? [];
         if (record.role && typeof record.role === "string") {
           worksList = record.role.split(",").map((w: string) => w.replace(/[<>]/g, "").trim()).filter(Boolean);
-        } else if (record.portfolio_works && Array.isArray(record.portfolio_works)) {
-          worksList = record.portfolio_works.map((pw: any) => pw.title).filter(Boolean);
+        } else if (Array.isArray(dbWorks)) {
+          worksList = dbWorks.map((pw: any) => pw.title).filter(Boolean);
         }
 
         // Main Profile Image mapping
         let profileImage = "";
-        if (record.portfolio_works && Array.isArray(record.portfolio_works) && record.portfolio_works[0]?.image_url) {
-          profileImage = record.portfolio_works[0].image_url;
+        if (Array.isArray(dbWorks) && dbWorks[0]?.image_url) {
+          profileImage = dbWorks[0].image_url;
         }
 
         mappedDbArtists.push({

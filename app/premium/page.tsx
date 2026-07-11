@@ -171,82 +171,37 @@ export default function PremiumPage() {
         </p>
       </section>
 
-      {/* ── 2. BILLING TOGGLE ── */}
-      <section style={{ display: "flex", justifyContent: "center", padding: "0 32px 48px" }}>
+      {/* ── 2. SERVICE PREPARING STATUS PANEL (구독 요금제 준비중 숨김) ── */}
+      <section style={{ maxWidth: "600px", margin: "0 auto 80px", padding: "0 32px" }}>
         <div style={{
-          display: "inline-flex", gap: "4px", background: "#FFFFFF",
-          border: "1px solid var(--border)", borderRadius: "999px", padding: "5px",
+          background: "#FFFFFF",
+          border: "1.5px solid var(--border)",
+          borderRadius: "20px",
+          padding: "40px 32px",
+          textAlign: "center",
+          boxShadow: "0 10px 30px rgba(23, 20, 17, 0.03)"
         }}>
-          {(["monthly", "annual"] as BillingCycle[]).map((cycle) => {
-            const active = billingCycle === cycle;
-            return (
-              <button
-                key={cycle}
-                type="button"
-                onClick={() => setBillingCycle(cycle)}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "999px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
-                  fontWeight: 800,
-                  background: active ? "var(--navy)" : "transparent",
-                  color: active ? "#FFFFFF" : "var(--ink-muted)",
-                  transition: "all 0.18s ease",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                {cycle === "monthly" ? "월간 구독" : "연간 구독"}
-                {cycle === "annual" && (
-                  <span className="mono" style={{
-                    fontSize: "0.6rem", fontWeight: 800, padding: "2px 8px", borderRadius: "10px",
-                    background: active ? "var(--accent)" : "var(--tag-bg)",
-                    color: active ? "var(--navy)" : "var(--accent-dark)",
-                  }}>
-                    약 2개월 무료
-                  </span>
-                )}
-              </button>
-            );
-          })}
+          <div style={{
+            width: "60px", height: "60px", borderRadius: "50%",
+            background: "#FFF7ED", border: "1px solid #FDBA74",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            marginBottom: "20px", color: "#EA580C", fontSize: "1.6rem", fontWeight: 900
+          }}>
+            !
+          </div>
+          <h2 style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--navy)", marginBottom: "12px" }}>
+            Premium 구독 서비스 준비 중
+          </h2>
+          <p style={{ color: "var(--ink-muted)", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "28px" }}>
+            아티스트의 정기 프로필 업데이트 및 맞춤 관리를 지원하는 Premium 플랜 서비스는 현재 준비 중입니다.<br />
+            준비가 완료되면 등록 시 기입하신 이메일로 빠르게 안내드릴게요!
+          </p>
+          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" className="btn-lime" style={{ textDecoration: "none", padding: "13px 24px", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 900 }}>
+              기본 아티스트 무료 등록하기
+            </a>
+          </div>
         </div>
-      </section>
-
-      {/* ── 3. PLAN CARDS ── */}
-      <section className="premium-section" style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 32px 100px" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "24px",
-          alignItems: "stretch",
-        }}>
-          {PLANS.map((plan) => (
-            <PremiumPlanCard
-              key={plan.id}
-              name={plan.name}
-              tagline={plan.tagline}
-              price={billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice}
-              billingCycle={billingCycle}
-              badge={plan.badge}
-              highlight={plan.highlight}
-              features={plan.features}
-              ctaLabel={plan.id === "free" ? "무료로 시작하기" : "구독 안내 받기"}
-              onSubscribe={
-                plan.id === "free"
-                  ? () => triggerToast("Free 플랜은 지금 바로 시작할 수 있어요.\n등록 페이지로 이동해 주세요.")
-                  : () => handleSubscribe(plan.id, billingCycle)
-              }
-            />
-          ))}
-        </div>
-        <p style={{ textAlign: "center", marginTop: "28px" }}>
-          <Link href="/submit" style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--navy)", textDecoration: "none", borderBottom: "1.5px solid var(--navy)", paddingBottom: "2px" }}>
-            Free 플랜으로 지금 POPOK 만들기 →
-          </Link>
-        </p>
       </section>
 
       {/* ── 4. HOW UPDATES WORK ── */}

@@ -32,6 +32,6 @@ export const faqItems: FaqItem[] = [
     question: "POPOK Premium은 무엇인가요?",
     answer: "새로운 공연과 작품 활동을 POPOK 팀이 주기적으로 확인하고 정리해 아티스트 프로필을 최신 상태로 유지해주는 관리 서비스입니다.",
     ctaHref: "/premium",
-    ctaLabel: "Premium 요금제 보기 →",
+    ctaLabel: "Premium 안내 보기 →",
   },
 ];

@@ -181,57 +181,59 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
     const list: WorkItem[] = [];
 
-    if (artist.portfolio_works && Array.isArray(artist.portfolio_works) && artist.portfolio_works.length > 0) {
-      artist.portfolio_works.forEach((w: any, idx: number) => {
-        if (!w) return;
-        const titles = parseWorksIntoTitles(w.title || w);
-        titles.forEach((title, tIdx) => {
-          list.push({
-            id: `work-p-${idx}-${tIdx}`,
-            title: title,
-            year: w.year || "연도미상",
-            description: w.description || "이 작품은 아티스트의 핵심적인 포트폴리오 프로젝트 아카이브입니다. 창의적인 연출과 기획 요소들이 담겨 있습니다.",
-            role: w.role || "창작",
-            image: w.image_url || "/images/placeholders/cake-placeholder.png",
-            videoUrl: w.video_url || "",
-            credits: w.role || "창작",
-            previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
-            previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
-            previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
-            media: w.media || null
+    const worksList = artist.works ?? artist.portfolio_works;
+    if (worksList && Array.isArray(worksList) && worksList.length > 0) {
+      const isObjects = typeof worksList[0] === "object";
+      if (isObjects) {
+        worksList.forEach((w: any, idx: number) => {
+          if (!w) return;
+          const titles = parseWorksIntoTitles(w.title || w);
+          titles.forEach((title, tIdx) => {
+            list.push({
+              id: w.id || `work-p-${idx}-${tIdx}`,
+              title: title,
+              year: w.year || "연도미상",
+              description: w.description || "이 작품은 아티스트의 핵심적인 포트폴리오 프로젝트 아카이브입니다. 창의적인 연출과 기획 요소들이 담겨 있습니다.",
+              role: w.role || "창작",
+              image: w.image_url || "/images/placeholders/cake-placeholder.png",
+              videoUrl: w.video_url || "",
+              credits: w.role || "창작",
+              previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
+              previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
+              previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
+              media: w.media || null
+            });
           });
         });
-      });
-      return list;
-    }
-
-    if (artist.works && Array.isArray(artist.works) && artist.works.length > 0) {
-      artist.works.forEach((w: any, idx: number) => {
-        if (!w) return;
-        const titles = parseWorksIntoTitles(w);
-        titles.forEach((title, tIdx) => {
-          let cleanTitle = title.trim();
-          let year = "연도미상";
-          const yearMatch = cleanTitle.match(/\((\d{4})\)/);
-          if (yearMatch) {
-            year = yearMatch[1];
-            cleanTitle = cleanTitle.replace(/\((\d{4})\)/, "").trim();
-          } else if (cleanTitle.includes("(연도미상)")) {
-            cleanTitle = cleanTitle.replace("(연도미상)", "").trim();
-          }
-          list.push({
-            id: `work-w-${idx}-${tIdx}`,
-            title: cleanTitle,
-            year,
-            description: "대표 아카이브 작품입니다.",
-            role: "창작자",
-            image: "/images/placeholders/cake-placeholder.png",
-            videoUrl: "",
-            credits: "참여: " + artist.name
+        return list;
+      } else {
+        worksList.forEach((w: any, idx: number) => {
+          if (!w) return;
+          const titles = parseWorksIntoTitles(w);
+          titles.forEach((title, tIdx) => {
+            let cleanTitle = title.trim();
+            let year = "연도미상";
+            const yearMatch = cleanTitle.match(/\((\d{4})\)/);
+            if (yearMatch) {
+              year = yearMatch[1];
+              cleanTitle = cleanTitle.replace(/\((\d{4})\)/, "").trim();
+            } else if (cleanTitle.includes("(연도미상)")) {
+              cleanTitle = cleanTitle.replace("(연도미상)", "").trim();
+            }
+            list.push({
+              id: `work-w-${idx}-${tIdx}`,
+              title: cleanTitle,
+              year,
+              description: "대표 아카이브 작품입니다.",
+              role: "창작자",
+              image: "/images/placeholders/cake-placeholder.png",
+              videoUrl: "",
+              credits: "참여: " + artist.name
+            });
           });
         });
-      });
-      return list;
+        return list;
+      }
     }
     return [];
   })();
@@ -260,7 +262,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   // Representative video for the Motion Profile reel — same priority order used
   // for the artist card previews on the /artists list (video_url, then first work's video).
-  const firstPortfolioWork = Array.isArray(artist.portfolio_works) ? (artist.portfolio_works[0] as any) : null;
+  const worksList = artist.works ?? artist.portfolio_works;
+  const firstPortfolioWork = Array.isArray(worksList) ? (worksList[0] as any) : null;
   const representativeVideoUrl: string =
     artist.video_url || firstPortfolioWork?.video_url || firstPortfolioWork?.videoUrl || firstPortfolioWork?.media?.url || "";
 
@@ -349,6 +352,41 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   return (
     <div style={{ background: "var(--bg-warm)", minHeight: "100vh", paddingBottom: "100px" }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .works-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+          gap: 24px !important;
+        }
+        @media (max-width: 768px) {
+          .works-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px 10px !important;
+          }
+          .work-card {
+            border-radius: 12px !important;
+          }
+          .work-card-media-wrapper {
+            aspect-ratio: 1.4 !important;
+          }
+          .work-card-info-wrapper {
+            padding: 12px 10px !important;
+            gap: 6px !important;
+          }
+          .work-card-title {
+            font-size: 0.82rem !important;
+          }
+          .work-card-role-year {
+            font-size: 0.6rem !important;
+            margin-top: 2px !important;
+          }
+          .work-card-desc {
+            font-size: 0.65rem !important;
+            line-height: 1.35 !important;
+            -webkit-line-clamp: 2 !important;
+          }
+        }
+      ` }} />
       
       {/* Toast Notification */}
       {toastMsg && (
@@ -384,9 +422,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)" }}>
               Artists
             </Link>
-            <Link href="/submit" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
               Register
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -559,11 +597,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             <p style={{ color: "var(--ink-muted)", fontSize: "0.85rem", padding: "20px 0" }}>등록된 작품 포트폴리오가 없습니다.</p>
           ) : (
             /* Visual Responsive Grid */
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "24px"
-            }}>
+            <div className="works-grid">
               {displayWorks.map((work) => (
                 <div
                   key={work.id}
@@ -578,7 +612,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     boxShadow: "0 4px 16px rgba(23, 20, 17, 0.02)",
                     transition: "all 0.2s ease"
                   }}
-                  className="hover-scale-img"
+                  className="work-card hover-scale-img"
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "translateY(-4px)";
                     e.currentTarget.style.boxShadow = "0 12px 24px rgba(23, 20, 17, 0.06)";
@@ -589,7 +623,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   }}
                 >
                   {/* Visual Preview Banner */}
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "1.4", overflow: "hidden", background: "#F5F1E8" }}>
+                  <div className="work-card-media-wrapper" style={{ position: "relative", width: "100%", aspectRatio: "1.4", overflow: "hidden", background: "#F5F1E8" }}>
                     {isYouTubeUrl(work.videoUrl || work.media?.url) ? (
                       <YouTubeMotionPreview
                         videoUrl={work.videoUrl || work.media?.url}
@@ -640,17 +674,17 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   </div>
 
                   {/* Visual Content info */}
-                  <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <div className="work-card-info-wrapper" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
                     <div>
-                      <h4 style={{ fontSize: "1.1rem", fontWeight: 850, color: "var(--navy)", margin: 0, letterSpacing: "-0.01em" }}>
+                      <h4 className="work-card-title" style={{ fontSize: "1.1rem", fontWeight: 850, color: "var(--navy)", margin: 0, letterSpacing: "-0.01em" }}>
                         {work.title}
                       </h4>
-                      <span className="mono" style={{ fontSize: "0.65rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginTop: "4px" }}>
+                      <span className="mono work-card-role-year" style={{ fontSize: "0.65rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginTop: "4px" }}>
                         {work.role}
                       </span>
                     </div>
 
-                    <p style={{
+                    <p className="work-card-desc" style={{
                       fontSize: "0.8rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0,
                       display: "-webkit-box", WebkitLineClamp: "3", WebkitBoxOrient: "vertical", overflow: "hidden"
                     }}>

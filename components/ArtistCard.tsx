@@ -58,10 +58,16 @@ export default function ArtistCard({ artist: a, onClick }: ArtistCardProps) {
         {a.name_en && (
           <p style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>{a.name_en}</p>
         )}
-        {(a.works && a.works.length > 0) ? (
-          <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", marginTop: "3px" }}>
-            〈{a.works[0]}〉{a.works.length > 1 && ` 외 ${a.works.length - 1}건`}
-          </p>
+        {a.works && a.works.length > 0 ? (
+          (() => {
+            const firstWork = a.works[0];
+            const firstWorkTitle = typeof firstWork === "string" ? firstWork : firstWork?.title || "";
+            return (
+              <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", marginTop: "3px" }}>
+                〈{firstWorkTitle}〉{a.works.length > 1 && ` 외 ${a.works.length - 1}건`}
+              </p>
+            );
+          })()
         ) : a.representative_work ? (
           <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", marginTop: "3px" }}>
             〈{a.representative_work}〉

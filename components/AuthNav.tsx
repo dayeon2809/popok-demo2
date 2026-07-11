@@ -18,13 +18,13 @@ export default function AuthNav() {
       }}>
         {t.myPopok}
       </Link>
-      <Link href="/submit" style={{
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSe_AHMbxzdsu2QJE9tFzAoWf5cAndjF4scnPdIEvwm5BsW2_w/viewform" target="_blank" rel="noopener noreferrer" style={{
         textDecoration: "none", fontSize: "0.875rem", fontWeight: 800,
         padding: "10px 20px", borderRadius: "10px",
         display: "inline-flex", alignItems: "center",
       }} className="btn-lime">
         {t.cta}
-      </Link>
+      </a>
     </div>
   );
 }

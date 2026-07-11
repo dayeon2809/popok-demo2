@@ -115,6 +115,8 @@ export async function POST(
       const mainImg = subData.profile_image_url || (Array.isArray(subData.profile_image_urls) ? subData.profile_image_urls[0] : null);
       const portfolioWorks = [
         {
+          id: `${slug}-001`,
+          slug: "official-motion-profile",
           title: "공식 모션 프로필",
           year: new Date().getFullYear().toString(),
           description: "POPOK 등록 모션 프로필 비디오 및 이미지 아카이브",
@@ -144,7 +146,7 @@ export async function POST(
             attachment: subData.instagram || "",
             email: subData.email || null,
             bio_short: subData.additional_requests || `${name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
-            portfolio_works: portfolioWorks,
+            works: portfolioWorks,
             status: "published"
           })
           .eq("id", existingArtist.id);
@@ -161,7 +163,7 @@ export async function POST(
             email: subData.email || null,
             slug,
             bio_short: subData.additional_requests || `${name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,
-            portfolio_works: portfolioWorks,
+            works: portfolioWorks,
             status: "published"
           });
         artistErr = error;

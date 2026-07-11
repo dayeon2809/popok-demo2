@@ -34,8 +34,8 @@ export default function Footer() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink)", fontWeight: 700, letterSpacing: "0.1em" }}>POPOK</span>
             <Link href="/#about" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>About</Link>
-            <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Artists</Link>
-            <Link href="/premium" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Premium</Link>
+            <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Artists (준비중)</Link>
+            <Link href="/premium" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Premium (준비중)</Link>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink)", fontWeight: 700, letterSpacing: "0.1em" }}>Social</span>

@@ -19,6 +19,11 @@ type SubmissionRecord = {
     profile_image_url?: string | null;
     motion_video_url?: string | null;
   }> | null;
+  works?: Array<{
+    kind?: string;
+    profile_image_url?: string | null;
+    motion_video_url?: string | null;
+  }> | null;
 };
 
 const TABS = [
@@ -61,8 +66,10 @@ function getStatusLabel(status?: string | null) {
 }
 
 function getRegistrationMedia(record: SubmissionRecord | null) {
-  if (!record || !Array.isArray(record.portfolio_works)) return null;
-  return record.portfolio_works.find((item) => item?.kind === "popok_registration_media") || null;
+  if (!record) return null;
+  const worksList = record.works ?? record.portfolio_works;
+  if (!Array.isArray(worksList)) return null;
+  return worksList.find((item) => item?.kind === "popok_registration_media") || null;
 }
 
 export default function MyPopokPage() {
