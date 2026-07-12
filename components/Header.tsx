@@ -14,8 +14,13 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
   },
   {
     href: "/artists",
-    label: { ko: "아티스트 (준비중)", en: "Artists (Preparing)" },
+    label: { ko: "아티스트", en: "Artists" },
     match: (pathname) => pathname === "/artists" || pathname.startsWith("/artists/"),
+  },
+  {
+    href: "/premium",
+    label: { ko: "Premium", en: "Premium" },
+    match: (pathname) => pathname === "/premium",
   },
   {
     href: "/#testimonials",

@@ -58,7 +58,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     if (!id) return;
     setLoading(true);
     setError(null);
-    fetch(`/api/artists/${encodeURIComponent(id)}`)
+    fetch(`/api/artists/${encodeURIComponent(id)}`, { cache: "no-store" })
       .then((r) => r.json())
       .then(({ data, error: err, detail }) => {
         if (err) {

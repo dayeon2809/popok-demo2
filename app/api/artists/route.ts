@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
           field: fValue,
           genre: gValue,
           role: record.role || `${fValue} 아티스트`,
-          type: record.artist_type || "individual",
+          type: record.role?.includes("단체") || record.company ? "group" : "individual",
           instagram: record.instagram || "",
           website: record.website || "",
           profileImage: profileImage || "/images/placeholders/cake-placeholder.png",
@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ data: merged, error: null }, {
-      headers: { "Cache-Control": "s-maxage=10, stale-while-revalidate=60" }, // Low cache to see DB publish immediately
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" }, // Supabase 수정이 CDN/브라우저 캐시 없이 즉시 반영되도록
     });
   } catch (err) {
     console.error("[/api/artists]", err);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PremiumPlanCard, { type BillingCycle } from "@/components/PremiumPlanCard";
 
 type PlanId = "free" | "student" | "artist";
@@ -12,6 +12,8 @@ interface PlanDef {
   tagline?: string;
   monthlyPrice: number;
   annualPrice: number;
+  originalMonthlyPrice?: number;
+  originalAnnualPrice?: number;
   badge?: string;
   highlight?: boolean;
   features: string[];
@@ -37,32 +39,32 @@ const PLANS: PlanDef[] = [
     tagline: "학업과 활동을 병행하는 아티스트를 위한 플랜",
     monthlyPrice: 3900,
     annualPrice: 39000,
-    badge: "첫 1개월 무료",
+    originalMonthlyPrice: 4900,
+    originalAnnualPrice: 49000,
+    badge: "오픈 이벤트가 · 평생 유지",
     features: [
-      "프로필 주기 업데이트",
-      "이메일로 작업 자료 제출",
-      "인스타그램 기반 작업 확인",
-      "대표 영상 및 사진 교체",
-      "작품 및 공연 이력 업데이트",
-      "학생 인증 기능은 추후 추가 예정",
+      "포트폴리오 제작",
+      "작품 관리",
+      "QR 명함",
+      "링크 공유",
     ],
   },
   {
     id: "artist",
-    name: "Artist",
+    name: "Premium",
     tagline: "활발히 활동하는 아티스트를 위한 정기 관리 플랜",
-    monthlyPrice: 5900,
-    annualPrice: 59000,
-    badge: "첫 1개월 무료",
+    monthlyPrice: 6900,
+    annualPrice: 69000,
+    originalMonthlyPrice: 9900,
+    originalAnnualPrice: 99000,
+    badge: "얼리버드 한정가",
     highlight: true,
     features: [
-      "정기 포트폴리오 관리",
-      "공연 및 작품 이력 업데이트",
-      "유튜브 영상 정리",
-      "인스타그램 기반 활동 확인",
-      "대표 사진 및 영상 업데이트",
-      "공개 프로필 우선 관리",
-      "향후 커스텀 도메인 연결 가능",
+      "Student 기능 모두 포함",
+      "AI 활동 모니터링",
+      "월 1회 업데이트 지원",
+      "프로필 분석",
+      "무제한 아티스트 탐색",
     ],
   },
 ];
@@ -92,8 +94,8 @@ const UPDATE_STEPS = [
 
 const FAQ_ITEMS = [
   {
-    question: "첫 달은 정말 무료인가요?",
-    answer: "네, Student·Artist 플랜 모두 첫 1개월은 무료로 이용하실 수 있어요. 이후부터 선택하신 주기에 따라 요금이 안내될 예정입니다.",
+    question: "오픈 이벤트 가격은 언제까지 적용되나요?",
+    answer: "지금 가입하시면 Student는 3,900원을 평생 유지해드리고, Premium은 얼리버드 한정으로 6,900원에 이용하실 수 있어요. 이벤트가 끝나면 각각 4,900원, 9,900원으로 전환될 예정이라 지금 가입하시는 것이 가장 유리해요.",
   },
   {
     question: "포트폴리오 업데이트는 어떻게 요청하나요?",
@@ -118,6 +120,7 @@ const FAQ_ITEMS = [
 ];
 
 export default function PremiumPage() {
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [openFaqIndexes, setOpenFaqIndexes] = useState<Record<number, boolean>>({});
   const [toastMsg, setToastMsg] = useState("");
@@ -131,7 +134,7 @@ export default function PremiumPage() {
     setOpenFaqIndexes((prev) => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  // 실제 결제 연동 전까지는 안내 메시지만 표시한다.
+  // 실제 결제 연동 전까지는 사전 신청(안내 접수) 메시지만 표시한다.
   const handleSubscribe = (planType: PlanId, cycle: BillingCycle) => {
     // TODO: 결제 연동 시 아래 엔드포인트와 연결
     // const res = await fetch("/api/checkout/create-subscription", {
@@ -141,7 +144,7 @@ export default function PremiumPage() {
     // });
     // const { checkoutUrl } = await res.json();
     // window.location.href = checkoutUrl; // Toss Payments / Stripe 결제 페이지로 이동 예정
-    triggerToast("아직 공개 전이에요.\nPOPOK 팀이 정리 후 이메일로 안내드릴게요.");
+    triggerToast("사전 신청이 접수됐어요!\n결제 오픈 시 이메일로 가장 먼저 안내드릴게요.");
   };
 
   return (
@@ -161,7 +164,7 @@ export default function PremiumPage() {
       {/* ── 1. TOP SECTION ── */}
       <section className="premium-section" style={{ maxWidth: "760px", margin: "0 auto", padding: "100px 32px 60px", textAlign: "center" }}>
         <span className="tag" style={{ background: "var(--accent)", color: "var(--navy)", border: "none", marginBottom: "20px", display: "inline-block" }}>
-          첫 1개월 무료
+          🎉 오픈 이벤트 · 얼리버드 특가
         </span>
         <h1 className="display" style={{ fontSize: "clamp(2rem, 5vw, 3rem)", color: "var(--navy)", fontWeight: 900, letterSpacing: "-0.03em", marginBottom: "20px" }}>
           포트폴리오, 이제 직접<br />업데이트하지 마세요.
@@ -171,37 +174,66 @@ export default function PremiumPage() {
         </p>
       </section>
 
-      {/* ── 2. SERVICE PREPARING STATUS PANEL (구독 요금제 준비중 숨김) ── */}
-      <section style={{ maxWidth: "600px", margin: "0 auto 80px", padding: "0 32px" }}>
-        <div style={{
-          background: "#FFFFFF",
-          border: "1.5px solid var(--border)",
-          borderRadius: "20px",
-          padding: "40px 32px",
-          textAlign: "center",
-          boxShadow: "0 10px 30px rgba(23, 20, 17, 0.03)"
-        }}>
+      {/* ── 2. BILLING TOGGLE + PRICING PLANS ── */}
+      <section className="premium-section" style={{ maxWidth: "1120px", margin: "0 auto 100px", padding: "0 32px" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "48px" }}>
           <div style={{
-            width: "60px", height: "60px", borderRadius: "50%",
-            background: "#FFF7ED", border: "1px solid #FDBA74",
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            marginBottom: "20px", color: "#EA580C", fontSize: "1.6rem", fontWeight: 900
+            display: "inline-flex", background: "#FFFFFF", border: "1.5px solid var(--border)",
+            borderRadius: "999px", padding: "4px", gap: "4px",
           }}>
-            !
-          </div>
-          <h2 style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--navy)", marginBottom: "12px" }}>
-            Premium 구독 서비스 준비 중
-          </h2>
-          <p style={{ color: "var(--ink-muted)", fontSize: "0.88rem", lineHeight: 1.6, marginBottom: "28px" }}>
-            아티스트의 정기 프로필 업데이트 및 맞춤 관리를 지원하는 Premium 플랜 서비스는 현재 준비 중입니다.<br />
-            준비가 완료되면 등록 시 기입하신 이메일로 빠르게 안내드릴게요!
-          </p>
-          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-            <Link href="/submit" className="btn-lime" style={{ textDecoration: "none", padding: "13px 24px", borderRadius: "12px", fontSize: "0.9rem", fontWeight: 900 }}>
-              기본 아티스트 무료 등록하기
-            </Link>
+            {(["monthly", "annual"] as BillingCycle[]).map((cycle) => {
+              const active = billingCycle === cycle;
+              return (
+                <button
+                  key={cycle}
+                  type="button"
+                  onClick={() => setBillingCycle(cycle)}
+                  style={{
+                    border: "none",
+                    borderRadius: "999px",
+                    padding: "10px 22px",
+                    fontSize: "0.85rem",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    background: active ? "var(--navy)" : "transparent",
+                    color: active ? "#FFFFFF" : "var(--ink-muted)",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {cycle === "monthly" ? "월간 결제" : "연간 결제 (2개월 무료)"}
+                </button>
+              );
+            })}
           </div>
         </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "24px" }}>
+          {PLANS.map((plan) => (
+            <PremiumPlanCard
+              key={plan.id}
+              name={plan.name}
+              tagline={plan.tagline}
+              price={billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice}
+              originalPrice={billingCycle === "monthly" ? plan.originalMonthlyPrice : plan.originalAnnualPrice}
+              billingCycle={billingCycle}
+              badge={plan.badge}
+              highlight={plan.highlight}
+              features={plan.features}
+              ctaLabel={plan.id === "free" ? "무료로 시작하기" : "구독 신청하기"}
+              onSubscribe={() => {
+                if (plan.id === "free") {
+                  router.push("/submit");
+                  return;
+                }
+                handleSubscribe(plan.id, billingCycle);
+              }}
+            />
+          ))}
+        </div>
+
+        <p style={{ textAlign: "center", color: "var(--ink-faint)", fontSize: "0.78rem", marginTop: "24px" }}>
+          결제 시스템은 준비 중이에요. 지금 신청하시면 오픈 시 가장 먼저 안내드려요.
+        </p>
       </section>
 
       {/* ── 4. HOW UPDATES WORK ── */}

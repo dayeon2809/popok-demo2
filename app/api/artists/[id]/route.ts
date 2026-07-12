@@ -122,7 +122,7 @@ export async function GET(
       const mappedArtist = mapDbRecordToArtist(record);
       return NextResponse.json(
         { data: mappedArtist, error: null },
-        { headers: { "Cache-Control": "s-maxage=30, stale-while-revalidate=120" } }
+        { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
       );
     }
 
@@ -140,7 +140,7 @@ export async function GET(
 
     return NextResponse.json(
       { data: { ...artist, works }, error: null },
-      { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=300" } }
+      { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   } catch (err: any) {
     console.error(`[/api/artists/${id}] Error:`, err);

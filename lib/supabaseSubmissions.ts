@@ -1,4 +1,5 @@
 import { getSupabaseServer } from "./supabaseServer";
+import type { ParsedArtistProfile, ParserStatus } from "./parsedProfile";
 
 export interface Submission {
   id: string;
@@ -17,6 +18,10 @@ export interface Submission {
   works?: any | null;
   claim_code?: string | null;
   public_slug?: string | null;
+  parsed_profile?: ParsedArtistProfile | null;
+  parsed_at?: string | null;
+  parser_status?: ParserStatus;
+  parser_error?: string | null;
 }
 
 // Explicit type for the Supabase submissions table (columns as they actually exist)
@@ -37,6 +42,10 @@ interface SubmissionRow {
   claim_code: string | null;
   public_slug: string | null;
   profile_image_urls: string[] | null;
+  parsed_profile: ParsedArtistProfile | null;
+  parsed_at: string | null;
+  parser_status: ParserStatus | null;
+  parser_error: string | null;
 }
 
 /**
@@ -75,5 +84,9 @@ export async function getSubmissions(): Promise<Submission[]> {
     works:         row.works || undefined,
     claim_code:    row.claim_code || undefined,
     public_slug:   row.public_slug || undefined,
+    parsed_profile: row.parsed_profile || null,
+    parsed_at:     row.parsed_at || null,
+    parser_status: row.parser_status || "not_parsed",
+    parser_error:  row.parser_error || null,
   }));
 }

@@ -6,6 +6,7 @@ interface PremiumPlanCardProps {
   name: string;
   tagline?: string;
   price: number;
+  originalPrice?: number;
   billingCycle: BillingCycle;
   badge?: string;
   highlight?: boolean;
@@ -18,6 +19,7 @@ export default function PremiumPlanCard({
   name,
   tagline,
   price,
+  originalPrice,
   billingCycle,
   badge,
   highlight,
@@ -27,6 +29,7 @@ export default function PremiumPlanCard({
 }: PremiumPlanCardProps) {
   const isFree = price === 0;
   const unit = billingCycle === "monthly" ? "월" : "년";
+  const showOriginalPrice = !isFree && !!originalPrice && originalPrice > price;
 
   return (
     <div
@@ -77,7 +80,12 @@ export default function PremiumPlanCard({
 
       {/* Price */}
       <div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "6px" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
+          {showOriginalPrice && (
+            <span style={{ fontSize: "1.1rem", color: "var(--ink-faint)", fontWeight: 700, textDecoration: "line-through" }}>
+              {originalPrice!.toLocaleString()}원
+            </span>
+          )}
           <span style={{ fontSize: "2rem", fontWeight: 900, color: "var(--navy)", letterSpacing: "-0.03em" }}>
             {isFree ? "0원" : `${price.toLocaleString()}원`}
           </span>

@@ -28,4 +28,10 @@ export const faqItems: FaqItem[] = [
     question: "프로필을 나중에 수정할 수 있나요?",
     answer: "네. 기본 수정 요청이 가능하며, 앞으로 정기적으로 포트폴리오를 관리해주는 Premium 서비스도 제공할 예정입니다.",
   },
+  {
+    question: "POPOK Premium은 무엇인가요?",
+    answer: "새로운 공연과 작품 활동을 POPOK 팀이 주기적으로 확인하고 정리해 아티스트 프로필을 최신 상태로 유지해주는 관리 서비스입니다.",
+    ctaHref: "/premium",
+    ctaLabel: "Premium 안내 보기 →",
+  },
 ];
