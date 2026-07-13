@@ -9,7 +9,6 @@ interface Stats {
   approvedSubmissions: number;
   rejectedSubmissions: number;
   publishedArtists: number;
-  lastSync: string | null;
 }
 
 export default function AdminPage() {
@@ -234,18 +233,7 @@ export default function AdminPage() {
             <div style={{ fontSize: "2.4rem", fontWeight: 800, color: "#1F2937", margin: "10px 0 4px 0" }}>
               {stats.publishedArtists}
             </div>
-            <span style={{ fontSize: "0.78rem", color: "var(--ink-muted)" }}>data/artists.json 기준</span>
-          </div>
-
-          {/* Card 5: Last Sync Time */}
-          <div style={{ ...cardStyle, gridColumn: "1 / -1" }}>
-            <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--ink-muted)" }}>최근 Airtable 동기화 시점 (Last Sync)</span>
-            <div style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--navy)", margin: "8px 0" }}>
-              {stats.lastSync ? new Date(stats.lastSync).toLocaleString("ko-KR") : "동기화 이력이 없습니다."}
-            </div>
-            <a href="/admin/sync" style={{ fontSize: "0.78rem", color: "var(--navy)", fontWeight: 700, textDecoration: "none" }}>
-              동기화 실행 페이지로 이동 →
-            </a>
+            <span style={{ fontSize: "0.78rem", color: "var(--ink-muted)" }}>Supabase 기준</span>
           </div>
         </div>
       )}

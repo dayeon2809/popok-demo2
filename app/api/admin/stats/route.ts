@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
 import { getSubmissions } from "@/lib/supabaseSubmissions";
-
+import { getSupabaseServer } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
@@ -22,38 +20,29 @@ export async function GET(req: NextRequest) {
     const submissions = await getSubmissions();
     const totalSubmissions = submissions.length;
 
-    // 2. Get published artists count
+    // 2. Get published artists count directly from Supabase
     let publishedArtists = 0;
     try {
-      const artistsPath = path.join(process.cwd(), "data/artists.json");
-      if (fs.existsSync(artistsPath)) {
-        const fileContent = fs.readFileSync(artistsPath, "utf8");
-        const artists = JSON.parse(fileContent);
-        publishedArtists = artists.filter((a: any) => !a.status || a.status === "published").length;
-      }
-    } catch (err) {
-      console.warn("Failed to read artists.json for statistics", err);
-    }
+      const supabase = getSupabaseServer();
+      const { count, error } = await supabase
+        .from("artists")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "published");
 
-    // 3. Get last sync metadata
-    let lastSync = null;
-    try {
-      const metaPath = path.join(process.cwd(), "data/sync-meta.json");
-      if (fs.existsSync(metaPath)) {
-        const fileContent = fs.readFileSync(metaPath, "utf8");
-        const meta = JSON.parse(fileContent);
-        lastSync = meta.lastSync || null;
+      if (error) {
+        console.error("Failed to query published artists from Supabase:", error);
+      } else if (count !== null) {
+        publishedArtists = count;
       }
     } catch (err) {
-      console.warn("Failed to read sync-meta.json", err);
+      console.warn("Failed to read Supabase for statistics", err);
     }
 
     return NextResponse.json({
       success: true,
       stats: {
         totalSubmissions,
-        publishedArtists,
-        lastSync
+        publishedArtists
       }
     });
   } catch (err: any) {
@@ -64,3 +53,4 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+

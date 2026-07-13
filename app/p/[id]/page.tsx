@@ -41,9 +41,7 @@ export default async function CardResultPage({ params }: Props) {
     console.error("[CardResultPage] Query error:", err);
   }
 
-  // If no record is found in submissions, check if they exist in local artists.json database as a fallback
   if (!record) {
-    // If not found anywhere, trigger 404
     notFound();
   }
 

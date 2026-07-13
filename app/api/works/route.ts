@@ -1,46 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
-import { artists } from "@/lib/artists";
+import { getSupabaseServer } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
     const artistId = req.nextUrl.searchParams.get("artist_id");
-    
+    const supabase = getSupabaseServer();
+
     let works: any[] = [];
     if (artistId) {
-      const artist = artists.find((a) => a.id === artistId || a.recordId === artistId);
-      if (artist) {
-        works = (artist.works || []).map((w) => {
-          const title = typeof w === "string" ? w : (w as any).title || "";
+      const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
+      let dbQuery = supabase
+        .from("artists")
+        .select("id, name, slug, works, status");
+      
+      if (!showDraft) {
+        dbQuery = dbQuery.eq("status", "published");
+      }
+
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(artistId);
+      if (isUuid) {
+        dbQuery = dbQuery.or(`id.eq.${artistId},slug.eq.${artistId},name.eq.${artistId}`);
+      } else {
+        dbQuery = dbQuery.or(`slug.eq.${artistId},name.eq.${artistId}`);
+      }
+
+      const { data: record, error: dbErr } = (await dbQuery.maybeSingle()) as any;
+
+      if (!dbErr && record) {
+        const dbWorks = Array.isArray(record.works) ? record.works : [];
+        const artistIdVal = record.slug || String(record.id);
+        works = dbWorks.map((w: any) => {
+          const title = typeof w === "string" ? w : w?.title || "";
           return {
             title,
-            artist_id: artist.id,
-            artist_name: artist.name,
-            year: null,
-            role: "choreographer",
-            venue: "",
-            festival: "",
-            source_url: "",
+            artist_id: artistIdVal,
+            artist_name: record.name,
+            year: typeof w === "object" ? w?.year || null : null,
+            role: typeof w === "object" ? w?.role || "choreographer" : "choreographer",
+            venue: typeof w === "object" ? w?.venue || "" : "",
+            festival: typeof w === "object" ? w?.festival || "" : "",
+            source_url: typeof w === "object" ? w?.source_url || "" : "",
           };
         });
       }
     } else {
-      works = artists.flatMap((a) =>
-        (a.works || []).map((w) => {
-          const title = typeof w === "string" ? w : (w as any).title || "";
-          return {
-            title,
-            artist_id: a.id,
-            artist_name: a.name,
-            year: null,
-            role: "choreographer",
-            venue: "",
-            festival: "",
-            source_url: "",
-          };
-        })
-      );
+      const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
+      let dbQuery = supabase
+        .from("artists")
+        .select("id, name, slug, works, status");
+      
+      if (!showDraft) {
+        dbQuery = dbQuery.eq("status", "published");
+      }
+
+      const { data: records, error: dbErr } = (await dbQuery) as any;
+
+      if (!dbErr && records) {
+        works = records.flatMap((record: any) => {
+          const dbWorks = Array.isArray(record.works) ? record.works : [];
+          const artistIdVal = record.slug || String(record.id);
+          return dbWorks.map((w: any) => {
+            const title = typeof w === "string" ? w : w?.title || "";
+            return {
+              title,
+              artist_id: artistIdVal,
+              artist_name: record.name,
+              year: typeof w === "object" ? w?.year || null : null,
+              role: typeof w === "object" ? w?.role || "choreographer" : "choreographer",
+              venue: typeof w === "object" ? w?.venue || "" : "",
+              festival: typeof w === "object" ? w?.festival || "" : "",
+              source_url: typeof w === "object" ? w?.source_url || "" : "",
+            };
+          });
+        });
+      }
     }
 
     return NextResponse.json({ data: works, error: null }, {
@@ -54,3 +89,4 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+

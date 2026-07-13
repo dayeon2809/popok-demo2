@@ -340,3 +340,7 @@ input:focus, select:focus, textarea:focus {
   from { transform: translate(-50%, 100%); }
   to { transform: translate(-50%, 0); }
 }
+
+.flip-card-container:hover .popok-card-img {
+  transform: scale(1.03);
+}

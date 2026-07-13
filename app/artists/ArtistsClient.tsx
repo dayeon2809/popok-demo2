@@ -364,8 +364,8 @@ export default function ArtistsClient() {
           box-shadow: 0 20px 40px rgba(23, 20, 17, 0.12) !important;
         }
         .showcase-card:hover img {
-          filter: grayscale(0) contrast(1.02) !important;
-          transform: scale(1.05);
+          filter: contrast(1.02) !important;
+          transform: scale(1.03);
         }
         .showcase-card:hover .arrow-btn {
           background-color: var(--accent) !important;
@@ -622,7 +622,7 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
                 alt={artist.name}
                 style={{
                   width: "100%", height: "100%", objectFit: "cover",
-                  filter: "grayscale(1) contrast(1.05) brightness(0.8)",
+                  filter: "contrast(1.02) brightness(0.9)",
                   transition: "transform 0.5s ease, filter 0.5s ease"
                 }}
               />

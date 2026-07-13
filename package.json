@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "sync": "npx tsx scripts/sync.ts"
+    "start": "next start"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

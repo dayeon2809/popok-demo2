@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AuthNav from "@/components/AuthNav";
 import { useLanguage, type Language } from "@/lib/useLanguage";
+import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
 const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (pathname: string) => boolean }> = [
   {
@@ -36,8 +37,38 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
+  const [user, setUser] = useState<any>(null);
+  const supabase = createBrowserSupabaseClient();
+
+  useEffect(() => {
+    async function getSession() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setUser(session.user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setMenuOpen(false);
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <nav style={{
@@ -176,37 +207,59 @@ export default function Header() {
               </Link>
             );
           })}
-          <Link
-            href="/my-popok"
-            onClick={() => setMenuOpen(false)}
-            style={{
-              textDecoration: "none",
-              padding: "14px 6px",
-              fontSize: "0.95rem",
-              fontWeight: 700,
-              color: pathname === "/my-popok" ? "var(--navy)" : "var(--ink-muted)",
-              borderBottom: "1px solid var(--border)",
-            }}
-          >
-            {language === "ko" ? "내 포퐄 확인하기" : "My POPOK"}
-          </Link>
-
-          <Link
-            href="/submit"
-            onClick={() => setMenuOpen(false)}
-            className="btn-lime"
-            style={{
-              textDecoration: "none",
-              marginTop: "12px",
-              padding: "13px 16px",
-              borderRadius: "12px",
-              fontSize: "0.9rem",
-              fontWeight: 850,
-              textAlign: "center",
-            }}
-          >
-            {language === "ko" ? "내 포퐄 만들기" : "Get my POPOK"}
-          </Link>
+          {!user ? (
+            <Link
+              href="/auth"
+              onClick={() => setMenuOpen(false)}
+              className="btn-lime"
+              style={{
+                textDecoration: "none",
+                marginTop: "12px",
+                padding: "13px 16px",
+                borderRadius: "12px",
+                fontSize: "0.9rem",
+                fontWeight: 850,
+                textAlign: "center",
+              }}
+            >
+              {language === "ko" ? "내 포퐄 만들기" : "Get my POPOK"}
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/my-popok"
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  textDecoration: "none",
+                  padding: "14px 6px",
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
+                  color: pathname === "/my-popok" ? "var(--navy)" : "var(--ink-muted)",
+                  borderBottom: "1px solid var(--border)",
+                }}
+              >
+                {language === "ko" ? "내 포퐄 확인하기" : "My POPOK"}
+              </Link>
+              <button
+                onClick={handleSignOut}
+                style={{
+                  textDecoration: "none",
+                  padding: "14px 6px",
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
+                  color: "var(--ink-muted)",
+                  border: 0,
+                  background: "transparent",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  borderBottom: "1px solid var(--border)",
+                }}
+              >
+                {language === "ko" ? "로그아웃" : "Sign Out"}
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>

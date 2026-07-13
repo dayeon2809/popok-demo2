@@ -10,6 +10,7 @@ export type VerificationStatus = "verified" | "needs_review";
 export interface Artist {
   id: string;                         // fields.id (김경숙-b0431df7 또는 yoon-kyunggeun)
   name: string;
+  /** @deprecated Deletion candidate. To be migrated in the next phase. */
   company?: string;                   // 소속/단체명
   bio?: string;                       // 소개글
   works?: Array<string | Work>;       // 대표작 목록 (문자열 또는 상세 객체 배열)
@@ -23,6 +24,7 @@ export interface Artist {
   status?: "published" | "draft" | string; // 검수 상태
   verified?: boolean;                 // 검증 여부
   slug?: string;                      // 아티스트 슬러그명
+  /** @deprecated Deletion candidate. To be migrated in the next phase. */
   claim_code?: string;                // 비공개 로그인 코드 (poc_xxxxxxxx)
   aiSummary?: string;                 // AI 요약 정보
   reviews?: Array<{                   // 관련 리뷰 링크 목록

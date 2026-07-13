@@ -109,17 +109,7 @@ export default function AdminArtistsPage() {
         return;
       }
 
-      // 2. Trigger cache sync to update JSON static files
-      const syncRes = await fetch("/api/admin/sync?type=all", {
-        method: "POST",
-        headers: {
-          "x-admin-passcode": passcode,
-        },
-      });
 
-      if (!syncRes.ok) {
-        console.warn("삭제는 완료되었으나 캐시 동기화에 실패했습니다. 수동 동기화를 수행해주세요.");
-      }
 
       alert("아티스트가 삭제되었습니다.");
       setDeletingId(null);

@@ -108,7 +108,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
         }}>
           {isYoutubePlayback ? (
             playing ? (
-              <div style={{ width: "100%", height: "100%", filter: "grayscale(0.5) contrast(1.1) brightness(0.85)" }}>
+              <div style={{ width: "100%", height: "100%", filter: "contrast(1.1) brightness(0.95)" }}>
                 <YouTubeMotionPreview
                   videoId={youtubeVideoId}
                   title={`${name} representative video`}
@@ -127,7 +127,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
-                  filter: "grayscale(0.6) contrast(1.15) brightness(0.85)",
+                  filter: "contrast(1.15) brightness(0.95)",
                 }}
               />
             )
@@ -143,7 +143,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                filter: "grayscale(0.5) contrast(1.1) brightness(0.85)",
+                filter: "contrast(1.1) brightness(0.95)",
               }}
               onTimeUpdate={handleTimeUpdate}
               onError={() => {
@@ -159,7 +159,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                filter: "grayscale(0.6) contrast(1.15) brightness(0.85)",
+                filter: "contrast(1.15) brightness(0.95)",
                 transform: playing ? "scale(1.15) translate(10px, -5px)" : "scale(1) translate(0, 0)",
                 transition: "transform 15s linear infinite alternate",
                 animation: playing ? "slowZoomMotion 15s linear infinite alternate" : "none"

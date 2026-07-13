@@ -145,7 +145,8 @@ export default function PopokCard({
               <img
                 src={profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}`}
                 alt={name}
-                style={{ width: "100%", height: "100%", objectFit: "cover", filter: "grayscale(1) contrast(1.08)" }}
+                className="popok-card-img"
+                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}
               />
               {/* Little Lime Accent Label */}
               <div style={{

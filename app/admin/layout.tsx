@@ -47,7 +47,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Submissions", path: "/admin/submissions" },
     { name: "Artists", path: "/admin/artists" },
     { name: "Performances", path: "/admin/performances" },
-    { name: "Sync", path: "/admin/sync" },
   ];
 
   return (
