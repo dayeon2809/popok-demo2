@@ -69,7 +69,7 @@ export default async function CardResultPage({ params }: Props) {
             <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
               Artists
             </Link>
-            <Link href="/submit" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
+            <Link href="/onboarding" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
               Create card
             </Link>
           </div>

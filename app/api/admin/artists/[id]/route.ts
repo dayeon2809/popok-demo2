@@ -46,6 +46,64 @@ export async function DELETE(
   }
 }
 
+// Whitelisted, real-column-only partial edit: core profile fields plus a status
+// toggle restricted to the two values actually used anywhere in this codebase
+// (published | draft) — never write a status value that isn't already real.
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!checkAuth(req)) {
+    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
+  }
+
+  const { id: artistId } = await params;
+  if (!artistId) {
+    return NextResponse.json({ success: false, error: "유효하지 않은 아티스트 ID입니다." }, { status: 400 });
+  }
+
+  try {
+    const body = await req.json();
+    const updateData: Record<string, any> = {};
+
+    if (typeof body.name === "string") updateData.name = body.name.trim();
+    if (typeof body.name_en === "string") updateData.name_en = body.name_en.trim();
+    if (typeof body.genre === "string") updateData.genre = body.genre.trim();
+    if (typeof body.role === "string") updateData.role = body.role.trim();
+    if (typeof body.bio_short === "string") updateData.bio_short = body.bio_short.trim();
+
+    if (body.status !== undefined) {
+      if (body.status !== "published" && body.status !== "draft") {
+        return NextResponse.json({ success: false, error: "status는 published 또는 draft만 허용됩니다." }, { status: 400 });
+      }
+      updateData.status = body.status;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ success: false, error: "수정할 내용이 없습니다." }, { status: 400 });
+    }
+
+    updateData.updated_at = new Date().toISOString();
+
+    const supabase = getSupabaseServer();
+    const { data: updated, error: updateErr } = await (supabase.from("artists") as any)
+      .update(updateData)
+      .eq("id", artistId)
+      .select()
+      .maybeSingle();
+
+    if (updateErr) {
+      console.error("[PATCH /api/admin/artists/[id]] Update error:", updateErr);
+      return NextResponse.json({ success: false, error: `수정 실패: ${updateErr.message}` }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data: updated });
+  } catch (err: any) {
+    console.error("[PATCH /api/admin/artists/[id]] Server error:", err);
+    return NextResponse.json({ success: false, error: "서버 오류가 발생했습니다.", detail: String(err) }, { status: 500 });
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

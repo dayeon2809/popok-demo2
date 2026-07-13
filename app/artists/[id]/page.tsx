@@ -8,6 +8,8 @@ import PopokCard from "@/components/PopokCard";
 import MotionProfile from "@/components/MotionProfile";
 import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
 import { getYouTubePreviewAspectRatio, isYouTubeUrl } from "@/lib/youtube";
+import { isSameVideoUrl, getYouTubeEmbedUrl, isDirectVideoUrl } from "@/lib/video";
+import { isVimeoUrl, getVimeoEmbedUrl } from "@/lib/videoLinks";
 
 interface WorkItem {
   id: string;
@@ -196,7 +198,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               description: w.description || "이 작품은 아티스트의 핵심적인 포트폴리오 프로젝트 아카이브입니다. 창의적인 연출과 기획 요소들이 담겨 있습니다.",
               role: w.role || "창작",
               image: w.image_url || "/images/placeholders/cake-placeholder.png",
-              videoUrl: w.video_url || "",
+              videoUrl: w.video_url || w.video || w.videoUrl || "",
               credits: w.role || "창작",
               previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
               previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
@@ -260,12 +262,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     return list;
   })();
 
-  // Representative video for the Motion Profile reel — same priority order used
-  // for the artist card previews on the /artists list (video_url, then first work's video).
-  const worksList = artist.works ?? artist.portfolio_works;
-  const firstPortfolioWork = Array.isArray(worksList) ? (worksList[0] as any) : null;
-  const representativeVideoUrl: string =
-    artist.video_url || firstPortfolioWork?.video_url || firstPortfolioWork?.videoUrl || firstPortfolioWork?.media?.url || "";
+  // Motion profile video comes ONLY from motion_video_url (1순위: artist.motion_video_url)
+  const representativeVideoUrl: string = artist.motion_video_url || "";
 
   const englishName = artist.name_en || (artist.name ? artist.name.toUpperCase() : "CREATIVE");
   const tags = Array.isArray(artist.tags) ? artist.tags : [artist.field, artist.genre].filter(Boolean);
@@ -278,45 +276,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     const lat = (37.5665 + (hash % 100) / 1000).toFixed(4);
     const lng = (126.978 + (Math.abs(hash) % 100) / 1000).toFixed(4);
     return `${lat}° N, ${lng}° E`;
-  };
-
-  // Video ID extractors for Youtube & Vimeo
-  const getYoutubeEmbedUrl = (url: string): string | null => {
-    try {
-      let videoId = "";
-      if (url.includes("youtu.be/")) {
-        videoId = url.split("youtu.be/")[1].split(/[?#]/)[0];
-      } else if (url.includes("youtube.com/watch")) {
-        const urlObj = new URL(url);
-        videoId = urlObj.searchParams.get("v") || "";
-      } else if (url.includes("youtube.com/embed/")) {
-        videoId = url.split("youtube.com/embed/")[1].split(/[?#]/)[0];
-      } else if (url.includes("youtube.com/shorts/")) {
-        videoId = url.split("youtube.com/shorts/")[1].split(/[?#]/)[0];
-      }
-      if (videoId) {
-        return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
-      }
-    } catch (e) {
-      console.error("Failed to parse YouTube URL", e);
-    }
-    return null;
-  };
-
-  const getVimeoEmbedUrl = (url: string): string | null => {
-    try {
-      let videoId = "";
-      if (url.includes("vimeo.com/")) {
-        const parts = url.split("vimeo.com/")[1].split(/[?#]/)[0].split("/");
-        videoId = parts[parts.length - 1];
-      }
-      if (videoId && /^\d+$/.test(videoId)) {
-        return `https://player.vimeo.com/video/${videoId}?autoplay=0&byline=0&portrait=0`;
-      }
-    } catch (e) {
-      console.error("Failed to parse Vimeo URL", e);
-    }
-    return null;
   };
 
   const parsedActiveMedia = activeWork ? (() => {
@@ -422,7 +381,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)" }}>
               Artists
             </Link>
-            <Link href="/submit" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
+            <Link href="/onboarding" style={{ textDecoration: "none", fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)" }}>
               Register
             </Link>
           </div>
@@ -463,10 +422,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           <MotionProfile
             name={artist.name}
             genre={artist.genre}
-            image={artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
+            image={artist.profile_image_url || (Array.isArray(artist.profile_image_urls) && artist.profile_image_urls[0]) || artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
             quote={artist.bio_short}
-            motionProfile={artist.motionProfile}
-            representativeVideoUrl={representativeVideoUrl}
+            videoUrl={representativeVideoUrl}
           />
         </section>
 
@@ -582,6 +540,76 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </section>
 
+        {/* ── 2.5. VIDEO PROFILE (Additional Video Section) ── */}
+        {artist.youtube_url && !isSameVideoUrl(artist.youtube_url, artist.motion_video_url) && (
+          <section style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "8px", marginTop: "-30px", paddingBottom: "60px" }}>
+            <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "24px" }}>
+              <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                Video Profile
+              </span>
+              <h3 style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--navy)", marginTop: "4px", letterSpacing: "-0.02em" }}>
+                소개 및 하이라이트 영상
+              </h3>
+            </div>
+
+            <div style={{
+              width: "100%",
+              maxWidth: "720px",
+              aspectRatio: "16 / 9",
+              background: "#171411",
+              borderRadius: "20px",
+              border: "2px solid var(--navy)",
+              overflow: "hidden",
+              boxShadow: "0 20px 40px rgba(23, 20, 17, 0.15)",
+            }}>
+              {(() => {
+                const url = artist.youtube_url;
+                const isYt = isYouTubeUrl(url);
+                const isVim = isVimeoUrl(url);
+                const isDirect = isDirectVideoUrl(url);
+
+                if (isYt) {
+                  const ytEmbed = getYouTubeEmbedUrl(url);
+                  return (
+                    <iframe
+                      src={ytEmbed ? `${ytEmbed}?autoplay=0&controls=1&rel=0` : ""}
+                      style={{ width: "100%", height: "100%", border: 0 }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="YouTube video player"
+                    />
+                  );
+                } else if (isVim) {
+                  const vimEmbed = getVimeoEmbedUrl(url, false);
+                  return (
+                    <iframe
+                      src={vimEmbed || ""}
+                      style={{ width: "100%", height: "100%", border: 0 }}
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title="Vimeo video player"
+                    />
+                  );
+                } else if (isDirect) {
+                  return (
+                    <video
+                      src={url}
+                      controls
+                      playsInline
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  );
+                }
+                return (
+                  <div style={{ display: "flex", alignItems: "center", justifyItems: "center", height: "100%", color: "#999", padding: "20px", textAlign: "center" }}>
+                    재생할 수 없는 영상 주소입니다.
+                  </div>
+                );
+              })()}
+            </div>
+          </section>
+        )}
+
         {/* ──────────────── 3. SELECTED WORKS (Visual Card Layouts - Split) ──────────────── */}
         <section style={{ marginBottom: "80px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "28px" }}>
@@ -624,17 +652,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 >
                   {/* Visual Preview Banner */}
                   <div className="work-card-media-wrapper" style={{ position: "relative", width: "100%", aspectRatio: "1.4", overflow: "hidden", background: "#F5F1E8" }}>
-                    {isYouTubeUrl(work.videoUrl || work.media?.url) ? (
-                      <YouTubeMotionPreview
-                        videoUrl={work.videoUrl || work.media?.url}
-                        title={`${work.title} motion preview`}
-                        previewStart={work.media?.previewStart ?? work.previewStart ?? 0}
-                        previewEnd={work.media?.previewEnd ?? work.previewEnd ?? 15}
-                        aspectRatio={work.media?.aspectRatio || work.previewAspectRatio || getYouTubePreviewAspectRatio(work.videoUrl || work.media?.url)}
-                        playMode="hover"
-                        fill
-                      />
-                    ) : work.image && !work.image.includes("cake-placeholder") ? (
+                    {work.image && !work.image.includes("cake-placeholder") ? (
                       <img
                         src={work.image}
                         alt={work.title}
@@ -879,6 +897,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               genre={artist.genre}
               instagram={artist.instagram}
               id={artist.id}
+              slug={artist.slug || artist.id}
               profileImage={artist.profileImage}
             />
           </div>
@@ -970,33 +989,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   justifyContent: "center",
                   position: "relative"
                 }}>
-                  {parsedActiveMedia.type === "youtube" && isYouTubeUrl(parsedActiveMedia.url || "") ? (
-                    <YouTubeMotionPreview
-                      videoUrl={parsedActiveMedia.url || ""}
-                      title={activeWork.title}
-                      previewStart={(parsedActiveMedia as any).previewStart ?? activeWork.previewStart ?? 0}
-                      previewEnd={(parsedActiveMedia as any).previewEnd ?? activeWork.previewEnd ?? 15}
-                      aspectRatio={(parsedActiveMedia as any).aspectRatio || activeWork.previewAspectRatio || getYouTubePreviewAspectRatio(parsedActiveMedia.url || "")}
-                      playMode="always"
-                      fill
-                    />
-                  ) : parsedActiveMedia.type === "vimeo" && getVimeoEmbedUrl(parsedActiveMedia.url || "") ? (
-                    <iframe
-                      src={getVimeoEmbedUrl(parsedActiveMedia.url || "") || ""}
-                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
-                      title={activeWork.title}
-                    />
-                  ) : parsedActiveMedia.type === "video" && parsedActiveMedia.src ? (
-                    <video
-                      src={parsedActiveMedia.src}
-                      poster={parsedActiveMedia.poster || activeWork.image}
-                      controls
-                      playsInline
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                    />
-                  ) : activeWork.image && !activeWork.image.includes("cake-placeholder") ? (
+                  {activeWork.image && !activeWork.image.includes("cake-placeholder") ? (
                     <img
                       src={activeWork.image}
                       alt={activeWork.title}
@@ -1082,7 +1075,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       borderRadius: "24px", fontSize: "0.85rem", fontWeight: 800, cursor: "pointer"
                     }}
                   >
-                    Watch Video Profile ↗
+                    Watch Video ↗
                   </a>
                 ) : (
                   <button

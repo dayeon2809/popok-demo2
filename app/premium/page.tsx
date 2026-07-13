@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import PremiumPlanCard, { type BillingCycle } from "@/components/PremiumPlanCard";
 
 type PlanId = "free" | "student" | "artist";
@@ -120,7 +119,6 @@ const FAQ_ITEMS = [
 ];
 
 export default function PremiumPage() {
-  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
   const [openFaqIndexes, setOpenFaqIndexes] = useState<Record<number, boolean>>({});
   const [toastMsg, setToastMsg] = useState("");
@@ -183,6 +181,8 @@ export default function PremiumPage() {
           }}>
             {(["monthly", "annual"] as BillingCycle[]).map((cycle) => {
               const active = billingCycle === cycle;
+              const activeBackground = cycle === "annual" ? "var(--accent)" : "var(--navy)";
+              const activeColor = cycle === "annual" ? "var(--navy)" : "#FFFFFF";
               return (
                 <button
                   key={cycle}
@@ -195,8 +195,8 @@ export default function PremiumPage() {
                     fontSize: "0.85rem",
                     fontWeight: 800,
                     cursor: "pointer",
-                    background: active ? "var(--navy)" : "transparent",
-                    color: active ? "#FFFFFF" : "var(--ink-muted)",
+                    background: active ? activeBackground : "transparent",
+                    color: active ? activeColor : "var(--ink-muted)",
                     transition: "all 0.2s ease",
                   }}
                 >
@@ -208,27 +208,25 @@ export default function PremiumPage() {
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "24px" }}>
-          {PLANS.map((plan) => (
-            <PremiumPlanCard
-              key={plan.id}
-              name={plan.name}
-              tagline={plan.tagline}
-              price={billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice}
-              originalPrice={billingCycle === "monthly" ? plan.originalMonthlyPrice : plan.originalAnnualPrice}
-              billingCycle={billingCycle}
-              badge={plan.badge}
-              highlight={plan.highlight}
-              features={plan.features}
-              ctaLabel={plan.id === "free" ? "무료로 시작하기" : "구독 신청하기"}
-              onSubscribe={() => {
-                if (plan.id === "free") {
-                  router.push("/submit");
-                  return;
-                }
-                handleSubscribe(plan.id, billingCycle);
-              }}
-            />
-          ))}
+          {PLANS.map((plan) => {
+            const isFreePlan = plan.monthlyPrice === 0;
+
+            return (
+              <PremiumPlanCard
+                key={plan.id}
+                name={plan.name}
+                tagline={plan.tagline}
+                price={billingCycle === "monthly" ? plan.monthlyPrice : plan.annualPrice}
+                originalPrice={billingCycle === "monthly" ? plan.originalMonthlyPrice : plan.originalAnnualPrice}
+                billingCycle={billingCycle}
+                badge={plan.badge}
+                highlight={plan.highlight}
+                features={plan.features}
+                ctaLabel={isFreePlan ? "무료로 시작하기" : "구독 신청하기"}
+                onSubscribe={() => handleSubscribe(plan.id, billingCycle)}
+              />
+            );
+          })}
         </div>
 
         <p style={{ textAlign: "center", color: "var(--ink-faint)", fontSize: "0.78rem", marginTop: "24px" }}>

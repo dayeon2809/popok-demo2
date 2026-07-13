@@ -132,6 +132,11 @@ input:focus, select:focus, textarea:focus {
   .header-inner { padding: 0 16px !important; }
   .auth-nav { display: none !important; }
 
+  /* Header: 로그인 상태 계정 pill은 모바일에서도 표시하되, 화살표를 숨기고
+     핸들 텍스트 폭을 줄여 공간을 최소화한다 (로그아웃 CTA 버튼은 기존대로 숨김). */
+  .auth-nav-chevron { display: none !important; }
+  .auth-nav-handle { max-width: 64px !important; font-size: 0.74rem !important; }
+
   /* Home / Performance Detail: 2단 그리드 → 1단 */
   .responsive-stack-320 { grid-template-columns: 1fr !important; }
   .home-about-grid { grid-template-columns: 1fr !important; padding: 28px 24px !important; }
@@ -157,6 +162,25 @@ input:focus, select:focus, textarea:focus {
 
   /* Premium 페이지: 섹션 상하 여백 축소 */
   .premium-section { padding-top: 56px !important; padding-bottom: 56px !important; }
+
+  /* Home Artist Carousel (지금 만나볼/새롭게 등록된/지금 활동 중인 예술가):
+     한 화면에 카드가 ~2.5~3장 보이도록 카드 폭을 줄인다. 카드 내부 콘텐츠는
+     260px 디자인 폭 그대로 렌더링한 뒤 transform: scale()로 통째로 축소하므로
+     폰트·배지·바코드·이미지 비율이 전부 그대로 유지된다. 데스크톱은 이 블록
+     밖이라 영향 없음. */
+  .artist-carousel-section { padding-left: 16px !important; padding-right: 16px !important; }
+  .artist-carousel-track { gap: 14px !important; }
+  .artist-carousel-slot {
+    min-width: 130px !important;
+    max-width: 130px !important;
+    height: 216px !important;
+    overflow: hidden !important;
+  }
+  .artist-carousel-scale {
+    width: 260px !important;
+    transform: scale(0.5) !important;
+    transform-origin: top left !important;
+  }
 }
 
 /* ── POPOK Custom Motion & Interactions ── */

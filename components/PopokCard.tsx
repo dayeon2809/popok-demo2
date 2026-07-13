@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
+import Link from "next/link";
 
 interface PopokCardProps {
   name: string;
@@ -8,9 +9,14 @@ interface PopokCardProps {
   genre: string | null;
   instagram: string | null;
   id: string;
+  slug?: string;
   profileImage?: string;
-  cardUrl?: string;
 }
+
+// NEXT_PUBLIC_ vars are inlined at build time, so this is identical in the
+// server-rendered HTML and the client's first render — never derived from
+// window.location, which would differ between the two and break hydration.
+const PUBLIC_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://popok.kr";
 
 export default function PopokCard({
   name,
@@ -18,19 +24,12 @@ export default function PopokCard({
   genre,
   instagram,
   id,
+  slug,
   profileImage,
-  cardUrl,
 }: PopokCardProps) {
   const [flipped, setFlipped] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [currentUrl, setCurrentUrl] = useState("");
   const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setCurrentUrl(cardUrl || window.location.href);
-    }
-  }, [cardUrl]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -65,18 +64,19 @@ export default function PopokCard({
     }
   };
 
-  const getSlugifiedName = (str: string) => {
-    if (!str) return "username";
-    return str
-      .replace(/[^\w가-힣\s-]/g, "")
-      .trim()
-      .replace(/[\s\t]+/g, "-")
-      .toLowerCase();
-  };
+  const effectiveSlug = slug || id;
+  const detailHref = `/artists/${effectiveSlug}`;
+  const displayPath = `popok.kr/${effectiveSlug}`;
+  const profileUrl = `${PUBLIC_URL}${detailHref}`;
 
   const cardNo = id.substring(0, 4).toUpperCase();
   const displayEnglishName = nameEn || name.toUpperCase();
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(currentUrl || "https://popok.kr")}`;
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(profileUrl)}`;
+
+  // Clicking the link should navigate, not just flip the card.
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
@@ -182,9 +182,13 @@ export default function PopokCard({
             }}>
               <div>
                 <span style={{ display: "block", fontSize: "0.45rem", color: "var(--ink-faint)", fontFamily: "monospace" }}>PORTFOLIO URL</span>
-                <span style={{ display: "block", fontSize: "0.72rem", fontWeight: 800, color: "var(--navy)", fontFamily: "monospace" }}>
-                  popok.kr/p/{getSlugifiedName(name)}
-                </span>
+                <Link
+                  href={detailHref}
+                  onClick={handleLinkClick}
+                  style={{ display: "block", fontSize: "0.72rem", fontWeight: 800, color: "var(--navy)", fontFamily: "monospace", textDecoration: "none" }}
+                >
+                  {displayPath}
+                </Link>
               </div>
               
               {/* Barcode representation */}
@@ -268,9 +272,13 @@ export default function PopokCard({
             }}>
               <div>
                 <span style={{ display: "block", fontSize: "0.45rem", color: "var(--navy)", opacity: 0.6, fontFamily: "monospace" }}>SCAN TO EXPLORE</span>
-                <span style={{ display: "block", fontSize: "0.75rem", fontWeight: 850, color: "var(--navy)", fontFamily: "monospace" }}>
-                  popok.kr/p/{getSlugifiedName(name)}
-                </span>
+                <Link
+                  href={detailHref}
+                  onClick={handleLinkClick}
+                  style={{ display: "block", fontSize: "0.75rem", fontWeight: 850, color: "var(--navy)", fontFamily: "monospace", textDecoration: "underline" }}
+                >
+                  {displayPath}
+                </Link>
               </div>
               
               {/* Little visual graphic */}

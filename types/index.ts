@@ -52,9 +52,15 @@ export interface Artist {
   verification_status?: VerificationStatus;
   created_at?: string;
   updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
   portfolio_works?: Work[];
   isDemo?: boolean;
   role?: string;
+  motion_video_url?: string | null;
+  youtube_url?: string | null;
+  profile_image_url?: string | null;
+  profile_image_urls?: string[];
   motionProfile?: {
     type: "video" | "image";
     src: string;
@@ -62,6 +68,11 @@ export interface Artist {
     title?: string;
     caption?: string;
   } | null;
+  affiliations?: any[];
+  education?: string[];
+  awards?: any[];
+  competitions?: any[];
+  links?: any[];
 }
 
 export interface Work {
@@ -159,33 +170,58 @@ export interface UserProfile {
   role?: "reader" | "artist" | "admin";
 }
 
+// An artist linked to a performance via performance_artists, with the role
+// preserved from that join row (e.g. "안무", "출연"). Kept separate from
+// Artist itself so Artist doesn't have to carry performance-specific fields.
+export interface RelatedPerformanceArtist {
+  artist: Artist;
+  role?: string | null;
+}
+
 export interface Performance {
-  id: string;
+  id: string;                         // performances.id (uuid)
   title: string;
-  company: string;
-  venue: string;
-  city: string;
-  startDate: string;
-  endDate: string;
-  posterImage: string;
+  slug?: string | null;
+
+  posterUrl?: string | null;
+  sourceUrl?: string | null;
+  ticketUrl?: string | null;
+
+  venue?: string | null;
+  startDate?: string | null;          // performances.start_date
+  endDate?: string | null;            // performances.end_date
+
+  organizer?: string | null;
+  genre?: string | null;
+  category?: string | null;
+
+  status?: string | null;             // 'draft' | 'published' | 'archived'
+  published?: boolean;                // derived: status === 'published'
+  featured?: boolean;                 // manual editorial pick for curated placement
+
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  // Populated by lib/performances.ts from performance_artists + artists,
+  // filtered to artists.status === 'published'. Empty array, never undefined,
+  // when there's no DB relation yet or no linked artists.
+  relatedArtists?: RelatedPerformanceArtist[];
+
+  description?: string;
+
+  // Legacy fields kept optional for any code still reading the old shape
+  // (none currently found in active use — see walkthrough.md).
+  company?: string;
+  city?: string;
+  posterImage?: string;
   imageUrl?: string;
-  genre: string[];
-  ticketUrl: string;
-  artistIds: string[];
-  status: "published" | "draft" | string;
-  description: string;
+  artistIds?: string[];
   recordId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  
-  // Airtable에서 로드할 추가 필드
   aiSummary?: string;
   reviews?: Array<{
     source: string;
     url: string;
   }>;
-
-  // 향후 확장을 위한 데이터 구조 설계
   companyId?: string;
   comments?: PerformanceComment[];
   ratings?: PerformanceRating[];

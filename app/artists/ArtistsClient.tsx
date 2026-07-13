@@ -577,7 +577,7 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
 }) {
   const worksList = artist.works ?? artist.portfolio_works;
   const firstWork = Array.isArray(worksList) ? (worksList[0] as any) : null;
-  const previewUrl = artist.video_url || firstWork?.videoUrl || firstWork?.video_url || firstWork?.media?.url || "";
+  const previewUrl = artist.motion_video_url || "";
   const hasYoutubePreview = isYouTubeUrl(previewUrl);
 
   return (

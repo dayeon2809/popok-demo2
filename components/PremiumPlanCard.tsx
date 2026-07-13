@@ -44,6 +44,7 @@ export default function PremiumPlanCard({
         gap: "24px",
         position: "relative",
         boxShadow: highlight ? "0 16px 40px rgba(23, 20, 17, 0.1)" : "0 4px 16px rgba(23, 20, 17, 0.03)",
+        overflow: "visible", // override the shared .card class's overflow:hidden, which was clipping the "highlight" badge above the card
       }}
     >
       {highlight && (

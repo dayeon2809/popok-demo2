@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import PopokCard from "@/components/PopokCard";
+import AiProfileImporter from "@/components/profile/AiProfileImporter";
+import AiProfileCompare from "@/components/profile/AiProfileCompare";
 
 interface Work {
   id: string;
@@ -31,6 +33,11 @@ interface Artist {
   works?: Work[] | null;
   status?: string | null;
   verified?: boolean | null;
+  affiliations?: any[];
+  education?: string[];
+  awards?: any[];
+  competitions?: any[];
+  links?: any[];
 }
 
 export default function MyPopokClient({ initialArtist }: { initialArtist: Artist }) {
@@ -53,6 +60,18 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
   const [works, setWorks] = useState<Work[]>(
     Array.isArray(artist.works) ? artist.works : []
   );
+
+  // Extra profile fields hooks for AI parsing
+  const [affiliations, setAffiliations] = useState<any[]>(artist.affiliations || []);
+  const [education, setEducation] = useState<string[]>(artist.education || []);
+  const [awards, setAwards] = useState<any[]>(artist.awards || []);
+  const [competitions, setCompetitions] = useState<any[]>(artist.competitions || []);
+  const [links, setLinks] = useState<any[]>(artist.links || []);
+
+  // AI Update modal states
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiState, setAiState] = useState<"import" | "compare" | "none">("none");
+  const [parsedResult, setParsedResult] = useState<any>(null);
 
   // Uploading / saving indicators
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -234,6 +253,16 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
     setSaveSuccess(false);
 
     try {
+      const cleanedWorks = works.map(w => ({
+        id: w.id,
+        title: w.title ? w.title.trim() : "",
+        year: w.year,
+        role: w.role ? w.role.trim() : "",
+        description: w.description ? w.description.trim() : "",
+        image_url: w.image_url || "",
+        video_url: w.video_url || (w as any).video || (w as any).videoUrl || ""
+      }));
+
       const res = await fetch("/api/artists/me", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -250,7 +279,12 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
           youtube_url: youtubeUrl.trim() || null,
           instagram: instagram.trim() || null,
           website: website.trim() || null,
-          works
+          works: cleanedWorks,
+          affiliations,
+          education,
+          awards,
+          competitions,
+          links
         })
       });
 
@@ -408,6 +442,20 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
             gap: "12px"
           }}>
             <h3 style={{ fontSize: "0.85rem", fontWeight: 900, color: "var(--navy)", margin: 0 }}>퀵 메뉴 (Quick Actions)</h3>
+            <button
+              onClick={() => {
+                setAiState("import");
+                setAiModalOpen(true);
+              }}
+              style={{
+                width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px",
+                padding: "12px", borderRadius: "10px", fontWeight: 900, fontSize: "0.88rem",
+                background: "linear-gradient(135deg, var(--navy) 0%, #1e293b 100%)", color: "var(--accent)",
+                border: "none", cursor: "pointer", boxShadow: "0 4px 12px rgba(23, 20, 17, 0.08)"
+              }}
+            >
+              ✨ AI로 프로필 업데이트
+            </button>
             <button
               onClick={() => setShareModalOpen(true)}
               className="btn-outline"
@@ -623,12 +671,19 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
                 )}
 
                 <label style={labelStyle}>
-                  모션 영상 및 소개 영상 URL (YouTube, Vimeo, MP4 등)
+                  모션 프로필 영상
+                  <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                    아티스트 상세페이지에 처음 표시되는 세로형 프로필 영상입니다.
+                    9:16 비율의 YouTube Shorts, Vimeo 세로 영상 또는 MP4 링크를 권장합니다.
+                  </span>
                   <input type="text" value={motionVideoUrl} onChange={(e) => setMotionVideoUrl(e.target.value)} placeholder="예: https://youtube.com/embed/..." style={inputStyle} />
                 </label>
 
                 <label style={labelStyle}>
-                  유튜브 숏폼/하이라이트 영상 URL (임베드용)
+                  추가 소개 영상
+                  <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                    상세페이지 본문에 표시되는 가로형 소개 또는 하이라이트 영상입니다.
+                  </span>
                   <input type="text" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="예: https://www.youtube.com/watch?v=..." style={inputStyle} />
                 </label>
 
@@ -734,7 +789,10 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
                           />
                         </label>
                         <label style={labelStyle}>
-                          영상 URL (Vimeo/YouTube 등)
+                          작품 영상
+                          <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 500, display: "block", marginBottom: "4px" }}>
+                            이 작품을 소개하는 영상입니다.
+                          </span>
                           <input
                             type="text"
                             value={work.video_url || ""}
@@ -894,8 +952,8 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
                   genre={genre || "장르 입력 전"}
                   instagram={instagram || ""}
                   id={artist.id}
+                  slug={slug || artist.id}
                   profileImage={profileImageUrl || undefined}
-                  cardUrl={publicUrl}
                 />
               </div>
               <p style={{
@@ -1007,6 +1065,83 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
         </div>
       )}
       
+      {/* AI Import Modal Overlay */}
+      {aiModalOpen && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(23, 20, 17, 0.4)",
+          backdropFilter: "blur(4px)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px"
+        }}>
+          <div className="card fade-up" style={{
+            background: "#FFFFFF",
+            border: "1.5px solid var(--border)",
+            borderRadius: "20px",
+            padding: "40px 32px",
+            maxWidth: aiState === "compare" ? "720px" : "480px",
+            width: "100%",
+            maxHeight: "85vh",
+            overflowY: "auto",
+            boxShadow: "0 20px 50px rgba(23, 20, 17, 0.15)",
+            transition: "max-width 0.2s ease"
+          }}>
+            {aiState === "import" && (
+              <AiProfileImporter
+                onParsed={(data) => {
+                  setParsedResult(data);
+                  setAiState("compare");
+                }}
+                onCancel={() => setAiModalOpen(false)}
+              />
+            )}
+            {aiState === "compare" && parsedResult && (
+              <AiProfileCompare
+                currentProfile={{
+                  name,
+                  name_en: nameEn,
+                  genre,
+                  role,
+                  bio_short: bioShort,
+                  bio,
+                  works,
+                  affiliations,
+                  current_activity: [],
+                  awards,
+                  competitions,
+                  education,
+                  links
+                }}
+                parsedProfile={parsedResult}
+                onConfirm={(merged) => {
+                  // Update state hooks with merged data
+                  if (merged.artist.name) setName(merged.artist.name);
+                  if (merged.artist.name_en) setNameEn(merged.artist.name_en);
+                  if (merged.artist.genre) setGenre(merged.artist.genre);
+                  if (merged.artist.role) setRole(merged.artist.role);
+                  if (merged.artist.bio_short) setBioShort(merged.artist.bio_short);
+                  if (merged.artist.bio) setBio(merged.artist.bio);
+
+                  if (merged.works) setWorks(merged.works);
+                  if (merged.affiliations) setAffiliations(merged.affiliations);
+                  if (merged.awards) setAwards(merged.awards);
+                  if (merged.competitions) setCompetitions(merged.competitions);
+                  if (merged.education) setEducation(merged.education);
+                  if (merged.links) setLinks(merged.links);
+
+                  setAiModalOpen(false);
+                }}
+                onCancel={() => setAiState("import")}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Visual responsive styles for sidebar/editor stack */}
       <style>{`
         @media (max-width: 900px) {

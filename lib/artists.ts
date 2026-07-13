@@ -9,8 +9,33 @@ export function mapArtistRowToArtist(record: any): Artist {
   let gValue = "contemporary";
   if (record.genre && typeof record.genre === "string") {
     const parts = record.genre.split(",").map((s: string) => s.trim());
-    fValue = parts[0] || "dance";
-    gValue = parts[1] || "contemporary";
+    if (parts.length > 1) {
+      fValue = parts[0] || "dance";
+      gValue = parts[1] || "contemporary";
+    } else {
+      const val = parts[0] || "";
+      const lowerVal = val.toLowerCase();
+      if (
+        lowerVal.includes("무용") ||
+        lowerVal.includes("발레") ||
+        lowerVal.includes("dance") ||
+        lowerVal.includes("contemporary") ||
+        lowerVal.includes("ballet") ||
+        lowerVal.includes("korean")
+      ) {
+        fValue = "dance";
+        gValue = val;
+      } else if (lowerVal.includes("음악") || lowerVal.includes("music") || lowerVal.includes("composition")) {
+        fValue = "music";
+        gValue = val;
+      } else if (lowerVal.includes("미술") || lowerVal.includes("시각") || lowerVal.includes("visual") || lowerVal.includes("art")) {
+        fValue = "visual";
+        gValue = val;
+      } else {
+        fValue = "dance";
+        gValue = val;
+      }
+    }
   }
 
   // works는 jsonb 컬럼 — 항상 배열로 정규화
@@ -61,8 +86,15 @@ export function mapArtistRowToArtist(record: any): Artist {
     instagram: record.instagram || "",
     website: record.website || "",
     profileImage: profileImage || "/images/placeholders/cake-placeholder.png",
+    profile_image_url: record.profile_image_url || null,
     profile_image_urls: Array.isArray(record.profile_image_urls) ? record.profile_image_urls : [],
     motion_video_url: record.motion_video_url || null,
+    youtube_url: record.youtube_url || null,
+    affiliations: Array.isArray(record.affiliations) ? record.affiliations : [],
+    education: Array.isArray(record.education) ? record.education : [],
+    awards: Array.isArray(record.awards) ? record.awards : [],
+    competitions: Array.isArray(record.competitions) ? record.competitions : [],
+    links: Array.isArray(record.links) ? record.links : [],
     residency: [],
     festival: [],
     status: record.status || "published",

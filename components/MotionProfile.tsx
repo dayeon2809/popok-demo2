@@ -3,37 +3,33 @@
 import { useState, useEffect, useRef } from "react";
 import YouTubeMotionPreview from "./YouTubeMotionPreview";
 import { extractYouTubeVideoId } from "@/lib/youtube";
-
-interface MotionProfileData {
-  type: "video" | "image";
-  src: string;
-  poster?: string;
-  title?: string;
-  caption?: string;
-}
+import { extractVimeoVideoId, getVimeoEmbedUrl } from "@/lib/videoLinks";
+import { isDirectVideoUrl } from "@/lib/video";
 
 interface MotionProfileProps {
   name: string;
   genre: string | null;
   image: string;
   quote?: string;
-  motionProfile?: MotionProfileData | null;
-  representativeVideoUrl?: string;
+  videoUrl?: string;
 }
 
-export default function MotionProfile({ name, genre, image, quote, motionProfile, representativeVideoUrl }: MotionProfileProps) {
+export default function MotionProfile({ name, genre, image, quote, videoUrl }: MotionProfileProps) {
   const [playing, setPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const youtubeVideoId = extractYouTubeVideoId(representativeVideoUrl);
-  const isYoutubePlayback = Boolean(youtubeVideoId);
+  const youtubeVideoId = extractYouTubeVideoId(videoUrl);
+  const vimeoVideoId = extractVimeoVideoId(videoUrl);
 
-  // Time progress bar loops automatically for static images / youtube embeds
+  const isYoutube = Boolean(youtubeVideoId);
+  const isVimeo = Boolean(vimeoVideoId);
+  const isDirect = isDirectVideoUrl(videoUrl) && !videoError;
+
+  // Time progress bar loops automatically for static images / youtube embeds / vimeo
   useEffect(() => {
-    const isVideo = motionProfile?.type === "video" && motionProfile.src && !videoError;
-    if (isVideo || isYoutubePlayback) return; // handled by HTML5 onTimeUpdate / YouTube's own loop
+    if (isDirect) return; // handled by HTML5 onTimeUpdate
     if (!playing) return;
 
     const intervalTime = 100; // update every 100ms
@@ -50,9 +46,9 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [playing, motionProfile, videoError, isYoutubePlayback]);
+  }, [playing, isDirect]);
 
-  // Video playhead play/pause synchronization
+  // Video playhead play/pause synchronization for direct MP4 videos
   useEffect(() => {
     if (videoRef.current) {
       if (playing) {
@@ -61,7 +57,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
         videoRef.current.pause();
       }
     }
-  }, [playing]);
+  }, [playing, isDirect]);
 
   const togglePlay = () => {
     setPlaying(!playing);
@@ -75,7 +71,6 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
   };
 
   const displayQuote = quote || "예술을 통해 세상과 소통하고 나만의 움직임을 연결합니다.";
-  const isVideoPlayback = isYoutubePlayback || (motionProfile?.type === "video" && motionProfile.src && !videoError);
   const pausedYoutubePoster = youtubeVideoId ? `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg` : image;
 
   return (
@@ -87,7 +82,7 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
           position: "relative",
           width: "100%",
           maxWidth: "320px",
-          aspectRatio: "0.5625", // 9:16
+          aspectRatio: "9 / 16",
           background: "var(--navy)",
           borderRadius: "20px",
           border: "2px solid var(--navy)",
@@ -106,11 +101,11 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
           overflow: "hidden",
           background: "#171411"
         }}>
-          {isYoutubePlayback ? (
+          {isYoutube ? (
             playing ? (
               <div style={{ width: "100%", height: "100%", filter: "contrast(1.1) brightness(0.95)" }}>
                 <YouTubeMotionPreview
-                  videoId={youtubeVideoId}
+                  videoId={youtubeVideoId!}
                   title={`${name} representative video`}
                   aspectRatio="9 / 16"
                   playMode="always"
@@ -131,11 +126,36 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
                 }}
               />
             )
-          ) : motionProfile?.type === "video" && motionProfile.src && !videoError ? (
+          ) : isVimeo ? (
+            playing ? (
+              <div style={{ width: "100%", height: "100%", filter: "contrast(1.1) brightness(0.95)" }}>
+                <iframe
+                  src={getVimeoEmbedUrl(videoUrl, true) || ""}
+                  style={{ width: "100%", height: "100%", border: 0 }}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  title={`${name} representative video`}
+                />
+              </div>
+            ) : (
+              <div style={{ width: "100%", height: "100%", background: "#171411", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <img
+                  src={image}
+                  alt={`${name} Motion Profile`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    filter: "contrast(1.15) brightness(0.95)",
+                  }}
+                />
+              </div>
+            )
+          ) : isDirect ? (
             <video
               ref={videoRef}
-              src={motionProfile?.src}
-              poster={motionProfile?.poster || image}
+              src={videoUrl}
+              poster={image}
               muted
               loop
               playsInline
@@ -188,136 +208,124 @@ export default function MotionProfile({ name, genre, image, quote, motionProfile
         <div style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(to bottom, rgba(23,20,17,0.4) 0%, rgba(23,20,17,0) 30%, rgba(23,20,17,0.85) 100%)",
+          background: "linear-gradient(to bottom, rgba(23, 20, 17, 0.1) 0%, rgba(23, 20, 17, 0.4) 60%, rgba(23, 20, 17, 0.85) 100%)",
           zIndex: 1
         }} />
 
-        {/* 1. Progress Bar (15s Loop Indicator) at top */}
+        {/* Top Info Strip */}
         <div style={{
-          position: "absolute", top: "12px", left: "12px", right: "12px",
-          height: "4px", background: "rgba(255,255,255,0.25)", borderRadius: "2px",
-          zIndex: 2, overflow: "hidden"
-        }}>
-          <div style={{
-            height: "100%", width: `${progress}%`, background: "var(--accent)",
-            transition: "width 0.1s linear"
-          }} />
-        </div>
-
-        {/* 2. Top labels */}
-        <div style={{
-          position: "absolute", top: "28px", left: "16px", right: "16px",
-          display: "flex", justifyContent: "space-between", alignItems: "center",
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          right: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           zIndex: 2
         }}>
-          <span className="mono" style={{
-            fontSize: "0.62rem", background: "var(--navy)", color: "#FFFFFF",
-            padding: "4px 10px", borderRadius: "12px", fontWeight: 700,
-            border: "1px solid rgba(255,255,255,0.2)"
+          <span style={{
+            background: "rgba(255, 255, 255, 0.15)",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
+            border: "1px solid rgba(255, 255, 255, 0.25)",
+            borderRadius: "6px",
+            padding: "4px 8px",
+            fontSize: "0.62rem",
+            fontWeight: 800,
+            color: "#FFFFFF",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase"
           }}>
-            {isVideoPlayback ? "MOTION PLAY" : "MOTION PREVIEW"}
+            {genre || "Artist"}
           </span>
-          <span className="mono" style={{ fontSize: "0.62rem", color: "#FFFFFF", opacity: 0.85, fontWeight: 700 }}>
-            {isVideoPlayback ? "VIDEO REEL" : "15 SEC INTRO"}
+          <span style={{ fontSize: "0.85rem", color: "#FFFFFF", opacity: 0.8 }}>
+            {playing ? "⏸" : "▶"}
           </span>
         </div>
 
-        {/* 3. Central Pause overlay when paused */}
-        {!playing && (
-          <div style={{
-            position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-            background: "rgba(23, 20, 17, 0.3)", zIndex: 2
-          }}>
-            <div style={{
-              width: "56px", height: "56px", borderRadius: "50%", background: "rgba(255,255,255,0.9)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.2)"
-            }}>
-              ▶
-            </div>
-          </div>
-        )}
-
-        {/* 4. Bottom Content overlay */}
+        {/* Bottom Info Section */}
         <div style={{
-          position: "absolute", bottom: "20px", left: "16px", right: "16px",
-          zIndex: 2, display: "flex", flexDirection: "column", gap: "10px"
+          position: "absolute",
+          bottom: "20px",
+          left: "20px",
+          right: "20px",
+          zIndex: 2,
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px"
         }}>
-          {/* Tag labels */}
-          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-            <span className="tag" style={{
-              background: "var(--accent)", color: "var(--navy)", border: "none",
-              fontSize: "0.6rem", fontWeight: 850, padding: "2px 8px"
-            }}>
-              {genre || "Creative Artist"}
-            </span>
-            <span className="tag" style={{
-              background: "rgba(255,255,255,0.2)", color: "#FFFFFF", border: "1px solid rgba(255,255,255,0.3)",
-              fontSize: "0.6rem", fontWeight: 800, padding: "2px 8px"
-            }}>
-              {isVideoPlayback ? "Muted Video" : "Audio Demo"}
-            </span>
-          </div>
-
-          {/* Name & English name */}
           <div>
-            <h4 style={{ color: "#FFFFFF", fontSize: "1.45rem", fontWeight: 950, margin: 0, letterSpacing: "-0.02em" }}>
+            <h4 style={{
+              fontSize: "1.35rem",
+              fontWeight: 950,
+              color: "#FFFFFF",
+              margin: "0 0 4px",
+              letterSpacing: "-0.02em",
+              textShadow: "0 2px 4px rgba(0,0,0,0.3)"
+            }}>
               {name}
             </h4>
-            <span className="mono" style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.65rem", fontWeight: 700 }}>
-              {name.toUpperCase()} INTRO
-            </span>
+            <p style={{
+              fontSize: "0.78rem",
+              color: "rgba(255, 255, 255, 0.85)",
+              lineHeight: 1.4,
+              margin: 0,
+              display: "-webkit-box",
+              WebkitLineClamp: "3",
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
+            }}>
+              {displayQuote}
+            </p>
           </div>
 
-          {/* Editorial quote */}
-          <p style={{
-            color: "rgba(255,255,255,0.9)", fontSize: "0.82rem", lineHeight: 1.45,
-            fontWeight: 500, margin: "4px 0 8px 0"
-          }}>
-            “{displayQuote}”
-          </p>
-
-          {/* Progress bar + Audio Wave visualization */}
+          {/* Sound wave / play indicator decoration */}
           <div style={{
-            display: "flex", justifyContent: "space-between", alignItems: "center",
-            borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: "12px"
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingTop: "10px",
+            borderTop: "1px solid rgba(255, 255, 255, 0.2)"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              {/* Rotating badge graphic */}
-              <div style={{
-                width: "16px", height: "16px", borderRadius: "50%", border: "2px dashed var(--accent)",
-                animation: playing ? "badgeRotate 4s linear infinite" : "none"
-              }} />
-              <span className="mono" style={{ fontSize: "0.55rem", color: "var(--accent)", fontWeight: 800 }}>
-                POPOK STUDIO CAM
-              </span>
-            </div>
-
-            {/* Sound Wave Indicator lines */}
+            <span style={{ fontSize: "0.62rem", color: "#FFFFFF", opacity: 0.6, fontWeight: 700, fontFamily: "monospace" }}>
+              POPOK MOTION PREVIEW
+            </span>
             <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "18px" }}>
-              {[8, 14, 10, 16, 6].map((h, i) => (
+              {[1, 2, 3, 4, 5].map((bar) => (
                 <div
-                  key={i}
+                  key={bar}
                   style={{
                     width: "2px",
                     background: "var(--accent)",
                     borderRadius: "1px",
-                    height: playing ? undefined : `${h}px`,
-                    animation: playing ? `soundWaveMove ${0.6 + i * 0.15}s ease-in-out infinite alternate` : "none"
+                    height: "6px",
+                    animation: playing ? `soundWaveMove ${0.6 + bar * 0.15}s ease-in-out infinite alternate` : "none"
                   }}
                 />
               ))}
             </div>
           </div>
-
         </div>
 
+        {/* Progress Bar Loader (Loops 15s) */}
+        <div style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "4px",
+          background: "rgba(255, 255, 255, 0.2)",
+          zIndex: 3
+        }}>
+          <div style={{
+            width: `${progress}%`,
+            height: "100%",
+            background: "var(--accent)",
+            transition: isDirect ? "none" : "width 0.1s linear"
+          }} />
+        </div>
       </div>
-
-      {/* Tapping notice */}
-      <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700, marginTop: "10px" }}>
-        {playing ? "Tap to pause motion" : "Tap to resume motion"}
-      </span>
     </div>
   );
 }

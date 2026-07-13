@@ -132,7 +132,7 @@ export default function ClientCard({ record }: Props) {
           genre={record.genre}
           instagram={record.instagram}
           id={String(record.id)}
-          cardUrl={currentUrl}
+          slug={String(record.id)}
           profileImage={selectedImage || undefined}
         />
       </div>

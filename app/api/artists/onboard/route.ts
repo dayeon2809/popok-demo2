@@ -12,7 +12,23 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { profileType, displayName, username, genre, role } = await request.json();
+    const body = await request.json();
+    const {
+      profileType,
+      displayName,
+      username,
+      genre,
+      role,
+      bio,
+      bio_short,
+      works,
+      affiliations,
+      current_activity,
+      awards,
+      competitions,
+      education,
+      links
+    } = body;
 
     if (!profileType || !displayName || !username || !genre || !role) {
       return NextResponse.json({ success: false, error: "모든 항목을 입력해 주세요." }, { status: 400 });
@@ -80,7 +96,15 @@ export async function POST(request: Request) {
       role: role.trim(),
       status: "draft",
       verified: false,
-      works: [],
+      bio: typeof bio === "string" ? bio : null,
+      bio_short: typeof bio_short === "string" ? bio_short : null,
+      works: Array.isArray(works) ? works : [],
+      affiliations: Array.isArray(affiliations) ? affiliations : [],
+      current_activity: Array.isArray(current_activity) ? current_activity : [],
+      awards: Array.isArray(awards) ? awards : [],
+      competitions: Array.isArray(competitions) ? competitions : [],
+      education: Array.isArray(education) ? education : [],
+      links: Array.isArray(links) ? links : [],
     };
 
     const { error: artistError } = await supabase

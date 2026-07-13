@@ -9,9 +9,9 @@ import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
 const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (pathname: string) => boolean }> = [
   {
-    href: "/#how-it-works",
-    label: { ko: "이용 방법", en: "How it works" },
-    match: () => false,
+    href: "/about",
+    label: { ko: "소개", en: "About" },
+    match: (pathname) => pathname === "/about",
   },
   {
     href: "/artists",
@@ -24,13 +24,13 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
     match: (pathname) => pathname === "/premium",
   },
   {
-    href: "/#testimonials",
+    href: "/about#testimonials",
     label: { ko: "이용 후기", en: "Testimonials" },
     match: () => false,
   },
   {
-    href: "/#faq",
-    label: { ko: "QnA", en: "QnA" },
+    href: "/about#faq",
+    label: { ko: "자주 묻는 질문", en: "FAQ" },
     match: () => false,
   },
 ];

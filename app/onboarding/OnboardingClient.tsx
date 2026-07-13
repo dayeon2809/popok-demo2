@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import AiProfileImporter from "@/components/profile/AiProfileImporter";
+import AiProfileReview from "@/components/profile/AiProfileReview";
 
 export default function OnboardingClient({ defaultEmail, defaultDisplayName }: { defaultEmail: string; defaultDisplayName: string }) {
   const router = useRouter();
@@ -13,6 +15,11 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   const [username, setUsername] = useState("");
   const [genre, setGenre] = useState("");
   const [role, setRole] = useState("");
+
+  // AI states
+  const [aiState, setAiState] = useState<"choose" | "import" | "review" | "none">("choose");
+  const [aiDraft, setAiDraft] = useState<any>(null);
+  const [aiProfileData, setAiProfileData] = useState<any>(null);
 
   // Username validation state
   const [usernameStatus, setUsernameStatus] = useState<{
@@ -92,6 +99,11 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   };
 
   const handlePrev = () => {
+    // Stepping back into the AI step should always land on the choose screen,
+    // not the transitional "none" state left over from finishing/skipping it.
+    if (step === 7 && aiState === "none") {
+      setAiState("choose");
+    }
     setStep(prev => prev - 1);
   };
 
@@ -106,7 +118,16 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           displayName,
           username,
           genre,
-          role
+          role,
+          bio: aiProfileData?.artist?.bio || null,
+          bio_short: aiProfileData?.artist?.bio_short || null,
+          works: aiProfileData?.works || [],
+          affiliations: aiProfileData?.affiliations || [],
+          current_activity: aiProfileData?.current_activity || [],
+          awards: aiProfileData?.awards || [],
+          competitions: aiProfileData?.competitions || [],
+          education: aiProfileData?.education || [],
+          links: aiProfileData?.links || []
         })
       });
 
@@ -136,56 +157,59 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
       padding: "24px"
     }}>
       <div className="card fade-up" style={{
-        maxWidth: "480px",
+        maxWidth: step === 6 && aiState === "review" ? "720px" : "480px",
         width: "100%",
         padding: "40px 32px",
         background: "#FFFFFF",
         border: "1.5px solid var(--border)",
         borderRadius: "20px",
-        boxShadow: "0 10px 40px rgba(23, 20, 17, 0.04)"
+        boxShadow: "0 10px 40px rgba(23, 20, 17, 0.04)",
+        transition: "max-width 0.2s ease"
       }}>
-        {/* Step indicators */}
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "32px", position: "relative" }}>
-          <div style={{
-            position: "absolute",
-            top: "50%",
-            left: "0",
-            right: "0",
-            height: "2px",
-            background: "var(--border)",
-            zIndex: 1,
-            transform: "translateY(-50%)"
-          }} />
-          <div style={{
-            position: "absolute",
-            top: "50%",
-            left: "0",
-            width: `${((step - 1) / 5) * 100}%`,
-            height: "2px",
-            background: "var(--navy)",
-            zIndex: 1,
-            transform: "translateY(-50%)",
-            transition: "width 0.3s ease"
-          }} />
-          {[1, 2, 3, 4, 5, 6].map((num) => (
-            <div key={num} style={{
-              width: "24px",
-              height: "24px",
-              borderRadius: "50%",
-              background: num <= step ? "var(--navy)" : "var(--border)",
-              color: num <= step ? "#FFFFFF" : "var(--ink-muted)",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 2,
-              transition: "all 0.3s ease"
-            }}>
-              {num}
-            </div>
-          ))}
-        </div>
+        {(
+          /* Step indicators */
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "32px", position: "relative" }}>
+            <div style={{
+              position: "absolute",
+              top: "50%",
+              left: "0",
+              right: "0",
+              height: "2px",
+              background: "var(--border)",
+              zIndex: 1,
+              transform: "translateY(-50%)"
+            }} />
+            <div style={{
+              position: "absolute",
+              top: "50%",
+              left: "0",
+              width: `${((step - 1) / 6) * 100}%`,
+              height: "2px",
+              background: "var(--navy)",
+              zIndex: 1,
+              transform: "translateY(-50%)",
+              transition: "width 0.3s ease"
+            }} />
+            {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+              <div key={num} style={{
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                background: num <= step ? "var(--navy)" : "var(--border)",
+                color: num <= step ? "#FFFFFF" : "var(--ink-muted)",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2,
+                transition: "all 0.3s ease"
+              }}>
+                {num}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* STEP 1: profile_type */}
         {step === 1 && (
@@ -394,8 +418,83 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 6: complete */}
-        {step === 6 && (
+        {/* STEP 6: AI-assisted enrichment (optional, asked last) */}
+        {step === 6 && aiState === "choose" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <div>
+              <h2 style={{ fontSize: "1.45rem", fontWeight: 950, color: "var(--navy)", margin: "0 0 8px", letterSpacing: "-0.03em" }}>
+                이미 정리해둔 이력이 있나요?
+              </h2>
+              <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.5, fontWeight: 600, margin: 0 }}>
+                이력서나 기존 소개글을 넣으면 POPOK AI가 한줄 소개, 상세 소개, 대표작 설명까지 초안으로 정리해드려요. 확인하고 수정한 뒤 사용할 수 있어요. (선택 사항)
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <button
+                onClick={() => setAiState("import")}
+                className="btn-lime"
+                style={{
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "none",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  fontWeight: 900,
+                  fontSize: "0.95rem"
+                }}
+              >
+                ✨ AI로 빠르게 시작하기
+              </button>
+              <button
+                onClick={() => {
+                  setAiState("none");
+                  setStep(7);
+                }}
+                className="btn-outline"
+                style={{
+                  padding: "16px",
+                  borderRadius: "12px",
+                  border: "1.5px solid var(--border)",
+                  background: "#FFFFFF",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  fontWeight: 800,
+                  fontSize: "0.95rem"
+                }}
+              >
+                건너뛰기
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 6 && aiState === "import" && (
+          <AiProfileImporter
+            onParsed={(data) => {
+              setAiDraft(data);
+              setAiState("review");
+            }}
+            onCancel={() => setAiState("choose")}
+          />
+        )}
+
+        {step === 6 && aiState === "review" && aiDraft && (
+          <AiProfileReview
+            initialDraft={aiDraft}
+            onConfirm={(finalDraft) => {
+              setAiProfileData(finalDraft);
+              setAiState("none");
+              setStep(7);
+            }}
+            onCancel={() => {
+              setAiState("import");
+            }}
+          />
+        )}
+
+        {/* STEP 7: complete */}
+        {step === 7 && (
           <div style={{ textAlign: "center" }}>
             <div style={{
               fontSize: "3rem",
@@ -428,58 +527,61 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* Navigation Buttons */}
-        <div style={{ display: "flex", gap: "12px", marginTop: "36px" }}>
-          {step > 1 && (
-            <button
-              onClick={handlePrev}
-              disabled={submitting}
-              className="btn-outline"
-              style={{
-                flex: 1,
-                padding: "14px 20px",
-                borderRadius: "12px",
-                fontSize: "0.95rem",
-                fontWeight: 750,
-                cursor: "pointer"
-              }}
-            >
-              이전
-            </button>
-          )}
-          {step < 6 ? (
-            <button
-              onClick={handleNext}
-              className="btn-lime"
-              style={{
-                flex: 2,
-                padding: "14px 20px",
-                borderRadius: "12px",
-                fontSize: "0.95rem",
-                fontWeight: 800,
-                cursor: "pointer"
-              }}
-            >
-              다음
-            </button>
-          ) : (
-            <button
-              onClick={handleComplete}
-              disabled={submitting}
-              className="btn-lime"
-              style={{
-                flex: 2,
-                padding: "14px 20px",
-                borderRadius: "12px",
-                fontSize: "0.95rem",
-                fontWeight: 800,
-                cursor: submitting ? "not-allowed" : "pointer"
-              }}
-            >
-              {submitting ? "생성 중..." : "POPOK 시작하기"}
-            </button>
-          )}
-        </div>
+        {/* The AI import/review sub-screens (step 6) provide their own back/cancel navigation */}
+        {!(step === 6 && aiState !== "choose") && (
+          /* Navigation Buttons */
+          <div style={{ display: "flex", gap: "12px", marginTop: "36px" }}>
+            {step > 1 && (
+              <button
+                onClick={handlePrev}
+                disabled={submitting}
+                className="btn-outline"
+                style={{
+                  flex: 1,
+                  padding: "14px 20px",
+                  borderRadius: "12px",
+                  fontSize: "0.95rem",
+                  fontWeight: 750,
+                  cursor: "pointer"
+                }}
+              >
+                이전
+              </button>
+            )}
+            {step === 6 ? null : step < 7 ? (
+              <button
+                onClick={handleNext}
+                className="btn-lime"
+                style={{
+                  flex: 2,
+                  padding: "14px 20px",
+                  borderRadius: "12px",
+                  fontSize: "0.95rem",
+                  fontWeight: 800,
+                  cursor: "pointer"
+                }}
+              >
+                다음
+              </button>
+            ) : (
+              <button
+                onClick={handleComplete}
+                disabled={submitting}
+                className="btn-lime"
+                style={{
+                  flex: 2,
+                  padding: "14px 20px",
+                  borderRadius: "12px",
+                  fontSize: "0.95rem",
+                  fontWeight: 800,
+                  cursor: submitting ? "not-allowed" : "pointer"
+                }}
+              >
+                {submitting ? "생성 중..." : "POPOK 시작하기"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
