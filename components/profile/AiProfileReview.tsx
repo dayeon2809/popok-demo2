@@ -252,7 +252,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
         
         {/* 1. Basic Profile */}
         <div style={sectionHeaderStyle}>기본 정보</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
           <label style={labelStyle}>
             활동명 (Name) *
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
@@ -262,7 +262,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
             <input type="text" value={nameEn} onChange={(e) => setNameEn(e.target.value)} style={inputStyle} />
           </label>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
           <label style={labelStyle}>
             주 활동 분야 (Genre) *
             <input type="text" value={genre} onChange={(e) => setGenre(e.target.value)} style={inputStyle} />
@@ -303,7 +303,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {affiliations.map((aff, idx) => (
-            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "12px", alignItems: "center" }}>
+            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "12px", alignItems: "center" }} className="form-row-2col">
               <input
                 type="text"
                 placeholder="단체/기관명"
@@ -382,7 +382,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingRight: "100px" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 0.4fr", gap: "12px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 0.4fr", gap: "12px" }} className="form-row-2col">
                     <input
                       type="text"
                       placeholder="작품명 (Title) *"
@@ -518,7 +518,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {awards.map((aw, idx) => (
             <div key={idx} style={{ border: "1px solid var(--border)", borderRadius: "10px", padding: "12px", display: "flex", flexDirection: "column", gap: "10px", position: "relative" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "0.4fr 1.6fr", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "0.4fr 1.6fr", gap: "12px" }} className="form-row-2col">
                 <input
                   type="text"
                   placeholder="연도"
@@ -534,7 +534,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
                   style={inputStyle}
                 />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }} className="form-row-2col">
                 <input
                   type="text"
                   placeholder="수여 기관"
@@ -579,7 +579,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {competitions.map((comp, idx) => (
             <div key={idx} style={{ border: "1px solid var(--border)", borderRadius: "10px", padding: "12px", display: "flex", flexDirection: "column", gap: "10px", position: "relative" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "0.4fr 1.6fr", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "0.4fr 1.6fr", gap: "12px" }} className="form-row-2col">
                 <input
                   type="text"
                   placeholder="연도"
@@ -595,7 +595,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
                   style={inputStyle}
                 />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }} className="form-row-2col">
                 <input
                   type="text"
                   placeholder="주최 기관"
@@ -665,7 +665,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {links.map((l, idx) => (
-            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr auto", gap: "12px", alignItems: "center" }}>
+            <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr auto", gap: "12px", alignItems: "center" }} className="form-row-2col">
               <input
                 type="text"
                 placeholder="라벨 (예: 인스타그램, 포트폴리오)"

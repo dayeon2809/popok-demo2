@@ -332,7 +332,7 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
 
   return (
     <div style={{ background: "var(--bg-warm)", minHeight: "100vh", padding: "40px 16px 120px" }}>
-      <div style={{ maxWidth: "1080px", margin: "0 auto" }}>
+      <div className="my-popok-container" style={{ maxWidth: "1080px", margin: "0 auto" }}>
         
         {/* PREMIUM CMS DASHBOARD HERO PANEL */}
         <section style={{
@@ -406,9 +406,9 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
               flexWrap: "wrap",
               gap: "12px"
             }}>
-              <div>
+              <div style={{ minWidth: 0, flex: 1, maxWidth: "100%" }}>
                 <span style={{ display: "block", fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 800, marginBottom: "2px" }}>내 공개 링크</span>
-                <Link href={`/artists/${artist.slug}`} target="_blank" style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", textDecoration: "underline" }}>
+                <Link href={`/artists/${artist.slug}`} target="_blank" style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", textDecoration: "underline", wordBreak: "break-all" }}>
                   {publicUrl}
                 </Link>
               </div>
@@ -507,7 +507,7 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
           <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             
             {/* Card 1: 기본 정보 */}
-            <div style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 1. 기본 활동 정보
               </h2>
@@ -561,7 +561,7 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
             </div>
 
             {/* Card 2: 프로필 미디어 및 소개 */}
-            <div style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 2. 프로필 소개 및 미디어
               </h2>
@@ -624,11 +624,13 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
                     border: "1px solid var(--border)",
                     borderRadius: "12px",
                     overflow: "hidden",
-                    aspectRatio: "1/1",
+                    width: "120px",
+                    height: "120px",
                     background: "var(--bg-warm)",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    flexShrink: 0
                   }}>
                     {profileImageUrl ? (
                       <img src={profileImageUrl} alt="Profile Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -640,11 +642,11 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
 
                 {/* REPRESENTATIVE PROFILE IMAGE SELECTOR FROM WORKS LIST */}
                 {workImages.length > 0 && (
-                  <div style={{ border: "1px dashed var(--border-dark)", borderRadius: "14px", padding: "16px", background: "var(--bg-warm)" }}>
+                  <div style={{ border: "1px dashed var(--border-dark)", borderRadius: "14px", padding: "16px", background: "var(--bg-warm)", maxWidth: "100%", minWidth: 0, boxSizing: "border-box" }}>
                     <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 850, color: "var(--navy)", marginBottom: "10px" }}>
                       💡 작품 이미지에서 대표 이미지 지정
                     </span>
-                    <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "6px" }} className="no-scrollbar">
+                    <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "6px", width: "100%", maxWidth: "100%", minWidth: 0 }} className="no-scrollbar">
                       {workImages.map((url, index) => (
                         <div
                           key={index}
@@ -701,7 +703,7 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
             </div>
 
             {/* Card 3: 작품 목록 관리 (jsonb) */}
-            <div style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", margin: 0 }}>
                   3. 작품 및 프로젝트 목록{" "}

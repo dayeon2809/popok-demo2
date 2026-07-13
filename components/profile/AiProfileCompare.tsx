@@ -316,12 +316,12 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
                       이력서에서 소개문을 작성할 충분한 내용을 찾지 못했어요. 기존 값을 유지합니다.
                     </div>
                   ) : (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", fontSize: "0.8rem" }}>
+                  <div className="compare-row-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", fontSize: "0.8rem" }}>
                     <div>
                       <div style={{ fontSize: "0.68rem", color: "var(--ink-muted)", fontWeight: 700, marginBottom: "4px" }}>현재 값:</div>
                       <div style={{ color: "var(--navy)", minHeight: "18px", wordBreak: "break-all" }}>{cur || "(비어 있음)"}</div>
                     </div>
-                    <div style={{ borderLeft: "1.5px solid var(--border)", paddingLeft: "14px" }}>
+                    <div className="compare-ai-val" style={{ borderLeft: "1.5px solid var(--border)", paddingLeft: "14px" }}>
                       <div style={{ fontSize: "0.68rem", color: "var(--accent-dark)", fontWeight: 800, marginBottom: "4px" }}>AI 제안 값:</div>
                       <div style={{ color: "var(--navy)", fontWeight: status !== "identical" ? 750 : "normal", wordBreak: "break-all" }}>
                         {parsed || "(비어 있음)"}
@@ -442,7 +442,7 @@ function renderArraySection(
               background: comp.status === "identical" ? "#FAF8F5" : "transparent"
             }}
           >
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingRight: "40px" }}>
+            <div className="compare-item-text" style={{ display: "flex", flexDirection: "column", gap: "4px", paddingRight: "40px" }}>
               <div style={{ fontSize: "0.82rem", color: "var(--navy)", fontWeight: 700, whiteSpace: "pre-line" }}>
                 {renderText(comp.item)}
               </div>

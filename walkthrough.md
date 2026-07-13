@@ -1,100 +1,38 @@
-# Walkthrough — Homepage Performances ↔ Artists
+# Walkthrough — my-popok Mobile Layout Optimization (Overflow & Size Fix)
 
-## Context found before writing any code
+We have successfully resolved the horizontal layout overflow issue on the `/my-popok` page under mobile viewports and reduced the profile picture preview size for improved usability.
 
-- `docs/DEVELOPER_PRODUCT_OVERVIEW.md` describes an older architecture (`app/performances/`,
-  `lib/performances.ts` reading `data/performances.json`, a Supabase `performances` table with
-  an `artist_id` column, admin performance CRUD). **None of that exists on disk.** There is no
-  `app/performances/` route, no prior `lib/performances.ts`, and no `data/performances.json`.
-  That doc is stale and was not used as a source of truth here — the actual current pattern
-  (`lib/artists.ts` querying Supabase directly via `getSupabaseServer()`, no JSON cache layer)
-  is what this work follows instead.
-- Live schema introspection (service-role OpenAPI schema fetch, `scripts/inspectAllDb.ts`) confirmed
-  the real tables are only: `profiles`, `popok_upload_requests`, `artist_submissions`, `artists`,
-  `submissions`. **There is no `performances` table in the live database at all** — confirmed twice,
-  once via the OpenAPI schema (returned `undefined` for `performances`) and once via a direct REST
-  call (`404 PGRST205: Could not find the table 'public.performances'`).
-- `artists.id` is `uuid` (confirmed from the live schema), so `performances.id` and the
-  `performance_artists` foreign keys were designed as `uuid` too, not assumed.
-- `Performance`/`PerformanceComment`/`PerformanceRating` types already existed in `types/index.ts`
-  and a `usePerformances`/`usePerformance` hook pair already existed in `lib/api.ts`, but neither
-  hook is called from any `.tsx` file anywhere in the repo, and no `/api/performances` route exists.
-  This is dead scaffolding from an earlier design pass. It was safe to redefine `Performance`'s
-  shape without breaking anything — verified by grepping for actual call sites first.
-- `scripts/migrateSlugsToSupabase.ts`, a real (if currently non-functional) one-off migration
-  script, already assumes a `performances` table with `title`, `venue`, `start_date`, `external_id`,
-  `slug` columns. The new schema keeps those exact column names for continuity with that script.
+---
 
-## Why the DB currently returns no performances
+## 1. Overflow Causes & Resolutions
 
-Both `performances` and `performance_artists` are net-new tables — see
-`supabase/migrations/create_performances.sql` and `create_performance_artists.sql`. **Neither has
-been run yet.** Until you run them in the Supabase SQL Editor, `lib/performances.ts` will hit
-`relation "performances" does not exist` on every call. Every function in that file catches the
-Supabase error, logs it via `console.error`, and returns `[]` / `null` — so the homepage renders
-normally with the "이번 주 공연" section simply hidden (same pattern `ArtistCarousel`/
-`PerformanceCarousel` already used for an empty list), rather than a 500.
+- **Flexbox Min-Width Constraint on Links**:
+  - **Cause**: The public URL box rendered `{publicUrl}` within a wrapper `<div>` inside a flex container. In CSS, flex children default to `min-width: auto`, meaning the container stretched to fit the un-broken URL string, overriding `word-break` and pushing the whole viewport wide.
+  - **Resolution**: Wrapped the public link inside `<div style={{ minWidth: 0, flex: 1, ... }}`. This allowed the browser to respect `word-break: break-all` and wrap the URL dynamically.
 
-## Schema decisions worth knowing about
+- **Unconstrained Grid Item Containers**:
+  - **Cause**: The Main Edit Form `div` (holding the cards) and the dashboard hero contents had no classes and defaulted to `min-width: auto` inside CSS Grid columns, stretching the grid tracks.
+  - **Resolution**: Added `my-popok-container` class to the page wrap, and added `.editor-grid > *` and `.dashboard-hero > *` overrides in `globals.css` to enforce `min-width: 0 !important`, `max-width: 100% !important`, and `width: 100% !important`.
 
-- `performances.status` is the single source of truth (`'draft' | 'published' | 'archived'`),
-  matching `artists.status`'s existing convention. The `Performance.published` field in the app
-  type is *derived* (`status === 'published'`) in `lib/performances.ts`'s row mapper, not stored
-  as a second column — avoids the two ever disagreeing.
-- Added `performances.featured boolean default false` (not in the original request's SQL sketch)
-  specifically to back `getFeaturedPerformances()`, since no such flag existed anywhere yet and the
-  function needs something to filter on. Independent of `status`.
-- `genre` and `category` are both plain `text` columns, mirroring how `artists` already stores both
-  (`genre`, `category`) rather than inventing a new convention.
+- **Flex Carousel Width Contraction**:
+  - **Cause**: The representative work images horizontal selector had `display: flex` and auto-scrolled, but without a width boundary, the browser computed its min-content as the total sum of all work item images, stretching the card.
+  - **Resolution**: Restricted it to `width: 100%`, `max-width: 100%`, and `min-width: 0` inline and on the parent wrap.
 
-## Artist matching principle (for the future crawler + admin UI)
+- **AI Review Card Right Padding (`components/profile/AiProfileReview.tsx`)**:
+  - **Cause**: The array inputs in the review overlay had `paddingRight: "100px"`. On a 320px-430px mobile screen, this forced inputs to overflow.
+  - **Resolution**: Added `className="review-work-fields"` to the field wraps, setting `padding-right: 0 !important` and `margin-top: 36px !important` on mobile to position inputs neatly under the checkbox and expand to 100% width.
 
-Per the request, no admin matching UI was built in this pass — the current API surface
-(`performance_artists` with just `performance_id`, `artist_id`, `role`) intentionally only stores
-**confirmed** links. The recommended future flow, so nothing built now blocks it later:
+- **AI Comparison Row Widths (`components/profile/AiProfileCompare.tsx`)**:
+  - **Cause**: In `renderArraySection`, the text row container had no width boundaries, stretching the modal horizontally.
+  - **Resolution**:
+    - Added `compare-item-text` to comparison text containers, setting `flex: 1` and `min-width: 0` to enable proper wrapping.
+    - Stacked the comparison boxes vertically using `grid-template-columns: 1fr` and replaced vertical left dividers with top dividers (`compare-ai-val`) on mobile.
 
-```
-크롤링 → 원본 출연진 이름 저장 (raw text, not yet linked to any artist)
-      → 이름 정규화 (whitespace/공백, 특수문자 정리)
-      → artists 후보 검색 (이름 유사도 매칭, 여러 후보 가능)
-      → 관리자 검수 (동명이인·단체명 충돌은 사람이 판단)
-      → performance_artists에 artist_id 확정 저장 (여기서 처음 이 테이블에 행이 생김)
-```
+- **Profile Picture Preview Size Reduction**:
+  - **Resolution**: Changed the profile image preview wrapper's style from `aspectRatio: "1/1"` (which stretched to full container width) to `width: "120px"`, `height: "120px"`, and `flexShrink: 0`, creating a clean, compact preview.
 
-Crucially: **never** auto-insert a `performance_artists` row just because a crawled name string
-matches an `artists.name` value. Do it once and admin-approves-links stops applying scrutiny to
-new performances forever.
+---
 
-When the admin matching UI is eventually built, it will need a staging table that this migration
-deliberately does *not* create yet (kept out of scope, per the request) — something like:
-
-```
-performance_cast_candidates
-- id
-- performance_id
-- raw_name          -- exactly as scraped, before normalization
-- role
-- candidate_artist_ids   -- array/jsonb of similarity-matched artists.id candidates
-- match_confidence
-- review_status     -- pending | confirmed | rejected
-- confirmed_artist_id    -- set only once an admin picks one, then copied into performance_artists
-```
-
-`performance_artists` itself stays the clean, confirmed-only join table — the staging/candidate
-data belongs in its own table so a bad crawler guess can never leak into what's displayed publicly.
-
-## Known follow-ups / not done in this pass
-
-1. **Run the two migration SQL files** in the Supabase SQL Editor — nothing in this codebase
-   executes them automatically. Until then `getUpcomingPerformances()` returns `[]` and the
-   homepage section stays hidden by design.
-2. No `/performances/[slug-or-id]` detail page exists yet. `getPerformanceByIdOrSlug()` in
-   `lib/performances.ts` is ready for it, and `PerformanceCarousel`'s link-priority helper has a
-   `TODO` marking exactly where to slot the internal route in ahead of `ticketUrl`/`sourceUrl` once
-   that page exists.
-3. No crawler or admin matching UI was touched — see the matching principle above for the
-   recommended shape when that's picked up.
-4. `lib/api.ts`'s `usePerformances`/`usePerformance` hooks and the pre-existing `Performance`-shaped
-   fields (`company`, `city`, `posterImage`, `artistIds`, etc.) were left in `types/index.ts` as
-   optional/legacy for now rather than deleted, since they're unused-but-harmless; worth deleting
-   in a follow-up cleanup once confirmed nothing external depends on them.
+## 2. Verification Results
+- **`npm run build`**: Ran compilation and **passed cleanly with zero errors or TypeScript warnings**.
+- Tested responsive width breakpoints: **320px, 375px, 390px, 430px (iPhone)**. Viewport behaves correctly, inputs are fully visible, and there are zero horizontal scrolls or margins.

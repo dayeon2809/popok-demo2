@@ -20,7 +20,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { background: var(--bg-warm); color: var(--ink); scroll-behavior: smooth; }
+html { background: var(--bg-warm); color: var(--ink); scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
@@ -28,6 +28,7 @@ body {
   color: var(--ink);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 .display { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
@@ -153,9 +154,28 @@ input:focus, select:focus, textarea:focus {
   .discover-header { align-items: flex-start !important; }
   .discover-arrow-btns button { width: 32px !important; height: 32px !important; font-size: 0.85rem !important; }
 
-  /* Home Hero: 우측 카드 비주얼 축소 */
+  /* Home Hero: 우측 카드 비주얼 축소.
+     - 실제 아티스트가 있을 때(.hero-artist-card, PopokCard): 카드 내부 콘텐츠는
+       270px 디자인 폭 그대로 렌더링한 뒤 transform: scale()로 통째로 축소하므로
+       (아티스트 캐러셀과 동일한 방식) 포트폴리오 URL·바코드가 줄바꿈되거나
+       카드 하단이 잘리지 않는다.
+     - 아티스트가 없을 때 보여주는 목업 카드(.hero-float-card, 고정 250x360
+       레이아웃)는 기존 폭을 유지한다. */
   .hero-visual-stage { height: 340px !important; }
-  .hero-float-card { width: 190px !important; height: 275px !important; }
+  .hero-artist-card {
+    width: 200px !important;
+    height: 326px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+  }
+  .hero-card-scale {
+    width: 270px !important;
+    transform: scale(0.7407) !important;
+    transform-origin: top center !important;
+    flex-shrink: 0 !important;
+  }
 
   /* Home Testimonials: 카드 너비 축소 (모바일 스와이프 시 여러 장 보이도록) */
   .testimonial-card { width: 240px !important; }
@@ -164,22 +184,109 @@ input:focus, select:focus, textarea:focus {
   .premium-section { padding-top: 56px !important; padding-bottom: 56px !important; }
 
   /* Home Artist Carousel (지금 만나볼/새롭게 등록된/지금 활동 중인 예술가):
-     한 화면에 카드가 ~2.5~3장 보이도록 카드 폭을 줄인다. 카드 내부 콘텐츠는
-     260px 디자인 폭 그대로 렌더링한 뒤 transform: scale()로 통째로 축소하므로
-     폰트·배지·바코드·이미지 비율이 전부 그대로 유지된다. 데스크톱은 이 블록
-     밖이라 영향 없음. */
+     카드는 원래 크기(260px) 그대로 유지하고, 섹션 좌우 여백만 모바일에
+     맞게 줄인다. */
   .artist-carousel-section { padding-left: 16px !important; padding-right: 16px !important; }
   .artist-carousel-track { gap: 14px !important; }
-  .artist-carousel-slot {
-    min-width: 130px !important;
-    max-width: 130px !important;
-    height: 216px !important;
-    overflow: hidden !important;
+
+  /* my-popok Dashboard mobile compatibility */
+  .my-popok-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
-  .artist-carousel-scale {
-    width: 260px !important;
-    transform: scale(0.5) !important;
-    transform-origin: top left !important;
+  .dashboard-hero {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 20px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .dashboard-hero > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .editor-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .editor-grid > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .editor-sidebar {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .editor-card {
+    padding: 20px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Form control responsive sizing */
+  .editor-card input[type="text"],
+  .editor-card textarea,
+  .editor-card select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* AI review overlays */
+  .review-work-fields {
+    padding-right: 0 !important;
+    margin-top: 36px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* AI compare overlays */
+  .compare-row-grid {
+    grid-template-columns: 1fr !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .compare-ai-val {
+    border-left: none !important;
+    padding-left: 0 !important;
+    border-top: 1px dashed var(--border) !important;
+    padding-top: 10px !important;
+    margin-top: 6px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .compare-item-text {
+    padding-right: 12px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 !important;
+  }
+
+  /* Ensure grid children do not stretch track width */
+  .form-row-2col > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .card {
+    padding: 24px 16px !important;
   }
 }
 

@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { getSupabaseServer } from "./supabaseServer";
 import type { Artist, ArtistFilter } from "@/types";
 
@@ -109,14 +111,73 @@ export function mapArtistRowToArtist(record: any): Artist {
   } as any;
 }
 
+function getDemoArtists(): Artist[] {
+  try {
+    const filePath = path.join(process.cwd(), "data", "artists.json");
+    if (!fs.existsSync(filePath)) return [];
+    const fileContent = fs.readFileSync(filePath, "utf-8");
+    const parsed = JSON.parse(fileContent);
+    const demoItems = parsed.filter((a: any) => a.id === "kim-boram" || a.id === "ahn-eunmi");
+    return demoItems.map((item: any) => {
+      return {
+        id: item.id,
+        recordId: item.recordId || item.id,
+        name: item.name || "",
+        name_en: item.name_en || null,
+        company: item.company || null,
+        bio: item.bio || "",
+        bio_short: item.bio_short || null,
+        works: Array.isArray(item.works) ? item.works.map((w: any) => ({
+          id: w.id || String(Math.random()),
+          title: w.title || "",
+          year: w.year || null,
+          description: w.description || "",
+          role: w.role || "",
+          image_url: w.image_url || "",
+          video_url: w.video_url || ""
+        })) : [],
+        field: item.field || "dance",
+        genre: item.genre || "contemporary",
+        role: item.role || (item.field === "dance" ? "현대무용 안무가" : "아티스트"),
+        type: item.type || "company",
+        instagram: item.instagram || "",
+        website: item.website || "",
+        profileImage: item.profileImage || "/images/placeholders/cake-placeholder.png",
+        profile_image_url: item.profile_image_url || item.profileImage || null,
+        profile_image_urls: Array.isArray(item.profile_image_urls) ? item.profile_image_urls : [],
+        motion_video_url: item.motion_video_url || (item.id === "kim-boram" ? "https://www.youtube.com/watch?v=3P1CnWI62Ik" : null),
+        youtube_url: item.youtube_url || (item.id === "kim-boram" ? "https://www.youtube.com/watch?v=3P1CnWI62Ik" : null),
+        affiliations: Array.isArray(item.affiliations) ? item.affiliations : [],
+        education: Array.isArray(item.education) ? item.education : [],
+        awards: Array.isArray(item.awards) ? item.awards : [],
+        competitions: Array.isArray(item.competitions) ? item.competitions : [],
+        links: Array.isArray(item.links) ? item.links : [],
+        residency: [],
+        festival: [],
+        status: "published",
+        verified: true,
+        aiSummary: item.aiSummary || "",
+        reviews: Array.isArray(item.reviews) ? item.reviews : [],
+        isDemo: true,
+        createdAt: item.createdAt || new Date().toISOString(),
+        updatedAt: item.updatedAt || new Date().toISOString(),
+        city_or_region: item.city_or_region || "",
+        tags: ["무용", "현대무용", "데모", "검증됨"]
+      } as Artist;
+    });
+  } catch (e) {
+    console.error("Failed to load demo artists from JSON:", e);
+    return [];
+  }
+}
+
 export async function getArtists(): Promise<Artist[]> {
   const supabase = getSupabaseServer();
   const { data, error } = await supabase.from("artists" as any).select("*");
-  if (error) {
-    console.error("[getArtists] Supabase error:", error);
-    return [];
-  }
-  return (data || []).map(mapArtistRowToArtist);
+  const dbArtists = error ? [] : (data || []).map(mapArtistRowToArtist);
+  const demoArtists = getDemoArtists();
+  const filteredDemos = demoArtists.filter(d => !dbArtists.some(db => db.id === d.id));
+  return [...dbArtists, ...filteredDemos];
 }
 
 export async function getPublishedArtists(): Promise<Artist[]> {
@@ -129,11 +190,10 @@ export async function getPublishedArtists(): Promise<Artist[]> {
   }
 
   const { data, error } = await dbQuery;
-  if (error) {
-    console.error("[getPublishedArtists] Supabase error:", error);
-    return [];
-  }
-  return (data || []).map(mapArtistRowToArtist);
+  const dbArtists = error ? [] : (data || []).map(mapArtistRowToArtist);
+  const demoArtists = getDemoArtists();
+  const filteredDemos = demoArtists.filter(d => !dbArtists.some(db => db.id === d.id));
+  return [...dbArtists, ...filteredDemos];
 }
 
 export async function getArtistBySlug(slug: string): Promise<Artist | null> {
@@ -143,11 +203,10 @@ export async function getArtistBySlug(slug: string): Promise<Artist | null> {
     .select("*")
     .or(`slug.eq.${slug},name.eq.${slug}`)
     .maybeSingle();
-  if (error) {
-    console.error("[getArtistBySlug] Supabase error:", error);
-    return null;
-  }
-  return data ? mapArtistRowToArtist(data) : null;
+  if (data) return mapArtistRowToArtist(data);
+
+  const demoArtists = getDemoArtists();
+  return demoArtists.find(d => d.slug === slug || d.name === slug || d.id === slug) || null;
 }
 
 export async function getArtistById(id: string): Promise<Artist | null> {
@@ -157,11 +216,10 @@ export async function getArtistById(id: string): Promise<Artist | null> {
     .select("*")
     .or(`id.eq.${id},slug.eq.${id},name.eq.${id}`)
     .maybeSingle();
-  if (error) {
-    console.error("[getArtistById] Supabase error:", error);
-    return null;
-  }
-  return data ? mapArtistRowToArtist(data) : null;
+  if (data) return mapArtistRowToArtist(data);
+
+  const demoArtists = getDemoArtists();
+  return demoArtists.find(d => d.id === id || d.slug === id || d.name === id) || null;
 }
 
 

@@ -541,7 +541,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         </section>
 
         {/* ── 2.5. VIDEO PROFILE (Additional Video Section) ── */}
-        {artist.youtube_url && !isSameVideoUrl(artist.youtube_url, artist.motion_video_url) && (
+        {artist.youtube_url && (
           <section style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "8px", marginTop: "-30px", paddingBottom: "60px" }}>
             <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "24px" }}>
               <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>

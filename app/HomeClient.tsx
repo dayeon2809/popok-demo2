@@ -212,16 +212,23 @@ export default function HomeClient({ initialArtists, initialPerformances }: Home
               /* Real POPOK artist card — first of "지금 만나볼 예술가" (featuredArtists),
                  picked deterministically (never random) so SSR and the client's first
                  render always agree. */
-              <div className="float-card-1 hero-float-card" style={{ width: "270px", zIndex: 2 }}>
-                <PopokCard
-                  name={heroArtist.name}
-                  nameEn={heroArtist.name_en || undefined}
-                  genre={heroArtist.genre || "CREATIVE"}
-                  instagram={heroArtist.instagram || ""}
-                  id={heroArtist.id}
-                  slug={heroArtist.slug || heroArtist.id}
-                  profileImage={heroArtist.profileImage || undefined}
-                />
+              <div className="float-card-1 hero-artist-card" style={{ width: "270px", zIndex: 2 }}>
+                {/* Fixed 270px design-width inner box — on mobile this is shrunk via
+                    CSS transform: scale() (see globals.css .hero-card-scale), same
+                    technique as the artist carousel cards, so every bit of the card's
+                    internal content (fonts, barcode, portfolio URL) scales down
+                    uniformly instead of wrapping/clipping at a narrower width. */}
+                <div className="hero-card-scale">
+                  <PopokCard
+                    name={heroArtist.name}
+                    nameEn={heroArtist.name_en || undefined}
+                    genre={heroArtist.genre || "CREATIVE"}
+                    instagram={heroArtist.instagram || ""}
+                    id={heroArtist.id}
+                    slug={heroArtist.slug || heroArtist.id}
+                    profileImage={heroArtist.profileImage || undefined}
+                  />
+                </div>
               </div>
             ) : (
               <>

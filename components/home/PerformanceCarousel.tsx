@@ -153,7 +153,7 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
         onPointerDown={() => pauseAutoScroll()}
         onTouchStart={() => pauseAutoScroll()}
         onWheel={() => pauseAutoScroll()}
-        className="no-scrollbar"
+        className="no-scrollbar performance-carousel-track"
         style={{
           display: "flex",
           gap: "24px",
