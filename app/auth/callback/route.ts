@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
 
-  console.log("[Auth Callback] Received request. Code presence:", !!code);
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "popok.kr";
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  const origin = `${proto}://${host}`;
+
+  console.log("[Auth Callback] Received request. Code presence:", !!code, "Computed Origin:", origin);
 
   if (code) {
     const supabase = await createServerSupabaseClient();
