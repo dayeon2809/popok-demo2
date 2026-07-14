@@ -27,5 +27,14 @@ export default async function MyPopokPage() {
     redirect("/onboarding");
   }
 
-  return <MyPopokClient initialArtist={artist} />;
+  // profile_type (개인/단체) is chosen during onboarding step 1 but only ever
+  // saved to profiles.profile_type, never copied onto the artists row — fetch
+  // it separately so the dashboard can show what the user picked.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("profile_type")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  return <MyPopokClient initialArtist={artist} profileType={profile?.profile_type ?? null} />;
 }

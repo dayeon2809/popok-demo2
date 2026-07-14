@@ -40,7 +40,12 @@ interface Artist {
   links?: any[];
 }
 
-export default function MyPopokClient({ initialArtist }: { initialArtist: Artist }) {
+const PROFILE_TYPE_LABEL: Record<string, string> = {
+  artist: "개인",
+  organization: "단체",
+};
+
+export default function MyPopokClient({ initialArtist, profileType }: { initialArtist: Artist; profileType?: string | null }) {
   const [artist, setArtist] = useState<Artist>(initialArtist);
   const isPremium = false; // Stripe payment connection toggle point
 
@@ -350,10 +355,7 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
           
           {/* Left panel: Info & Link & Progress */}
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <span className="mono" style={{ color: "var(--accent-dark)", fontWeight: 900, fontSize: "0.8rem", letterSpacing: "0.08em" }}>
-                POPOK PORTFOLIO DASHBOARD
-              </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span style={{
                 display: "inline-flex",
                 padding: "5px 12px",
@@ -366,10 +368,14 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
               }}>
                 {statusConfig.label}
               </span>
+              {profileType && PROFILE_TYPE_LABEL[profileType] && (
+                <span style={tagStyle}>{PROFILE_TYPE_LABEL[profileType]}</span>
+              )}
+              {genre && <span style={tagStyle}>{genre}</span>}
             </div>
 
             <h1 className="display" style={{ fontSize: "clamp(1.8rem, 5vw, 2.6rem)", color: "var(--navy)", fontWeight: 950, letterSpacing: "-0.04em", margin: 0 }}>
-              {name || "아티스트"}님의 디지털 명함
+              {name || "아티스트"}님의 POPOK
             </h1>
 
             {/* Profile Completion Indicator */}
@@ -395,7 +401,7 @@ export default function MyPopokClient({ initialArtist }: { initialArtist: Artist
             </div>
 
             {/* Public Link Box */}
-            <div style={{
+            <div className="public-link-box" style={{
               background: "var(--bg-warm)",
               border: "1px solid var(--border)",
               borderRadius: "14px",
@@ -1196,6 +1202,16 @@ const textareaStyle: React.CSSProperties = {
   background: "#FFFFFF",
   resize: "vertical",
   lineHeight: 1.5,
+};
+
+const tagStyle: React.CSSProperties = {
+  display: "inline-flex",
+  padding: "5px 12px",
+  borderRadius: "999px",
+  fontSize: "0.78rem",
+  fontWeight: 800,
+  background: "var(--tag-bg)",
+  color: "var(--navy)",
 };
 
 const smallButtonStyle: React.CSSProperties = {

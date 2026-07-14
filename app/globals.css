@@ -288,6 +288,16 @@ input:focus, select:focus, textarea:focus {
   .card {
     padding: 24px 16px !important;
   }
+  .public-link-box {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  .public-link-box > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 /* ── POPOK Custom Motion & Interactions ── */

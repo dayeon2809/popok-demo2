@@ -3,6 +3,9 @@ import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { parseProfileTextWithAI } from "@/lib/profileParser";
 
 export const dynamic = "force-dynamic";
+// pdf-parse (pdfjs-dist) and mammoth use Node.js-only APIs (Buffer, fs) and
+// must not run on the Edge runtime.
+export const runtime = "nodejs";
 
 // Basic in-memory rate limiting map (userId -> lastRequestTimestamp)
 const rateLimitMap = new Map<string, number>();
@@ -55,24 +58,51 @@ export async function POST(request: Request) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const fileName = file.name.toLowerCase();
 
-      // Check file extension / MIME type
-      if (fileName.endsWith(".pdf") || file.type === "application/pdf") {
-        const pdf = require("pdf-parse");
-        const parsedPdf = await pdf(buffer);
-        textToParse = parsedPdf.text || "";
-      } else if (
-        fileName.endsWith(".docx") ||
-        file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
-        const mammoth = require("mammoth");
-        const parsedDocx = await mammoth.extractRawText({ buffer });
-        textToParse = parsedDocx.value || "";
-      } else if (fileName.endsWith(".txt") || file.type === "text/plain" || file.type.startsWith("text/")) {
-        textToParse = buffer.toString("utf8");
-      } else {
+      try {
+        // Check file extension / MIME type
+        if (fileName.endsWith(".pdf") || file.type === "application/pdf") {
+          // pdf-parse v2 dropped the old `pdf(buffer)` function export in favor
+          // of a `PDFParse` class (require("pdf-parse") no longer returns a
+          // callable function). pageJoiner is set to "" so page-boundary
+          // markers aren't injected into the text sent to the AI parser.
+          const { PDFParse } = require("pdf-parse");
+          const parser = new PDFParse({ data: buffer });
+          try {
+            const result = await parser.getText({ pageJoiner: "" });
+            textToParse = result.text || "";
+          } finally {
+            await parser.destroy();
+          }
+        } else if (
+          fileName.endsWith(".docx") ||
+          file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ) {
+          const mammoth = require("mammoth");
+          const parsedDocx = await mammoth.extractRawText({ buffer });
+          textToParse = parsedDocx.value || "";
+        } else if (fileName.endsWith(".txt") || file.type === "text/plain" || file.type.startsWith("text/")) {
+          textToParse = buffer.toString("utf8");
+        } else {
+          return NextResponse.json(
+            { success: false, error: "지원하지 않는 파일 형식입니다. (PDF, DOCX, TXT만 지원)", code: "UNSUPPORTED_FILE_TYPE" },
+            { status: 400 }
+          );
+        }
+      } catch (extractErr: any) {
+        console.error("[Profile Parser API] File text extraction failed:", {
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          message: extractErr?.message,
+          stack: extractErr?.stack,
+        });
         return NextResponse.json(
-          { success: false, error: "지원하지 않는 파일 형식입니다. (PDF, DOCX, TXT만 지원)" },
-          { status: 400 }
+          {
+            success: false,
+            error: "파일에서 텍스트를 추출하지 못했습니다. 파일이 손상되었거나 지원하지 않는 형식일 수 있습니다. 다른 파일을 사용하거나 텍스트를 직접 붙여넣어 주세요.",
+            code: "FILE_EXTRACTION_FAILED",
+          },
+          { status: 422 }
         );
       }
     } else {
@@ -102,9 +132,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data: profileData });
 
   } catch (err: any) {
-    console.error("[Profile Parser API Error]:", err);
+    console.error("[Profile Parser API Error]:", { message: err?.message, stack: err?.stack });
     return NextResponse.json(
-      { success: false, error: "내용을 자동으로 정리하지 못했어요. 다른 파일을 사용하거나 텍스트를 직접 붙여넣어 주세요." },
+      {
+        success: false,
+        error: "내용을 자동으로 정리하지 못했어요. 다른 파일을 사용하거나 텍스트를 직접 붙여넣어 주세요.",
+        code: "AI_PARSE_FAILED",
+      },
       { status: 500 }
     );
   }
