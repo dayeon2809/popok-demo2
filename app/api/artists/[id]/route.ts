@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getArtistById, getArtistBySlug } from "@/lib/artists";
+import { getPrimaryConnectedCompanyByArtistId } from "@/lib/companies";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +30,14 @@ export async function GET(
 
     const works = artist.works || [];
 
+    // recordId is the real artists.id (uuid) that artist_companies.artist_id
+    // references — artist.id itself may be a slug, so it can't be used here.
+    const connectedCompany = artist.recordId
+      ? await getPrimaryConnectedCompanyByArtistId(artist.recordId)
+      : null;
+
     return NextResponse.json(
-      { data: { ...artist, works }, error: null },
+      { data: { ...artist, works, connectedCompany }, error: null },
       { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
     );
   } catch (err: any) {

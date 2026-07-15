@@ -191,7 +191,7 @@ export default function AboutClient() {
             </span>
             <h3 style={{ fontSize: "1.1rem", fontWeight: 900, color: "var(--navy)", margin: "0 0 8px" }}>디지털 명함 & 포트폴리오</h3>
             <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0 }}>
-              프로필 정보, 유튜브 임베드, 작업 링크 및 대표 작품(Works)을 하나의 깔끔한 디지털 명함 페이지로 모아 즉시 공유할 수 있는 핵심 기능을 출시했습니다.
+              프로필 정보, 유튜브 임베드, 작업 링크 및 대표 작품(Works)을 하나의 깔끔한 디지털 명함 페이지로 모아 즉시 공유할 수 있는 핵심 기능을 출시했습니다. 개인 아티스트는 직접 등록하며, 단체는 POPOK 운영팀이 인터뷰를 통해 함께 구축합니다.
             </p>
           </div>
 

@@ -34,6 +34,7 @@ interface AdminArtistRow {
   submissionId: number | null;
   status: string; // "published" | "draft" — the only two real values
   worksCount: number;
+  viewCount: number;
   email: string | null;
   createdAt: string | null;
   updatedAt: string | null;
@@ -42,6 +43,13 @@ interface AdminArtistRow {
 }
 
 type FilterKey = "all" | "owned" | "unowned" | "published" | "draft" | "verified" | "no_account";
+type SortKey = "created_desc" | "views_desc" | "views_asc";
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "created_desc", label: "최근 등록순" },
+  { key: "views_desc", label: "조회수 높은순" },
+  { key: "views_asc", label: "조회수 낮은순" },
+];
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "전체" },
@@ -127,6 +135,7 @@ export default function AdminArtistsPage() {
   const [artists, setArtists] = useState<AdminArtistRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+  const [sortOption, setSortOption] = useState<SortKey>("created_desc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -155,11 +164,11 @@ export default function AdminArtistsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  const fetchArtists = async (authCode?: string) => {
+  const fetchArtists = async (authCode?: string, sortOverride?: SortKey) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/artists", {
+      const res = await fetch(`/api/admin/artists?sort=${sortOverride || sortOption}`, {
         headers: {
           "x-admin-passcode": authCode || passcode || sessionStorage.getItem("admin_passcode") || "",
         },
@@ -322,25 +331,50 @@ export default function AdminArtistsPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setActiveFilter(f.key)}
-            style={{
-              padding: "6px 14px",
-              borderRadius: "20px",
-              fontSize: "0.78rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              border: activeFilter === f.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
-              background: activeFilter === f.key ? "var(--navy)" : "#fff",
-              color: activeFilter === f.key ? "#fff" : "var(--ink-muted)",
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setActiveFilter(f.key)}
+              style={{
+                padding: "6px 14px",
+                borderRadius: "20px",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                border: activeFilter === f.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                background: activeFilter === f.key ? "var(--navy)" : "#fff",
+                color: activeFilter === f.key ? "#fff" : "var(--ink-muted)",
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        <select
+          value={sortOption}
+          onChange={(e) => {
+            const next = e.target.value as SortKey;
+            setSortOption(next);
+            fetchArtists(undefined, next);
+          }}
+          style={{
+            padding: "6px 12px",
+            borderRadius: "8px",
+            border: "1.5px solid var(--border)",
+            fontSize: "0.78rem",
+            fontWeight: 700,
+            fontFamily: "inherit",
+            background: "#fff",
+            color: "var(--navy)",
+          }}
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.key} value={opt.key}>{opt.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Search Input */}
@@ -372,6 +406,7 @@ export default function AdminArtistsPage() {
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>연결 계정</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>최근 로그인</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>작품 수</th>
+              <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>조회수</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>최근 수정일</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>상태</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)", textAlign: "right" }}>작업</th>
@@ -380,7 +415,7 @@ export default function AdminArtistsPage() {
           <tbody>
             {filteredArtists.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ padding: "40px", textAlign: "center", color: "var(--ink-muted)" }}>
+                <td colSpan={10} style={{ padding: "40px", textAlign: "center", color: "var(--ink-muted)" }}>
                   조건에 맞는 아티스트가 없습니다.
                 </td>
               </tr>
@@ -455,6 +490,11 @@ export default function AdminArtistsPage() {
                         {a.worksCount}
                       </td>
 
+                      {/* 조회수 */}
+                      <td style={{ padding: "12px 14px", color: "var(--navy)", fontWeight: 700 }}>
+                        {a.viewCount.toLocaleString("ko-KR")}
+                      </td>
+
                       {/* 최근 수정일 */}
                       <td style={{ padding: "12px 14px", color: "var(--ink-muted)" }}>
                         {formatRelativeTime(a.updatedAt) || "-"}
@@ -518,7 +558,7 @@ export default function AdminArtistsPage() {
 
                     {isExpanded && (
                       <tr key={`${a.id}-expanded`} style={{ borderBottom: "1px solid var(--border)" }}>
-                        <td colSpan={9} style={{ padding: "0 14px 18px", background: "#FAFBFC" }}>
+                        <td colSpan={10} style={{ padding: "0 14px 18px", background: "#FAFBFC" }}>
                           {isEditing ? (
                             <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "14px 0", maxWidth: "480px" }}>
                               <label style={editLabelStyle}>

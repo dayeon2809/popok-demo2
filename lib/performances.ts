@@ -1,5 +1,6 @@
 import { getSupabaseServer } from "./supabaseServer";
 import { mapArtistRowToArtist } from "./artists";
+import { getSeoulToday, filterUpcomingPerformances, parseDateOnly } from "./date";
 import type { Performance, RelatedPerformanceArtist } from "@/types";
 
 // Selects performances plus their linked artists via performance_artists.
@@ -82,15 +83,28 @@ export async function getPublishedPerformances(limit?: number): Promise<Performa
   }
 }
 
+// Fetch a wider candidate pool than the final display `limit` so the
+// in-memory "this week, then nearest future" selection below has enough
+// future performances to pick from when this week is thin — without
+// scanning the entire table on every homepage request.
+const UPCOMING_CANDIDATE_POOL_SIZE = 50;
+
 /**
- * Published performances that haven't ended yet (end_date >= today, or no
- * end_date recorded), soonest start_date first. Used by the homepage
- * "이번 주 공연" carousel.
+ * Performances for the homepage "이번 주 공연" carousel, recalculated on every
+ * call against the current Asia/Seoul date (never the server/deploy
+ * platform's local timezone):
+ *   1. Published, not-yet-ended performances this week (today's in-progress
+ *      ones first, then soonest start date)
+ *   2. If this week doesn't fill `limit`, the nearest upcoming performances
+ *      afterward — never anything that has already ended.
+ * See lib/date.ts (getSeoulToday / getWeeklyPerformanceRange /
+ * filterUpcomingPerformances) for the reusable, independently-testable date
+ * logic this relies on.
  */
 export async function getUpcomingPerformances(limit = 8): Promise<Performance[]> {
   try {
     const supabase = getSupabaseServer();
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getSeoulToday(); // Asia/Seoul-local "today", not UTC
 
     const { data, error } = await supabase
       .from("performances" as any)
@@ -98,13 +112,28 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
       .eq("status", "published")
       .or(`end_date.gte.${today},end_date.is.null`)
       .order("start_date", { ascending: true })
-      .limit(limit);
+      .limit(UPCOMING_CANDIDATE_POOL_SIZE);
 
     if (error) {
       console.error("[getUpcomingPerformances] Supabase error:", error);
       return [];
     }
-    return (data || []).map(mapPerformanceRowToPerformance);
+
+    const mapped = (data || []).map(mapPerformanceRowToPerformance);
+
+    // A single malformed start_date must not take down the whole homepage —
+    // log it and let filterUpcomingPerformances silently exclude that row.
+    for (const perf of mapped) {
+      if (perf.startDate && !parseDateOnly(perf.startDate)) {
+        console.error(
+          "[getUpcomingPerformances] Invalid start_date, excluding from weekly list:",
+          perf.id,
+          perf.startDate
+        );
+      }
+    }
+
+    return filterUpcomingPerformances(mapped, new Date(), limit);
   } catch (err) {
     console.error("[getUpcomingPerformances] Unexpected error:", err);
     return [];

@@ -14,7 +14,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      profileType,
       displayName,
       username,
       genre,
@@ -30,7 +29,12 @@ export async function POST(request: Request) {
       links
     } = body;
 
-    if (!profileType || !displayName || !username || !genre || !role) {
+    // /onboarding is individual-artist-only — organizations apply via
+    // /api/organizations/apply instead, so profileType is fixed here rather
+    // than trusted from the client.
+    const profileType = "artist";
+
+    if (!displayName || !username || !genre || !role) {
       return NextResponse.json({ success: false, error: "모든 항목을 입력해 주세요." }, { status: 400 });
     }
 

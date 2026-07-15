@@ -6,6 +6,7 @@ import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { emptyParsedProfile, type ParsedArtistProfile, type ParserStatus } from "@/lib/parsedProfile";
+import { ArrayField, StringArrayField } from "@/components/admin/ArrayField";
 
 interface Submission {
   id: number;
@@ -814,83 +815,5 @@ function ParserStatusBadge({ status }: { status: string }) {
   );
 }
 
-// ── 배열 편집기 (추가 / 삭제 / 순서 변경 / 텍스트 수정) ──────────────
-function ArrayField<T>({
-  label,
-  items,
-  onChange,
-  newItem,
-  renderItem,
-}: {
-  label: string;
-  items: T[];
-  onChange: (items: T[]) => void;
-  newItem: () => T;
-  renderItem: (item: T, setItem: (next: T) => void) => React.ReactNode;
-}) {
-  const move = (idx: number, dir: -1 | 1) => {
-    const target = idx + dir;
-    if (target < 0 || target >= items.length) return;
-    const next = [...items];
-    [next[idx], next[target]] = [next[target], next[idx]];
-    onChange(next);
-  };
-  const remove = (idx: number) => onChange(items.filter((_, i) => i !== idx));
-  const setAt = (idx: number) => (next: T) => {
-    const arr = [...items];
-    arr[idx] = next;
-    onChange(arr);
-  };
-  const add = () => onChange([...items, newItem()]);
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-        <label style={labelStyle}>{label}</label>
-        <button type="button" onClick={add} style={actionBtnStyle}>+ 항목 추가</button>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        {items.length === 0 && (
-          <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", margin: 0 }}>항목이 없습니다.</p>
-        )}
-        {items.map((item, idx) => (
-          <div key={idx} style={{ border: "1px solid var(--border)", borderRadius: "8px", padding: "10px", display: "flex", gap: "8px", alignItems: "flex-start", background: "#FAF8F5" }}>
-            <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
-              {renderItem(item, setAt(idx))}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flexShrink: 0 }}>
-              <button type="button" onClick={() => move(idx, -1)} disabled={idx === 0} style={iconBtnStyle} title="위로">↑</button>
-              <button type="button" onClick={() => move(idx, 1)} disabled={idx === items.length - 1} style={iconBtnStyle} title="아래로">↓</button>
-              <button type="button" onClick={() => remove(idx)} style={{ ...iconBtnStyle, color: "#EF4444", borderColor: "#FEE2E2" }} title="삭제">✕</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── 문자열 배열 편집기 (current_activity / education / warnings) ──────
-function StringArrayField({
-  label,
-  items,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  items: string[];
-  onChange: (items: string[]) => void;
-  placeholder?: string;
-}) {
-  return (
-    <ArrayField<string>
-      label={label}
-      items={items}
-      onChange={onChange}
-      newItem={() => ""}
-      renderItem={(item, setItem) => (
-        <input style={inputStyle} placeholder={placeholder} value={item} onChange={(e) => setItem(e.target.value)} />
-      )}
-    />
-  );
-}
+// ArrayField / StringArrayField moved to components/admin/ArrayField.tsx
+// (shared with app/admin/companies/[id]/page.tsx).

@@ -107,7 +107,12 @@ export function mapArtistRowToArtist(record: any): Artist {
     createdAt: record.created_at || new Date().toISOString(),
     updatedAt: record.updated_at || new Date().toISOString(),
     city_or_region: record.city_or_region || "",
-    tags: [fValue === "dance" ? "무용" : fValue === "music" ? "음악" : "시각예술", gValue, "검증됨"].filter(Boolean)
+    category: record.category || null,
+    current_activity: record.current_activity ?? null,
+    review_links: record.review_links ?? null,
+    portfolio_url: record.portfolio_url || null,
+    tags: [fValue === "dance" ? "무용" : fValue === "music" ? "음악" : "시각예술", gValue, "검증됨"].filter(Boolean),
+    view_count: typeof record.view_count === "number" ? record.view_count : 0,
   } as any;
 }
 
@@ -188,6 +193,16 @@ export async function getPublishedArtists(): Promise<Artist[]> {
   if (!showDraft) {
     dbQuery = dbQuery.eq("status", "published");
   }
+  // Individual-only: organizations now live in public.companies (see
+  // lib/companies.ts) and are browsed via /companies, not /artists or the
+  // homepage carousel. artists.artist_type is unset for every current row,
+  // so a plain .neq("artist_type", "organization") would wrongly exclude
+  // them too (NULL <> 'organization' evaluates to NULL/false in Postgres) —
+  // the OR explicitly keeps null (treated as individual) alongside any
+  // non-organization value. This is a distinct concept from the legacy
+  // `type`/ArtistType content filter (individual vs. group act) used by the
+  // "ALL TYPES / INDIVIDUAL / GROUP·TEAM" pills on /artists — that stays untouched.
+  dbQuery = dbQuery.or("artist_type.is.null,artist_type.neq.organization");
 
   const { data, error } = await dbQuery;
   const dbArtists = error ? [] : (data || []).map(mapArtistRowToArtist);

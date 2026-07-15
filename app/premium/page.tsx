@@ -116,6 +116,10 @@ const FAQ_ITEMS = [
     question: "결제는 언제부터 가능한가요?",
     answer: "현재는 결제 기능이 아직 공개되지 않았어요. 준비가 완료되면 이메일로 안내드릴게요.",
   },
+  {
+    question: "단체(무용단·기획사 등)도 Premium에 가입할 수 있나요?",
+    answer: "Premium은 개인 아티스트를 위한 구독 플랜이에요. 단체는 별도의 신청 폼을 통해 접수해주시면 POPOK 운영팀이 인터뷰를 통해 포트폴리오 제작을 직접 도와드려요.",
+  },
 ];
 
 export default function PremiumPage() {

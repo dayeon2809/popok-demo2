@@ -16,10 +16,22 @@ export async function GET(req: NextRequest) {
 
   try {
     const supabase = getSupabaseServer();
+    // sort: "created_desc" (default) | "views_desc" | "views_asc"
+    const sort = req.nextUrl.searchParams.get("sort") || "created_desc";
+
     // artists.id는 uuid(gen_random_uuid())라 id 기준 정렬은 더 이상 최신순을 의미하지 않는다 — created_at으로 정렬한다.
-    const { data: artists, error } = await (supabase.from("artists") as any)
-      .select("id, name, name_en, company, genre, role, bio_short, slug, claim_code, verified, profile_image_url, owner_id, submission_id, status, works, email, created_at, updated_at")
-      .order("created_at", { ascending: false });
+    let query = (supabase.from("artists") as any)
+      .select("id, name, name_en, company, genre, role, bio_short, slug, claim_code, verified, profile_image_url, owner_id, submission_id, status, works, email, view_count, created_at, updated_at");
+
+    if (sort === "views_desc") {
+      query = query.order("view_count", { ascending: false });
+    } else if (sort === "views_asc") {
+      query = query.order("view_count", { ascending: true });
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
+
+    const { data: artists, error } = await query;
 
     if (error) {
       console.error("[GET /api/admin/artists] Supabase error:", error);
@@ -85,6 +97,7 @@ export async function GET(req: NextRequest) {
         submissionId: a.submission_id ?? null,
         status: a.status || "draft", // published | draft — the only two values ever written
         worksCount: Array.isArray(a.works) ? a.works.length : 0,
+        viewCount: typeof a.view_count === "number" ? a.view_count : 0,
         email: a.email || null,
         createdAt: a.created_at,
         updatedAt: a.updated_at,

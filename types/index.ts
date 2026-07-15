@@ -73,6 +73,12 @@ export interface Artist {
   awards?: any[];
   competitions?: any[];
   links?: any[];
+  view_count?: number;                // 누적 조회수
+  category?: string | null;
+  current_activity?: unknown;         // string | object | array — normalize with lib/normalize before use
+  review_links?: unknown;             // string | object | array — normalize with lib/normalize before use
+  portfolio_url?: string | null;
+  connectedCompany?: ConnectedCompany | null;
 }
 
 export interface Work {
@@ -113,6 +119,44 @@ export interface Work {
 }
 
 export type ArtistWithWorks = Artist;
+
+// public.companies — organization public profile (separate from artists;
+// see lib/companies.ts). Individual <-> company relationships live in
+// public.artist_companies, never inferred from artists.company text.
+export interface Company {
+  id: string;
+  name: string;
+  name_en?: string | null;
+  slug?: string | null;
+  status?: "draft" | "published" | "archived" | string;
+  verified?: boolean;
+  genre?: string | null;
+  category?: string | null;
+  city_or_region?: string | null;
+  bio_short?: string | null;
+  bio?: string | null;
+  profile_image_url?: string | null;
+  profile_image_urls?: string[];
+  motion_video_url?: string | null;
+  email?: string | null;
+  instagram?: string | null;
+  website?: string | null;
+  portfolio_url?: string | null;
+  current_activity?: string[];
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+// A row from public.artist_companies joined with its linked company.
+export interface ConnectedCompany {
+  company: Company;
+  role: string | null;
+  start_year: number | null;
+  end_year: number | null;
+  is_current: boolean;
+  is_primary: boolean;
+  created_at?: string | null;
+}
 
 
 export interface ApiResponse<T> {

@@ -10,6 +10,8 @@ import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
 import { getYouTubePreviewAspectRatio, isYouTubeUrl } from "@/lib/youtube";
 import { isSameVideoUrl, getYouTubeEmbedUrl, isDirectVideoUrl } from "@/lib/video";
 import { isVimeoUrl, getVimeoEmbedUrl } from "@/lib/videoLinks";
+import { getCompanyDetailHref } from "@/lib/companyRoute";
+import { toStringArray, toObjectArray, safeYear, getValidWorks } from "@/lib/normalize";
 
 interface WorkItem {
   id: string;
@@ -17,6 +19,9 @@ interface WorkItem {
   year: string;
   description: string;
   role: string;
+  genre?: string;
+  venue?: string;
+  externalLink?: string;
   image: string;
   videoUrl: string;
   credits: string;
@@ -42,7 +47,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null);
 
   const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
-  const [openReviews, setOpenReviews] = useState<Record<string, boolean>>({});
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
 
@@ -75,6 +79,32 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         setLoading(false);
       });
   }, [id]);
+
+  // Record a view — only after the artist has actually loaded in a real
+  // browser (never during SSR/prefetch, and never for a draft/missing
+  // artist, since that fetch above would have already failed). Guarded by
+  // sessionStorage so repeated refreshes in the same tab/session don't
+  // inflate the count; a new session or device increments again.
+  useEffect(() => {
+    if (!artist) return;
+    const artistKey = artist.recordId || artist.id;
+    if (!artistKey || typeof window === "undefined") return;
+
+    const sessionKey = `popok_artist_view_${artistKey}`;
+    if (sessionStorage.getItem(sessionKey)) return;
+    sessionStorage.setItem(sessionKey, "1");
+
+    fetch(`/api/artists/${encodeURIComponent(artistKey)}/view`, { method: "POST" })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.success && typeof res.view_count === "number") {
+          setArtist((prev: any) => (prev ? { ...prev, view_count: res.view_count } : prev));
+        }
+      })
+      .catch(() => {
+        // View-count recording must never break the detail page.
+      });
+  }, [artist?.recordId, artist?.id]);
 
   // Ticking local clock
   useEffect(() => {
@@ -156,110 +186,125 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  // Compile works list
-  const displayWorks: WorkItem[] = (() => {
-    const parseWorksIntoTitles = (w: any): string[] => {
-      if (!w) return [];
-      
-      let targetString = "";
-      if (typeof w === "string") {
-        targetString = w;
-      } else if (typeof w === "object") {
-        targetString = w.title || w.name || "";
-      }
+  // Compile works list — only real archived pieces (getValidWorks drops the
+  // onboarding pipeline's "popok_registration_media" bookkeeping entry and
+  // any item with no title), so the rendered list and the "N WORKS ARCHIVED"
+  // count below always agree.
+  const validWorkRecords = getValidWorks<any>(artist.works ?? artist.portfolio_works);
+  const displayWorks: WorkItem[] = validWorkRecords.map((w: any, idx: number) => ({
+    id: w.id || `work-${idx}`,
+    title: typeof w.title === "string" ? w.title.trim() : String(w.title),
+    year: safeYear(w.year) || "연도미상",
+    description: typeof w.description === "string" ? w.description.trim() : "",
+    role: typeof w.role === "string" ? w.role.trim() : "",
+    genre: typeof w.genre === "string" ? w.genre.trim() : "",
+    venue: typeof w.venue === "string" ? w.venue.trim() : "",
+    externalLink: typeof (w.link || w.url || w.source_url) === "string" ? (w.link || w.url || w.source_url).trim() : "",
+    image: w.image_url || "/images/placeholders/cake-placeholder.png",
+    videoUrl: w.video_url || w.video || w.videoUrl || "",
+    credits: typeof w.credits === "string" ? w.credits.trim() : (w.role || ""),
+    previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
+    previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
+    previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
+    media: w.media || null,
+  }));
 
-      if (!targetString) return [];
-
-      try {
-        const bracketMatches = Array.from(targetString.matchAll(/<([^>]+)>/g)).map(m => m[1].trim());
-        if (bracketMatches.length > 0) {
-          return bracketMatches;
-        }
-        return targetString.split(/[,\n]/).map(item => item.trim()).filter(Boolean);
-      } catch (e) {
-        return [String(targetString)];
-      }
-    };
-
-    const list: WorkItem[] = [];
-
-    const worksList = artist.works ?? artist.portfolio_works;
-    if (worksList && Array.isArray(worksList) && worksList.length > 0) {
-      const isObjects = typeof worksList[0] === "object";
-      if (isObjects) {
-        worksList.forEach((w: any, idx: number) => {
-          if (!w) return;
-          const titles = parseWorksIntoTitles(w.title || w);
-          titles.forEach((title, tIdx) => {
-            list.push({
-              id: w.id || `work-p-${idx}-${tIdx}`,
-              title: title,
-              year: w.year || "연도미상",
-              description: w.description || "이 작품은 아티스트의 핵심적인 포트폴리오 프로젝트 아카이브입니다. 창의적인 연출과 기획 요소들이 담겨 있습니다.",
-              role: w.role || "창작",
-              image: w.image_url || "/images/placeholders/cake-placeholder.png",
-              videoUrl: w.video_url || w.video || w.videoUrl || "",
-              credits: w.role || "창작",
-              previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
-              previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
-              previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
-              media: w.media || null
-            });
-          });
-        });
-        return list;
-      } else {
-        worksList.forEach((w: any, idx: number) => {
-          if (!w) return;
-          const titles = parseWorksIntoTitles(w);
-          titles.forEach((title, tIdx) => {
-            let cleanTitle = title.trim();
-            let year = "연도미상";
-            const yearMatch = cleanTitle.match(/\((\d{4})\)/);
-            if (yearMatch) {
-              year = yearMatch[1];
-              cleanTitle = cleanTitle.replace(/\((\d{4})\)/, "").trim();
-            } else if (cleanTitle.includes("(연도미상)")) {
-              cleanTitle = cleanTitle.replace("(연도미상)", "").trim();
-            }
-            list.push({
-              id: `work-w-${idx}-${tIdx}`,
-              title: cleanTitle,
-              year,
-              description: "대표 아카이브 작품입니다.",
-              role: "창작자",
-              image: "/images/placeholders/cake-placeholder.png",
-              videoUrl: "",
-              credits: "참여: " + artist.name
-            });
-          });
-        });
-        return list;
-      }
-    }
-    return [];
+  // ── Activity Timeline: current_activity + affiliations only (education,
+  // awards, competitions each get their own section below). Entries with a
+  // real numeric year sort newest-first; current_activity has no year field
+  // in practice so it always leads at the top as "CURRENT".
+  interface TimelineEntry { label: string; text: string; year: number | null; }
+  const timelineEntries: TimelineEntry[] = (() => {
+    const entries: TimelineEntry[] = [];
+    toStringArray(artist.current_activity).forEach((text) => {
+      entries.push({ label: "CURRENT", text, year: null });
+    });
+    toObjectArray<{ name?: string; position?: string; year?: string | number }>(artist.affiliations).forEach((aff) => {
+      const name = typeof aff.name === "string" ? aff.name.trim() : "";
+      if (!name) return;
+      const text = aff.position ? `${name} · ${aff.position}` : name;
+      const yearNum = Number(safeYear(aff.year));
+      entries.push({ label: "AFFILIATION", text, year: Number.isFinite(yearNum) && safeYear(aff.year) ? yearNum : null });
+    });
+    return entries;
   })();
+  const timelineCurrent = timelineEntries.filter((e) => e.label === "CURRENT");
+  const timelineRest = timelineEntries.filter((e) => e.label !== "CURRENT");
+  const timelineDated = timelineRest.filter((e) => e.year !== null).sort((a, b) => (b.year as number) - (a.year as number));
+  const timelineUndated = timelineRest.filter((e) => e.year === null);
+  const activityTimeline: TimelineEntry[] = [...timelineCurrent, ...timelineDated, ...timelineUndated];
 
-  // Compile career timeline
-  const careerList: string[] = (() => {
-    const list: string[] = [];
-    if (artist.residency && Array.isArray(artist.residency) && artist.residency.length > 0) {
-      artist.residency.forEach((r: any) => {
-        if (r) list.push(`Residency: ${String(r)}`);
-      });
+  // ── Education — plain strings in practice (no separate year/school/major
+  // fields), so each entry is rendered as-is, original order preserved.
+  const educationList = toStringArray(artist.education);
+
+  // ── Awards & Competitions — normalize, dedupe by (year, title, org), sort
+  // newest-first when a real year exists, otherwise keep original order.
+  interface AwardLike { year?: string | number; title?: string; result?: string; organization?: string; }
+  function normalizeAwardList(value: unknown): AwardLike[] {
+    const raw = toObjectArray<AwardLike>(value);
+    const seen = new Set<string>();
+    const deduped: AwardLike[] = [];
+    for (const item of raw) {
+      const key = `${safeYear(item.year)}|${(item.title || "").trim().toLowerCase()}|${(item.organization || "").trim().toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(item);
     }
-    if (artist.festival && Array.isArray(artist.festival) && artist.festival.length > 0) {
-      artist.festival.forEach((f: any) => {
-        if (f) list.push(`Festival: ${String(f)}`);
-      });
+    const withYear = deduped.filter((item) => Number.isFinite(Number(safeYear(item.year))) && safeYear(item.year));
+    const withoutYear = deduped.filter((item) => !(Number.isFinite(Number(safeYear(item.year))) && safeYear(item.year)));
+    withYear.sort((a, b) => Number(safeYear(b.year)) - Number(safeYear(a.year)));
+    return [...withYear, ...withoutYear];
+  }
+  const awardsList = normalizeAwardList(artist.awards);
+  const competitionsList = normalizeAwardList(artist.competitions);
+  const combinedAwardsCount = awardsList.length + competitionsList.length;
+  const splitAwardsAndCompetitions = combinedAwardsCount > 6;
+
+  // ── Reviews & Articles — review_links, not the legacy `reviews` shape.
+  interface ReviewLike { title?: string; publication?: string; date?: string; year?: string | number; work?: string; url?: string; label?: string; }
+  const reviewItems = toObjectArray<ReviewLike>(artist.review_links);
+  function getReviewDomain(url: string): string {
+    try {
+      return new URL(url).hostname.replace(/^www\./, "");
+    } catch {
+      return url;
     }
-    if (artist.works && Array.isArray(artist.works) && artist.works.length > 0) {
-      artist.works.slice(0, 3).forEach((w: any) => {
-        if (w) list.push(`Presented piece: ${typeof w === "object" ? (w.title || w.name || String(w)) : String(w)}`);
-      });
+  }
+
+  // ── Contact Info — priority-ordered, deduped, capped at 3.
+  interface ContactCandidate { label: string; href: string; }
+  function normalizeHref(raw: string): string {
+    const trimmed = raw.trim();
+    if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("mailto:")) return trimmed;
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return `mailto:${trimmed}`;
+    return `https://${trimmed}`;
+  }
+  function dedupeKey(href: string): string {
+    return href.replace(/^mailto:/, "").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "").toLowerCase();
+  }
+  const contactCandidates: ContactCandidate[] = (() => {
+    const list: ContactCandidate[] = [];
+    if (artist.instagram) list.push({ label: cleanInstagramHandle(artist.instagram), href: normalizeHref(artist.instagram) });
+    if (artist.website) list.push({ label: artist.website.replace(/^https?:\/\//, ""), href: normalizeHref(artist.website) });
+    if (artist.portfolio_url) list.push({ label: "Portfolio", href: normalizeHref(artist.portfolio_url) });
+    if (artist.email) list.push({ label: artist.email, href: `mailto:${artist.email}` });
+    if (artist.youtube_url) list.push({ label: "YouTube", href: normalizeHref(artist.youtube_url) });
+    toObjectArray<{ url?: string; label?: string }>(artist.links).forEach((link) => {
+      if (typeof link.url === "string" && link.url.trim()) {
+        list.push({ label: link.label || getReviewDomain(link.url), href: normalizeHref(link.url) });
+      }
+    });
+
+    const seen = new Set<string>();
+    const deduped: ContactCandidate[] = [];
+    for (const item of list) {
+      const key = dedupeKey(item.href);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(item);
     }
-    list.push("POPOK Registry Verification Completed");
-    return list;
+    return deduped.slice(0, 3);
   })();
 
   // Motion profile video comes ONLY from motion_video_url (1순위: artist.motion_video_url)
@@ -344,6 +389,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             line-height: 1.35 !important;
             -webkit-line-clamp: 2 !important;
           }
+          .education-row, .award-row {
+            grid-template-columns: 1fr !important;
+            gap: 4px !important;
+          }
+        }
+        .connected-org-card:hover {
+          box-shadow: 0 8px 20px rgba(23, 20, 17, 0.08);
+          transform: translateY(-2px);
         }
       ` }} />
       
@@ -466,17 +519,91 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               paddingBottom: "36px",
               marginBottom: "40px"
             }}>
-              {/* Col 1: Affiliations */}
-              <div>
+              {/* Col 1: Connected Organization — a small network card, not a
+                  new large section. Priority: official artist_companies
+                  connection > artists.company text fallback > Independent Artist.
+                  Never auto-connects by name matching a company string. */}
+              <div style={{ minWidth: 0 }}>
                 <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-                  AFFILIATION
+                  CONNECTED ORGANIZATION
                 </span>
-                <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", margin: 0 }}>
-                  {artist.company || "Independent Artist"}
-                </p>
-                <span className="mono" style={{ fontSize: "0.6rem", color: "var(--accent-dark)", fontWeight: 850, marginTop: "6px", display: "block" }}>
-                  {artist.genre ? artist.genre.toUpperCase() : "CREATIVE"}
-                </span>
+                {artist.connectedCompany ? (
+                  <Link
+                    href={getCompanyDetailHref(artist.connectedCompany.company.slug || artist.connectedCompany.company.id)}
+                    className="connected-org-card"
+                    style={{
+                      display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
+                      padding: "10px", borderRadius: "12px", border: "1px solid var(--border)",
+                      background: "#FAF8F5", transition: "all 0.15s ease", minWidth: 0,
+                    }}
+                  >
+                    <img
+                      src={artist.connectedCompany.company.profile_image_url || "/images/placeholders/cake-placeholder.png"}
+                      alt={artist.connectedCompany.company.name}
+                      style={{ width: "40px", height: "40px", borderRadius: "10px", objectFit: "cover", flexShrink: 0 }}
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                        <span style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                          {artist.connectedCompany.company.name}
+                        </span>
+                        {artist.connectedCompany.company.verified && (
+                          <span style={{ fontSize: "0.56rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "7px", whiteSpace: "nowrap" }}>
+                            POPOK VERIFIED
+                          </span>
+                        )}
+                      </div>
+                      {artist.connectedCompany.company.name_en && (
+                        <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", display: "block" }}>
+                          {artist.connectedCompany.company.name_en}
+                        </span>
+                      )}
+                      <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
+                        {[artist.connectedCompany.role, artist.connectedCompany.company.genre, artist.connectedCompany.company.city_or_region].filter(Boolean).join(" · ")}
+                      </div>
+                      <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--accent-dark)", display: "block", marginTop: "4px" }}>
+                        단체 포퐄 보기 →
+                      </span>
+                    </div>
+                  </Link>
+                ) : artist.company ? (
+                  <Link
+                    href={`/organizations/apply?orgName=${encodeURIComponent(artist.company)}`}
+                    className="connected-org-card"
+                    style={{
+                      display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
+                      padding: "10px", borderRadius: "12px", border: "1px dashed var(--border-dark)",
+                      background: "#FAF8F5", transition: "all 0.15s ease", minWidth: 0,
+                    }}
+                  >
+                    <div style={{
+                      width: "40px", height: "40px", borderRadius: "10px", background: "var(--bg-warm)",
+                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", flexShrink: 0,
+                    }}>
+                      🏢
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                        {artist.company}
+                      </div>
+                      <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
+                        아직 POPOK 등록 전
+                      </div>
+                      <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--accent-dark)", display: "block", marginTop: "4px" }}>
+                        단체 포퐄 등록하기 →
+                      </span>
+                    </div>
+                  </Link>
+                ) : (
+                  <div>
+                    <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", margin: 0 }}>
+                      Independent Artist
+                    </p>
+                    <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", marginTop: "4px" }}>
+                      현재 연결된 단체가 없습니다.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Col 2: About Me */}
@@ -485,29 +612,61 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   ABOUT ME
                 </span>
                 <p style={{ fontSize: "0.85rem", color: "var(--navy)", lineHeight: 1.6, whiteSpace: "pre-line", margin: 0 }}>
-                  {artist.bio || "POPOK 아티스트 레지스트리에 정식 등록된 창작자입니다. 흩어져 있는 활동과 기록을 수집하여 포트폴리오를 구성해 나가는 여정에 있습니다."}
+                  {artist.bio || artist.bio_short || "POPOK 아티스트 레지스트리에 정식 등록된 창작자입니다. 흩어져 있는 활동과 기록을 수집하여 포트폴리오를 구성해 나가는 여정에 있습니다."}
                 </p>
+                {toStringArray(artist.current_activity).length > 0 && (
+                  <div style={{ marginTop: "12px" }}>
+                    <span className="mono" style={{ fontSize: "0.58rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.08em" }}>
+                      CURRENT
+                    </span>
+                    <p style={{
+                      fontSize: "0.8rem", color: "var(--navy)", lineHeight: 1.5, margin: "4px 0 0",
+                      display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
+                    }}>
+                      {toStringArray(artist.current_activity).join(" · ")}
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* Col 3: Contact */}
+              {/* Col 3: Contact — up to 3 candidates, priority-ordered and deduped */}
               <div>
                 <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
                   CONTACT INFO
                 </span>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.8rem" }}>
-                  {artist.instagram && (
-                    <a href={artist.instagram} target="_blank" rel="noopener noreferrer" style={{ color: "var(--navy)", fontWeight: 700, textDecoration: "none" }}>
-                      {cleanInstagramHandle(artist.instagram)} ↗
-                    </a>
-                  )}
-                  {artist.website && (
-                    <a href={artist.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--ink-muted)", textDecoration: "none", fontFamily: "monospace" }}>
-                      {artist.website.replace("https://", "")} ↗
-                    </a>
+                  {contactCandidates.length > 0 ? (
+                    contactCandidates.map((c, idx) => (
+                      <a
+                        key={idx}
+                        href={c.href}
+                        target={c.href.startsWith("mailto:") ? undefined : "_blank"}
+                        rel="noopener noreferrer"
+                        style={{
+                          color: idx === 0 ? "var(--navy)" : "var(--ink-muted)",
+                          fontWeight: idx === 0 ? 700 : 500,
+                          textDecoration: "none",
+                          fontFamily: idx === 0 ? "inherit" : "monospace",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-all",
+                        }}
+                      >
+                        {c.label} ↗
+                      </a>
+                    ))
+                  ) : (
+                    <span style={{ color: "var(--ink-faint)" }}>등록된 연락처가 없습니다.</span>
                   )}
                   <span style={{ color: "var(--ink-muted)", fontFamily: "monospace" }}>{artist.name}@popok.kr</span>
                 </div>
               </div>
+            </div>
+
+            {/* View count — small and unobtrusive, right below profile info */}
+            <div style={{ textAlign: "right", marginBottom: "-8px" }}>
+              <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+                조회수 {(artist.view_count ?? 0).toLocaleString("ko-KR")}회
+              </span>
             </div>
 
             {/* Typography Overlay Banner */}
@@ -535,6 +694,28 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   </span>
                 ))}
               </div>
+            </div>
+
+            {/* Name & basic info — compact, readable line under the watermark;
+                blank fields are skipped entirely rather than left as empty dots. */}
+            <div style={{
+              display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "center",
+              gap: "8px", marginTop: "12px", textAlign: "center",
+            }}>
+              <span style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--navy)" }}>{artist.name}</span>
+              {artist.name_en && (
+                <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>{artist.name_en}</span>
+              )}
+              {artist.verified && (
+                <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 7px", borderRadius: "8px" }}>
+                  POPOK VERIFIED
+                </span>
+              )}
+              {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).length > 0 && (
+                <span className="mono" style={{ fontSize: "0.7rem", color: "var(--accent-dark)", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                  {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).join(" · ")}
+                </span>
+              )}
             </div>
 
           </div>
@@ -617,7 +798,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               Selected Works
             </h3>
             <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>
-              {displayWorks.length} PIECES REGISTERED
+              {displayWorks.length} WORKS ARCHIVED
             </span>
           </div>
 
@@ -697,17 +878,26 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       <h4 className="work-card-title" style={{ fontSize: "1.1rem", fontWeight: 850, color: "var(--navy)", margin: 0, letterSpacing: "-0.01em" }}>
                         {work.title}
                       </h4>
-                      <span className="mono work-card-role-year" style={{ fontSize: "0.65rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginTop: "4px" }}>
-                        {work.role}
-                      </span>
+                      {(work.role || work.genre) && (
+                        <span className="mono work-card-role-year" style={{ fontSize: "0.65rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginTop: "4px" }}>
+                          {[work.role, work.genre].filter(Boolean).join(" · ")}
+                        </span>
+                      )}
+                      {work.venue && (
+                        <span style={{ fontSize: "0.68rem", color: "var(--ink-muted)", display: "block", marginTop: "2px" }}>
+                          📍 {work.venue}
+                        </span>
+                      )}
                     </div>
 
-                    <p className="work-card-desc" style={{
-                      fontSize: "0.8rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0,
-                      display: "-webkit-box", WebkitLineClamp: "3", WebkitBoxOrient: "vertical", overflow: "hidden"
-                    }}>
-                      {work.description}
-                    </p>
+                    {work.description && (
+                      <p className="work-card-desc" style={{
+                        fontSize: "0.8rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0,
+                        display: "-webkit-box", WebkitLineClamp: "3", WebkitBoxOrient: "vertical", overflow: "hidden"
+                      }}>
+                        {work.description}
+                      </p>
+                    )}
 
                     <button
                       onClick={() => setActiveWork(work)}
@@ -720,6 +910,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     >
                       View Detail ↗
                     </button>
+                    {work.externalLink && (
+                      <a
+                        href={work.externalLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--accent-dark)", textAlign: "center", textDecoration: "none" }}
+                      >
+                        외부 링크 ↗
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -727,150 +927,154 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           )}
         </section>
 
-        {/* ──────────────── 4. CAREER / ACTIVITY TIMELINE (Visually Quieter) ──────────────── */}
-        <section style={{ marginBottom: "64px" }}>
-          <h3 className="display" style={{
-            fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
-            borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
-          }}>
-            Activity Timeline
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", borderLeft: "1.5px solid var(--border)", paddingLeft: "16px", marginLeft: "8px" }}>
-            {careerList.map((item, idx) => (
-              <div key={idx} style={{ position: "relative" }}>
-                <span style={{
-                  position: "absolute", left: "-21px", top: "5px", width: "8px", height: "8px",
-                  borderRadius: "50%", background: "#C8C2B7", border: "2px solid var(--bg-warm)"
-                }} />
-                <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
-                  {item}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* ──────────────── 4. ACTIVITY TIMELINE — current_activity + affiliations only ──────────────── */}
+        {activityTimeline.length > 0 && (
+          <section style={{ marginBottom: "64px" }}>
+            <h3 className="display" style={{
+              fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
+              borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
+            }}>
+              Activity Timeline
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", borderLeft: "1.5px solid var(--border)", paddingLeft: "16px", marginLeft: "8px" }}>
+              {activityTimeline.map((entry, idx) => (
+                <div key={idx} style={{ position: "relative" }}>
+                  <span style={{
+                    position: "absolute", left: "-21px", top: "5px", width: "8px", height: "8px",
+                    borderRadius: "50%", background: "#C8C2B7", border: "2px solid var(--bg-warm)"
+                  }} />
+                  <span className="mono" style={{ fontSize: "0.62rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "2px" }}>
+                    {entry.year ? `${entry.year} · ${entry.label}` : entry.label}
+                  </span>
+                  <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
+                    {entry.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* ──────────────── 5. REVIEWS & ARTICLES (작품별 토글 Accordion) ──────────────── */}
-        {artist.reviews && Array.isArray(artist.reviews) && artist.reviews.length > 0 && (() => {
-          // Group reviews by workTitle
-          const reviewsByWork: Record<string, typeof artist.reviews> = {};
-          artist.reviews.forEach((rev: any) => {
-            const key = rev.workTitle || "기타";
-            if (!reviewsByWork[key]) reviewsByWork[key] = [];
-            reviewsByWork[key].push(rev);
-          });
-          const workTitles = Object.keys(reviewsByWork);
+        {/* ──────────────── 5. EDUCATION — plain strings, no separate year/school/major fields ──────────────── */}
+        {educationList.length > 0 && (
+          <section style={{ marginBottom: "64px" }}>
+            <h3 className="display" style={{
+              fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
+              borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
+            }}>
+              Education
+            </h3>
+            <div className="education-list" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              {educationList.map((entry, idx) => (
+                <div
+                  key={idx}
+                  className="education-row"
+                  style={{
+                    display: "grid", gridTemplateColumns: "100px 1fr", gap: "16px",
+                    paddingBottom: "14px", borderBottom: idx < educationList.length - 1 ? "1px solid var(--border)" : "none",
+                  }}
+                >
+                  <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <p style={{ fontSize: "0.85rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.5, overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                    {entry}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-          return (
-            <section style={{ marginBottom: "80px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "8px" }}>
+        {/* ──────────────── 6. AWARDS & COMPETITIONS ──────────────── */}
+        {combinedAwardsCount > 0 && (
+          <section style={{ marginBottom: "64px" }}>
+            <h3 className="display" style={{
+              fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
+              borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
+            }}>
+              {splitAwardsAndCompetitions ? "Awards" : "Awards & Competitions"}
+            </h3>
+            <AwardRows items={splitAwardsAndCompetitions ? awardsList : [...awardsList, ...competitionsList]} />
+
+            {splitAwardsAndCompetitions && competitionsList.length > 0 && (
+              <>
                 <h3 className="display" style={{
-                  fontSize: "1.15rem", color: "var(--navy)", textTransform: "uppercase", margin: 0
+                  fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
+                  borderBottom: "1px solid var(--border)", paddingBottom: "12px", margin: "40px 0 24px"
                 }}>
-                  Reviews & Articles
+                  Competitions
                 </h3>
-                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)" }}>
-                  {artist.reviews.length} ITEMS
-                </span>
-              </div>
+                <AwardRows items={competitionsList} />
+              </>
+            )}
+          </section>
+        )}
 
-              {/* Per-work accordion rows */}
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {workTitles.map((workTitle, wIdx) => {
-                  const isOpen = !!openReviews[workTitle];
-                  const items = reviewsByWork[workTitle];
-                  return (
-                    <div key={workTitle} style={{ borderBottom: "1px solid var(--border)" }}>
-                      {/* Accordion Header — clickable */}
-                      <button
-                        onClick={() => setOpenReviews(prev => ({ ...prev, [workTitle]: !isOpen }))}
-                        style={{
-                          width: "100%", background: "none", border: "none", cursor: "pointer",
-                          display: "flex", justifyContent: "space-between", alignItems: "center",
-                          padding: "18px 4px", textAlign: "left"
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                          <span style={{
-                            width: "22px", height: "22px", borderRadius: "50%",
-                            background: isOpen ? "var(--accent)" : "var(--border)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: "0.6rem", fontWeight: 900, color: "var(--navy)",
-                            transition: "background 0.2s", flexShrink: 0
-                          }}>
-                            {String(wIdx + 1).padStart(2, "0")}
-                          </span>
-                          <span style={{ fontSize: "1rem", fontWeight: 800, color: "var(--navy)" }}>
-                            &lt;{workTitle}&gt;
-                          </span>
-                          <span style={{
-                            fontSize: "0.72rem", fontWeight: 700, color: "var(--ink-muted)",
-                            background: "var(--tag-bg)", padding: "2px 8px", borderRadius: "10px"
-                          }}>
-                            {items.length}건
-                          </span>
-                        </div>
-                        <span style={{
-                          fontSize: "1rem", color: "var(--navy)",
-                          transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                          transition: "transform 0.25s ease",
-                          display: "inline-block"
-                        }}>
-                          ↓
-                        </span>
-                      </button>
+        {/* ──────────────── 7. REVIEWS & ARTICLES — review_links, flat list ──────────────── */}
+        {reviewItems.length > 0 && (
+          <section style={{ marginBottom: "80px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "8px" }}>
+              <h3 className="display" style={{
+                fontSize: "1.15rem", color: "var(--navy)", textTransform: "uppercase", margin: 0
+              }}>
+                Reviews & Articles
+              </h3>
+              <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)" }}>
+                {reviewItems.length} ITEMS
+              </span>
+            </div>
 
-                      {/* Collapsible content */}
-                      <div style={{
-                        overflow: "hidden",
-                        maxHeight: isOpen ? `${items.length * 80}px` : "0",
-                        transition: "max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                        opacity: isOpen ? 1 : 0,
-                      }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0", paddingBottom: "12px" }}>
-                          {items.map((rev: any, rIdx: number) => (
-                            <a
-                              key={rIdx}
-                              href={rev.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{
-                                display: "flex", justifyContent: "space-between", alignItems: "center",
-                                padding: "14px 4px 14px 34px",
-                                borderTop: rIdx > 0 ? "1px solid var(--border)" : "none",
-                                textDecoration: "none", color: "inherit",
-                                transition: "background 0.15s",
-                                borderRadius: "8px"
-                              }}
-                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--tag-bg)")}
-                              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                            >
-                              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--navy)" }}>
-                                  {rev.source}
-                                </span>
-                                <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>
-                                  관련 평론 및 언론 보도
-                                </span>
-                              </div>
-                              <span style={{
-                                fontSize: "0.72rem", border: "1px solid var(--navy)", borderRadius: "20px",
-                                padding: "5px 12px", color: "var(--navy)", background: "#FFFFFF",
-                                fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0
-                              }}>
-                                Read ↗
-                              </span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {reviewItems.map((rev, idx) => {
+                const url = typeof rev.url === "string" ? rev.url.trim() : "";
+                const title = rev.title || rev.publication || (url ? getReviewDomain(url) : "관련 자료");
+                const subtitle = [rev.work, rev.publication && rev.title ? rev.publication : null, rev.date || (rev.year ? safeYear(rev.year) : null)]
+                  .filter(Boolean)
+                  .join(" · ") || "관련 평론 및 언론 보도";
+
+                const row = (
+                  <div style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "14px 4px", borderTop: idx > 0 ? "1px solid var(--border)" : "none",
+                  }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+                      <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--navy)", overflowWrap: "break-word" }}>
+                        {title}
+                      </span>
+                      <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>
+                        {subtitle}
+                      </span>
                     </div>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })()}
+                    {url && (
+                      <span style={{
+                        fontSize: "0.72rem", border: "1px solid var(--navy)", borderRadius: "20px",
+                        padding: "5px 12px", color: "var(--navy)", background: "#FFFFFF",
+                        fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0, marginLeft: "12px",
+                      }}>
+                        Read ↗
+                      </span>
+                    )}
+                  </div>
+                );
+
+                return url ? (
+                  <a
+                    key={idx}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: "none", color: "inherit", borderRadius: "8px" }}
+                  >
+                    {row}
+                  </a>
+                ) : (
+                  <div key={idx}>{row}</div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* ──────────────── 6. DIGITAL ARTIST CARD HERO (맨 밑에 배치) ──────────────── */}
         <section style={{
@@ -1028,31 +1232,37 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       </h4>
                       <span className="mono" style={{ color: "var(--ink-muted)", fontSize: "0.8rem" }}>({activeWork.year})</span>
                     </div>
-                    <span className="tag" style={{ background: "var(--accent)", color: "var(--navy)", border: "none", fontSize: "0.65rem", fontWeight: 800 }}>
-                      {activeWork.role}
-                    </span>
+                    {activeWork.role && (
+                      <span className="tag" style={{ background: "var(--accent)", color: "var(--navy)", border: "none", fontSize: "0.65rem", fontWeight: 800 }}>
+                        {activeWork.role}
+                      </span>
+                    )}
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                    <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                      PROJECT DESCRIPTION
-                    </span>
-                    <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6, margin: 0 }}>
-                      {activeWork.description}
-                    </p>
-                  </div>
+                  {activeWork.description && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
+                        PROJECT DESCRIPTION
+                      </span>
+                      <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6, margin: 0 }}>
+                        {activeWork.description}
+                      </p>
+                    </div>
+                  )}
 
-                  <div style={{
-                    display: "flex", flexDirection: "column", gap: "6px", background: "#FAF8F5",
-                    border: "1px solid var(--border)", padding: "16px", borderRadius: "12px"
-                  }}>
-                    <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                      CREDITS / CONTRIBUTORS
-                    </span>
-                    <p style={{ fontSize: "0.78rem", color: "var(--navy)", fontWeight: 700, fontFamily: "monospace", margin: 0, lineHeight: 1.4 }}>
-                      {activeWork.credits}
-                    </p>
-                  </div>
+                  {activeWork.credits && (
+                    <div style={{
+                      display: "flex", flexDirection: "column", gap: "6px", background: "#FAF8F5",
+                      border: "1px solid var(--border)", padding: "16px", borderRadius: "12px"
+                    }}>
+                      <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
+                        CREDITS / CONTRIBUTORS
+                      </span>
+                      <p style={{ fontSize: "0.78rem", color: "var(--navy)", fontWeight: 700, fontFamily: "monospace", margin: 0, lineHeight: 1.4 }}>
+                        {activeWork.credits}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
               </div>
@@ -1097,6 +1307,44 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         </>
       )}
 
+    </div>
+  );
+}
+
+interface AwardLike { year?: string | number; title?: string; result?: string; organization?: string; }
+
+// Desktop: year left / details right. Mobile: stacked (see .award-row rule
+// in the page's <style> block). Blank fields are simply omitted.
+function AwardRows({ items }: { items: AwardLike[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      {items.map((item, idx) => (
+        <div
+          key={idx}
+          className="award-row"
+          style={{
+            display: "grid", gridTemplateColumns: "80px 1fr", gap: "16px",
+            padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border)" : "none",
+          }}
+        >
+          <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+            {item.year != null && String(item.year).trim() ? String(item.year) : ""}
+          </span>
+          <div style={{ minWidth: 0 }}>
+            {item.title && (
+              <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", margin: 0, overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                {item.title}
+              </p>
+            )}
+            {(item.result || item.organization) && (
+              <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", margin: "4px 0 0", overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                {[item.result, item.organization].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

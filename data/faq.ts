@@ -29,6 +29,12 @@ export const faqItems: FaqItem[] = [
     answer: "네. 기본 수정 요청이 가능하며, 앞으로 정기적으로 포트폴리오를 관리해주는 Premium 서비스도 제공할 예정입니다.",
   },
   {
+    question: "단체(무용단·기획사 등)도 프로필을 만들 수 있나요?",
+    answer: "네. 단체는 개인과 달리 별도의 신청 폼을 통해 접수해주시면, POPOK 운영팀이 인터뷰를 통해 포트폴리오 제작을 직접 도와드립니다.",
+    ctaHref: "/organizations/apply",
+    ctaLabel: "단체 포트폴리오 제작 신청하기 →",
+  },
+  {
     question: "POPOK Premium은 무엇인가요?",
     answer: "새로운 공연과 작품 활동을 POPOK 팀이 주기적으로 확인하고 정리해 아티스트 프로필을 최신 상태로 유지해주는 관리 서비스입니다.",
     ctaHref: "/premium",

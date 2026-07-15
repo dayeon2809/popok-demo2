@@ -9,8 +9,9 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   const router = useRouter();
 
   // Wizard state
+  // /onboarding is now individual-artist-only — organizations apply via
+  // /organizations/apply instead (see app/auth/AuthClient.tsx).
   const [step, setStep] = useState(1);
-  const [profileType, setProfileType] = useState<"artist" | "organization">("artist");
   const [displayName, setDisplayName] = useState(defaultDisplayName || "");
   const [username, setUsername] = useState("");
   const [genre, setGenre] = useState("");
@@ -32,7 +33,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
 
   // Debounced username checking
   useEffect(() => {
-    if (step !== 3) return;
+    if (step !== 2) return;
 
     const cleanUsername = username.trim().toLowerCase();
     if (!cleanUsername) {
@@ -79,19 +80,19 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   }, [username, step]);
 
   const handleNext = () => {
-    if (step === 2 && !displayName.trim()) {
+    if (step === 1 && !displayName.trim()) {
       alert("활동명을 입력해 주세요.");
       return;
     }
-    if (step === 3 && !usernameStatus.valid) {
+    if (step === 2 && !usernameStatus.valid) {
       alert("올바르고 사용 가능한 주소를 입력해 주세요.");
       return;
     }
-    if (step === 4 && !genre.trim()) {
+    if (step === 3 && !genre.trim()) {
       alert("주 활동 분야를 선택하거나 입력해 주세요.");
       return;
     }
-    if (step === 5 && !role.trim()) {
+    if (step === 4 && !role.trim()) {
       alert("주 역할을 선택하거나 입력해 주세요.");
       return;
     }
@@ -101,7 +102,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   const handlePrev = () => {
     // Stepping back into the AI step should always land on the choose screen,
     // not the transitional "none" state left over from finishing/skipping it.
-    if (step === 7 && aiState === "none") {
+    if (step === 6 && aiState === "none") {
       setAiState("choose");
     }
     setStep(prev => prev - 1);
@@ -114,7 +115,6 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profileType,
           displayName,
           username,
           genre,
@@ -157,7 +157,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
       padding: "24px"
     }}>
       <div className="card fade-up" style={{
-        maxWidth: step === 6 && aiState === "review" ? "720px" : "480px",
+        maxWidth: step === 5 && aiState === "review" ? "720px" : "480px",
         width: "100%",
         padding: "40px 32px",
         background: "#FFFFFF",
@@ -183,14 +183,14 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               position: "absolute",
               top: "50%",
               left: "0",
-              width: `${((step - 1) / 6) * 100}%`,
+              width: `${((step - 1) / 5) * 100}%`,
               height: "2px",
               background: "var(--navy)",
               zIndex: 1,
               transform: "translateY(-50%)",
               transition: "width 0.3s ease"
             }} />
-            {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+            {[1, 2, 3, 4, 5, 6].map((num) => (
               <div key={num} style={{
                 width: "24px",
                 height: "24px",
@@ -211,52 +211,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 1: profile_type */}
+        {/* STEP 1: display_name */}
         {step === 1 && (
-          <div>
-            <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              어떤 POPOK를 만들고 싶나요?
-            </h2>
-            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "28px" }}>
-              원하는 프로필 유형을 선택해 주세요.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <button
-                onClick={() => setProfileType("artist")}
-                style={{
-                  padding: "16px",
-                  borderRadius: "12px",
-                  border: profileType === "artist" ? "2px solid var(--navy)" : "1.5px solid var(--border)",
-                  background: profileType === "artist" ? "var(--accent-light)" : "#FFFFFF",
-                  textAlign: "left",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease"
-                }}
-              >
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--navy)", marginBottom: "4px" }}>개인 예술가 (Artist)</div>
-                <div style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>무용수, 안무가, 기획자 등 개인 창작자를 위한 프로필</div>
-              </button>
-              <button
-                onClick={() => setProfileType("organization")}
-                style={{
-                  padding: "16px",
-                  borderRadius: "12px",
-                  border: profileType === "organization" ? "2px solid var(--navy)" : "1.5px solid var(--border)",
-                  background: profileType === "organization" ? "var(--accent-light)" : "#FFFFFF",
-                  textAlign: "left",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease"
-                }}
-              >
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--navy)", marginBottom: "4px" }}>단체 (Organization)</div>
-                <div style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>무용단, 기획사, 예술 프로젝트 팀을 위한 프로필</div>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: display_name */}
-        {step === 2 && (
           <div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
               활동명을 입력해 주세요.
@@ -281,8 +237,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 3: username */}
-        {step === 3 && (
+        {/* STEP 2: username */}
+        {step === 2 && (
           <div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
               내 POPOK 주소를 만들어주세요.
@@ -324,8 +280,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 4: genre */}
-        {step === 4 && (
+        {/* STEP 3: genre */}
+        {step === 3 && (
           <div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
               주 활동 분야를 선택해주세요.
@@ -371,8 +327,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 5: role */}
-        {step === 5 && (
+        {/* STEP 4: role */}
+        {step === 4 && (
           <div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
               당신의 주 역할을 선택해주세요.
@@ -418,8 +374,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 6: AI-assisted enrichment (optional, asked last) */}
-        {step === 6 && aiState === "choose" && (
+        {/* STEP 5: AI-assisted enrichment (optional, asked last) */}
+        {step === 5 && aiState === "choose" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <div>
               <h2 style={{ fontSize: "1.45rem", fontWeight: 950, color: "var(--navy)", margin: "0 0 8px", letterSpacing: "-0.03em" }}>
@@ -449,7 +405,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               <button
                 onClick={() => {
                   setAiState("none");
-                  setStep(7);
+                  setStep(6);
                 }}
                 className="btn-outline"
                 style={{
@@ -469,7 +425,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {step === 6 && aiState === "import" && (
+        {step === 5 && aiState === "import" && (
           <AiProfileImporter
             onParsed={(data) => {
               setAiDraft(data);
@@ -479,13 +435,13 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           />
         )}
 
-        {step === 6 && aiState === "review" && aiDraft && (
+        {step === 5 && aiState === "review" && aiDraft && (
           <AiProfileReview
             initialDraft={aiDraft}
             onConfirm={(finalDraft) => {
               setAiProfileData(finalDraft);
               setAiState("none");
-              setStep(7);
+              setStep(6);
             }}
             onCancel={() => {
               setAiState("import");
@@ -493,8 +449,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           />
         )}
 
-        {/* STEP 7: complete */}
-        {step === 7 && (
+        {/* STEP 6: complete */}
+        {step === 6 && (
           <div style={{ textAlign: "center" }}>
             <div style={{
               fontSize: "3rem",
@@ -519,7 +475,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               fontSize: "0.88rem",
               marginBottom: "32px"
             }}>
-              <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>유형:</span> <strong>{profileType === "artist" ? "개인 예술가" : "단체"}</strong></div>
+              <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>유형:</span> <strong>개인 예술가</strong></div>
               <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>주소:</span> <strong>popok.kr/{username}</strong></div>
               <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>장르:</span> <strong>{genre}</strong></div>
               <div><span style={{ color: "var(--ink-muted)" }}>역할:</span> <strong>{role}</strong></div>
@@ -527,8 +483,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* The AI import/review sub-screens (step 6) provide their own back/cancel navigation */}
-        {!(step === 6 && aiState !== "choose") && (
+        {/* The AI import/review sub-screens (step 5) provide their own back/cancel navigation */}
+        {!(step === 5 && aiState !== "choose") && (
           /* Navigation Buttons */
           <div style={{ display: "flex", gap: "12px", marginTop: "36px" }}>
             {step > 1 && (
@@ -548,7 +504,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                 이전
               </button>
             )}
-            {step === 6 ? null : step < 7 ? (
+            {step === 5 ? null : step < 6 ? (
               <button
                 onClick={handleNext}
                 className="btn-lime"
