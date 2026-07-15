@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { getOrganizationApplicationByCompanyId } from "@/lib/companies";
 
 export const dynamic = "force-dynamic";
+
+const SOURCE_TEXT_MAX = 30000;
 
 function checkAuth(req: NextRequest): boolean {
   const passcode = req.headers.get("x-admin-passcode") || "";
@@ -12,11 +15,14 @@ function checkAuth(req: NextRequest): boolean {
 // Fields an admin may edit directly. `status` is deliberately excluded —
 // publish/unpublish/archive each have their own validation and must go
 // through app/api/admin/companies/[id]/publish|unpublish|archive instead.
+// `source_file_*` are deliberately excluded too — those are only ever
+// written by app/api/admin/companies/[id]/source-file, never this generic PATCH.
 const EDITABLE_FIELDS = [
   "name", "name_en", "slug", "verified", "genre", "category", "city_or_region",
   "bio_short", "bio", "profile_image_url", "motion_video_url", "email",
   "instagram", "website", "portfolio_url",
   "profile_image_urls", "current_activity", "works", "awards", "review_links", "links",
+  "source_text",
 ];
 
 export async function GET(
@@ -72,7 +78,25 @@ export async function GET(
         : null,
     }));
 
-    return NextResponse.json({ success: true, data: { ...(company as any), connectedArtists } });
+    // Read-only view of the applicant's original submission — surfaced in
+    // the admin "SOURCE MATERIALS" section, never editable through this route.
+    const application = await getOrganizationApplicationByCompanyId(id);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...(company as any),
+        connectedArtists,
+        application: application
+          ? {
+              id: application.id,
+              logo_url: application.logo_url,
+              portfolio_text: application.portfolio_text,
+              resume_file_name: application.resume_file_name,
+            }
+          : null,
+      },
+    });
   } catch (err: any) {
     console.error(`[GET /api/admin/companies/${id}]`, err);
     return NextResponse.json({ success: false, error: "단체 정보를 가져오는 데 실패했습니다." }, { status: 500 });
@@ -100,6 +124,13 @@ export async function PATCH(
 
     if (Object.keys(update).length === 0) {
       return NextResponse.json({ success: false, error: "수정할 내용이 없습니다." }, { status: 400 });
+    }
+
+    if (typeof update.source_text === "string") {
+      if (update.source_text.length > SOURCE_TEXT_MAX) {
+        return NextResponse.json({ success: false, error: "보충 자료는 30,000자 이하로 입력해주세요." }, { status: 400 });
+      }
+      update.source_material_updated_at = new Date().toISOString();
     }
 
     const supabase = getSupabaseServer();

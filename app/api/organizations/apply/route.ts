@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { detectResumeFileExtension, mimeTypeForExtension } from "@/lib/resumeFileTypes";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,8 +14,9 @@ const GENERIC_ERROR = "신청 접수 중 오류가 발생했습니다. 잠시 �
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const SHORT_FIELD_MAX = 200; // org_name / contact_name / instagram
-const MEDIUM_FIELD_MAX = 300; // email / phone / website
-const DESCRIPTION_MAX = 2000;
+const MEDIUM_FIELD_MAX = 300; // email / phone
+const LOGO_URL_MAX = 2000;
+const PORTFOLIO_TEXT_MAX = 30000;
 
 function devError(label: string, err: unknown) {
   if (process.env.NODE_ENV !== "production") {
@@ -46,8 +48,8 @@ export async function POST(req: NextRequest) {
     const email = getString(formData, "email");
     const phone = getString(formData, "phone");
     const instagram = getString(formData, "instagram");
-    const website = getString(formData, "website");
-    const description = getString(formData, "description");
+    const portfolioText = getString(formData, "portfolio_text");
+    const logoUrl = getString(formData, "logo_url");
     const file = formData.get("file") as File | null;
 
     if (!orgName || !contactName || !email || !phone || !instagram) {
@@ -59,11 +61,14 @@ export async function POST(req: NextRequest) {
     if (orgName.length > SHORT_FIELD_MAX || contactName.length > SHORT_FIELD_MAX || instagram.length > SHORT_FIELD_MAX) {
       return NextResponse.json({ success: false, error: "입력하신 내용이 너무 깁니다." }, { status: 400 });
     }
-    if (email.length > MEDIUM_FIELD_MAX || phone.length > MEDIUM_FIELD_MAX || website.length > MEDIUM_FIELD_MAX) {
+    if (email.length > MEDIUM_FIELD_MAX || phone.length > MEDIUM_FIELD_MAX) {
       return NextResponse.json({ success: false, error: "입력하신 내용이 너무 깁니다." }, { status: 400 });
     }
-    if (description.length > DESCRIPTION_MAX) {
-      return NextResponse.json({ success: false, error: "단체 소개가 너무 깁니다." }, { status: 400 });
+    if (logoUrl.length > LOGO_URL_MAX) {
+      return NextResponse.json({ success: false, error: "로고 이미지 업로드에 실패했습니다. 다시 시도해주세요." }, { status: 400 });
+    }
+    if (portfolioText.length > PORTFOLIO_TEXT_MAX) {
+      return NextResponse.json({ success: false, error: "이력 및 활동 내용은 30,000자 이하로 입력해주세요." }, { status: 400 });
     }
 
     const supabase = getSupabaseServer();
@@ -72,23 +77,23 @@ export async function POST(req: NextRequest) {
     let resumeFileName: string | null = null;
 
     if (file) {
-      const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-      if (!isPdf) {
-        return NextResponse.json({ success: false, error: "PDF 파일만 업로드할 수 있습니다." }, { status: 400 });
+      const ext = detectResumeFileExtension(file.name, file.type);
+      if (!ext) {
+        return NextResponse.json({ success: false, error: "PDF, DOCX, TXT 파일만 업로드할 수 있습니다." }, { status: 400 });
       }
       if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json({ success: false, error: "파일 크기는 20MB를 초과할 수 없습니다." }, { status: 400 });
+        return NextResponse.json({ success: false, error: "파일 크기는 20MB를 초과할 수 없습니다." }, { status: 413 });
       }
 
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       // Storage path is UUID-only — the user's original filename is never used
       // in the path, only kept for display in resume_file_name below.
-      const filePath = `applications/${randomUUID()}.pdf`;
+      const filePath = `applications/${randomUUID()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
-        .upload(filePath, buffer, { contentType: "application/pdf", upsert: false });
+        .upload(filePath, buffer, { contentType: mimeTypeForExtension(ext), upsert: false });
 
       if (uploadError) {
         devError("[POST /api/organizations/apply] Storage upload error:", uploadError);
@@ -106,8 +111,8 @@ export async function POST(req: NextRequest) {
       email,
       phone,
       instagram,
-      website: website || null,
-      description: description || null,
+      logo_url: logoUrl || null,
+      portfolio_text: portfolioText || null,
       resume_file_path: resumeFilePath,
       resume_file_name: resumeFileName,
     } as any);

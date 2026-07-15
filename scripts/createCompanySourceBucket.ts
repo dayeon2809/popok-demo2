@@ -41,7 +41,6 @@ async function run() {
 
     const bucketConfig = {
       public: false,
-      // PDF/DOCX/TXT — matches lib/resumeFileTypes.ts's detectResumeFileExtension.
       allowedMimeTypes: [
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -50,27 +49,29 @@ async function run() {
       fileSizeLimit: 20 * 1024 * 1024 // 20MB — matches client + API validation
     };
 
-    const hasBucket = buckets.some(b => b.name === "org-applications");
+    const hasBucket = buckets.some(b => b.name === "company-source-files");
     if (hasBucket) {
-      // Re-running this script (e.g. after DOCX/TXT support was added)
-      // should bring an already-created bucket's allowed MIME types up to
-      // date rather than silently leaving it PDF-only.
-      console.log("Bucket 'org-applications' already exists — syncing config...");
-      const { error } = await supabase.storage.updateBucket("org-applications", bucketConfig);
+      // Re-running this script (e.g. after the file-size limit changed from
+      // 10MB to 20MB) should bring an already-created bucket's config up to
+      // date rather than silently leaving it stale.
+      console.log("Bucket 'company-source-files' already exists — syncing config...");
+      const { error } = await supabase.storage.updateBucket("company-source-files", bucketConfig);
       if (error) {
         throw error;
       }
-      console.log("Bucket 'org-applications' config updated.");
+      console.log("Bucket 'company-source-files' config updated.");
     } else {
-      console.log("Creating private bucket 'org-applications'...");
-      // Private: applications carry contact info + resumes, so this bucket is
-      // never public. Files are only reachable via short-lived signed URLs
-      // issued to authenticated admins (see /api/admin/organizations/[id]/resume).
-      const { data, error } = await supabase.storage.createBucket("org-applications", bucketConfig);
+      console.log("Creating private bucket 'company-source-files'...");
+      // Private: admin-only "AI 분석용 자료" resumes, reachable only via
+      // short-lived signed URLs issued to authenticated admins (see
+      // /api/admin/companies/[id]/source-file). Kept entirely separate from
+      // the "org-applications" bucket that holds applicants' original
+      // uploads — admin replacements never touch that bucket.
+      const { data, error } = await supabase.storage.createBucket("company-source-files", bucketConfig);
       if (error) {
         throw error;
       }
-      console.log("Bucket 'org-applications' created successfully:", data);
+      console.log("Bucket 'company-source-files' created successfully:", data);
     }
   } catch (err) {
     console.error("Failed to setup bucket:", err);

@@ -17,16 +17,28 @@ export function mapArtistRowToArtist(record: any): Artist {
     } else {
       const val = parts[0] || "";
       const lowerVal = val.toLowerCase();
-      if (
+      // Onboarding's genre picker (app/onboarding/OnboardingClient.tsx's
+      // GENRE_OPTIONS) saves the raw Korean label as-is ("한국무용", "발레",
+      // "현대무용") rather than an English slug — normalize it to the same
+      // canonical dance sub-genre slugs filterArtists() below compares
+      // against, or artists picking "한국무용"/"발레" never match the
+      // KOREAN DANCE / BALLET sub-filters on /artists. Order matters here:
+      // "한국무용" contains "무용", so the Korean-dance check must run
+      // before the generic contemporary/무용 check below.
+      if (lowerVal.includes("한국") || lowerVal.includes("korean") || lowerVal.includes("전통") || lowerVal.includes("traditional")) {
+        fValue = "dance";
+        gValue = "korean_dance";
+      } else if (lowerVal.includes("발레") || lowerVal.includes("ballet")) {
+        fValue = "dance";
+        gValue = "ballet";
+      } else if (
         lowerVal.includes("무용") ||
-        lowerVal.includes("발레") ||
+        lowerVal.includes("현대") ||
         lowerVal.includes("dance") ||
-        lowerVal.includes("contemporary") ||
-        lowerVal.includes("ballet") ||
-        lowerVal.includes("korean")
+        lowerVal.includes("contemporary")
       ) {
         fValue = "dance";
-        gValue = val;
+        gValue = "contemporary_dance";
       } else if (lowerVal.includes("음악") || lowerVal.includes("music") || lowerVal.includes("composition")) {
         fValue = "music";
         gValue = val;

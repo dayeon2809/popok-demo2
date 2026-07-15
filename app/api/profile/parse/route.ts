@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { parseProfileTextWithAI } from "@/lib/profileParser";
+import { extractTextFromBuffer, FileExtractionError } from "@/lib/fileTextExtraction";
 
 export const dynamic = "force-dynamic";
 // pdf-parse (pdfjs-dist) and mammoth use Node.js-only APIs (Buffer, fs) and
@@ -56,38 +57,9 @@ export async function POST(request: Request) {
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
-      const fileName = file.name.toLowerCase();
 
       try {
-        // Check file extension / MIME type
-        if (fileName.endsWith(".pdf") || file.type === "application/pdf") {
-          // pdf-parse v2 dropped the old `pdf(buffer)` function export in favor
-          // of a `PDFParse` class (require("pdf-parse") no longer returns a
-          // callable function). pageJoiner is set to "" so page-boundary
-          // markers aren't injected into the text sent to the AI parser.
-          const { PDFParse } = require("pdf-parse");
-          const parser = new PDFParse({ data: buffer });
-          try {
-            const result = await parser.getText({ pageJoiner: "" });
-            textToParse = result.text || "";
-          } finally {
-            await parser.destroy();
-          }
-        } else if (
-          fileName.endsWith(".docx") ||
-          file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ) {
-          const mammoth = require("mammoth");
-          const parsedDocx = await mammoth.extractRawText({ buffer });
-          textToParse = parsedDocx.value || "";
-        } else if (fileName.endsWith(".txt") || file.type === "text/plain" || file.type.startsWith("text/")) {
-          textToParse = buffer.toString("utf8");
-        } else {
-          return NextResponse.json(
-            { success: false, error: "지원하지 않는 파일 형식입니다. (PDF, DOCX, TXT만 지원)", code: "UNSUPPORTED_FILE_TYPE" },
-            { status: 400 }
-          );
-        }
+        textToParse = await extractTextFromBuffer(buffer, file.name, file.type);
       } catch (extractErr: any) {
         console.error("[Profile Parser API] File text extraction failed:", {
           fileName: file.name,
@@ -96,6 +68,12 @@ export async function POST(request: Request) {
           message: extractErr?.message,
           stack: extractErr?.stack,
         });
+        if (extractErr instanceof FileExtractionError && extractErr.code === "UNSUPPORTED_FILE_TYPE") {
+          return NextResponse.json(
+            { success: false, error: extractErr.message, code: "UNSUPPORTED_FILE_TYPE" },
+            { status: 400 }
+          );
+        }
         return NextResponse.json(
           {
             success: false,

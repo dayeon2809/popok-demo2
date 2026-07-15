@@ -178,22 +178,24 @@ export interface OrganizationApplicationForApproval {
   org_name: string;
   email: string;
   instagram: string;
-  website: string | null;
-  description: string | null;
+  logo_url: string | null;
 }
 
 /**
  * Inserts a draft companies row from an approved application. Fields not
  * present on the application (works, awards, links, ...) get the safe empty
- * defaults from the schema — nothing is invented. Retries with a numeric
- * slug suffix on a unique-constraint collision (popok-dance, popok-dance-2, ...).
+ * defaults from the schema — nothing is invented. bio/bio_short are
+ * deliberately left blank here rather than crudely truncated from
+ * portfolio_text — the admin-only "AI로 신청 자료 구조화" tool
+ * (lib/companyAiDraft.ts) does that job properly, from the full submitted
+ * material, after approval. Retries with a numeric slug suffix on a
+ * unique-constraint collision (popok-dance, popok-dance-2, ...).
  */
 export async function createDraftCompanyFromApplication(
   application: OrganizationApplicationForApproval
 ): Promise<string> {
   const supabase = getSupabaseServer();
   const baseSlug = generateCompanySlug(application.org_name);
-  const bioShort = application.description ? application.description.trim().slice(0, 80) || null : null;
 
   const MAX_ATTEMPTS = 5;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -208,9 +210,7 @@ export async function createDraftCompanyFromApplication(
         verified: false,
         email: application.email || null,
         instagram: application.instagram || null,
-        website: application.website || null,
-        bio: application.description || null,
-        bio_short: bioShort,
+        profile_image_url: application.logo_url || null,
         profile_image_urls: [],
         current_activity: [],
         works: [],
@@ -250,7 +250,7 @@ export async function approveOrganizationApplication(applicationId: string): Pro
 
   const { data: application, error: fetchError } = await supabase
     .from("organization_applications" as any)
-    .select("id, org_name, email, instagram, website, description, company_id")
+    .select("id, org_name, email, instagram, logo_url, company_id")
     .eq("id", applicationId)
     .maybeSingle();
 
@@ -346,4 +346,83 @@ export async function clearPrimaryFlagForArtist(artistId: string, excludeCompany
   }
 
   await query;
+}
+
+export interface OrganizationApplicationForAi {
+  id: string;
+  org_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  instagram: string;
+  logo_url: string | null;
+  portfolio_text: string | null;
+  resume_file_path: string | null;
+  resume_file_name: string | null;
+  // Doubles as the resume's upload timestamp: resume_file_path can only ever
+  // be set at initial submission (admins add their own separate file via
+  // companies.source_file_*, never edit this row's original upload), so
+  // created_at is an accurate "uploaded_at" for it — see ai_draft_source_summary.
+  created_at: string;
+}
+
+/** Reverse lookup for the AI-structuring tool: given a companies.id, find the
+ * organization_applications row that was approved into it (if any). */
+export async function getOrganizationApplicationByCompanyId(
+  companyId: string
+): Promise<OrganizationApplicationForAi | null> {
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("organization_applications" as any)
+    .select("id, org_name, contact_name, email, phone, instagram, logo_url, portfolio_text, resume_file_path, resume_file_name, created_at")
+    .eq("company_id", companyId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getOrganizationApplicationByCompanyId] Supabase error:", error);
+    return null;
+  }
+  return (data as any) || null;
+}
+
+/**
+ * Downloads the actual resume bytes from the private org-applications
+ * bucket (unlike the admin resume route, which only ever hands the browser
+ * a signed URL — this reads the file server-side so its text can be
+ * extracted for AI structuring). Throws on any failure; callers treat that
+ * as a hard failure of the whole AI-structuring run (see
+ * app/api/admin/companies/[id]/ai-structure), not a soft "insufficient text"
+ * case — a resume that's on record but unreadable is not the same as no
+ * resume at all.
+ */
+export async function downloadResumeBuffer(resumeFilePath: string): Promise<Buffer> {
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase.storage.from("org-applications").download(resumeFilePath);
+
+  if (error || !data) {
+    throw new Error(error?.message || "이력서 파일을 불러오지 못했습니다.");
+  }
+
+  const arrayBuffer = await data.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+}
+
+/**
+ * Same as downloadResumeBuffer, but for the admin-only "company-source-files"
+ * bucket (see app/api/admin/companies/[id]/source-file) — the admin's own
+ * uploaded/replaced resume, kept entirely separate from the applicant's
+ * original org-applications upload. Throws on failure for the same reason:
+ * a source file on record but unreadable is a hard failure of the whole
+ * AI-structuring run, not "no file attached".
+ */
+export async function downloadCompanySourceFileBuffer(sourceFilePath: string): Promise<Buffer> {
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase.storage.from("company-source-files").download(sourceFilePath);
+
+  if (error || !data) {
+    throw new Error(error?.message || "관리자 첨부 파일을 불러오지 못했습니다.");
+  }
+
+  const arrayBuffer = await data.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }

@@ -49,7 +49,10 @@ export const parsedProfileSchema = z.object({
 export type ParsedProfile = z.infer<typeof parsedProfileSchema>;
 
 let _client: OpenAI | null = null;
-function getClient(): OpenAI {
+// Exported so other AI-structuring pipelines (e.g. lib/companyAiDraft.ts)
+// reuse the same singleton/env-key handling instead of re-initializing a
+// second OpenAI client.
+export function getClient(): OpenAI {
   if (!_client) {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -60,7 +63,7 @@ function getClient(): OpenAI {
   return _client;
 }
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+export const MODEL = process.env.OPENAI_MODEL || "gpt-4o";
 
 /**
  * Safely converts any numeric or formatted year value to a clean string format.

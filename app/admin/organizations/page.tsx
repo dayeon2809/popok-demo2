@@ -12,8 +12,8 @@ interface OrganizationApplication {
   email: string;
   phone: string;
   instagram: string;
-  website: string | null;
-  description: string | null;
+  logo_url: string | null;
+  portfolio_text: string | null;
   resume_file_path: string | null;
   resume_file_name: string | null;
   status: "pending" | "approved" | "rejected";
@@ -259,20 +259,23 @@ export default function AdminOrganizationsPage() {
                   <div><span style={{ color: "var(--ink-muted)" }}>이메일: </span><strong>{app.email}</strong></div>
                   <div><span style={{ color: "var(--ink-muted)" }}>연락처: </span><strong>{app.phone}</strong></div>
                   <div><span style={{ color: "var(--ink-muted)" }}>인스타그램: </span><strong>{app.instagram}</strong></div>
-                  {app.website && (
-                    <div><span style={{ color: "var(--ink-muted)" }}>홈페이지: </span><strong>{app.website}</strong></div>
-                  )}
                   {app.resume_file_name && (
                     <div><span style={{ color: "var(--ink-muted)" }}>첨부파일: </span><strong>{app.resume_file_name}</strong></div>
                   )}
+                  {app.logo_url && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ color: "var(--ink-muted)" }}>로고:</span>
+                      <img src={app.logo_url} alt="" style={{ width: "28px", height: "28px", borderRadius: "6px", objectFit: "cover" }} />
+                    </div>
+                  )}
                 </div>
 
-                {app.description && (
+                {app.portfolio_text && (
                   <p style={{
                     marginTop: "14px", padding: "12px 14px", background: "#f8f9fa", borderRadius: "8px",
-                    fontSize: "0.82rem", color: "var(--ink-muted)", lineHeight: 1.6,
+                    fontSize: "0.82rem", color: "var(--ink-muted)", lineHeight: 1.6, whiteSpace: "pre-line",
                   }}>
-                    {app.description}
+                    {app.portfolio_text}
                   </p>
                 )}
               </div>

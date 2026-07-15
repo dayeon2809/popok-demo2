@@ -40,7 +40,7 @@ export default function Footer() {
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink)", fontWeight: 700, letterSpacing: "0.1em" }}>Social</span>
             <a href="https://www.instagram.com/popok.official/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Instagram</a>
-            <a href="mailto:contact@popok.kr" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Contact</a>
+            <a href="mailto:popok.service@gmail.com" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Contact</a>
           </div>
         </div>
       </div>

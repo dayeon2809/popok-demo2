@@ -3,9 +3,23 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB — matches API + Storage bucket limit
+const PORTFOLIO_TEXT_MAX = 30000;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const PORTFOLIO_TEXT_PLACEHOLDER = `단체 소개
+- 2022년 창단
+- 컨템포러리 댄스를 중심으로 활동
+
+주요 작품
+- 2025 〈몸의 경계〉, 예술의전당
+- 2024 〈잔상〉, 대학로예술극장
+
+주요 활동 및 수상
+- 2025 서울국제공연예술제 참가
+- 2024 ○○예술상 수상`;
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -38,8 +52,7 @@ export default function OrganizationApplyClient() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [instagram, setInstagram] = useState("");
-  const [website, setWebsite] = useState("");
-  const [description, setDescription] = useState("");
+  const [portfolioText, setPortfolioText] = useState("");
   // Honeypot — left empty by real users, invisible to them. Bots that fill
   // every field on a form tend to fill this too, which the API uses to
   // silently drop the submission.
@@ -50,15 +63,25 @@ export default function OrganizationApplyClient() {
   const [fileError, setFileError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Logo — uploaded immediately on selection (same pattern as the
+  // individual artist profile-image picker in MyPopokClient.tsx), so the
+  // final submit only ever sends the resulting public URL, not the file.
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState("");
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const validateAndSetFile = (candidate: File | undefined | null) => {
     if (!candidate) return;
-    const isPdf = candidate.type === "application/pdf" || candidate.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      setFileError("PDF 파일만 업로드할 수 있습니다.");
+    const ext = detectResumeFileExtension(candidate.name, candidate.type);
+    if (!ext) {
+      setFileError("PDF, DOCX, TXT 파일을 업로드할 수 있습니다.");
       setFileState("error");
       return;
     }
@@ -88,14 +111,78 @@ export default function OrganizationApplyClient() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const validateAndUploadLogo = async (candidate: File | undefined | null) => {
+    if (!candidate) return;
+    if (!candidate.type.startsWith("image/")) {
+      setLogoError("이미지 파일만 업로드할 수 있습니다.");
+      return;
+    }
+    if (candidate.size > 10 * 1024 * 1024) {
+      setLogoError("파일 크기는 10MB를 초과할 수 없습니다.");
+      return;
+    }
+
+    setLogoError("");
+    setLogoFile(candidate);
+    setLogoUrl("");
+    setLogoPreview(URL.createObjectURL(candidate));
+    setLogoUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", candidate);
+      formData.append("path", "organizations/logos");
+      formData.append("bucket", "artist-media");
+
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (res.ok && data.success && data.url) {
+        setLogoUrl(data.url);
+      } else {
+        setLogoError(data.error || "로고 업로드에 실패했습니다.");
+      }
+    } catch (err) {
+      setLogoError("로고 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    validateAndUploadLogo(e.target.files?.[0]);
+  };
+
+  const handleLogoDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    validateAndUploadLogo(e.dataTransfer.files?.[0]);
+  };
+
+  const removeLogo = () => {
+    if (logoPreview) URL.revokeObjectURL(logoPreview);
+    setLogoFile(null);
+    setLogoPreview("");
+    setLogoUrl("");
+    setLogoError("");
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
   const validate = (): string | null => {
     if (!orgName.trim()) return "단체명을 입력해 주세요.";
     if (!contactName.trim()) return "대표자명을 입력해 주세요.";
     if (!email.trim() || !EMAIL_REGEX.test(email.trim())) return "올바른 이메일 주소를 입력해 주세요.";
     if (!phone.trim()) return "연락처를 입력해 주세요.";
     if (!instagram.trim()) return "인스타그램을 입력해 주세요.";
+    if (portfolioText.length > PORTFOLIO_TEXT_MAX) return "이력 및 활동 내용은 30,000자 이하로 입력해주세요.";
+    if (logoUploading) return "로고 업로드가 끝날 때까지 잠시 기다려 주세요.";
     return null;
   };
+
+  // Non-blocking guidance only — the existing required-field policy above is
+  // untouched. Applying with no attached file and no typed history is still
+  // allowed; this just surfaces a heads-up so the applicant doesn't submit
+  // an application POPOK has nothing to review.
+  const hasNoSupportingMaterial = !file && !portfolioText.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,8 +203,8 @@ export default function OrganizationApplyClient() {
       formData.append("email", email.trim());
       formData.append("phone", phone.trim());
       formData.append("instagram", instagram.trim());
-      if (website.trim()) formData.append("website", website.trim());
-      if (description.trim()) formData.append("description", description.trim());
+      if (portfolioText.trim()) formData.append("portfolio_text", portfolioText.trim());
+      if (logoUrl) formData.append("logo_url", logoUrl);
       formData.append("company_website", companyWebsite);
       if (file) formData.append("file", file);
 
@@ -245,19 +332,89 @@ export default function OrganizationApplyClient() {
           </div>
 
           <div>
-            <label style={labelStyle}>홈페이지 (선택)</label>
-            <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://" style={inputStyle} />
-          </div>
-
-          <div>
-            <label style={labelStyle}>간단한 단체 소개 (선택)</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="단체의 활동과 특징을 간단히 소개해 주세요."
-              rows={4}
-              style={{ ...inputStyle, resize: "vertical" }}
-            />
+            <label style={labelStyle}>단체 로고 (선택)</label>
+            {!logoPreview ? (
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleLogoDrop}
+                onClick={() => logoInputRef.current?.click()}
+                style={{
+                  border: "2px dashed var(--border)",
+                  borderRadius: "14px",
+                  padding: "28px 20px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  background: "#FAF8F5",
+                  transition: "border 0.2s",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <input
+                  type="file"
+                  ref={logoInputRef}
+                  onChange={handleLogoChange}
+                  accept="image/*"
+                  style={{ display: "none" }}
+                />
+                <span style={{ fontSize: "1.6rem" }}>🖼️</span>
+                <p style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--navy)", margin: 0 }}>
+                  이곳에 단체 로고 이미지를 끌어다 놓거나 클릭하여 선택
+                </p>
+                <span style={{ fontSize: "0.7rem", color: "var(--ink-muted)" }}>
+                  이미지 파일만 업로드할 수 있습니다. (최대 10MB)
+                </span>
+              </div>
+            ) : (
+              <div style={{
+                border: "1.5px solid var(--border)",
+                borderRadius: "14px",
+                padding: "16px 18px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+                background: "#FAF8F5",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                  <img
+                    src={logoPreview}
+                    alt=""
+                    style={{ width: "44px", height: "44px", borderRadius: "8px", objectFit: "cover", flexShrink: 0 }}
+                  />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{
+                      fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "220px",
+                    }}>
+                      {logoFile?.name}
+                    </div>
+                    <div style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>
+                      {logoUploading && "업로드 중..."}
+                      {!logoUploading && logoUrl && "업로드 완료"}
+                      {!logoUploading && !logoUrl && logoError && "업로드 실패"}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeLogo}
+                  style={{
+                    border: "none", background: "none", color: "var(--ink-muted)",
+                    fontSize: "0.8rem", fontWeight: 700, cursor: "pointer", flexShrink: 0,
+                  }}
+                >
+                  제거
+                </button>
+              </div>
+            )}
+            {logoError && (
+              <p style={{ fontSize: "0.76rem", color: "#DC2626", fontWeight: 700, marginTop: "6px" }}>
+                {logoError}
+              </p>
+            )}
           </div>
 
           {/* Honeypot field — hidden from real users via CSS + aria-hidden, not via display:none
@@ -275,7 +432,7 @@ export default function OrganizationApplyClient() {
           </div>
 
           <div>
-            <label style={labelStyle}>단체 이력서 (PDF, 선택)</label>
+            <label style={labelStyle}>단체 이력서 (선택)</label>
             {fileState !== "selected" && fileState !== "uploading" && fileState !== "success" ? (
               <div
                 onDragOver={(e) => e.preventDefault()}
@@ -299,14 +456,16 @@ export default function OrganizationApplyClient() {
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
-                  accept=".pdf,application/pdf"
+                  accept={RESUME_FILE_ACCEPT}
                   style={{ display: "none" }}
                 />
                 <span style={{ fontSize: "1.6rem" }}>📄</span>
                 <p style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--navy)", margin: 0 }}>
-                  이곳에 단체 이력서(PDF)를 끌어다 놓거나 클릭하여 선택
+                  이곳에 단체 이력서를 끌어다 놓거나 클릭하여 선택
                 </p>
-                <span style={{ fontSize: "0.7rem", color: "var(--ink-muted)" }}>PDF 파일만 지원 (최대 20MB)</span>
+                <span style={{ fontSize: "0.7rem", color: "var(--ink-muted)" }}>
+                  PDF, DOCX, TXT 파일을 업로드할 수 있습니다. 20MB 이하의 이력서 또는 포트폴리오를 업로드해주세요.
+                </span>
               </div>
             ) : (
               <div style={{
@@ -355,6 +514,43 @@ export default function OrganizationApplyClient() {
               </p>
             )}
           </div>
+
+          <div>
+            <label style={labelStyle}>이력서 및 주요 활동 직접 입력 (선택)</label>
+            <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", marginBottom: "8px", lineHeight: 1.6 }}>
+              파일 업로드가 어렵거나 별도의 이력서가 없다면, 단체 소개·주요 작품·공연·수상·활동 이력을 텍스트로 입력해주세요.
+            </p>
+            <textarea
+              value={portfolioText}
+              onChange={(e) => setPortfolioText(e.target.value)}
+              placeholder={PORTFOLIO_TEXT_PLACEHOLDER}
+              rows={8}
+              style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
+            />
+            <p style={{
+              fontSize: "0.72rem",
+              marginTop: "6px",
+              textAlign: "right",
+              color: portfolioText.length > PORTFOLIO_TEXT_MAX ? "#DC2626" : "var(--ink-muted)",
+              fontWeight: portfolioText.length > PORTFOLIO_TEXT_MAX ? 700 : 400,
+            }}>
+              {portfolioText.length.toLocaleString()} / {PORTFOLIO_TEXT_MAX.toLocaleString()}자
+            </p>
+          </div>
+
+          {hasNoSupportingMaterial && (
+            <div style={{
+              fontSize: "0.78rem",
+              color: "var(--ink-muted)",
+              background: "var(--bg-warm)",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              border: "1px dashed var(--border-dark)",
+              lineHeight: 1.6,
+            }}>
+              단체 이력서 파일 또는 직접 입력한 이력 중 아무것도 입력되지 않았습니다. 검토를 위해 최소한 하나는 남겨주시는 것을 권장합니다.
+            </div>
+          )}
 
           {errorMsg && (
             <div style={{
