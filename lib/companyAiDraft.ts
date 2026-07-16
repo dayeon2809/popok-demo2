@@ -75,6 +75,11 @@ export const companyAiDraftSchema = z.object({
   city_or_region: z.string().optional().default(""),
   bio_short: z.string().optional().default(""),
   bio: z.string().optional().default(""),
+  founded_year: z.number().nullable().optional(),
+  mission: z.string().optional().default(""),
+  vision: z.string().optional().default(""),
+  core_values: z.array(z.string()).default([]),
+  history: z.array(z.object({ year: z.string(), event: z.string() })).default([]),
   current_activity: z.array(z.string()).default([]),
   works: z.array(workSchema).default([]),
   awards: z.array(awardSchema).default([]),
@@ -140,6 +145,11 @@ reviewSearchHints에 기록하세요.
 
 [세부 추출 규칙]
 - name / name_en: 문서에 실제로 명시된 경우만 사용합니다. 영문명이 없으면 임의로 번역하지 말고 빈 문자열로 둡니다.
+- founded_year: 단체의 설립연도가 문서상 명확히 명시된 경우 정수(number)로 추출하고, 명확하지 않으면 null로 둡니다.
+- mission: 단체의 미션(사명)이나 창작 방향이 이력서상에 있으면 1~2문장으로 객관적으로 추출합니다.
+- vision: 단체의 비전이나 목표가 이력서상에 있으면 1~2문장으로 객관적으로 추출합니다.
+- core_values: 단체의 핵심 창작 가치가 명시되어 있으면 단어/짧은 구 형태의 문자열 배열로 추출합니다.
+- history: 단체의 설립 이후의 주요 연혁을 연도별로 추출해 {"year": "연도", "event": "내용"} 형태의 배열로 반환합니다.
 - genre / category: 문서상 명확한 활동 장르를 기준으로 분류하고, 모호하면 빈 값으로 두고 needsReview에 기록합니다.
 - city_or_region: 실제 활동 지역이나 소재지가 명시된 경우만 사용하고, 연락처 주소나 공연장 위치를 단체 활동 지역으로 오인하지 않습니다.
 - current_activity: 현재 진행 중이라고 확인되는 작업만 포함하고, 과거 활동을 현재 활동으로 분류하지 않습니다.
@@ -159,6 +169,13 @@ ${PROFILE_SUMMARY_PROMPT}
   "city_or_region": "",
   "bio_short": "",
   "bio": "",
+  "founded_year": null,
+  "mission": "",
+  "vision": "",
+  "core_values": [],
+  "history": [
+    { "year": "", "event": "" }
+  ],
   "current_activity": [],
   "works": [
     { "title": "", "title_en": "", "year": "", "description": "", "role": "", "venue": "", "image_url": "", "video_url": "", "external_url": "", "artist_names": [] }
@@ -492,6 +509,11 @@ export async function structureCompanyDataWithAI(input: StructureCompanyInput): 
       city_or_region: rawParsed?.city_or_region || "",
       bio_short: rawParsed?.bio_short || "",
       bio: rawParsed?.bio || "",
+      founded_year: typeof rawParsed?.founded_year === "number" ? rawParsed.founded_year : null,
+      mission: rawParsed?.mission || "",
+      vision: rawParsed?.vision || "",
+      core_values: Array.isArray(rawParsed?.core_values) ? rawParsed.core_values : [],
+      history: Array.isArray(rawParsed?.history) ? rawParsed.history : [],
       current_activity: Array.isArray(rawParsed?.current_activity) ? rawParsed.current_activity : [],
       works: Array.isArray(rawParsed?.works) ? rawParsed.works : [],
       awards: Array.isArray(rawParsed?.awards) ? rawParsed.awards : [],

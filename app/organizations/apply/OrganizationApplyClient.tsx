@@ -38,7 +38,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: "6px",
 };
 
-type FileState = "idle" | "selected" | "uploading" | "success" | "error";
+type FileState = "idle" | "uploading" | "success" | "error";
 
 export default function OrganizationApplyClient() {
   const searchParams = useSearchParams();
@@ -58,9 +58,17 @@ export default function OrganizationApplyClient() {
   // silently drop the submission.
   const [companyWebsite, setCompanyWebsite] = useState("");
 
+  // Resume — uploaded immediately on selection (same pattern as the logo
+  // below), so the final submit only ever sends the resulting storage
+  // metadata (path/name/size), never the file itself. Sending the file here
+  // too used to blow past Next.js's ~10MB FormData parsing limit once a
+  // logo upload was already counted, causing "Request body exceeded 10MB".
   const [file, setFile] = useState<File | null>(null);
   const [fileState, setFileState] = useState<FileState>("idle");
   const [fileError, setFileError] = useState("");
+  const [resumeFilePath, setResumeFilePath] = useState("");
+  const [resumeFileName, setResumeFileName] = useState("");
+  const [resumeFileSize, setResumeFileSize] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Logo — uploaded immediately on selection (same pattern as the
@@ -77,7 +85,7 @@ export default function OrganizationApplyClient() {
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const validateAndSetFile = (candidate: File | undefined | null) => {
+  const validateAndUploadFile = async (candidate: File | undefined | null) => {
     if (!candidate) return;
     const ext = detectResumeFileExtension(candidate.name, candidate.type);
     if (!ext) {
@@ -90,24 +98,53 @@ export default function OrganizationApplyClient() {
       setFileState("error");
       return;
     }
+
     setFile(candidate);
     setFileError("");
-    setFileState("selected");
+    setResumeFilePath("");
+    setResumeFileName("");
+    setResumeFileSize(null);
+    setFileState("uploading");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", candidate);
+      formData.append("type", "organization-resume");
+
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (res.ok && data.success && data.path) {
+        setResumeFilePath(data.path);
+        setResumeFileName(data.fileName || candidate.name);
+        setResumeFileSize(typeof data.fileSize === "number" ? data.fileSize : candidate.size);
+        setFileState("success");
+      } else {
+        setFileError(data.error || "파일 업로드에 실패했습니다.");
+        setFileState("error");
+      }
+    } catch (err) {
+      setFileError("파일 업로드 중 오류가 발생했습니다.");
+      setFileState("error");
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    validateAndSetFile(e.target.files?.[0]);
+    validateAndUploadFile(e.target.files?.[0]);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    validateAndSetFile(e.dataTransfer.files?.[0]);
+    validateAndUploadFile(e.dataTransfer.files?.[0]);
   };
 
   const removeFile = () => {
     setFile(null);
     setFileState("idle");
     setFileError("");
+    setResumeFilePath("");
+    setResumeFileName("");
+    setResumeFileSize(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -175,6 +212,7 @@ export default function OrganizationApplyClient() {
     if (!instagram.trim()) return "인스타그램을 입력해 주세요.";
     if (portfolioText.length > PORTFOLIO_TEXT_MAX) return "이력 및 활동 내용은 30,000자 이하로 입력해주세요.";
     if (logoUploading) return "로고 업로드가 끝날 때까지 잠시 기다려 주세요.";
+    if (fileState === "uploading") return "이력서 업로드가 끝날 때까지 잠시 기다려 주세요.";
     return null;
   };
 
@@ -182,7 +220,7 @@ export default function OrganizationApplyClient() {
   // untouched. Applying with no attached file and no typed history is still
   // allowed; this just surfaces a heads-up so the applicant doesn't submit
   // an application POPOK has nothing to review.
-  const hasNoSupportingMaterial = !file && !portfolioText.trim();
+  const hasNoSupportingMaterial = !resumeFilePath && !portfolioText.trim();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,7 +232,6 @@ export default function OrganizationApplyClient() {
 
     setErrorMsg("");
     setSubmitting(true);
-    if (file) setFileState("uploading");
 
     try {
       const formData = new FormData();
@@ -206,7 +243,11 @@ export default function OrganizationApplyClient() {
       if (portfolioText.trim()) formData.append("portfolio_text", portfolioText.trim());
       if (logoUrl) formData.append("logo_url", logoUrl);
       formData.append("company_website", companyWebsite);
-      if (file) formData.append("file", file);
+      if (resumeFilePath) {
+        formData.append("resume_file_path", resumeFilePath);
+        formData.append("resume_file_name", resumeFileName);
+        formData.append("resume_file_size", String(resumeFileSize ?? ""));
+      }
 
       const res = await fetch("/api/organizations/apply", {
         method: "POST",
@@ -215,15 +256,12 @@ export default function OrganizationApplyClient() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        if (file) setFileState("success");
         setSubmitted(true);
       } else {
-        if (file) setFileState("error");
         setErrorMsg(data.error || "신청 접수 중 오류가 발생했습니다. 다시 시도해주세요.");
         setSubmitting(false);
       }
     } catch (err: any) {
-      if (file) setFileState("error");
       setErrorMsg("서버 연결에 실패했습니다. 네트워크 상태를 확인하고 다시 시도해 주세요.");
       setSubmitting(false);
     }
@@ -433,7 +471,7 @@ export default function OrganizationApplyClient() {
 
           <div>
             <label style={labelStyle}>단체 이력서 (선택)</label>
-            {fileState !== "selected" && fileState !== "uploading" && fileState !== "success" ? (
+            {fileState !== "uploading" && fileState !== "success" ? (
               <div
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
@@ -489,7 +527,7 @@ export default function OrganizationApplyClient() {
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>
                       {file ? `${(file.size / (1024 * 1024)).toFixed(1)}MB` : ""}
-                      {fileState === "uploading" && " · 업로드 및 제출 중..."}
+                      {fileState === "uploading" && " · 업로드 중..."}
                       {fileState === "success" && " · 업로드 완료"}
                     </div>
                   </div>

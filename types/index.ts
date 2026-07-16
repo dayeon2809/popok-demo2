@@ -145,6 +145,27 @@ export interface Company {
   current_activity?: string[];
   createdAt?: string | null;
   updatedAt?: string | null;
+
+  // Rich Brand/Company Extensions
+  brand_color?: string | null;
+  slogan?: string | null;
+  mission?: string | null;
+  vision?: string | null;
+  values?: string[] | null;
+  core_values?: string[] | null;
+  view_count?: number | null;
+  founded_year?: number | null;
+  history?: Array<{ year: string; event: string }> | null;
+  projects?: Array<{ title: string; date?: string; link?: string; description?: string }> | null;
+  press_links?: Array<{ title: string; source?: string; url?: string }> | null;
+  logo_url?: string | null;
+  hero_image_url?: string | null;
+
+  // JSONB Arrays
+  works?: any[] | null;
+  awards?: any[] | null;
+  review_links?: any[] | null;
+  links?: any[] | null;
 }
 
 // A row from public.artist_companies joined with its linked company.

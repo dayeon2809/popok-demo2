@@ -6,6 +6,19 @@
 -- — that one should receive manual-migrations/dev_restore_previous_schema.sql
 -- instead.
 --
+-- FIXED EXECUTION ORDER on a fresh/empty Preview DB:
+--   ① supabase/manual-migrations/baseline_preview_schema.sql   (profiles,
+--      artists, submissions, organization_applications base structure)
+--   ② supabase/migrations/create_performances.sql,
+--      create_performance_artists.sql (already-tracked, unchanged)
+--   ③ this file
+-- This file's `create table if not exists public.organization_applications`
+-- below intentionally still contains the FULL base-structure definition
+-- (org_name/contact_name/.../status check) — once ① has already created that
+-- table, this becomes a safe no-op; keeping it here means this file can also
+-- still be run standalone against a database that never got ① (e.g. a
+-- from-scratch environment), which is why it isn't stripped out.
+--
 -- This consolidates, in dependency order, every schema change the current
 -- codebase's "artists and companies architecture" feature depends on:
 --   1. create_companies_and_artist_companies.sql

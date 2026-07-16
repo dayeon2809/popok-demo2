@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   // pdf-parse(pdfjs-dist)/mammoth는 Node.js 전용 API에 의존하므로 Next의
   // Route Handler 번들링에서 제외하고 네이티브 require를 사용하게 한다.
   serverExternalPackages: ["pdf-parse", "mammoth"],
+
+  experimental: {
+    proxyClientMaxBodySize: "20mb",
+  },
 };
 
 export default nextConfig;

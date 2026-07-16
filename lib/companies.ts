@@ -23,9 +23,30 @@ export function mapCompanyRowToCompany(record: any): Company {
     instagram: record.instagram || null,
     website: record.website || null,
     portfolio_url: record.portfolio_url || null,
-    current_activity: toStringArray(record.current_activity),
+    current_activity: Array.isArray(record.current_activity) ? record.current_activity : [],
     createdAt: record.created_at || null,
     updatedAt: record.updated_at || null,
+
+    // Brand Profile properties
+    brand_color: record.brand_color || null,
+    slogan: record.slogan || null,
+    mission: record.mission || null,
+    vision: record.vision || null,
+    values: Array.isArray(record.core_values) ? record.core_values : null,
+    core_values: Array.isArray(record.core_values) ? record.core_values : null,
+    founded_year: typeof record.founded_year === "number" ? record.founded_year : null,
+    history: Array.isArray(record.history) ? record.history : null,
+    projects: Array.isArray(record.current_activity) ? record.current_activity : null,
+    press_links: Array.isArray(record.review_links) ? record.review_links : null,
+    logo_url: record.logo_url || null,
+    hero_image_url: record.hero_image_url || null,
+    view_count: typeof record.view_count === "number" ? record.view_count : 0,
+
+    // Base jsonb mappings
+    works: Array.isArray(record.works) ? record.works : [],
+    awards: Array.isArray(record.awards) ? record.awards : [],
+    review_links: Array.isArray(record.review_links) ? record.review_links : [],
+    links: Array.isArray(record.links) ? record.links : [],
   };
 }
 
@@ -426,3 +447,60 @@ export async function downloadCompanySourceFileBuffer(sourceFilePath: string): P
   const arrayBuffer = await data.arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
+
+/** Fetches 3 alternative published companies for continuous platform discovery. */
+export async function getRelatedCompanies(excludeId: string): Promise<Company[]> {
+  try {
+    const supabase = getSupabaseServer();
+    const { data, error } = await supabase
+      .from("companies" as any)
+      .select("*")
+      .eq("status", "published")
+      .neq("id", excludeId)
+      .limit(3);
+
+    if (error) {
+      console.error("[getRelatedCompanies] Supabase error:", error);
+      return [];
+    }
+    return (data || []).map(mapCompanyRowToCompany);
+  } catch (err) {
+    console.error("[getRelatedCompanies] Unexpected error:", err);
+    return [];
+  }
+}
+
+/** Fetches artists linked to a specific company via artist_companies join table. */
+export async function getConnectedArtistsByCompanyId(companyId: string): Promise<any[]> {
+  try {
+    const supabase = getSupabaseServer();
+    const { data, error } = await supabase
+      .from("artist_companies" as any)
+      .select("role, start_year, end_year, is_current, is_primary, artists(id, name, name_en, profile_image_url, profileImage, status, slug)")
+      .eq("company_id", companyId);
+
+    if (error) {
+      console.error("[getConnectedArtistsByCompanyId] Supabase error:", error);
+      return [];
+    }
+
+    return (data || [])
+      .filter((row: any) => row.artists && row.artists.status === "published")
+      .map((row: any) => ({
+        id: String(row.artists.id),
+        name: row.artists.name || "",
+        name_en: row.artists.name_en || null,
+        profile_image_url: row.artists.profile_image_url || row.artists.profileImage || null,
+        slug: row.artists.slug || null,
+        role: row.role || null,
+        start_year: row.start_year || null,
+        end_year: row.end_year || null,
+        is_current: !!row.is_current,
+        is_primary: !!row.is_primary,
+      }));
+  } catch (err) {
+    console.error("[getConnectedArtistsByCompanyId] Unexpected error:", err);
+    return [];
+  }
+}
+

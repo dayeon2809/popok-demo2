@@ -39,9 +39,6 @@ export async function POST(
     const missing: string[] = [];
     if (!c.name || !String(c.name).trim()) missing.push("단체명");
     if (!c.slug || !String(c.slug).trim()) missing.push("slug (단체 주소)");
-    if (!(c.bio_short && String(c.bio_short).trim()) && !(c.bio && String(c.bio).trim())) {
-      missing.push("소개(bio_short 또는 bio) 중 최소 1개");
-    }
 
     if (missing.length > 0) {
       return NextResponse.json(

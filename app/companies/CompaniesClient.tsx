@@ -94,7 +94,7 @@ function CompanyCard({ company }: { company: Company }) {
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
-        <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "6px", minWidth: 0 }}>
+        <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "6px", minWidth: 0, height: "135px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
             <h4 style={{
               fontSize: "1rem", fontWeight: 900, color: "var(--navy)", margin: 0,

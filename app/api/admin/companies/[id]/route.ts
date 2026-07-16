@@ -23,6 +23,7 @@ const EDITABLE_FIELDS = [
   "instagram", "website", "portfolio_url",
   "profile_image_urls", "current_activity", "works", "awards", "review_links", "links",
   "source_text",
+  "founded_year", "brand_color", "mission", "vision", "core_values", "history",
 ];
 
 export async function GET(

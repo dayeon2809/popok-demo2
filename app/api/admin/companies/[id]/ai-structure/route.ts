@@ -7,6 +7,7 @@ import {
 } from "@/lib/companies";
 import { structureCompanyDataWithAI, type CompanySourceMaterial } from "@/lib/companyAiDraft";
 import { extractTextFromBuffer } from "@/lib/fileTextExtraction";
+import { mergeCurrentActivity, mergeWorks, mergeAwards, mergeLinks } from "@/lib/mergeCompanyArrays";
 
 export const dynamic = "force-dynamic";
 // pdf-parse/mammoth (via extractTextFromBuffer) require Node-only APIs.
@@ -152,13 +153,66 @@ export async function POST(
       adminFileDuplicatesApplicationResume,
     });
 
+    // Merge array data
+    const existingCurrentActivity = Array.isArray(company.current_activity) ? company.current_activity : [];
+    const incomingCurrentActivity = Array.isArray(draft.current_activity) ? draft.current_activity : [];
+    const mergedCurrentActivity = mergeCurrentActivity(existingCurrentActivity, incomingCurrentActivity);
+
+    const existingWorks = Array.isArray(company.works) ? company.works : [];
+    const incomingWorks = Array.isArray(draft.works) ? draft.works : [];
+    const mergedWorks = mergeWorks(existingWorks, incomingWorks);
+
+    const existingAwards = Array.isArray(company.awards) ? company.awards : [];
+    const incomingAwards = Array.isArray(draft.awards) ? draft.awards : [];
+    const mergedAwards = mergeAwards(existingAwards, incomingAwards);
+
+    const existingLinks = Array.isArray(company.links) ? company.links : [];
+    const incomingLinks = Array.isArray(draft.links) ? draft.links : [];
+    const mergedLinks = mergeLinks(existingLinks, incomingLinks);
+
+    // Merge core values
+    const existingCoreValues = Array.isArray(company.core_values) ? company.core_values : [];
+    const incomingCoreValues = Array.isArray(draft.core_values) ? draft.core_values : [];
+    const mergedCoreValues = Array.from(new Set([...existingCoreValues, ...incomingCoreValues]));
+
+    // Merge history
+    const existingHistory = Array.isArray(company.history) ? company.history : [];
+    const incomingHistory = Array.isArray(draft.history) ? draft.history : [];
+    const mergedHistory = [...existingHistory];
+    for (const item of incomingHistory) {
+      if (!existingHistory.some((e: any) => e.year === item.year && e.event === item.event)) {
+        mergedHistory.push(item);
+      }
+    }
+
     const { error: saveError } = await (supabase.from("companies" as any) as any)
       .update({
         ai_draft: draft,
-        ai_draft_status: "ready",
+        ai_draft_status: "applied",
         ai_draft_generated_at: new Date().toISOString(),
         ai_draft_error: null,
         ai_draft_source_summary: sourceSummary,
+
+        // Auto apply single fields
+        name_en: draft.name_en?.trim() || company.name_en || null,
+        genre: draft.genre?.trim() || company.genre || null,
+        category: draft.category?.trim() || company.category || null,
+        city_or_region: draft.city_or_region?.trim() || company.city_or_region || null,
+        bio_short: draft.bio_short?.trim() || company.bio_short || null,
+        bio: draft.bio?.trim() || company.bio || null,
+
+        // Auto apply brand fields
+        founded_year: draft.founded_year || company.founded_year || null,
+        mission: draft.mission?.trim() || company.mission || null,
+        vision: draft.vision?.trim() || company.vision || null,
+
+        // Auto apply arrays
+        current_activity: mergedCurrentActivity,
+        works: mergedWorks,
+        awards: mergedAwards,
+        links: mergedLinks,
+        core_values: mergedCoreValues,
+        history: mergedHistory,
       })
       .eq("id", id);
 
