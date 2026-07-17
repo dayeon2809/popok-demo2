@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import AuthNav from "@/components/AuthNav";
 import { useLanguage, type Language } from "@/lib/useLanguage";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
+import { analytics } from "@/lib/analytics";
 
 const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (pathname: string) => boolean }> = [
   {
@@ -58,8 +59,27 @@ export default function Header() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setUser(session.user);
+        
+        // Track explicit login if it was pending
+        if (typeof window !== "undefined" && sessionStorage.getItem("popok_login_pending") === "true") {
+          sessionStorage.removeItem("popok_login_pending");
+          analytics.login("google");
+        }
+        
+        if (typeof window !== "undefined") {
+          localStorage.setItem("popok_logged_in", "true");
+        }
       } else {
         setUser(null);
+        
+        // Track logout if user was previously logged in
+        if (typeof window !== "undefined") {
+          const wasLoggedIn = localStorage.getItem("popok_logged_in") === "true";
+          if (wasLoggedIn || event === "SIGNED_OUT") {
+            localStorage.removeItem("popok_logged_in");
+            analytics.logout();
+          }
+        }
       }
     });
 
@@ -101,6 +121,11 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => {
+                  if (item.href === "/premium") {
+                    analytics.premiumClick("header");
+                  }
+                }}
                 style={{
                   textDecoration: "none",
                   fontSize: "0.875rem",
@@ -198,7 +223,12 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setMenuOpen(false)}
+                onClick={() => {
+                  setMenuOpen(false);
+                  if (item.href === "/premium") {
+                    analytics.premiumClick("header");
+                  }
+                }}
                 style={{
                   textDecoration: "none",
                   padding: "14px 6px",

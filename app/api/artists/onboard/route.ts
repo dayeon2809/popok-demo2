@@ -111,9 +111,11 @@ export async function POST(request: Request) {
       links: Array.isArray(links) ? links : [],
     };
 
-    const { error: artistError } = await supabase
+    const { data: artistData, error: artistError } = await supabase
       .from("artists")
-      .insert(newArtist);
+      .insert(newArtist)
+      .select("id")
+      .single();
 
     if (artistError) {
       console.error("[Onboarding API] Artist insert error:", artistError);
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "아티스트 정보 생성에 실패했습니다." }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, artistId: artistData?.id });
   } catch (err: any) {
     console.error("[Onboarding API] Catch error:", err);
     return NextResponse.json({ success: false, error: err.message || "서버 처리 중 오류가 발생했습니다." }, { status: 500 });

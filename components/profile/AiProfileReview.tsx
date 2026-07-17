@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ParsedProfile } from "@/lib/profileParser";
+import { analytics } from "@/lib/analytics";
 
 interface AiProfileReviewProps {
   initialDraft: ParsedProfile;
@@ -468,6 +469,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
             <a
               href="/premium"
               target="_blank"
+              onClick={() => analytics.premiumClick("ai_review")}
               style={{
                 background: "var(--accent)",
                 color: "var(--navy)",

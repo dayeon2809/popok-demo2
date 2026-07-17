@@ -5,6 +5,7 @@ import Link from "next/link";
 import PopokCard from "@/components/PopokCard";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import AiProfileCompare from "@/components/profile/AiProfileCompare";
+import { analytics } from "@/lib/analytics";
 
 interface Work {
   id: string;
@@ -254,6 +255,8 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
       return;
     }
 
+    const newWorksCount = works.filter(w => w.id && String(w.id).startsWith("new-work-")).length;
+
     setSaving(true);
     setSaveSuccess(false);
 
@@ -297,6 +300,9 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
       if (res.ok && data.success) {
         setArtist(data.data);
         setSaveSuccess(true);
+        if (newWorksCount > 0) {
+          analytics.workCreated(newWorksCount);
+        }
         window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
@@ -313,6 +319,7 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
   const handleCopyLink = () => {
     navigator.clipboard.writeText(publicUrl);
     setCopied(true);
+    analytics.profileShared("copy", "portfolio", slug || artist.id);
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -922,7 +929,7 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
                   <p style={{ fontSize: "0.82rem", color: "#94A3B8", marginBottom: "16px", lineHeight: 1.5 }}>
                     대표 작품을 무제한 등록하고 AI 자동 업데이트를 받아보세요.
                   </p>
-                  <Link href="/premium" style={{
+                  <Link href="/premium" onClick={() => analytics.premiumClick("dashboard")} style={{
                     display: "inline-block",
                     textDecoration: "none",
                     background: "var(--accent)",

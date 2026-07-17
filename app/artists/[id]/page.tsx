@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
+import { analytics } from "@/lib/analytics";
 import MotionProfile from "@/components/MotionProfile";
 import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
 import { getYouTubePreviewAspectRatio, isYouTubeUrl } from "@/lib/youtube";
@@ -85,6 +86,19 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   // artist, since that fetch above would have already failed). Guarded by
   // sessionStorage so repeated refreshes in the same tab/session don't
   // inflate the count; a new session or device increments again.
+  // Track artist view event immediately on page load when artist is loaded
+  useEffect(() => {
+    if (!artist) return;
+    const artistKey = artist.recordId || artist.id;
+    if (!artistKey) return;
+    analytics.artistViewed(artistKey, artist.name);
+  }, [artist?.recordId, artist?.id]);
+
+  // Record a view — only after the artist has actually loaded in a real
+  // browser (never during SSR/prefetch, and never for a draft/missing
+  // artist, since that fetch above would have already failed). Guarded by
+  // sessionStorage so repeated refreshes in the same tab/session don't
+  // inflate the count; a new session or device increments again.
   useEffect(() => {
     if (!artist) return;
     const artistKey = artist.recordId || artist.id;
@@ -135,6 +149,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
       triggerToast("포트폴리오 주소가 복사되었습니다.");
+      analytics.profileShared("copy", "artist", artist?.slug || artist?.id || id);
     }
   };
 

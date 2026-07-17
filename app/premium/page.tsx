@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import PremiumPlanCard, { type BillingCycle } from "@/components/PremiumPlanCard";
+import { analytics } from "@/lib/analytics";
 
 type PlanId = "free" | "student" | "artist";
 
@@ -138,6 +139,7 @@ export default function PremiumPage() {
 
   // 실제 결제 연동 전까지는 사전 신청(안내 접수) 메시지만 표시한다.
   const handleSubscribe = (planType: PlanId, cycle: BillingCycle) => {
+    analytics.premiumClick(`pricing_plan_${planType}`);
     // TODO: 결제 연동 시 아래 엔드포인트와 연결
     // const res = await fetch("/api/checkout/create-subscription", {
     //   method: "POST",

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
+import { analytics } from "@/lib/analytics";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB — matches API + Storage bucket limit
 const PORTFOLIO_TEXT_MAX = 30000;
@@ -257,6 +258,7 @@ export default function OrganizationApplyClient() {
 
       if (res.ok && data.success) {
         setSubmitted(true);
+        analytics.companyApply(orgName);
       } else {
         setErrorMsg(data.error || "신청 접수 중 오류가 발생했습니다. 다시 시도해주세요.");
         setSubmitting(false);

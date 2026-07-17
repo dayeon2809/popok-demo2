@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
+import { analytics } from "@/lib/analytics";
 import AiProfileReview from "@/components/profile/AiProfileReview";
 
 export default function OnboardingClient({ defaultEmail, defaultDisplayName }: { defaultEmail: string; defaultDisplayName: string }) {
@@ -133,6 +134,10 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        analytics.signUp("google");
+        if (data.artistId) {
+          analytics.portfolioCreated(data.artistId);
+        }
         router.push("/my-popok");
         router.refresh();
       } else {

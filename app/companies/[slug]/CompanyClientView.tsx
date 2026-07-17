@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Company } from "@/types";
+import { analytics } from "@/lib/analytics";
 
 // Import custom company components
 import DigitalCard from "@/components/company/DigitalCard";
@@ -39,6 +40,13 @@ export default function CompanyClientView({
   useEffect(() => {
     document.title = `${company.name} | POPOK Company Archive`;
   }, [company.name]);
+
+  useEffect(() => {
+    if (!company) return;
+    const companyKey = company.id;
+    if (!companyKey) return;
+    analytics.companyViewed(companyKey, company.name);
+  }, [company?.id, company?.name]);
 
   const hexToRgb = (hexColor: string) => {
     const hex = hexColor.replace("#", "");

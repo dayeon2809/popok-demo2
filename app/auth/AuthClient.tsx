@@ -13,6 +13,9 @@ export default function AuthClient() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("popok_login_pending", "true");
+      }
       const redirectTo = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",

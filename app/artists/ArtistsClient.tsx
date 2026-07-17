@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { analytics } from "@/lib/analytics";
 import { useArtists } from "@/lib/api";
 import { LoadingSpinner, ErrorMessage, EmptyState } from "@/components/ui/States";
 import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
@@ -79,6 +80,16 @@ export default function ArtistsClient() {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, selectedField, selectedSubField, selectedType, selectedConsonant]);
+
+  // Debounce and track search query
+  useEffect(() => {
+    if (!query) return;
+    const timer = setTimeout(() => {
+      analytics.search(query);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const danceSliderRef = useRef<HTMLDivElement>(null);
   const musicSliderRef = useRef<HTMLDivElement>(null);

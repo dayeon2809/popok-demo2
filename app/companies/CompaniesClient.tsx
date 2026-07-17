@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/States";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import type { Company } from "@/types";
+import { analytics } from "@/lib/analytics";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
@@ -18,6 +19,16 @@ const CATEGORIES = [
 export default function CompaniesClient({ companies }: { companies: Company[] }) {
   const [query, setQuery] = useState("");
   const [selectedField, setSelectedField] = useState("all");
+
+  // Debounce and track search query
+  useEffect(() => {
+    if (!query) return;
+    const timer = setTimeout(() => {
+      analytics.search(query);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const filteredCompanies = companies.filter((c) => {
     // Category filter
