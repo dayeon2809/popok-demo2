@@ -2,24 +2,32 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const STATS = [
-  { value: 47, suffix: "명", label: "등록 아티스트" },
-  { value: 35, suffix: "명", label: "개인 안무가" },
-  { value: 8, suffix: "개", label: "무용단·단체" },
-  { value: 135, suffix: "+", label: "등록 작품" },
-];
-
 function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-export default function StatsCTA() {
+export default function StatsCTA({
+  totalArtists = 48,
+  individualArtists = 36,
+  organizations = 12,
+  totalWorks = 137
+}: {
+  totalArtists?: number;
+  individualArtists?: number;
+  organizations?: number;
+  totalWorks?: number;
+}) {
+  const STATS = [
+    { value: totalArtists, suffix: "명", label: "등록 아티스트" },
+    { value: individualArtists, suffix: "명", label: "개인 안무가" },
+    { value: organizations, suffix: "개", label: "무용단·단체" },
+    { value: totalWorks, suffix: "개", label: "등록 작품" },
+  ];
+
   const containerRef = useRef<HTMLDivElement>(null);
   const hasAnimatedRef = useRef(false);
   const [counts, setCounts] = useState<number[]>(() => STATS.map(() => 0));
 
-  // Count up from 0 to each stat's real value, once, the first time the
-  // section scrolls into view — never re-triggers on subsequent scrolls.
   useEffect(() => {
     const node = containerRef.current;
     if (!node) return;
@@ -58,7 +66,7 @@ export default function StatsCTA() {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [totalArtists, individualArtists, organizations, totalWorks]);
 
   return (
     <section className="home-section" style={{

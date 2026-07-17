@@ -41,6 +41,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
           rel="stylesheet"
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "POPOK",
+              "url": "https://popok.kr",
+              "description": "한국 무용계 아티스트와 작품을 발견하는 가장 쉬운 방법.",
+              "applicationCategory": "BusinessApplication",
+              "operatingSystem": "All"
+            })
+          }}
+        />
       </head>
       <body>
         <Header />

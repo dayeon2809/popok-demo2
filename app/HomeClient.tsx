@@ -17,7 +17,7 @@ const HOME_COPY = {
     eyebrow: "POPOK FOR CREATORS",
     heroSubhead: "당신의 작업이 하나로 연결됩니다.",
     heroBody:
-      "POPOK은 아티스트와 크리에이터를 위한 디지털 명함이자 포트폴리오입니다. 프로필, 프로젝트, 경력, 링크를 하나의 주소에 모아 당신의 작업을 더 쉽게 보여주세요.",
+      "POPOK은 공연예술인을 위한 디지털 명함이자 포트폴리오입니다. 프로필, 프로젝트, 경력, 링크를 하나의 주소에 모아 당신의 작업을 더 쉽게 보여주세요.",
     getMyPopok: "내 포퐄 만들기",
     seeExamples: "예시 보기",
     backCardTitle: "당신의 작업이\n연결됩니다.",
@@ -28,7 +28,7 @@ const HOME_COPY = {
     eyebrow: "POPOK FOR CREATORS",
     heroSubhead: "Your work, connected.",
     heroBody:
-      "POPOK is a digital business card and portfolio platform for artists and creators. Gather your profile, projects, experiences, and links into one single link. Showcase yourself instantly.",
+      "POPOK is a digital business card and portfolio platform for performing artists. Gather your profile, projects, experiences, and links into one single link. Showcase yourself instantly.",
     getMyPopok: "Get my POPOK",
     seeExamples: "See examples",
     backCardTitle: "Your work,\nconnected.",
@@ -45,6 +45,16 @@ interface HomeClientProps {
 export default function HomeClient({ initialArtists, initialPerformances }: HomeClientProps) {
   const { language } = useLanguage();
   const t = HOME_COPY[language];
+
+  // Calculate dynamic stats from actual dataset
+  const totalArtists = initialArtists.length;
+  const individualArtists = initialArtists.filter(a => a.type === "individual").length;
+  const organizations = initialArtists.filter(a => a.type === "company" || a.type === "project_group").length;
+  const totalWorks = initialArtists.reduce((acc, artist) => {
+    const worksList = artist.works || artist.portfolio_works || [];
+    return acc + (Array.isArray(worksList) ? worksList.length : 0);
+  }, 0);
+  
   const artists = initialArtists;
 
   // Filter artists who have valid profile images for carousels
@@ -420,7 +430,12 @@ export default function HomeClient({ initialArtists, initialPerformances }: Home
       />
 
       {/* ── 5. Artist DB 현황 (STATS CTA) ── */}
-      <StatsCTA />
+      <StatsCTA
+        totalArtists={totalArtists}
+        individualArtists={individualArtists}
+        organizations={organizations}
+        totalWorks={totalWorks}
+      />
 
       {/* ── 6. FOOTER CTA ── */}
       <FooterCTA />

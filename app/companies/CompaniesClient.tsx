@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/States";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
@@ -7,7 +8,35 @@ import type { Company } from "@/types";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
+const CATEGORIES = [
+  { key: "all", label: "ALL" },
+  { key: "dance", label: "DANCE" },
+  { key: "music", label: "MUSIC" },
+  { key: "visual", label: "VISUAL" },
+];
+
 export default function CompaniesClient({ companies }: { companies: Company[] }) {
+  const [query, setQuery] = useState("");
+  const [selectedField, setSelectedField] = useState("all");
+
+  const filteredCompanies = companies.filter((c) => {
+    // Category filter
+    if (selectedField !== "all") {
+      if (c.category !== selectedField) return false;
+    }
+    // Search query filter
+    if (query) {
+      const q = query.toLowerCase();
+      const nameMatch = c.name?.toLowerCase().includes(q) || c.name_en?.toLowerCase().includes(q);
+      const genreMatch = c.genre?.toLowerCase().includes(q);
+      const bioMatch = c.bio_short?.toLowerCase().includes(q) || c.bio?.toLowerCase().includes(q);
+      const worksMatch = c.works?.some((w) => w.title?.toLowerCase().includes(q));
+
+      return nameMatch || genreMatch || bioMatch || worksMatch;
+    }
+    return true;
+  });
+
   return (
     <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 32px 80px" }}>
       <style dangerouslySetInnerHTML={{
@@ -35,32 +64,78 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
         </h1>
       </div>
 
-      {companies.length === 0 ? (
-        <div>
-          <EmptyState message="아직 등록된 단체가 없습니다." />
-          <div style={{ textAlign: "center", marginTop: "-20px", marginBottom: "40px" }}>
-            <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginBottom: "16px" }}>
-              POPOK에 단체의 작품과 활동을 기록해보세요.
-            </p>
-            <Link
-              href="/organizations/apply"
-              className="btn-lime"
+      {/* ── FILTER & SEARCH BAR ── */}
+      <div style={{ marginBottom: "40px", display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* Category Pill Buttons */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setSelectedField(cat.key)}
               style={{
-                display: "inline-block",
-                textDecoration: "none",
-                padding: "12px 24px",
-                borderRadius: "12px",
-                fontSize: "0.88rem",
-                fontWeight: 800,
+                padding: "10px 18px",
+                borderRadius: "20px",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                border: selectedField === cat.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                backgroundColor: selectedField === cat.key ? "var(--navy)" : "#FFFFFF",
+                color: selectedField === cat.key ? "#FFFFFF" : "var(--navy)",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
               }}
             >
-              단체 포퐄 등록하기 →
-            </Link>
-          </div>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Input */}
+        <div style={{ position: "relative", width: "100%" }}>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="이름, 장르, 대표작 등으로 단체 검색..."
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              fontSize: "0.95rem",
+              borderRadius: "12px",
+              border: "1.5px solid var(--border)",
+              background: "#FFFFFF",
+            }}
+          />
+        </div>
+      </div>
+
+      {filteredCompanies.length === 0 ? (
+        <div>
+          <EmptyState message="검색 결과가 없습니다." />
+          {query === "" && selectedField === "all" && (
+            <div style={{ textAlign: "center", marginTop: "-20px", marginBottom: "40px" }}>
+              <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginBottom: "16px" }}>
+                POPOK에 단체의 작품과 활동을 기록해보세요.
+              </p>
+              <Link
+                href="/organizations/apply"
+                className="btn-lime"
+                style={{
+                  display: "inline-block",
+                  textDecoration: "none",
+                  padding: "12px 24px",
+                  borderRadius: "12px",
+                  fontSize: "0.88rem",
+                  fontWeight: 800,
+                }}
+              >
+                단체 포퐄 등록하기 →
+              </Link>
+            </div>
+          )}
         </div>
       ) : (
         <div className="company-grid">
-          {companies.map((company) => (
+          {filteredCompanies.map((company) => (
             <CompanyCard key={company.id} company={company} />
           ))}
         </div>

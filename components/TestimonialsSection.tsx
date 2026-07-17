@@ -1,8 +1,37 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { testimonials } from "@/data/testimonials";
 
 export default function TestimonialsSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || isPaused) return;
+
+    const timerId = setInterval(() => {
+      if (!el) return;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      const firstChild = el.firstElementChild as HTMLElement;
+      const cardWidth = firstChild?.getBoundingClientRect().width || 300;
+      const style = window.getComputedStyle(el);
+      const gap = parseInt(style.gap || "20px", 10) || 20;
+      const step = cardWidth + gap;
+
+      if (el.scrollLeft >= maxScroll - 10) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: step, behavior: "smooth" });
+      }
+    }, 4000);
+
+    return () => clearInterval(timerId);
+  }, [isPaused]);
+
   if (testimonials.length === 0) return null;
 
   return (
@@ -33,6 +62,11 @@ export default function TestimonialsSection() {
           to hint that more testimonials continue off-screen. Scrolls via touch swipe
           on mobile and trackpad/scroll on desktop. */}
       <div
+        ref={scrollRef}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
         className="no-scrollbar testimonial-row"
         style={{
           display: "flex",
@@ -58,19 +92,25 @@ export default function TestimonialsSection() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              minHeight: "210px",
+              minHeight: "230px",
               boxShadow: "0 16px 40px rgba(0,0,0,0.22)",
             }}
           >
-            <p style={{
-              fontSize: "1.02rem",
-              color: "var(--navy)",
-              lineHeight: 1.6,
-              fontWeight: 700,
-              marginBottom: "24px",
-            }}>
-              “{t.quote}”
-            </p>
+            <div>
+              <div style={{ color: "var(--accent-yellow)", fontSize: "0.85rem", marginBottom: "8px" }}>
+                {"★".repeat(t.rating || 5)}
+              </div>
+              <p style={{
+                fontSize: "0.95rem",
+                color: "var(--navy)",
+                lineHeight: 1.6,
+                fontWeight: 700,
+                marginBottom: "24px",
+                whiteSpace: "pre-line"
+              }}>
+                “{t.quote}”
+              </p>
+            </div>
             <div style={{
               display: "flex",
               alignItems: "center",
