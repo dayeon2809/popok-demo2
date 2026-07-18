@@ -13,8 +13,6 @@ export default function CompanyUpcomingPerformances({
   company,
   performances = [],
 }: CompanyUpcomingPerformancesProps) {
-  if (performances.length === 0) return null;
-
   const brandAccent = company.brand_color || "#C8EE52"; // default popok point color
 
   const formatPerformanceDates = (startDate?: string | null, endDate?: string | null) => {
@@ -246,7 +244,30 @@ export default function CompanyUpcomingPerformances({
         </span>
       </div>
 
-      {/* Grid List Container */}
+      {/* Grid List Container / Empty State */}
+      {performances.length === 0 ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "14px",
+            padding: "24px 4px",
+            borderTop: "1px solid var(--border)",
+          }}
+        >
+          <span style={{ fontSize: "1.3rem", lineHeight: 1, opacity: 0.5 }} aria-hidden="true">
+            📅
+          </span>
+          <div>
+            <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)", margin: 0 }}>
+              다가오는 공연 소식을 준비 중입니다.
+            </p>
+            <p style={{ fontSize: "0.78rem", color: "var(--ink-faint)", margin: "4px 0 0 0" }}>
+              새로운 일정이 등록되면 가장 먼저 알려드릴게요.
+            </p>
+          </div>
+        </div>
+      ) : (
       <div className="upcoming-performances-grid">
         {performances.map((perf) => {
           const hasPoster = !!perf.posterUrl;
@@ -327,6 +348,7 @@ export default function CompanyUpcomingPerformances({
           );
         })}
       </div>
+      )}
     </section>
   );
 }
