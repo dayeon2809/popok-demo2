@@ -47,7 +47,7 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
   });
 
   return (
-    <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 32px 80px" }}>
+    <div className="companies-page-container" style={{ maxWidth: "1120px", margin: "0 auto", padding: "0 32px 80px" }}>
       <style dangerouslySetInnerHTML={{
         __html: `
         .company-grid {
@@ -56,6 +56,9 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
           gap: 24px;
         }
         @media (max-width: 768px) {
+          .companies-page-container {
+            padding: 0 16px 60px !important;
+          }
           .company-grid {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 16px 12px !important;

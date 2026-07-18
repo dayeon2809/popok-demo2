@@ -43,6 +43,7 @@ export default function Footer() {
             <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink)", fontWeight: 700, letterSpacing: "0.1em" }}>POPOK</span>
             <Link href="/about" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>About</Link>
             <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Artists</Link>
+            <Link href="/companies" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Companies</Link>
             <Link href="/premium" onClick={() => analytics.premiumClick("footer")} style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Premium</Link>
           </div>
           <div className="footer-inner" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
