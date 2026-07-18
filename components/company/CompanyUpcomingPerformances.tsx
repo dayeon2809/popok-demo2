@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { Company, Performance } from "@/types";
+import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 
 interface CompanyUpcomingPerformancesProps {
   company: Company;
@@ -250,14 +251,16 @@ export default function CompanyUpcomingPerformances({
         {performances.map((perf) => {
           const hasPoster = !!perf.posterUrl;
           const displayDates = formatPerformanceDates(perf.startDate, perf.endDate);
-          const detailUrl = perf.externalUrl || "";
+          // externalUrl > ticketUrl > sourceUrl — same priority as the home
+          // carousel (lib/performanceLinks.ts). A performance with none of
+          // the three still renders as a card, just without a clickable CTA.
+          const link = getPerformanceExternalLink(perf);
+          const CardTag = link ? "a" : "div";
 
           return (
-            <a
+            <CardTag
               key={perf.id}
-              href={detailUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(link ? { href: link, target: "_blank", rel: "noopener noreferrer" } : {})}
               className="performance-card"
             >
               {/* Poster Section */}
@@ -314,11 +317,13 @@ export default function CompanyUpcomingPerformances({
                   {perf.description || `${perf.title} 공연 정보입니다. 자세한 예매 및 예매처 정보는 안내 링크를 확인해주시기 바랍니다.`}
                 </p>
 
-                <div className="perf-cta-row">
-                  <span>공연 정보 보기 ↗</span>
-                </div>
+                {link && (
+                  <div className="perf-cta-row">
+                    <span>공연 정보 보기 ↗</span>
+                  </div>
+                )}
               </div>
-            </a>
+            </CardTag>
           );
         })}
       </div>

@@ -178,14 +178,20 @@ export async function getPerformanceByIdOrSlug(idOrSlug: string): Promise<Perfor
 }
 
 /**
- * Fetches upcoming published performances connected to the company.
- * 
+ * Fetches upcoming published performances connected to the company, for the
+ * company detail page's "다가오는 공연" section. Unlike getUpcomingPerformances
+ * (the homepage's curated pick across the whole catalog), this is scoped to
+ * exactly this company's own performances and does NOT require featured or
+ * external_url — a company-linked performance with only a crawler-populated
+ * ticket_url/source_url (or no link at all) still belongs here; the card
+ * itself resolves whichever link field is usable (see
+ * lib/performanceLinks.ts) and simply omits its CTA when none is.
+ *
  * Filter conditions:
  * - company_id === companyId
  * - status === 'published'
- * - end_date >= Asia/Seoul today
- * - external_url is not null and not empty string and valid http/https URL
- * 
+ * - end_date >= Asia/Seoul today (or null)
+ *
  * Sort order:
  * 1. display_order ASC (nulls last)
  * 2. start_date ASC
@@ -196,10 +202,9 @@ export async function getUpcomingPerformancesByCompanyId(companyId: string): Pro
     const supabase = getSupabaseServer();
     const today = getSeoulToday(); // Returns 'YYYY-MM-DD' in Asia/Seoul time
 
-    // Fetch matching data from Supabase
     const { data, error } = await supabase
       .from("performances" as any)
-      .select("id, title, slug, poster_url, venue, start_date, end_date, organizer, genre, category, status, company_id, external_url, display_order, created_at, updated_at")
+      .select("id, title, slug, poster_url, venue, start_date, end_date, organizer, genre, category, status, company_id, external_url, ticket_url, source_url, description, display_order, created_at, updated_at")
       .eq("company_id", companyId)
       .eq("status", "published")
       .or(`end_date.gte.${today},end_date.is.null`)
@@ -212,18 +217,7 @@ export async function getUpcomingPerformancesByCompanyId(companyId: string): Pro
       return [];
     }
 
-    if (!data) return [];
-
-    // Filter in-memory for non-empty external_url in http:// or https:// format
-    const urlPattern = /^https?:\/\/.+/i;
-    const filtered = data
-      .filter((row: any) => {
-        const url = (row.external_url || "").trim();
-        return url !== "" && urlPattern.test(url);
-      })
-      .map(mapPerformanceRowToPerformance);
-
-    return filtered;
+    return (data || []).map(mapPerformanceRowToPerformance);
   } catch (err) {
     console.error("[getUpcomingPerformancesByCompanyId] Unexpected error:", err);
     return [];

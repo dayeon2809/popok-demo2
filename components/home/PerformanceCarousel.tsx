@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Performance } from "@/types";
+import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 
 interface PerformanceCarouselProps {
   title: string;
@@ -32,24 +33,12 @@ function formatDateRange(startDate?: string | null, endDate?: string | null): st
   return `${startStr} – ${endStr}`;
 }
 
-// Only a real http/https URL counts as usable — null, "", and whitespace-only
-// values (any of which a crawled or partially-filled-in row can have) are
-// rejected rather than handed to <Link href>.
-function isValidHttpUrl(value: string | null | undefined): value is string {
-  if (!value) return false;
-  return /^https?:\/\/.+/i.test(value.trim());
-}
-
-// Link priority: admin-entered externalUrl (ticket page, official site,
-// Instagram post, ...) first, then the crawler's ticketUrl, then its
-// sourceUrl — covers both admin-curated rows and the 479 crawler-imported
-// rows, which only ever have ticketUrl/sourceUrl. No internal detail page
-// exists yet, so there's nothing to prefer over these.
+// externalUrl > ticketUrl > sourceUrl, first valid http(s) one wins — see
+// lib/performanceLinks.ts (shared with CompanyUpcomingPerformances). No
+// internal detail page exists yet, so there's nothing to prefer over these.
 function getPerformanceLink(perf: Performance): { href: string; external: boolean } | null {
-  for (const candidate of [perf.externalUrl, perf.ticketUrl, perf.sourceUrl]) {
-    if (isValidHttpUrl(candidate)) return { href: candidate.trim(), external: true };
-  }
-  return null;
+  const href = getPerformanceExternalLink(perf);
+  return href ? { href, external: true } : null;
 }
 
 export default function PerformanceCarousel({ title, subtitle, performances }: PerformanceCarouselProps) {
