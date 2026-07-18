@@ -32,11 +32,23 @@ function formatDateRange(startDate?: string | null, endDate?: string | null): st
   return `${startStr} – ${endStr}`;
 }
 
-// Cards only ever link to the admin-entered external_url (ticket page,
-// official site, Instagram post, ...) — never the crawler's ticketUrl/
-// sourceUrl, and never an internal detail page (there isn't one).
+// Only a real http/https URL counts as usable — null, "", and whitespace-only
+// values (any of which a crawled or partially-filled-in row can have) are
+// rejected rather than handed to <Link href>.
+function isValidHttpUrl(value: string | null | undefined): value is string {
+  if (!value) return false;
+  return /^https?:\/\/.+/i.test(value.trim());
+}
+
+// Link priority: admin-entered externalUrl (ticket page, official site,
+// Instagram post, ...) first, then the crawler's ticketUrl, then its
+// sourceUrl — covers both admin-curated rows and the 479 crawler-imported
+// rows, which only ever have ticketUrl/sourceUrl. No internal detail page
+// exists yet, so there's nothing to prefer over these.
 function getPerformanceLink(perf: Performance): { href: string; external: boolean } | null {
-  if (perf.externalUrl) return { href: perf.externalUrl, external: true };
+  for (const candidate of [perf.externalUrl, perf.ticketUrl, perf.sourceUrl]) {
+    if (isValidHttpUrl(candidate)) return { href: candidate.trim(), external: true };
+  }
   return null;
 }
 

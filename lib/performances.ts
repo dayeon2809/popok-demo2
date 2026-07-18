@@ -1,6 +1,6 @@
 import { getSupabaseServer } from "./supabaseServer";
 import { mapArtistRowToArtist } from "./artists";
-import { getSeoulToday } from "./date";
+import { getSeoulToday, filterUpcomingPerformances, parseDateOnly } from "./date";
 import type { Performance, RelatedPerformanceArtist } from "@/types";
 
 // Selects performances plus their linked artists via performance_artists.
@@ -90,19 +90,30 @@ export async function getPublishedPerformances(limit?: number): Promise<Performa
   }
 }
 
+// Fetch a wider candidate pool than the final display `limit` so the
+// in-memory "this week, then nearest future" selection below has enough
+// future performances to pick from when this week is thin — without
+// scanning the entire table on every homepage request.
+const UPCOMING_CANDIDATE_POOL_SIZE = 50;
+
 /**
- * Performances for the homepage "이번 주 공연" carousel — admin-curated via
- * /admin/performances, recalculated on every call against the current
- * Asia/Seoul date (never the server/deploy platform's local timezone).
+ * Performances for the homepage "이번 주 공연" carousel, recalculated on every
+ * call against the current Asia/Seoul date (never the server/deploy
+ * platform's local timezone):
+ *   1. Published, not-yet-ended performances this week (today's in-progress
+ *      ones first, then soonest start date)
+ *   2. If this week doesn't fill `limit`, the nearest upcoming performances
+ *      afterward — never anything that has already ended.
+ * See lib/date.ts (getSeoulToday / getWeeklyPerformanceRange /
+ * filterUpcomingPerformances) for the reusable, independently-testable date
+ * logic this relies on.
  *
- * A performance only appears here if ALL of:
- *   - status = 'published' (admin's "공개 여부")
- *   - featured = true (admin's "메인 노출 여부")
- *   - external_url is a non-empty http(s) URL — the card's only click target
- *   - end_date >= today (never shows something already over)
- *
- * Sort: display_order asc, then start_date asc, then created_at desc — same
- * ordering as getUpcomingPerformancesByCompanyId's company-scoped version.
+ * Deliberately does NOT require featured/external_url/company_id — this is
+ * POPOK's whole performance catalog (crawler-imported rows included), not
+ * just admin-curated ones. /admin/performances only manages the admin's own
+ * rows (see its `source_url IS NULL` scoping) and is independent of this
+ * query; PerformanceCarousel resolves whichever link field is actually
+ * usable (externalUrl > ticketUrl > sourceUrl) per row.
  */
 export async function getUpcomingPerformances(limit = 8): Promise<Performance[]> {
   try {
@@ -113,24 +124,30 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
       .from("performances" as any)
       .select(`${PERFORMANCE_SELECT_WITH_ARTISTS}, companies ( name )` as any)
       .eq("status", "published")
-      .eq("featured", true)
       .or(`end_date.gte.${today},end_date.is.null`)
-      .order("display_order", { ascending: true, nullsFirst: false })
       .order("start_date", { ascending: true })
-      .order("created_at", { ascending: false });
+      .limit(UPCOMING_CANDIDATE_POOL_SIZE);
 
     if (error) {
       console.error("[getUpcomingPerformances] Supabase error:", error);
       return [];
     }
 
-    const urlPattern = /^https?:\/\/.+/i;
-    const filtered = (data || []).filter((row: any) => {
-      const url = (row.external_url || "").trim();
-      return url !== "" && urlPattern.test(url);
-    });
+    const mapped = (data || []).map(mapPerformanceRowToPerformance);
 
-    return filtered.slice(0, limit).map(mapPerformanceRowToPerformance);
+    // A single malformed start_date must not take down the whole homepage —
+    // log it and let filterUpcomingPerformances silently exclude that row.
+    for (const perf of mapped) {
+      if (perf.startDate && !parseDateOnly(perf.startDate)) {
+        console.error(
+          "[getUpcomingPerformances] Invalid start_date, excluding from weekly list:",
+          perf.id,
+          perf.startDate
+        );
+      }
+    }
+
+    return filterUpcomingPerformances(mapped, new Date(), limit);
   } catch (err) {
     console.error("[getUpcomingPerformances] Unexpected error:", err);
     return [];
