@@ -7,6 +7,10 @@ import type { Company } from "@/types";
 interface DigitalCardProps {
   company: Company;
   viewCount?: number;
+  /** Optional controlled flip state. Omit to let the card manage flip state itself (default, unchanged behavior). */
+  flipped?: boolean;
+  /** Fires with the next flip state whenever the card is toggled, controlled or not. */
+  onFlipChange?: (flipped: boolean) => void;
 }
 
 const PUBLIC_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://popok.kr";
@@ -31,10 +35,23 @@ function getContrastColor(hexColor: string | null | undefined) {
   return yiq >= 128 ? "var(--navy)" : "#FFFFFF";
 }
 
-export default function DigitalCard({ company, viewCount = 247 }: DigitalCardProps) {
-  const [flipped, setFlipped] = useState(false);
+export default function DigitalCard({
+  company,
+  viewCount = 247,
+  flipped: flippedProp,
+  onFlipChange,
+}: DigitalCardProps) {
+  const [internalFlipped, setInternalFlipped] = useState(false);
+  const isControlled = flippedProp !== undefined;
+  const flipped = isControlled ? flippedProp : internalFlipped;
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const toggleFlip = () => {
+    const next = !flipped;
+    if (!isControlled) setInternalFlipped(next);
+    onFlipChange?.(next);
+  };
 
   const brandAccent = company.brand_color || "#C8EE52"; // Falls back to Popok Lime
   const textColorBack = getContrastColor(company.brand_color);
@@ -89,7 +106,7 @@ export default function DigitalCard({ company, viewCount = 247 }: DigitalCardPro
       {/* 3D Flip Card stage wrapper */}
       <div
         ref={cardRef}
-        onClick={() => setFlipped(!flipped)}
+        onClick={toggleFlip}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className={`flip-card-container ${flipped ? "flipped" : ""}`}
@@ -315,7 +332,7 @@ export default function DigitalCard({ company, viewCount = 247 }: DigitalCardPro
         gap: "6px",
         cursor: "pointer",
         transition: "opacity 0.2s"
-      }} onClick={() => setFlipped(!flipped)}>
+      }} onClick={toggleFlip}>
         <span>↻</span>
         <span>Tap to flip card</span>
       </div>

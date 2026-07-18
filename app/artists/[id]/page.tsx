@@ -855,26 +855,22 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (
-                      /* Lime/Cream Typographic POPOK Logo Placeholder instead of cake slice */
+                      /* Same "no image" placeholder treatment as the Company Detail portfolio grid */
                       <div style={{
                         width: "100%", height: "100%", display: "flex", flexDirection: "column",
-                        alignItems: "center", justifyContent: "center", background: "#FAF8F5", padding: "16px",
+                        alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "8px",
                         borderBottom: "1px solid var(--border)"
                       }}>
-                        <div style={{
-                          fontWeight: 950, fontSize: "1.1rem", color: "var(--navy)", letterSpacing: "-0.04em",
-                          display: "inline-flex", alignItems: "center", gap: "2px", marginBottom: "8px"
+                        <span style={{
+                          fontWeight: 950, fontSize: "1rem", color: "var(--navy)", letterSpacing: "-0.04em",
+                          display: "flex", alignItems: "center", gap: "2px"
                         }}>
                           POPOK
-                          <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
-                        </div>
-                        <div style={{
-                          width: "52px", height: "52px", borderRadius: "50%", background: "var(--accent)",
-                          border: "1.5px solid var(--navy)", display: "flex", alignItems: "center", justifyContent: "center",
-                          fontWeight: 900, fontSize: "1rem", color: "var(--navy)"
-                        }}>
-                          {work.title.replace(/[<>\s]/g, "").substring(0, 2).toUpperCase()}
-                        </div>
+                          <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
+                        </span>
+                        <span style={{ fontSize: "0.58rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                          준비중
+                        </span>
                       </div>
                     )}
                     
@@ -1215,25 +1211,21 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (
-                    /* Lime/Cream Typographic POPOK Logo Placeholder instead of cake slice */
+                    /* Same "no image" placeholder treatment as the Company Detail portfolio grid */
                     <div style={{
                       width: "100%", height: "100%", display: "flex", flexDirection: "column",
-                      alignItems: "center", justifyContent: "center", background: "#FAF8F5", padding: "24px"
+                      alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "10px"
                     }}>
-                      <div style={{
+                      <span style={{
                         fontWeight: 950, fontSize: "1.5rem", color: "var(--navy)", letterSpacing: "-0.04em",
-                        display: "inline-flex", alignItems: "center", gap: "2px", marginBottom: "16px"
+                        display: "flex", alignItems: "center", gap: "2px"
                       }}>
                         POPOK
                         <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
-                      </div>
-                      <div style={{
-                        width: "72px", height: "72px", borderRadius: "50%", background: "var(--accent)",
-                        border: "2px solid var(--navy)", display: "flex", alignItems: "center", justifyContent: "center",
-                        fontWeight: 950, fontSize: "1.35rem", color: "var(--navy)"
-                      }}>
-                        {activeWork.title.replace(/[<>\s]/g, "").substring(0, 2).toUpperCase()}
-                      </div>
+                      </span>
+                      <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                        준비중
+                      </span>
                     </div>
                   )}
                 </div>

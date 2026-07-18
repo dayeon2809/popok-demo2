@@ -476,7 +476,7 @@ export async function getConnectedArtistsByCompanyId(companyId: string): Promise
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
       .from("artist_companies" as any)
-      .select("role, start_year, end_year, is_current, is_primary, artists(id, name, name_en, profile_image_url, status, slug)")
+      .select("role, start_year, end_year, is_current, is_primary, artists(id, name, name_en, profile_image_url, status, slug, instagram, website, email)")
       .eq("company_id", companyId);
 
     if (error) {
@@ -492,6 +492,9 @@ export async function getConnectedArtistsByCompanyId(companyId: string): Promise
         name_en: row.artists.name_en || null,
         profile_image_url: row.artists.profile_image_url || null,
         slug: row.artists.slug || null,
+        instagram: row.artists.instagram || null,
+        website: row.artists.website || null,
+        email: row.artists.email || null,
         role: row.role || null,
         start_year: row.start_year || null,
         end_year: row.end_year || null,

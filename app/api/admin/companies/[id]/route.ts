@@ -54,7 +54,7 @@ export async function GET(
 
     const { data: relations, error: relError } = await supabase
       .from("artist_companies" as any)
-      .select("id, role, start_year, end_year, is_current, is_primary, created_at, artists(id, name, slug, profile_image_url)")
+      .select("id, role, start_year, end_year, is_current, is_primary, created_at, artists(id, name, name_en, slug, profile_image_url, instagram, website, email)")
       .eq("company_id", id)
       .order("created_at", { ascending: false });
 
@@ -73,8 +73,12 @@ export async function GET(
         ? {
             id: String(row.artists.id),
             name: row.artists.name,
+            name_en: row.artists.name_en || null,
             slug: row.artists.slug,
             profileImage: row.artists.profile_image_url,
+            instagram: row.artists.instagram || null,
+            website: row.artists.website || null,
+            email: row.artists.email || null,
           }
         : null,
     }));

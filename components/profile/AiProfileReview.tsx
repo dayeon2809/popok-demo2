@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { ParsedProfile } from "@/lib/profileParser";
-import { analytics } from "@/lib/analytics";
 
 interface AiProfileReviewProps {
   initialDraft: ParsedProfile;
@@ -31,11 +30,11 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
   const [education, setEducation] = useState(initialDraft.education || []);
   const [links, setLinks] = useState(initialDraft.links || []);
 
-  // State for works (with selection check boxes for representative works, capped at 3)
+  // State for works (with selection check boxes for representative works)
   const [works, setWorks] = useState(
-    (initialDraft.works || []).map((w, idx) => ({
+    (initialDraft.works || []).map((w) => ({
       ...w,
-      selected: idx < 3 // default select first 3 works
+      selected: true // default select all works
     }))
   );
 
@@ -44,12 +43,6 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
   const handleToggleWorkSelection = (index: number) => {
     const updated = [...works];
     const item = updated[index];
-
-    if (!item.selected && selectedWorksCount >= 3) {
-      // Prevent selecting more than 3
-      return;
-    }
-
     item.selected = !item.selected;
     setWorks(updated);
   };
@@ -140,7 +133,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
   };
 
   const handleAddWorkItem = () => {
-    setWorks([...works, { title: "", year: "", role: "", description: "", image_url: "", video_url: "", selected: selectedWorksCount < 3 }]);
+    setWorks([...works, { title: "", year: "", role: "", description: "", image_url: "", video_url: "", selected: true }]);
   };
 
   const handleRemoveWorkItem = (index: number) => {
@@ -330,32 +323,16 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
           {affiliations.length === 0 && <span style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>등록된 소속 정보가 없습니다.</span>}
         </div>
 
-        {/* 3. Works (Enforces max 3 selection for free plans) */}
+        {/* 3. Works */}
         <div style={sectionHeaderStyle}>
           대표 작품 (Works)
           <span style={{ fontSize: "0.78rem", color: "var(--accent-dark)", fontWeight: 800 }}>
-            선택된 대표작: {selectedWorksCount} / 3
+            선택된 대표작: {selectedWorksCount}개
           </span>
-        </div>
-        
-        {/* Work selection guidelines */}
-        <div style={{
-          fontSize: "0.75rem",
-          color: "var(--ink-muted)",
-          lineHeight: 1.45,
-          background: "#FAF8F5",
-          padding: "12px 16px",
-          borderRadius: "10px",
-          border: "1px solid var(--border)"
-        }}>
-          💡 <strong>대표작 등록 권장 안내:</strong> 무료 포퐄에는 대표 작품을 최대 3개까지 등록할 수 있어요. 전체 작업 이력을 아카이빙하려면 Premium에서 작품을 무제한으로 관리할 수 있습니다.
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {works.map((work, idx) => {
-            const isFull = selectedWorksCount >= 3;
-            const disabled = !work.selected && isFull;
-
             return (
               <div
                 key={idx}
@@ -373,11 +350,10 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
                   <input
                     type="checkbox"
                     checked={work.selected}
-                    disabled={disabled}
                     onChange={() => handleToggleWorkSelection(idx)}
-                    style={{ width: "16px", height: "16px", cursor: disabled ? "not-allowed" : "pointer" }}
+                    style={{ width: "16px", height: "16px", cursor: "pointer" }}
                   />
-                  <span style={{ fontSize: "0.72rem", fontWeight: 800, color: disabled ? "var(--ink-faint)" : "var(--navy)" }}>
+                  <span style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--navy)" }}>
                     대표작 등록
                   </span>
                 </div>
@@ -444,47 +420,6 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
             + 새 작품 추가
           </button>
         </div>
-
-        {/* Premium Lock Banner for Extra Works */}
-        {works.length > 3 && (
-          <div style={{
-            background: "var(--navy)",
-            border: "1.5px solid var(--border-dark)",
-            borderRadius: "16px",
-            padding: "24px",
-            color: "#FFFFFF",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "10px",
-            marginTop: "12px",
-            boxShadow: "0 10px 30px rgba(23, 20, 17, 0.15)"
-          }}>
-            <span style={{ fontSize: "1.4rem" }}>🔒</span>
-            <div style={{ fontSize: "0.9rem", fontWeight: 900, color: "var(--accent)" }}>POPOK Premium</div>
-            <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.7)", margin: "0 0 4px", lineHeight: 1.4 }}>
-              작품을 무제한 등록하고<br />AI 자동 업데이트를 받아보세요.
-            </p>
-            <a
-              href="/premium"
-              target="_blank"
-              onClick={() => analytics.premiumClick("ai_review")}
-              style={{
-                background: "var(--accent)",
-                color: "var(--navy)",
-                textDecoration: "none",
-                fontWeight: 850,
-                fontSize: "0.75rem",
-                padding: "8px 20px",
-                borderRadius: "30px",
-                boxShadow: "0 4px 12px rgba(200, 238, 82, 0.2)"
-              }}
-            >
-              Premium 알아보기
-            </a>
-          </div>
-        )}
 
         {/* 4. Current Activities */}
         <div style={sectionHeaderStyle}>

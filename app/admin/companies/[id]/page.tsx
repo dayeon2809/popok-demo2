@@ -7,13 +7,13 @@ import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import { ArrayField, StringArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
 
-// Public Preview Components
-import DigitalCard from "@/components/company/DigitalCard";
-import CompanyHero from "@/components/company/CompanyHero";
+// Public Preview Components — kept in lockstep with app/companies/[slug]/CompanyClientView.tsx
+// so the admin Live Preview never drifts from the real public page structure.
+import CompanyCardStack from "@/components/company/CompanyCardStack";
+import CompanyBrochureHeader from "@/components/company/CompanyBrochureHeader";
 import CompanyIdentity from "@/components/company/CompanyIdentity";
 import CompanyPortfolio from "@/components/company/CompanyPortfolio";
 import CompanyHistory from "@/components/company/CompanyHistory";
-import CompanyProjects from "@/components/company/CompanyProjects";
 import CompanyArtists from "@/components/company/CompanyArtists";
 import CompanyContact from "@/components/company/CompanyContact";
 
@@ -28,7 +28,16 @@ interface ConnectedArtist {
   end_year: number | null;
   is_current: boolean;
   is_primary: boolean;
-  artist: { id: string; name: string; slug: string | null; profileImage: string | null } | null;
+  artist: {
+    id: string;
+    name: string;
+    name_en: string | null;
+    slug: string | null;
+    profileImage: string | null;
+    instagram: string | null;
+    website: string | null;
+    email: string | null;
+  } | null;
 }
 
 type AiDraftStatus = "not_started" | "processing" | "ready" | "failed" | "applied";
@@ -124,6 +133,7 @@ interface CompanyDetail {
   bio: string | null;
   profile_image_url: string | null;
   profile_image_urls: string[];
+  logo_url: string | null;
   motion_video_url: string | null;
   email: string | null;
   instagram: string | null;
@@ -823,8 +833,12 @@ export default function AdminCompanyEditPage() {
   const adaptedArtists = (company.connectedArtists || []).map((rel) => ({
     id: rel.artist?.id || "",
     name: rel.artist?.name || "",
+    name_en: rel.artist?.name_en || null,
     profile_image_url: rel.artist?.profileImage || null,
     slug: rel.artist?.slug || null,
+    instagram: rel.artist?.instagram || null,
+    website: rel.artist?.website || null,
+    email: rel.artist?.email || null,
     role: rel.role || "CREATIVE",
     start_year: rel.start_year || null,
     end_year: rel.end_year || null,
@@ -1211,21 +1225,16 @@ export default function AdminCompanyEditPage() {
             
             <EditableSection title="디지털 카드" onEdit={() => handleJumpToEdit("basic")}>
               <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
-                <DigitalCard company={adaptedCompany as any} viewCount={company.view_count || 0} />
+                <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} artists={adaptedArtists} />
               </div>
             </EditableSection>
 
             <EditableSection
-              title="히어로 배너"
-              onEdit={() => handleJumpToEdit("hero")}
-              isEmpty={!company.founded_year && !company.brand_color && !company.bio_short}
+              title="브로슈어 헤더 & 포스터"
+              onEdit={() => handleJumpToEdit("basic")}
+              isEmpty={!company.name_en && !company.bio_short && !company.bio}
             >
-              <CompanyHero
-                company={adaptedCompany as any}
-                artistCount={adaptedArtists.length}
-                workCount={adaptedCompany.works?.length || 0}
-                performanceCount={adaptedCompany.current_activity?.length || 0}
-              />
+              <CompanyBrochureHeader company={adaptedCompany as any} artistCount={adaptedArtists.length} />
             </EditableSection>
 
             <EditableSection
@@ -1250,14 +1259,6 @@ export default function AdminCompanyEditPage() {
               isEmpty={!company.history || company.history.length === 0}
             >
               <CompanyHistory company={adaptedCompany as any} />
-            </EditableSection>
-
-            <EditableSection
-              title="현재 활동 (Projects)"
-              onEdit={() => handleJumpToEdit("projects")}
-              isEmpty={!company.current_activity || company.current_activity.length === 0}
-            >
-              <CompanyProjects company={adaptedCompany as any} />
             </EditableSection>
 
             <EditableSection
