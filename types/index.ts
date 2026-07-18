@@ -267,6 +267,10 @@ export interface Performance {
   createdAt?: string | null;
   updatedAt?: string | null;
 
+  companyId?: string | null;          // performances.company_id
+  externalUrl?: string | null;        // performances.external_url
+  displayOrder?: number;              // performances.display_order
+
   // Populated by lib/performances.ts from performance_artists + artists,
   // filtered to artists.status === 'published'. Empty array, never undefined,
   // when there's no DB relation yet or no linked artists.
@@ -287,7 +291,6 @@ export interface Performance {
     source: string;
     url: string;
   }>;
-  companyId?: string;
   comments?: PerformanceComment[];
   ratings?: PerformanceRating[];
   averageRating?: number;

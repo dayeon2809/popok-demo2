@@ -9,6 +9,30 @@ interface WorkDrawerProps {
   onClose: () => void;
 }
 
+const WorkImagePlaceholder = ({ company }: { company: any }) => (
+  <div style={{
+    width: "100%",
+    aspectRatio: "1.77",
+    backgroundColor: "#FAF9F5",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid var(--border)",
+    borderRadius: "4px",
+    color: "var(--navy)",
+    gap: "8px",
+  }}>
+    <span style={{ fontWeight: 950, fontSize: "1.1rem", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
+      POPOK
+      <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: company.brand_color || "#171411" }} />
+    </span>
+    <span style={{ fontSize: "0.58rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      No Image Archive
+    </span>
+  </div>
+);
+
 export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) {
   const brandAccent = company.brand_color || "#171411";
 
@@ -20,11 +44,10 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
     };
   }, []);
 
-  const imageUrl =
-    work.image_url ||
-    work.image ||
-    (work.media && work.media.src) ||
-    "/images/placeholders/cake-placeholder.png";
+  const hasImage = !!(work.image_url || work.image || (work.media && work.media.src));
+  const imageUrl = hasImage
+    ? (work.image_url || work.image || (work.media && work.media.src))
+    : "";
 
   const renderVideo = () => {
     const videoUrl = work.video_url || work.video || (work.media && work.media.url) || "";
@@ -97,7 +120,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           padding: 40px 20px;
         }
         @keyframes fadeInScale {
-          from { opacity: 0; transform: scale(0.95); }
+          from { opacity: 0; transform: scale(0.98); }
           to { opacity: 1; transform: scale(1); }
         }
         @keyframes slideUpBottom {
@@ -105,16 +128,17 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           to { transform: translateY(0); }
         }
         .drawer-main {
-          width: 640px;
+          width: 600px;
           max-width: 100%;
           height: auto;
-          max-height: 90vh;
+          max-height: 85vh;
           background-color: #FFFFFF;
-          box-shadow: 0 20px 60px rgba(23, 20, 17, 0.15);
-          border-radius: 16px;
+          box-shadow: 0 10px 40px rgba(23, 20, 17, 0.1);
+          border-radius: 4px;
+          border: 1px solid var(--border);
           display: flex;
           flex-direction: column;
-          animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           overflow-y: auto;
           position: relative;
         }
@@ -131,8 +155,8 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
             max-width: 100% !important;
             height: 85vh !important;
             max-height: 85vh !important;
-            border-radius: 20px 20px 0 0 !important;
-            animation: slideUpBottom 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            border-radius: 12px 12px 0 0 !important;
+            animation: slideUpBottom 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
           }
           .drag-handle {
             display: block !important;
@@ -161,8 +185,8 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
             top: 0,
             backgroundColor: "rgba(255,255,255,0.95)",
             backdropFilter: "blur(8px)",
-            padding: "20px 24px",
-            borderBottom: "1.5px solid var(--border-light)",
+            padding: "16px 24px",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -186,7 +210,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
             </span>
             <h3
               style={{
-                fontSize: "1.15rem",
+                fontSize: "1.1rem",
                 fontWeight: 900,
                 color: "var(--navy)",
                 margin: 0,
@@ -204,7 +228,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
             style={{
               border: "none",
               background: "none",
-              fontSize: "1.6rem",
+              fontSize: "1.5rem",
               fontWeight: 300,
               cursor: "pointer",
               color: "var(--ink-muted)",
@@ -219,32 +243,115 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
         <div style={{ padding: "24px" }}>
           
           {/* Main Visual */}
-          <div style={{ width: "100%", borderRadius: "10px", overflow: "hidden", border: "1.5px solid var(--border-light)", marginBottom: "24px" }}>
-            <img src={imageUrl} alt={work.title} style={{ width: "100%", height: "auto", display: "block" }} />
+          <div style={{ width: "100%", borderRadius: "4px", overflow: "hidden", border: "1px solid var(--border)", marginBottom: "24px" }}>
+            {hasImage ? (
+              <img src={imageUrl} alt={work.title} style={{ width: "100%", height: "auto", display: "block" }} />
+            ) : (
+              <WorkImagePlaceholder company={company} />
+            )}
           </div>
 
           {/* Description */}
           <div style={{ marginBottom: "28px" }}>
-            <span className="mono" style={{ display: "block", marginBottom: "8px" }}>About this project</span>
-            <p style={{ fontSize: "0.88rem", color: "var(--navy)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line", wordBreak: "keep-all" }}>
-              {work.description || "이 작품에 대한 상세 설명이 등록되어 있지 않습니다. 이 공연은 창작 단체의 아카이빙 가이드라인을 준수하여 구성되었습니다."}
+            <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>About this project</span>
+            <p style={{ fontSize: "0.85rem", color: "var(--navy)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line", wordBreak: "keep-all" }}>
+              {work.description || "이 작품에 대한 상세 설명이 등록되어 있지 않습니다. 이 공연은 아카이빙 가이드라인을 준수하여 구성되었습니다."}
             </p>
           </div>
+
+          {/* 공연 정보 (Performance Info) */}
+          {(work.venue || work.festival || work.year) && (
+            <div style={{ marginBottom: "28px" }}>
+              <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>Performance Info</span>
+              <div style={{
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                padding: "14px 18px",
+                background: "#FAF9F5",
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: "8px",
+                fontSize: "0.82rem",
+                color: "var(--navy)"
+              }}>
+                {work.year && <div><strong style={{ fontWeight: 800 }}>일시/연도:</strong> {work.year}</div>}
+                {work.venue && <div><strong style={{ fontWeight: 800 }}>장소:</strong> {work.venue}</div>}
+                {work.festival && <div><strong style={{ fontWeight: 800 }}>축제/행사:</strong> {work.festival}</div>}
+              </div>
+            </div>
+          )}
 
           {/* Video Section */}
           {(work.video_url || work.video || (work.media && work.media.url)) && (
             <div style={{ marginBottom: "28px" }}>
-              <span className="mono" style={{ display: "block", marginBottom: "8px" }}>Video Archive</span>
-              <div style={{ width: "100%", aspectRatio: "16 / 9", borderRadius: "8px", overflow: "hidden", background: "#171411", border: "1.5px solid var(--border)" }}>
+              <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>Video Archive</span>
+              <div style={{ width: "100%", aspectRatio: "16 / 9", borderRadius: "4px", overflow: "hidden", background: "#171411", border: "1px solid var(--border)" }}>
                 {renderVideo()}
+              </div>
+            </div>
+          )}
+
+          {/* Program Book Section (Conditional) */}
+          {(work.program_book_url || (work.program_book_images && work.program_book_images.length > 0)) && (
+            <div style={{ marginBottom: "28px" }}>
+              <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>Program Book</span>
+              <div style={{
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                padding: "20px",
+                background: "#FAF9F5",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+                alignItems: "center"
+              }}>
+                <div style={{ fontSize: "1.8rem" }}>📄</div>
+                <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)" }}>
+                  공연 팜플렛 / 프로그램북 아카이브
+                </div>
+                {work.program_book_url && (
+                  <a
+                    href={work.program_book_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      fontSize: "0.8rem",
+                      fontWeight: 800,
+                      color: "#FFFFFF",
+                      backgroundColor: "var(--navy)",
+                      padding: "8px 16px",
+                      borderRadius: "4px",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      marginTop: "4px",
+                      transition: "opacity 0.2s ease"
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
+                  >
+                    PDF로 보기 ↗
+                  </a>
+                )}
+                {work.program_book_images && work.program_book_images.length > 0 && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px", width: "100%", marginTop: "12px" }}>
+                    {work.program_book_images.map((img: string, pidx: number) => (
+                      <img
+                        key={pidx}
+                        src={img}
+                        alt="Program page"
+                        style={{ width: "100%", aspectRatio: "0.7", objectFit: "cover", borderRadius: "4px", border: "1px solid var(--border-light)" }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* Credits */}
           <div style={{ marginBottom: "28px" }}>
-            <span className="mono" style={{ display: "block", marginBottom: "8px" }}>Credits</span>
-            <div style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "16px", background: "#FAF8F5" }}>
+            <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>Credits</span>
+            <div style={{ border: "1px solid var(--border)", borderRadius: "4px", padding: "16px", background: "#FAF9F5" }}>
               {work.credits || work.role ? (
                 <p style={{ fontSize: "0.82rem", color: "var(--navy)", lineHeight: 1.55, margin: 0, whiteSpace: "pre-line" }}>
                   {work.credits || `Role: ${work.role}`}
@@ -258,7 +365,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           {/* Additional Gallery images */}
           {work.gallery && Array.isArray(work.gallery) && work.gallery.length > 0 && (
             <div style={{ marginBottom: "28px" }}>
-              <span className="mono" style={{ display: "block", marginBottom: "12px" }}>Gallery</span>
+              <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "12px", letterSpacing: "0.08em" }}>Gallery</span>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px" }}>
                 {work.gallery.map((img: string, idx: number) => (
                   <img
@@ -269,7 +376,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
                       width: "100%",
                       aspectRatio: "1.33",
                       objectFit: "cover",
-                      borderRadius: "6px",
+                      borderRadius: "4px",
                       border: "1px solid var(--border-light)",
                     }}
                   />
@@ -281,7 +388,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           {/* Related Links */}
           {(work.links || work.url || work.link) && (
             <div>
-              <span className="mono" style={{ display: "block", marginBottom: "8px" }}>References</span>
+              <span className="mono" style={{ display: "block", fontSize: "0.65rem", fontWeight: 700, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>References</span>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {Array.isArray(work.links) ? (
                   work.links.map((lnk: any, idx: number) => (

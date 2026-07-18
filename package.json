@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "migrate": "node scratch/migrate.js",
+    "migrate-artists": "node scratch/migrate-artists.js"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.10",

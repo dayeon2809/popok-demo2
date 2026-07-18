@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import type { Company } from "@/types";
 
 interface CompanyContactProps {
@@ -9,21 +9,31 @@ interface CompanyContactProps {
 
 export default function CompanyContact({ company }: CompanyContactProps) {
   const brandAccent = company.brand_color || "#171411";
+  const [openWorks, setOpenWorks] = useState<Record<string, boolean>>({});
 
-  const pressList = company.press_links && company.press_links.length > 0
-    ? company.press_links
-    : [
-        {
-          title: "현대무용의 한계와 경계를 뒤흔들다 - 새로운 몸짓의 아카이브",
-          source: "중앙일보",
-          url: "#",
-        },
-        {
-          title: "신체 지각 예술 프로젝트 '침묵의 잔상' 평론: 낯선 감각의 극대화",
-          source: "Dance Magazine",
-          url: "#",
-        },
-      ];
+  const toggleWork = (workTitle: string) => {
+    setOpenWorks(prev => ({ ...prev, [workTitle]: !prev[workTitle] }));
+  };
+
+    const groupedReviews = useMemo(() => {
+    const groups: Record<string, Array<{ title: string; source?: string; url?: string }>> = {};
+    const list = Array.isArray(company.press_links) ? company.press_links : [];
+    
+    if (list.length === 0) return groups;
+    
+    list.forEach(item => {
+      const key = item.title || "기타 언론 보도";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push({
+        title: item.title || "",
+        source: item.source || "",
+        url: item.url || "",
+      });
+    });
+    return groups;
+  }, [company.press_links]);
+
+  const hasReviews = Object.keys(groupedReviews).length > 0;
 
   const emailText = company.email || "inquiry@popok-dance.org";
   const webText = company.website || "www.popok-dance.org";
@@ -32,8 +42,8 @@ export default function CompanyContact({ company }: CompanyContactProps) {
   return (
     <section
       style={{
-        padding: "60px 0",
-        borderBottom: "1.5px solid var(--border)",
+        padding: "50px 0",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <style jsx global>{`
@@ -43,16 +53,17 @@ export default function CompanyContact({ company }: CompanyContactProps) {
           gap: 48px;
         }
         .contact-info-card {
-          padding: 28px;
-          background: #FAF8F5;
-          border: 1.5px solid var(--border);
-          border-radius: 14px;
+          padding: 24px;
+          background: #FFFFFF;
+          border: 1px solid var(--border);
+          border-radius: 4px;
           display: flex;
           flex-direction: column;
           gap: 20px;
         }
         .press-link:hover {
           color: ${brandAccent} !important;
+          text-decoration: underline !important;
         }
         @media (max-width: 768px) {
           .contact-grid-container {
@@ -63,57 +74,100 @@ export default function CompanyContact({ company }: CompanyContactProps) {
             padding: 20px !important;
             gap: 16px !important;
           }
-          .press-title {
-            font-size: 0.85rem !important;
-          }
         }
       `}</style>
 
       <div className="contact-grid-container">
         
-        {/* Press Links */}
-        <div>
-          <h3
-            className="mono"
-            style={{
-              fontSize: "0.72rem",
-              fontWeight: 800,
-              color: "var(--navy)",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              marginBottom: "24px",
-            }}
-          >
-            Press & Media Coverage
-          </h3>
+        {/* Press Links (Grouped by Work) */}
+        {hasReviews ? (
+          <div>
+            <h3
+              className="mono"
+              style={{
+                fontSize: "0.72rem",
+                fontWeight: 800,
+                color: "var(--navy)",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                marginBottom: "24px",
+              }}
+            >
+              Reviews & Articles
+            </h3>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {pressList.map((press, idx) => (
-              <a
-                key={idx}
-                href={press.url || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  textDecoration: "none",
-                  fontSize: "0.85rem",
-                  color: "var(--navy)",
-                  lineHeight: 1.5,
-                  display: "block",
-                  paddingBottom: "12px",
-                  borderBottom: "1px solid var(--border-light)",
-                  transition: "color 0.2s ease",
-                }}
-                className="press-link"
-              >
-                <span style={{ fontSize: "0.68rem", color: "var(--ink-faint)", display: "block", fontFamily: "monospace", marginBottom: "4px" }}>
-                  {press.source || "NEWS"}
-                </span>
-                <span className="press-title" style={{ fontWeight: 700, letterSpacing: "-0.01em" }}>{press.title} ↗</span>
-              </a>
-            ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {Object.entries(groupedReviews).map(([workTitle, reviews], idx) => {
+                const isOpen = !!openWorks[workTitle];
+                return (
+                  <div key={idx} style={{ border: "1px solid var(--border)", borderRadius: "4px", backgroundColor: "#FFFFFF", overflow: "hidden" }}>
+                    <button
+                      type="button"
+                      onClick={() => toggleWork(workTitle)}
+                      style={{
+                        width: "100%",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "16px 20px",
+                        textAlign: "left",
+                      }}
+                    >
+                      <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--navy)" }}>
+                        {workTitle}
+                      </span>
+                      <span style={{
+                        fontSize: "0.8rem",
+                        color: "var(--navy)",
+                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.25s ease",
+                        marginLeft: "12px",
+                      }}>
+                        ↓
+                      </span>
+                    </button>
+
+                    <div style={{
+                      maxHeight: isOpen ? "1000px" : "0px",
+                      overflow: "hidden",
+                      transition: "max-height 0.3s ease-in-out",
+                    }}>
+                      <div style={{ padding: "0 20px 16px 20px", borderTop: "1px solid var(--border-light)", display: "flex", flexDirection: "column", gap: "10px", paddingTop: "12px" }}>
+                        {reviews.map((press, pIdx) => (
+                          <a
+                            key={pIdx}
+                            href={press.url || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              textDecoration: "none",
+                              fontSize: "0.82rem",
+                              color: "var(--navy)",
+                              display: "block",
+                              lineHeight: 1.4,
+                              transition: "color 0.15s ease",
+                            }}
+                            className="press-link"
+                          >
+                            <span style={{ fontSize: "0.68rem", color: "var(--ink-faint)", display: "block", fontFamily: "monospace", marginBottom: "2px" }}>
+                              {press.source || "NEWS"}
+                            </span>
+                            <span style={{ fontWeight: 700 }}>{press.source && press.source.includes(workTitle) ? press.source : `${press.source || "리뷰 링크"} ↗`}</span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div style={{ display: "none" }} />
+        )}
 
         {/* Contact info */}
         <div>

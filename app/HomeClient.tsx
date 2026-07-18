@@ -2,10 +2,11 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import type { Artist, Performance } from "@/types";
+import type { Artist, Performance, Company } from "@/types";
 import { useLanguage } from "@/lib/useLanguage";
 import PopokCard from "@/components/PopokCard";
 import ArtistCarousel from "@/components/home/ArtistCarousel";
+import CompanyCarousel from "@/components/home/CompanyCarousel";
 import PerformanceCarousel from "@/components/home/PerformanceCarousel";
 import TestimonialsPreview from "@/components/home/TestimonialsPreview";
 import FAQSection from "@/components/FAQSection";
@@ -40,9 +41,10 @@ const HOME_COPY = {
 interface HomeClientProps {
   initialArtists: Artist[];
   initialPerformances: Performance[];
+  initialCompanies: Company[];
 }
 
-export default function HomeClient({ initialArtists, initialPerformances }: HomeClientProps) {
+export default function HomeClient({ initialArtists, initialPerformances, initialCompanies }: HomeClientProps) {
   const { language } = useLanguage();
   const t = HOME_COPY[language];
 
@@ -89,6 +91,13 @@ export default function HomeClient({ initialArtists, initialPerformances }: Home
       .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
       .slice(0, 6);
   }, [baseArtists]);
+
+  // 4. 당신과 연결될 단체: Sorted by createdAt descending
+  const newCompanies = useMemo(() => {
+    return [...initialCompanies]
+      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+      .slice(0, 6);
+  }, [initialCompanies]);
 
   return (
     <div style={{ background: "var(--bg-warm)", minHeight: "100vh", overflowX: "hidden" }}>
@@ -407,11 +416,12 @@ export default function HomeClient({ initialArtists, initialPerformances }: Home
         </div>
       </section>
 
-      {/* ── 2. 지금 만나볼 예술가 (FEATURED) ── */}
+      {/* ── 2. 새롭게 등록된 예술가 (NEW ARTISTS) ── */}
       <ArtistCarousel
-        title="👤 지금 만나볼 예술가"
-        subtitle="POPOK 추천 아티스트들을 소개합니다."
-        artists={featuredArtists}
+        title="✨ 새롭게 등록된 예술가"
+        subtitle="새로운 아이디어를 확장해나가는 신진 크리에이터입니다."
+        artists={newArtists}
+        showNewBadge={true}
       />
 
       {/* ── 3. 이번 주 공연 (PERFORMANCE CAROUSEL) ── */}
@@ -421,12 +431,11 @@ export default function HomeClient({ initialArtists, initialPerformances }: Home
         performances={initialPerformances}
       />
 
-      {/* ── 4. 새롭게 등록된 예술가 (NEW ARTISTS) ── */}
-      <ArtistCarousel
-        title="✨ 새롭게 등록된 예술가"
-        subtitle="새로운 아이디어를 확장해나가는 신진 크리에이터입니다."
-        artists={newArtists}
-        showNewBadge={true}
+      {/* ── 4. 당신과 연결될 단체 (COMPANIES) ── */}
+      <CompanyCarousel
+        title="🏢 당신과 연결될 단체"
+        subtitle="공연예술 단체와 프로젝트를 만나보세요."
+        companies={newCompanies}
       />
 
       {/* ── 5. Artist DB 현황 (STATS CTA) ── */}

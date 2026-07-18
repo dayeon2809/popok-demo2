@@ -186,8 +186,9 @@ input:focus, select:focus, textarea:focus {
   /* Home Artist Carousel (지금 만나볼/새롭게 등록된/지금 활동 중인 예술가):
      카드는 원래 크기(260px) 그대로 유지하고, 섹션 좌우 여백만 모바일에
      맞게 줄인다. */
-  .artist-carousel-section { padding-left: 16px !important; padding-right: 16px !important; }
-  .artist-carousel-track { gap: 14px !important; }
+  .artist-carousel-section, .company-carousel-section { padding-left: 16px !important; padding-right: 16px !important; }
+  .artist-carousel-track, .company-carousel-track { gap: 14px !important; }
+
 
   /* my-popok Dashboard mobile compatibility */
   .my-popok-container {

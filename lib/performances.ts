@@ -54,6 +54,10 @@ export function mapPerformanceRowToPerformance(record: any): Performance {
     createdAt: record.created_at || null,
     updatedAt: record.updated_at || null,
 
+    companyId: record.company_id || null,
+    externalUrl: record.external_url || null,
+    displayOrder: typeof record.display_order === "number" ? record.display_order : 0,
+
     relatedArtists,
     description: record.description || "",
   };
@@ -183,5 +187,58 @@ export async function getPerformanceByIdOrSlug(idOrSlug: string): Promise<Perfor
   } catch (err) {
     console.error("[getPerformanceByIdOrSlug] Unexpected error:", err);
     return null;
+  }
+}
+
+/**
+ * Fetches upcoming published performances connected to the company.
+ * 
+ * Filter conditions:
+ * - company_id === companyId
+ * - status === 'published'
+ * - end_date >= Asia/Seoul today
+ * - external_url is not null and not empty string and valid http/https URL
+ * 
+ * Sort order:
+ * 1. display_order ASC (nulls last)
+ * 2. start_date ASC
+ * 3. created_at DESC
+ */
+export async function getUpcomingPerformancesByCompanyId(companyId: string): Promise<Performance[]> {
+  try {
+    const supabase = getSupabaseServer();
+    const today = getSeoulToday(); // Returns 'YYYY-MM-DD' in Asia/Seoul time
+
+    // Fetch matching data from Supabase
+    const { data, error } = await supabase
+      .from("performances" as any)
+      .select("id, title, slug, poster_url, venue, start_date, end_date, organizer, genre, category, status, company_id, external_url, display_order, created_at, updated_at")
+      .eq("company_id", companyId)
+      .eq("status", "published")
+      .or(`end_date.gte.${today},end_date.is.null`)
+      .order("display_order", { ascending: true, nullsFirst: false })
+      .order("start_date", { ascending: true })
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("[getUpcomingPerformancesByCompanyId] Supabase error:", error);
+      return [];
+    }
+
+    if (!data) return [];
+
+    // Filter in-memory for non-empty external_url in http:// or https:// format
+    const urlPattern = /^https?:\/\/.+/i;
+    const filtered = data
+      .filter((row: any) => {
+        const url = (row.external_url || "").trim();
+        return url !== "" && urlPattern.test(url);
+      })
+      .map(mapPerformanceRowToPerformance);
+
+    return filtered;
+  } catch (err) {
+    console.error("[getUpcomingPerformancesByCompanyId] Unexpected error:", err);
+    return [];
   }
 }

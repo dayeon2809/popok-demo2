@@ -10,28 +10,14 @@ interface CompanyProjectsProps {
 export default function CompanyProjects({ company }: CompanyProjectsProps) {
   const brandAccent = company.brand_color || "#171411";
 
-  const projectList = (company.projects && company.projects.length > 0
-    ? company.projects
-    : [
-        {
-          title: "다차원 신체 공명 연구소 2026 (Physicality Lab)",
-          date: "2026.08.10 - 2026.11.20",
-          link: "#",
-          description: "신체의 움직임과 소리의 매핑을 통한 인터랙티브 퍼포먼스 실험 연구 프로젝트",
-        },
-        {
-          title: "침묵의 잔상 (Scent of Silence) - 아르코예술극장 대극장 공연",
-          date: "2026.09.15 - 2026.09.17",
-          link: "#",
-          description: "공간의 지각적 깊이를 탐구하는 신작 정기 공연 피지컬 시어터",
-        },
-      ]) as Array<{ title: string; date?: string; link?: string; description?: string }>;
+  const projectList = (Array.isArray(company.projects) ? company.projects : []) as Array<{ title: string; date?: string; link?: string; description?: string }>;
+  if (projectList.length === 0) return null;
 
   return (
     <section
       style={{
-        padding: "60px 0",
-        borderBottom: "1.5px solid var(--border)",
+        padding: "50px 0",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <style jsx global>{`
@@ -44,7 +30,7 @@ export default function CompanyProjects({ company }: CompanyProjectsProps) {
           padding: 24px;
           background: #FFFFFF;
           border: 1px solid var(--border);
-          border-radius: 14px;
+          border-radius: 4px;
           box-shadow: 0 4px 16px rgba(23, 20, 17, 0.01);
           display: flex;
           flex-direction: column;

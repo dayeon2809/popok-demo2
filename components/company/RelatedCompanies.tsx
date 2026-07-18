@@ -41,10 +41,10 @@ export default function RelatedCompanies({ currentCompany, relatedCompanies = []
         },
       ];
 
-  return (
+    return (
     <section
       style={{
-        padding: "60px 0 0 0",
+        padding: "50px 0 0 0",
       }}
     >
       <style jsx global>{`
@@ -58,7 +58,7 @@ export default function RelatedCompanies({ currentCompany, relatedCompanies = []
           display: flex;
           flex-direction: column;
           border: 1px solid var(--border);
-          border-radius: 14px;
+          border-radius: 4px;
           overflow: hidden;
           background: #FFFFFF;
           box-shadow: 0 4px 16px rgba(23, 20, 17, 0.01);
@@ -75,7 +75,7 @@ export default function RelatedCompanies({ currentCompany, relatedCompanies = []
             gap: 12px 10px !important;
           }
           .related-card {
-            border-radius: 8px !important;
+            border-radius: 4px !important;
           }
           .related-thumb-wrapper {
             aspect-ratio: 2.1 !important;

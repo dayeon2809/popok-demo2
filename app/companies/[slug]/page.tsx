@@ -5,6 +5,7 @@ import {
   getConnectedArtistsByCompanyId,
   getRelatedCompanies,
 } from "@/lib/companies";
+import { getUpcomingPerformancesByCompanyId } from "@/lib/performances";
 import CompanyClientView from "./CompanyClientView";
 
 export const dynamic = "force-dynamic";
@@ -27,10 +28,11 @@ export default async function CompanyDetailPage({
     notFound();
   }
 
-  // Fetch connected artists and related companies in parallel
-  const [artists, relatedCompanies] = await Promise.all([
+  // Fetch connected artists, related companies, and upcoming performances in parallel
+  const [artists, relatedCompanies, upcomingPerformances] = await Promise.all([
     getConnectedArtistsByCompanyId(company.id),
     getRelatedCompanies(company.id),
+    getUpcomingPerformancesByCompanyId(company.id),
   ]);
 
   return (
@@ -38,6 +40,7 @@ export default async function CompanyDetailPage({
       company={company}
       artists={artists}
       relatedCompanies={relatedCompanies}
+      upcomingPerformances={upcomingPerformances}
     />
   );
 }

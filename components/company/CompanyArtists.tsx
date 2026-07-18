@@ -15,8 +15,8 @@ export default function CompanyArtists({ company, artists = [] }: CompanyArtists
   return (
     <section
       style={{
-        padding: "60px 0",
-        borderBottom: "1.5px solid var(--border)",
+        padding: "50px 0",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <style jsx global>{`
@@ -31,7 +31,7 @@ export default function CompanyArtists({ company, artists = [] }: CompanyArtists
           align-items: center;
           gap: 14px;
           padding: 12px;
-          border-radius: 12px;
+          border-radius: 4px;
           border: 1px solid var(--border);
           backgroundColor: #FFFFFF;
           box-shadow: 0 4px 12px rgba(23, 20, 17, 0.01);
@@ -50,7 +50,7 @@ export default function CompanyArtists({ company, artists = [] }: CompanyArtists
           .artist-profile-card {
             padding: 10px 8px !important;
             gap: 8px !important;
-            border-radius: 8px !important;
+            border-radius: 4px !important;
           }
           .artist-name {
             font-size: 0.82rem !important;
@@ -85,7 +85,7 @@ export default function CompanyArtists({ company, artists = [] }: CompanyArtists
             padding: "40px 24px",
             textAlign: "center",
             border: "1px dashed var(--border)",
-            borderRadius: "14px",
+            borderRadius: "4px",
             color: "var(--ink-muted)",
             fontSize: "0.85rem",
           }}
@@ -113,7 +113,7 @@ export default function CompanyArtists({ company, artists = [] }: CompanyArtists
                   style={{
                     width: "44px",
                     height: "44px",
-                    borderRadius: "50%",
+                    borderRadius: "4px",
                     objectFit: "cover",
                     backgroundColor: "#FAF8F5",
                     border: "1px solid var(--border-light)",

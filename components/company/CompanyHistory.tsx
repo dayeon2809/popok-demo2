@@ -10,21 +10,14 @@ interface CompanyHistoryProps {
 export default function CompanyHistory({ company }: CompanyHistoryProps) {
   const brandAccent = company.brand_color || "#171411";
 
-  const historyList = company.history && company.history.length > 0
-    ? company.history
-    : [
-        { year: "2020", event: "단체 창단 (Founded in Seoul)" },
-        { year: "2021", event: "아르코 예술극장 신진 예술가 레지던시 선정 (ARKO Residency)" },
-        { year: "2022", event: "프랑스 파리 국제 현대무용 페스티벌 초청 공연 (Paris Tour)" },
-        { year: "2023", event: "올해의 예술가상 최우수 작품 부문 수상 (Grand Prix)" },
-        { year: "2025", event: "POPOK 피처드 아티스트 단체 인터뷰 참여 (POPOK Interview)" },
-      ];
+  const historyList = Array.isArray(company.history) ? company.history : [];
+  if (historyList.length === 0) return null;
 
   return (
     <section
       style={{
-        padding: "60px 0",
-        borderBottom: "1.5px solid var(--border)",
+        padding: "50px 0",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <style jsx global>{`

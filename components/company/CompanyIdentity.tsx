@@ -10,24 +10,19 @@ interface CompanyIdentityProps {
 export default function CompanyIdentity({ company }: CompanyIdentityProps) {
   const brandAccent = company.brand_color || "#171411";
 
-  const missionText =
-    company.mission ||
-    company.bio ||
-    "우리는 신체의 움직임이 언어를 넘어서는 고유한 서사임을 믿으며, 현대 사회의 다양한 화두를 무대 위에 해체적이고 전위적인 방식으로 풀어내는 물리적 실험실을 지향합니다.";
+  const missionText = company.mission || null;
+  const visionText = company.vision || null;
 
-  const visionText =
-    company.vision ||
-    "국내외 예술 교류 네트워크의 구심점이 되어, 무용뿐만 아니라 다원 예술 영역을 아우르는 디지털/피지컬 융복합 아카이브 생태계를 개척합니다.";
+  const valuesList = Array.isArray(company.core_values) ? company.core_values : [];
 
-  const valuesList = company.values && company.values.length > 0
-    ? company.values
-    : ["Experiment", "Community", "Archive", "Challenge"];
+  const hasContent = missionText || visionText || valuesList.length > 0;
+  if (!hasContent) return null;
 
   return (
     <section
       style={{
-        padding: "60px 0",
-        borderBottom: "1.5px solid var(--border)",
+        padding: "50px 0",
+        borderBottom: "1px solid var(--border)",
       }}
     >
       <style jsx global>{`
@@ -36,21 +31,21 @@ export default function CompanyIdentity({ company }: CompanyIdentityProps) {
           margin: 0 auto;
         }
         .identity-block {
-          margin-bottom: 40px;
+          margin-bottom: 32px;
         }
         .identity-title {
           font-family: 'Pretendard Variable', sans-serif;
-          font-size: 0.72rem;
-          font-weight: 850;
+          font-size: 0.68rem;
+          font-weight: 800;
           color: var(--ink-muted);
           letter-spacing: 0.08em;
           display: block;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
           text-transform: uppercase;
         }
         .identity-mission-text {
-          font-size: clamp(1.15rem, 3vw, 1.45rem);
-          font-weight: 800;
+          font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+          font-weight: 700;
           color: var(--navy);
           line-height: 1.6;
           margin: 0;
@@ -58,8 +53,8 @@ export default function CompanyIdentity({ company }: CompanyIdentityProps) {
           letter-spacing: -0.02em;
         }
         .identity-vision-text {
-          font-size: clamp(1.05rem, 2.5vw, 1.3rem);
-          font-weight: 600;
+          font-size: clamp(1rem, 2vw, 1.15rem);
+          font-weight: 500;
           color: var(--ink-muted);
           line-height: 1.55;
           margin: 0;
@@ -69,18 +64,18 @@ export default function CompanyIdentity({ company }: CompanyIdentityProps) {
         .values-container {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px 14px;
+          gap: 8px 12px;
         }
         @media (max-width: 768px) {
           .identity-block {
-            margin-bottom: 30px !important;
+            margin-bottom: 24px !important;
           }
           .identity-mission-text {
-            font-size: 1.08rem !important;
+            font-size: 1rem !important;
             line-height: 1.5 !important;
           }
           .identity-vision-text {
-            font-size: 0.98rem !important;
+            font-size: 0.9rem !important;
             line-height: 1.5 !important;
           }
         }
@@ -89,57 +84,65 @@ export default function CompanyIdentity({ company }: CompanyIdentityProps) {
       <div className="identity-wrapper">
         
         {/* MISSION */}
-        <div className="identity-block">
-          <span className="identity-title" style={{ color: brandAccent }}>
-            MISSION
-          </span>
-          <h3 className="identity-mission-text">
-            {missionText}
-          </h3>
-        </div>
-
-        <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border-light)", marginBottom: "40px" }} />
+        {missionText && (
+          <>
+            <div className="identity-block">
+              <span className="identity-title" style={{ color: brandAccent }}>
+                MISSION
+              </span>
+              <h3 className="identity-mission-text">
+                {missionText}
+              </h3>
+            </div>
+            <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border-light)", marginBottom: "32px" }} />
+          </>
+        )}
 
         {/* VISION */}
-        <div className="identity-block">
-          <span className="identity-title" style={{ color: brandAccent }}>
-            VISION
-          </span>
-          <h3 className="identity-vision-text">
-            {visionText}
-          </h3>
-        </div>
-
-        <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border-light)", marginBottom: "40px" }} />
+        {visionText && (
+          <>
+            <div className="identity-block">
+              <span className="identity-title" style={{ color: brandAccent }}>
+                VISION
+              </span>
+              <h3 className="identity-vision-text">
+                {visionText}
+              </h3>
+            </div>
+            <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border-light)", marginBottom: "32px" }} />
+          </>
+        )}
 
         {/* VALUES */}
-        <div>
-          <span className="identity-title" style={{ color: brandAccent }}>
-            CORE VALUES
-          </span>
-          <div className="values-container">
-            {valuesList.map((val, idx) => (
-              <span
-                key={idx}
-                className="tag-navy"
-                style={{
-                  fontSize: "0.78rem",
-                  padding: "6px 16px",
-                  borderRadius: "20px",
-                  fontWeight: 700,
-                  backgroundColor: "var(--navy)",
-                  color: "#FFFFFF",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px"
-                }}
-              >
-                <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: brandAccent }} />
-                {val}
-              </span>
-            ))}
+        {valuesList.length > 0 && (
+          <div>
+            <span className="identity-title" style={{ color: brandAccent }}>
+              CORE VALUES
+            </span>
+            <div className="values-container">
+              {valuesList.map((val, idx) => (
+                <span
+                  key={idx}
+                  style={{
+                    fontSize: "0.75rem",
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                    fontWeight: 700,
+                    backgroundColor: "#FFFFFF",
+                    border: "1px solid var(--border)",
+                    color: "var(--navy)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px"
+                  }}
+                >
+                  <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: brandAccent }} />
+                  {val}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </section>
