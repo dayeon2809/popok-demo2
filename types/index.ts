@@ -268,6 +268,10 @@ export interface Performance {
   updatedAt?: string | null;
 
   companyId?: string | null;          // performances.company_id
+  // Joined companies.name — only populated by queries that join it (see
+  // getUpcomingPerformances). Preferred over `organizer` for display when
+  // present (an admin-linked Company takes priority over free-text organizer).
+  companyName?: string | null;
   externalUrl?: string | null;        // performances.external_url
   displayOrder?: number;              // performances.display_order
 

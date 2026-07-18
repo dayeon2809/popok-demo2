@@ -32,12 +32,11 @@ function formatDateRange(startDate?: string | null, endDate?: string | null): st
   return `${startStr} – ${endStr}`;
 }
 
-// Link priority: internal detail page (once one exists) > ticketUrl > sourceUrl.
-// TODO: when /performances/[slug-or-id] ships, prefer it first here:
-//   if (perf.slug) return { href: `/performances/${perf.slug}`, external: false };
+// Cards only ever link to the admin-entered external_url (ticket page,
+// official site, Instagram post, ...) — never the crawler's ticketUrl/
+// sourceUrl, and never an internal detail page (there isn't one).
 function getPerformanceLink(perf: Performance): { href: string; external: boolean } | null {
-  if (perf.ticketUrl) return { href: perf.ticketUrl, external: true };
-  if (perf.sourceUrl) return { href: perf.sourceUrl, external: true };
+  if (perf.externalUrl) return { href: perf.externalUrl, external: true };
   return null;
 }
 
@@ -167,6 +166,8 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
           const dateLabel = formatDateRange(perf.startDate, perf.endDate);
           const genreLabel = perf.genre || perf.category || "";
           const link = getPerformanceLink(perf);
+          // A linked Company takes priority over the free-text organizer.
+          const organizerLabel = perf.companyName || perf.organizer;
           const relatedArtists = perf.relatedArtists || [];
           const visibleArtists = relatedArtists.slice(0, 3);
           const extraCount = relatedArtists.length - visibleArtists.length;
@@ -212,9 +213,9 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
 
                   {/* Details */}
                   <div style={{ marginTop: "14px" }}>
-                    {perf.organizer && (
+                    {organizerLabel && (
                       <span className="mono" style={{ fontSize: "0.68rem", color: "var(--accent-dark)", fontWeight: 900, display: "block", marginBottom: "4px" }}>
-                        {perf.organizer}
+                        {organizerLabel}
                       </span>
                     )}
                     <h3 style={{
@@ -282,7 +283,7 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
                           borderRadius: "8px", border: "1px solid var(--navy)"
                         }}
                       >
-                        예매하기
+                        공연 정보 보기
                       </Link>
                     ) : (
                       <span style={{ fontSize: "0.75rem", color: "var(--ink-faint)", fontWeight: 700 }}>종료/예정</span>

@@ -127,3 +127,57 @@ export function filterUpcomingPerformances<T extends DateRangeLike>(
 
   return [...thisWeek, ...future].slice(0, limit).map((e) => e.item);
 }
+
+export type PerformanceLifecycleStatus = "upcoming" | "ongoing" | "ended";
+
+/**
+ * Derives a performance's display status purely from start_date/end_date —
+ * never stored as its own DB column, so it can never drift out of sync with
+ * the dates. Asia/Seoul-anchored via getSeoulToday, same as everything else
+ * in this file. A missing/unparseable start_date is treated as "upcoming"
+ * (nothing to compare against yet) rather than thrown away, since callers
+ * (the admin list) still need a status to render.
+ *
+ * upcoming: today < start_date
+ * ongoing:  start_date <= today <= end_date (end_date defaults to start_date
+ *           for a single-day performance)
+ * ended:    today > end_date
+ */
+export function getPerformanceLifecycleStatus(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+  referenceDate: Date = new Date()
+): PerformanceLifecycleStatus {
+  const today = getSeoulToday(referenceDate);
+  const start = parseDateOnly(startDate);
+  if (!start) return "upcoming";
+  const end = parseDateOnly(endDate) || start;
+
+  if (today < start) return "upcoming";
+  if (today > end) return "ended";
+  return "ongoing";
+}
+
+const DELETION_PENDING_GRACE_DAYS = 30;
+
+/**
+ * True once a performance has been over for more than
+ * DELETION_PENDING_GRACE_DAYS days — computed on every read (no DB column),
+ * per the "삭제 예정" admin filter/badge. A missing end_date is never
+ * pending deletion — there's nothing to measure "over" against.
+ */
+export function isPerformanceDeletionPending(
+  endDate: string | null | undefined,
+  referenceDate: Date = new Date()
+): boolean {
+  const end = parseDateOnly(endDate);
+  if (!end) return false;
+
+  const today = getSeoulToday(referenceDate);
+  const [y, m, d] = today.split("-").map(Number);
+  const cutoff = new Date(Date.UTC(y, m - 1, d));
+  cutoff.setUTCDate(cutoff.getUTCDate() - DELETION_PENDING_GRACE_DAYS);
+  const cutoffStr = `${cutoff.getUTCFullYear()}-${String(cutoff.getUTCMonth() + 1).padStart(2, "0")}-${String(cutoff.getUTCDate()).padStart(2, "0")}`;
+
+  return end < cutoffStr;
+}

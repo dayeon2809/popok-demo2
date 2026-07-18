@@ -1,6 +1,6 @@
 import { getSupabaseServer } from "./supabaseServer";
 import { mapArtistRowToArtist } from "./artists";
-import { getSeoulToday, filterUpcomingPerformances, parseDateOnly } from "./date";
+import { getSeoulToday } from "./date";
 import type { Performance, RelatedPerformanceArtist } from "@/types";
 
 // Selects performances plus their linked artists via performance_artists.
@@ -55,6 +55,9 @@ export function mapPerformanceRowToPerformance(record: any): Performance {
     updatedAt: record.updated_at || null,
 
     companyId: record.company_id || null,
+    // Populated only when the query joins companies(name) — see
+    // getUpcomingPerformances(). null for queries that don't join it.
+    companyName: record.companies && record.companies.name ? record.companies.name : null,
     externalUrl: record.external_url || null,
     displayOrder: typeof record.display_order === "number" ? record.display_order : 0,
 
@@ -87,23 +90,19 @@ export async function getPublishedPerformances(limit?: number): Promise<Performa
   }
 }
 
-// Fetch a wider candidate pool than the final display `limit` so the
-// in-memory "this week, then nearest future" selection below has enough
-// future performances to pick from when this week is thin — without
-// scanning the entire table on every homepage request.
-const UPCOMING_CANDIDATE_POOL_SIZE = 50;
-
 /**
- * Performances for the homepage "이번 주 공연" carousel, recalculated on every
- * call against the current Asia/Seoul date (never the server/deploy
- * platform's local timezone):
- *   1. Published, not-yet-ended performances this week (today's in-progress
- *      ones first, then soonest start date)
- *   2. If this week doesn't fill `limit`, the nearest upcoming performances
- *      afterward — never anything that has already ended.
- * See lib/date.ts (getSeoulToday / getWeeklyPerformanceRange /
- * filterUpcomingPerformances) for the reusable, independently-testable date
- * logic this relies on.
+ * Performances for the homepage "이번 주 공연" carousel — admin-curated via
+ * /admin/performances, recalculated on every call against the current
+ * Asia/Seoul date (never the server/deploy platform's local timezone).
+ *
+ * A performance only appears here if ALL of:
+ *   - status = 'published' (admin's "공개 여부")
+ *   - featured = true (admin's "메인 노출 여부")
+ *   - external_url is a non-empty http(s) URL — the card's only click target
+ *   - end_date >= today (never shows something already over)
+ *
+ * Sort: display_order asc, then start_date asc, then created_at desc — same
+ * ordering as getUpcomingPerformancesByCompanyId's company-scoped version.
  */
 export async function getUpcomingPerformances(limit = 8): Promise<Performance[]> {
   try {
@@ -112,57 +111,28 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
 
     const { data, error } = await supabase
       .from("performances" as any)
-      .select(PERFORMANCE_SELECT_WITH_ARTISTS as any)
+      .select(`${PERFORMANCE_SELECT_WITH_ARTISTS}, companies ( name )` as any)
       .eq("status", "published")
+      .eq("featured", true)
       .or(`end_date.gte.${today},end_date.is.null`)
+      .order("display_order", { ascending: true, nullsFirst: false })
       .order("start_date", { ascending: true })
-      .limit(UPCOMING_CANDIDATE_POOL_SIZE);
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("[getUpcomingPerformances] Supabase error:", error);
       return [];
     }
 
-    const mapped = (data || []).map(mapPerformanceRowToPerformance);
+    const urlPattern = /^https?:\/\/.+/i;
+    const filtered = (data || []).filter((row: any) => {
+      const url = (row.external_url || "").trim();
+      return url !== "" && urlPattern.test(url);
+    });
 
-    // A single malformed start_date must not take down the whole homepage —
-    // log it and let filterUpcomingPerformances silently exclude that row.
-    for (const perf of mapped) {
-      if (perf.startDate && !parseDateOnly(perf.startDate)) {
-        console.error(
-          "[getUpcomingPerformances] Invalid start_date, excluding from weekly list:",
-          perf.id,
-          perf.startDate
-        );
-      }
-    }
-
-    return filterUpcomingPerformances(mapped, new Date(), limit);
+    return filtered.slice(0, limit).map(mapPerformanceRowToPerformance);
   } catch (err) {
     console.error("[getUpcomingPerformances] Unexpected error:", err);
-    return [];
-  }
-}
-
-/** Manually curated (performances.featured = true), published, soonest first. */
-export async function getFeaturedPerformances(limit = 8): Promise<Performance[]> {
-  try {
-    const supabase = getSupabaseServer();
-    const { data, error } = await supabase
-      .from("performances" as any)
-      .select(PERFORMANCE_SELECT_WITH_ARTISTS as any)
-      .eq("status", "published")
-      .eq("featured", true)
-      .order("start_date", { ascending: true })
-      .limit(limit);
-
-    if (error) {
-      console.error("[getFeaturedPerformances] Supabase error:", error);
-      return [];
-    }
-    return (data || []).map(mapPerformanceRowToPerformance);
-  } catch (err) {
-    console.error("[getFeaturedPerformances] Unexpected error:", err);
     return [];
   }
 }
@@ -241,4 +211,26 @@ export async function getUpcomingPerformancesByCompanyId(companyId: string): Pro
     console.error("[getUpcomingPerformancesByCompanyId] Unexpected error:", err);
     return [];
   }
+}
+
+// The bucket performance posters live in — the same public "artist-media"
+// bucket artist/company images already use (see app/api/upload/route.ts),
+// under a performances/{id}/ prefix. No dedicated bucket for this feature.
+export const PERFORMANCE_POSTER_BUCKET = "artist-media";
+
+/**
+ * Extracts the Storage object path (e.g. "performances/<id>/<uuid>.jpg")
+ * from a public poster_url so it can be passed to
+ * supabase.storage.from(PERFORMANCE_POSTER_BUCKET).remove([path]). Returns
+ * null for anything that isn't a same-bucket public Storage URL (e.g. a
+ * legacy crawled poster_url from an external host) — callers should treat
+ * null as "nothing to delete" rather than an error.
+ */
+export function extractPerformancePosterPath(posterUrl: string | null | undefined): string | null {
+  if (!posterUrl) return null;
+  const marker = `/object/public/${PERFORMANCE_POSTER_BUCKET}/`;
+  const idx = posterUrl.indexOf(marker);
+  if (idx === -1) return null;
+  const path = posterUrl.slice(idx + marker.length).split("?")[0];
+  return path || null;
 }

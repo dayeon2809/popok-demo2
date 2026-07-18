@@ -46,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Dashboard", path: "/admin" },
     { name: "Submissions", path: "/admin/submissions" },
     { name: "Artists", path: "/admin/artists" },
-    { name: "Performances", path: "/admin/performances" },
+    { name: "이주의 공연 관리", path: "/admin/performances" },
     { name: "Organizations", path: "/admin/organizations" },
     { name: "Companies", path: "/admin/companies" },
   ];
