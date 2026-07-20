@@ -16,6 +16,7 @@ interface AdminCompanyRow {
   category: string | null;
   city_or_region: string | null;
   owner_id?: string | null;
+  hasPrimaryArtist?: boolean;
   connectedArtistsCount: number;
   fromApplication: boolean;
   createdAt: string | null;
@@ -90,7 +91,7 @@ export default function AdminCompaniesPage() {
   }, [activeFilter, searchQuery]);
 
   const handleUnlinkOwner = async (company: AdminCompanyRow) => {
-    if (!confirm(`'${company.name}' 단체의 대표 연결을 해제하시겠습니까? (owner_id = NULL)`)) return;
+    if (!confirm(`'${company.name}' 단체의 대표 및 관리 권한을 해제하시겠습니까?`)) return;
     setStatusUpdatingId(company.id);
     try {
       const res = await fetch(`/api/admin/companies/${company.id}/unlink-owner`, {
@@ -99,10 +100,10 @@ export default function AdminCompaniesPage() {
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        alert(data.error || "대표 해제에 실패했습니다.");
+        alert(data.error || "대표 권한 해제에 실패했습니다.");
         return;
       }
-      alert("대표 연결이 해제되었습니다.");
+      alert("단체 대표 권한이 해제되었습니다.");
       await fetchCompanies();
     } catch (err) {
       alert("네트워크 오류가 발생했습니다.");
@@ -225,7 +226,7 @@ export default function AdminCompaniesPage() {
                             VERIFIED
                           </span>
                         )}
-                        {c.owner_id && (
+                        {(c.owner_id || c.hasPrimaryArtist) && (
                           <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#047857", background: "#ECFDF5", padding: "2px 6px", borderRadius: "6px" }}>
                             대표 연결됨
                           </span>
@@ -251,14 +252,14 @@ export default function AdminCompaniesPage() {
                     </td>
                     <td style={{ padding: "12px 14px", textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                        {c.owner_id && (
+                        {(c.owner_id || c.hasPrimaryArtist) && (
                           <button
                             type="button"
                             onClick={() => handleUnlinkOwner(c)}
                             disabled={statusUpdatingId === c.id}
                             style={{ ...actionBtnStyle, color: "#991B1B", borderColor: "#FCA5A5" }}
                           >
-                            대표 해제
+                            권한 해제
                           </button>
                         )}
                         {c.slug && (

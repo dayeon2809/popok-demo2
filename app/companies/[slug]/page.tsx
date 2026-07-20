@@ -4,6 +4,7 @@ import {
   getPublishedCompanyBySlug,
   getConnectedArtistsByCompanyId,
   getRelatedCompanies,
+  getRepresentativeArtistForCompany,
 } from "@/lib/companies";
 import { getUpcomingPerformancesByCompanyId } from "@/lib/performances";
 import { getPortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
@@ -29,14 +30,25 @@ export default async function CompanyDetailPage({
     notFound();
   }
 
-  // Fetch connected artists, related companies, upcoming performances, and the
-  // viewer's "포퐄 보내기" state in parallel
-  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState] = await Promise.all([
+  // Fetch connected artists, related companies, upcoming performances,
+  // viewer's state, and the 1 representative artist in parallel
+  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState, representativeArtist] = await Promise.all([
     getConnectedArtistsByCompanyId(company.id),
     getRelatedCompanies(company.id),
     getUpcomingPerformancesByCompanyId(company.id),
     getPortfolioRequestViewerState({ type: "company", id: company.id }),
+    getRepresentativeArtistForCompany(company.id),
   ]);
+
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[company page representative]", {
+      companyId: company.id,
+      companySlug: company.slug,
+      artistId: representativeArtist?.artist?.id,
+      artistName: representativeArtist?.artist?.name,
+      isPrimary: representativeArtist?.is_primary,
+    });
+  }
 
   // Mockup: 공원(GONGWON) — add placeholder "연결 아티스트" cards for design/demo
   // purposes only, alongside whatever real artist_companies rows already exist.
@@ -57,6 +69,7 @@ export default async function CompanyDetailPage({
       relatedCompanies={relatedCompanies}
       upcomingPerformances={upcomingPerformances}
       sendPortfolioViewerState={sendPortfolioViewerState}
+      representativeArtist={representativeArtist}
     />
   );
 }

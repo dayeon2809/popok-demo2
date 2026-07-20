@@ -1,7 +1,8 @@
 import { getSupabaseServer } from "./supabaseServer";
 import { toStringArray } from "./normalize";
 import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards } from "./company";
-import type { Company, ConnectedCompany } from "@/types";
+import { mapArtistRowToArtist } from "./artists";
+import type { Company, ConnectedCompany, Artist } from "@/types";
 
 export function mapCompanyRowToCompany(record: any): Company {
   if (!record) return {} as Company;
@@ -231,6 +232,75 @@ export async function getPrimaryArtistByCompanyId(companyId: string): Promise<Pr
     };
   } catch (err) {
     console.error("[getPrimaryArtistByCompanyId] Unexpected error:", err);
+    return null;
+  }
+}
+
+export interface RepresentativeArtistResult {
+  artist: Artist;
+  is_primary: boolean;
+  is_current: boolean;
+  role?: string | null;
+}
+
+/**
+ * Fetches the single representative artist for a company based on strict priority:
+ *   1. is_primary = true AND is_current != false
+ *   2. is_primary = true
+ *   3. is_current != false
+ *   4. first row in artist_companies
+ * Returns null if no connected published artist exists (never guesses or infers).
+ */
+export async function getRepresentativeArtistForCompany(
+  companyId: string
+): Promise<RepresentativeArtistResult | null> {
+  try {
+    const supabase = getSupabaseServer();
+    const { data, error } = await supabase
+      .from("artist_companies" as any)
+      .select("role, is_current, is_primary, created_at, artists(*)")
+      .eq("company_id", companyId);
+
+    if (error || !data || (data as any[]).length === 0) return null;
+
+    const rows = data as any[];
+    const validRows = rows.filter((row: any) => {
+      const rawArtist = Array.isArray(row.artists) ? row.artists[0] : row.artists;
+      return rawArtist && rawArtist.status === "published";
+    });
+
+    if (validRows.length === 0) return null;
+
+    // Single source of truth: Only select artist explicitly designated as "대표" (is_primary = true) in Admin UI
+    const primaryRows = validRows.filter((r: any) => r.is_primary === true);
+
+    if (primaryRows.length === 0) {
+      return null; // No representative designated in Admin UI -> Return null (display company card only)
+    }
+
+    let selectedRow = primaryRows.find((r: any) => r.is_current !== false);
+    if (!selectedRow) {
+      selectedRow = primaryRows[0];
+    }
+
+    if (!selectedRow) return null;
+
+    const rawArtist = Array.isArray(selectedRow.artists)
+      ? selectedRow.artists[0]
+      : selectedRow.artists;
+
+    if (!rawArtist) return null;
+
+    const artist = mapArtistRowToArtist(rawArtist);
+
+    return {
+      artist,
+      is_primary: true,
+      is_current: selectedRow.is_current !== false,
+      role: selectedRow.role || null,
+    };
+  } catch (err) {
+    console.error("[getRepresentativeArtistForCompany] Unexpected error:", err);
     return null;
   }
 }

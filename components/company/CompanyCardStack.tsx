@@ -3,145 +3,134 @@
 import React, { useEffect, useState } from "react";
 import type { Company } from "@/types";
 import DigitalCard from "./DigitalCard";
-import CompanyRepresentativeCard, {
-  hasRepresentativeCardData,
-  type RepresentativeArtist,
-} from "./CompanyRepresentativeCard";
+import PopokCard from "@/components/PopokCard";
+import type { RepresentativeArtistResult } from "@/lib/companies";
 
 interface CompanyCardStackProps {
   company: Company;
   viewCount?: number;
-  artists: any[];
+  representativeArtist?: RepresentativeArtistResult | null;
 }
 
-// Priority for resolving "who represents this company": an explicit,
-// currently-active primary artist_companies relation. There is no
-// representative_artist_id / owner_id-as-artist column in the schema, and
-// is_primary is only unique per-artist (not per-company), so if a company
-// somehow has more than one is_primary && is_current relation, we
-// deterministically take the first and do not attempt to guess further.
-function resolveRepresentative(artists: any[]): RepresentativeArtist | null {
-  if (!Array.isArray(artists)) return null;
-  return artists.find((a) => a && a.is_primary && a.is_current) || null;
-}
+export default function CompanyCardStack({
+  company,
+  viewCount,
+  representativeArtist,
+}: CompanyCardStackProps) {
+  const representative = representativeArtist?.artist || null;
+  const showBackCard = Boolean(representative);
 
-export default function CompanyCardStack({ company, viewCount, artists = [] }: CompanyCardStackProps) {
-  const representative = resolveRepresentative(artists);
-  const showBackCard = hasRepresentativeCardData(company, representative);
-
+  const [activeCard, setActiveCard] = useState<"company" | "representative">("company");
   const [isCompanyFlipped, setIsCompanyFlipped] = useState(false);
-  const [isRepresentativeActive, setIsRepresentativeActive] = useState(false);
 
-  const handleRepresentativeActivate = () => {
-    // Representative card can only come forward once the company card has
-    // been flipped to its back face — matches the intended reveal order.
-    if (!isCompanyFlipped || !representative) return;
-    setIsRepresentativeActive(true);
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[CompanyCardStack representative]", {
+      companySlug: company.slug,
+      artistId: representativeArtist?.artist?.id,
+      artistName: representativeArtist?.artist?.name,
+      hasRepresentative: showBackCard,
+      activeCard,
+    });
+  }
+
+  // Enforce company active state if representative is null
+  useEffect(() => {
+    if (!showBackCard) {
+      setActiveCard("company");
+    }
+  }, [showBackCard]);
+
+  const handleActivateRepresentative = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!showBackCard) return;
+    setActiveCard("representative");
   };
 
-  const handleRepresentativeClose = () => {
-    setIsRepresentativeActive(false);
+  const handleActivateCompany = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setActiveCard("company");
   };
 
   useEffect(() => {
-    if (!isRepresentativeActive) return;
+    if (activeCard !== "representative") return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setIsRepresentativeActive(false);
+        setActiveCard("company");
       }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isRepresentativeActive]);
-
-  const stackClassName = [
-    "company-card-stack",
-    showBackCard && "has-back",
-    isRepresentativeActive && "is-representative-active",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  }, [activeCard]);
 
   return (
-    <div className={stackClassName}>
+    <div className={`company-card-stack-root ${showBackCard ? "has-representative" : ""}`}>
       <style jsx>{`
-        .company-card-stack {
+        .company-card-stack-root {
           position: relative;
           width: 100%;
           max-width: 310px;
           margin: 0 auto;
-          --stack-offset-x: 24px;
-          --stack-offset-y: 18px;
-          --stack-rotate: 1.5deg;
+          overflow: visible;
         }
-        .company-card-stack.has-back {
-          max-width: calc(310px + 24px);
+        .company-card-stack-root.has-representative {
+          max-width: calc(310px + 20px);
         }
-        .company-card-stack-front {
-          position: relative;
-          z-index: 2;
+
+        .card-layer {
           width: 100%;
+          max-width: 310px;
+          transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 320ms ease;
         }
-        .company-card-stack.has-back .company-card-stack-front {
-          width: calc(100% - var(--stack-offset-x));
+
+        /* Company Card Layer */
+        .company-layer {
+          position: relative;
         }
-        .company-card-stack.is-representative-active .company-card-stack-front {
-          pointer-events: none;
+        .company-layer.is-front {
+          z-index: 3;
+          transform: translate(0, 0) scale(1) rotate(0deg);
+          opacity: 1;
         }
-        .company-card-stack-back {
+        .company-layer.is-back {
+          z-index: 1;
+          transform: translate(-14px, -10px) scale(0.96) rotate(-2deg);
+          opacity: 0.85;
+          cursor: pointer;
+        }
+
+        /* Representative Artist Layer */
+        .artist-layer {
           position: absolute;
           top: 0;
           left: 0;
-          width: calc(100% - var(--stack-offset-x));
+        }
+        .artist-layer.is-back {
           z-index: 1;
-          transform: translate(var(--stack-offset-x), var(--stack-offset-y)) rotate(var(--stack-rotate));
-          transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+          transform: translate(20px, 14px) scale(0.97) rotate(2deg);
+          opacity: 0.95;
+          cursor: pointer;
         }
-        .company-card-stack.is-representative-active .company-card-stack-back {
+        .artist-layer.is-front {
           z-index: 4;
-          transform: translate(0, 0) rotate(0deg);
+          transform: translate(0, 0) scale(1) rotate(0deg);
+          opacity: 1;
         }
+
         @media (max-width: 640px) {
-          .company-card-stack {
-            --stack-offset-x: 12px;
-            --stack-offset-y: 10px;
-            --stack-rotate: 1deg;
+          .artist-layer.is-back {
+            transform: translate(12px, 10px) scale(0.97) rotate(1.5deg);
           }
-          .company-card-stack.has-back {
-            max-width: calc(310px + 12px);
-          }
-        }
-        @media (max-width: 380px) {
-          .company-card-stack {
-            --stack-offset-x: 8px;
-            --stack-offset-y: 8px;
-            --stack-rotate: 0deg;
-          }
-          .company-card-stack.has-back {
-            max-width: calc(310px + 8px);
-          }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .company-card-stack-back {
-            transition: none;
+          .company-layer.is-back {
+            transform: translate(-10px, -8px) scale(0.96) rotate(-1.5deg);
           }
         }
       `}</style>
 
-      {showBackCard && (
-        <div className="company-card-stack-back">
-          <CompanyRepresentativeCard
-            company={company}
-            representative={representative}
-            isCompanyFlipped={isCompanyFlipped}
-            isActive={isRepresentativeActive}
-            onActivate={handleRepresentativeActivate}
-            onClose={handleRepresentativeClose}
-          />
-        </div>
-      )}
-
-      <div className="company-card-stack-front" inert={isRepresentativeActive}>
+      {/* 1. Company Digital Card Layer */}
+      <div
+        className={`card-layer company-layer ${activeCard === "company" ? "is-front" : "is-back"}`}
+        onClick={activeCard === "representative" ? handleActivateCompany : undefined}
+      >
         <DigitalCard
           company={company}
           viewCount={viewCount}
@@ -149,6 +138,61 @@ export default function CompanyCardStack({ company, viewCount, artists = [] }: C
           onFlipChange={setIsCompanyFlipped}
         />
       </div>
+
+      {/* 2. Connected Representative Artist Card Layer (Only rendered if representative exists) */}
+      {showBackCard && representative && (
+        <div
+          className={`card-layer artist-layer ${activeCard === "representative" ? "is-front" : "is-back"}`}
+          onClick={activeCard === "company" ? handleActivateRepresentative : undefined}
+        >
+          <div style={{ position: "relative" }}>
+            {/* Navigation Return Button when Representative Card is active */}
+            {activeCard === "representative" && (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                <button
+                  type="button"
+                  onClick={handleActivateCompany}
+                  style={{
+                    background: "rgba(23, 20, 17, 0.88)",
+                    color: "#FFFFFF",
+                    border: "none",
+                    borderRadius: "20px",
+                    padding: "4px 12px",
+                    fontSize: "0.72rem",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                  }}
+                >
+                  ← 단체 명함 보기
+                </button>
+              </div>
+            )}
+
+            {/* Reused actual PopokCard component */}
+            <div
+              onClick={(e) => {
+                if (activeCard === "representative") {
+                  e.stopPropagation();
+                }
+              }}
+            >
+              <PopokCard
+                name={representative.name}
+                nameEn={representative.name_en || undefined}
+                genre={representative.genre ?? null}
+                instagram={representative.instagram ?? null}
+                id={String(representative.recordId || representative.id || "")}
+                slug={representative.slug || representative.id}
+                profileImage={representative.profile_image_url || (representative as any).profileImage || undefined}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

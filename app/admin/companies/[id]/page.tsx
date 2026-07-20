@@ -1253,7 +1253,11 @@ export default function AdminCompanyEditPage() {
             
             <EditableSection title="디지털 카드" onEdit={() => handleJumpToEdit("basic")}>
               <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
-                <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} artists={adaptedArtists} />
+                {(() => {
+                  const rep = adaptedArtists.find((a: any) => a.is_primary === true);
+                  const repResult = rep ? ({ artist: rep, is_primary: true, is_current: rep.is_current !== false, role: rep.role || null } as any) : null;
+                  return <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} representativeArtist={repResult} />;
+                })()}
               </div>
             </EditableSection>
 

@@ -45,6 +45,19 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Which companies have a primary representative artist connected.
+    const primaryCompanySet = new Set<string>();
+    if (companyIds.length > 0) {
+      const { data: primaryRels } = await supabase
+        .from("artist_companies" as any)
+        .select("company_id")
+        .in("company_id", companyIds)
+        .eq("is_primary", true);
+      for (const row of (primaryRels || []) as any[]) {
+        if (row.company_id) primaryCompanySet.add(row.company_id);
+      }
+    }
+
     // Which companies originated from an organization application.
     const fromApplicationSet = new Set<string>();
     if (companyIds.length > 0) {
@@ -75,6 +88,7 @@ export async function GET(req: NextRequest) {
       category: c.category,
       city_or_region: c.city_or_region,
       owner_id: c.owner_id || null,
+      hasPrimaryArtist: primaryCompanySet.has(c.id),
       connectedArtistsCount: countByCompany.get(c.id) || 0,
       fromApplication: fromApplicationSet.has(c.id),
       createdAt: c.created_at,

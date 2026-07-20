@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import type { Company } from "@/types";
 import { analytics } from "@/lib/analytics";
 import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
+import type { RepresentativeArtistResult } from "@/lib/companies";
 
 // Import custom company components
 import CompanyCardStack from "@/components/company/CompanyCardStack";
@@ -27,6 +28,7 @@ interface CompanyClientViewProps {
   relatedCompanies: Company[];
   upcomingPerformances: any[];
   sendPortfolioViewerState: PortfolioRequestViewerState;
+  representativeArtist?: RepresentativeArtistResult | null;
 }
 
 export default function CompanyClientView({
@@ -35,9 +37,19 @@ export default function CompanyClientView({
   relatedCompanies,
   upcomingPerformances = [],
   sendPortfolioViewerState,
+  representativeArtist,
 }: CompanyClientViewProps) {
-      const router = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
+
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[CompanyClientView representative]", {
+      companyId: company.id,
+      artistId: representativeArtist?.artist?.id,
+      artistName: representativeArtist?.artist?.name,
+    });
+  }
+
   const [toastMsg, setToastMsg] = useState("");
   const brandAccent = company.brand_color || "#C8EE52"; // default popok lime
 
@@ -214,7 +226,7 @@ export default function CompanyClientView({
             ← 단체 둘러보기
           </button>
           
-          <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} artists={artists} />
+          <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} representativeArtist={representativeArtist} />
         </div>
       </div>
 
