@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
 import { analytics } from "@/lib/analytics";
@@ -12,7 +13,46 @@ import { getYouTubePreviewAspectRatio, isYouTubeUrl } from "@/lib/youtube";
 import { isSameVideoUrl, getYouTubeEmbedUrl, isDirectVideoUrl } from "@/lib/video";
 import { isVimeoUrl, getVimeoEmbedUrl } from "@/lib/videoLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
-import { toStringArray, toObjectArray, safeYear, getValidWorks } from "@/lib/normalize";
+import { toObjectArray, safeYear, getValidWorks } from "@/lib/normalize";
+import {
+  normalizeArtistEducation,
+  normalizeArtistCurrentActivity,
+  normalizeArtistAffiliations,
+  normalizeArtistAwards,
+  normalizeArtistCompetitions,
+} from "@/lib/artist-profile";
+import SendPortfolioSection from "@/components/portfolio-requests/SendPortfolioSection";
+import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
+import RepresentativeGallery from "@/components/RepresentativeGallery";
+import { normalizeWorkImages } from "@/lib/works";
+
+// Safe default while /api/portfolio-requests/viewer-state is loading (or if
+// it ever fails) — the CTA must still mount and behave correctly for a
+// logged-out viewer (click -> /auth) rather than disappear. Only a
+// successful fetch can ever set isSelf/artist/existingRequestStatus to
+// anything other than these "logged out" values.
+const DEFAULT_PORTFOLIO_VIEWER_STATE: PortfolioRequestViewerState = {
+  isLoggedIn: false,
+  artist: null,
+  existingRequestStatus: null,
+  isSelf: false,
+};
+
+// Shared section tokens — matches app/companies/[slug]/CompanyClientView.tsx
+// and its subcomponents (components/company/CompanyIdentity.tsx,
+// CompanyPortfolio.tsx, CompanyHistory.tsx, CompanyContact.tsx,
+// CompanyAwardsLinks.tsx) exactly, so the individual artist page reads as
+// the same editorial/brochure document as the company page: no per-section
+// card boxes or shadows, just a thin bottom border and consistent vertical
+// rhythm between sections.
+const SECTION_STYLE: CSSProperties = { padding: "50px 0", borderBottom: "1px solid var(--border)" };
+const SECTION_LABEL_STYLE: CSSProperties = {
+  fontSize: "0.72rem",
+  fontWeight: 800,
+  color: "var(--navy)",
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+};
 
 interface WorkItem {
   id: string;
@@ -48,8 +88,20 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null);
 
   const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
+  const [portfolioViewerState, setPortfolioViewerState] = useState<PortfolioRequestViewerState>(DEFAULT_PORTFOLIO_VIEWER_STATE);
+  const pathname = usePathname();
+
+  const handleOpenWork = (work: WorkItem) => {
+    setActiveImageIndex(0);
+    setActiveWork(work);
+  };
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [activeWork]);
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -59,6 +111,43 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     params.then(({ id: pid }) => setId(decodeURIComponent(pid)));
   }, [params]);
+
+  // "포퐄 보내기" CTA state — this page is a client component (unlike the
+  // company detail page, which computes this server-side), so it fetches the
+  // shared viewer-state endpoint once the artist's real uuid (recordId) is
+  // known. portfolioViewerState already starts as DEFAULT_PORTFOLIO_VIEWER_STATE
+  // (logged-out shape) — this effect only ever upgrades it on a successful
+  // response; a slow/failed fetch leaves the CTA visible in its safe default
+  // state instead of unmounting it.
+  useEffect(() => {
+    const recordId = artist?.recordId;
+    if (!recordId) return;
+    fetch(`/api/portfolio-requests/viewer-state?targetType=artist&targetId=${encodeURIComponent(recordId)}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.debug("[artist portfolio CTA] viewer-state response", { recordId, res });
+        }
+        if (res.success) setPortfolioViewerState(res.data);
+        else console.error("[artist portfolio CTA] viewer-state fetch returned success:false", res);
+      })
+      .catch((err) => {
+        console.error("[artist portfolio CTA] viewer-state fetch failed", err);
+      });
+  }, [artist?.recordId]);
+
+  // Temporary dev-only visibility into why the CTA is/isn't showing —
+  // remove once the report's root cause is confirmed against a real session.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production" || !artist) return;
+    console.debug("[artist portfolio CTA] render state", {
+      targetArtistId: artist.recordId || artist.id,
+      targetOwnerId: artist.owner_id,
+      status: artist.status,
+      viewerState: portfolioViewerState,
+      shouldRender: true,
+    });
+  }, [artist, portfolioViewerState]);
 
   // Load artist data
   useEffect(() => {
@@ -145,6 +234,23 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Keyboard Arrow navigation for active work modal carousel
+  useEffect(() => {
+    if (!activeWork) return;
+    const images = normalizeWorkImages(activeWork);
+    if (images.length <= 1) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        setActiveImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeWork]);
+
   const handleShareUrl = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
@@ -201,28 +307,29 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  // Compile works list — only real archived pieces (getValidWorks drops the
-  // onboarding pipeline's "popok_registration_media" bookkeeping entry and
-  // any item with no title), so the rendered list and the "N WORKS ARCHIVED"
-  // count below always agree.
+  // Compile works list — only real archived pieces
   const validWorkRecords = getValidWorks<any>(artist.works ?? artist.portfolio_works);
-  const displayWorks: WorkItem[] = validWorkRecords.map((w: any, idx: number) => ({
-    id: w.id || `work-${idx}`,
-    title: typeof w.title === "string" ? w.title.trim() : String(w.title),
-    year: safeYear(w.year) || "연도미상",
-    description: typeof w.description === "string" ? w.description.trim() : "",
-    role: typeof w.role === "string" ? w.role.trim() : "",
-    genre: typeof w.genre === "string" ? w.genre.trim() : "",
-    venue: typeof w.venue === "string" ? w.venue.trim() : "",
-    externalLink: typeof (w.link || w.url || w.source_url) === "string" ? (w.link || w.url || w.source_url).trim() : "",
-    image: w.image_url || "/images/placeholders/cake-placeholder.png",
-    videoUrl: w.video_url || w.video || w.videoUrl || "",
-    credits: typeof w.credits === "string" ? w.credits.trim() : (w.role || ""),
-    previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
-    previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
-    previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
-    media: w.media || null,
-  }));
+  const displayWorks: WorkItem[] = validWorkRecords.map((w: any, idx: number) => {
+    const images = normalizeWorkImages(w);
+    return {
+      id: w.id || `work-${idx}`,
+      title: typeof w.title === "string" ? w.title.trim() : String(w.title),
+      year: safeYear(w.year) || "연도미상",
+      description: typeof w.description === "string" ? w.description.trim() : "",
+      role: typeof w.role === "string" ? w.role.trim() : "",
+      genre: typeof w.genre === "string" ? w.genre.trim() : "",
+      venue: typeof w.venue === "string" ? w.venue.trim() : "",
+      externalLink: typeof (w.link || w.url || w.source_url) === "string" ? (w.link || w.url || w.source_url).trim() : "",
+      image: images[0] || w.image_url || "/images/placeholders/cake-placeholder.png",
+      images,
+      videoUrl: w.video_url || w.video || w.videoUrl || "",
+      credits: typeof w.credits === "string" ? w.credits.trim() : (w.role || ""),
+      previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
+      previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
+      previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
+      media: w.media || null,
+    };
+  });
 
   // ── Activity Timeline: current_activity + affiliations only (education,
   // awards, competitions each get their own section below). Entries with a
@@ -231,13 +338,11 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   interface TimelineEntry { label: string; text: string; year: number | null; }
   const timelineEntries: TimelineEntry[] = (() => {
     const entries: TimelineEntry[] = [];
-    toStringArray(artist.current_activity).forEach((text) => {
+    normalizeArtistCurrentActivity(artist.current_activity).forEach((text) => {
       entries.push({ label: "CURRENT", text, year: null });
     });
-    toObjectArray<{ name?: string; position?: string; year?: string | number }>(artist.affiliations).forEach((aff) => {
-      const name = typeof aff.name === "string" ? aff.name.trim() : "";
-      if (!name) return;
-      const text = aff.position ? `${name} · ${aff.position}` : name;
+    normalizeArtistAffiliations(artist.affiliations).forEach((aff) => {
+      const text = aff.position ? `${aff.name} · ${aff.position}` : (aff.name as string);
       const yearNum = Number(safeYear(aff.year));
       entries.push({ label: "AFFILIATION", text, year: Number.isFinite(yearNum) && safeYear(aff.year) ? yearNum : null });
     });
@@ -251,13 +356,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   // ── Education — plain strings in practice (no separate year/school/major
   // fields), so each entry is rendered as-is, original order preserved.
-  const educationList = toStringArray(artist.education);
+  const educationList = normalizeArtistEducation(artist.education);
 
-  // ── Awards & Competitions — normalize, dedupe by (year, title, org), sort
-  // newest-first when a real year exists, otherwise keep original order.
+  // ── Awards & Competitions — shared shape via lib/artist-profile.ts
+  // (normalizeArtistAwards/normalizeArtistCompetitions), then dedupe by
+  // (year, title, org) and sort newest-first when a real year exists,
+  // otherwise keep original order — this dedupe/sort is display-only and
+  // deliberately not part of the shared normalizer (the edit dashboard
+  // needs the user's own original, non-deduped order preserved).
   interface AwardLike { year?: string | number; title?: string; result?: string; organization?: string; }
-  function normalizeAwardList(value: unknown): AwardLike[] {
-    const raw = toObjectArray<AwardLike>(value);
+  function sortAndDedupeAwardList(raw: AwardLike[]): AwardLike[] {
     const seen = new Set<string>();
     const deduped: AwardLike[] = [];
     for (const item of raw) {
@@ -271,8 +379,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     withYear.sort((a, b) => Number(safeYear(b.year)) - Number(safeYear(a.year)));
     return [...withYear, ...withoutYear];
   }
-  const awardsList = normalizeAwardList(artist.awards);
-  const competitionsList = normalizeAwardList(artist.competitions);
+  const awardsList = sortAndDedupeAwardList(normalizeArtistAwards(artist.awards));
+  const competitionsList = sortAndDedupeAwardList(normalizeArtistCompetitions(artist.competitions));
   const combinedAwardsCount = awardsList.length + competitionsList.length;
   const splitAwardsAndCompetitions = combinedAwardsCount > 6;
 
@@ -372,37 +480,55 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   return (
     <div style={{ background: "var(--bg-warm)", minHeight: "100vh", paddingBottom: "100px" }}>
       <style dangerouslySetInnerHTML={{ __html: `
+        .artist-detail-container {
+          max-width: 1040px;
+          margin: 0 auto;
+          padding: 40px 24px;
+        }
         .works-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-          gap: 24px !important;
+          grid-template-columns: repeat(3, 1fr);
+          column-gap: 24px;
+          row-gap: 32px;
         }
-        @media (max-width: 768px) {
+        .work-tile {
+          cursor: pointer;
+        }
+        .work-tile-image-wrapper {
+          position: relative;
+          aspect-ratio: 1.4;
+          border-radius: 4px;
+          overflow: hidden;
+          border: 1px solid var(--border);
+          background-color: #FAF8F5;
+        }
+        .work-tile-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .work-tile:hover .work-tile-image {
+          transform: scale(1.03);
+        }
+        .work-tile:hover .work-tile-title {
+          text-decoration: underline;
+        }
+        @media (max-width: 1024px) {
           .works-grid {
             grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px 10px !important;
+            column-gap: 20px !important;
+            row-gap: 28px !important;
           }
-          .work-card {
-            border-radius: 12px !important;
+        }
+        @media (max-width: 640px) {
+          .works-grid {
+            grid-template-columns: 1fr !important;
           }
-          .work-card-media-wrapper {
-            aspect-ratio: 1.4 !important;
-          }
-          .work-card-info-wrapper {
-            padding: 12px 10px !important;
-            gap: 6px !important;
-          }
-          .work-card-title {
-            font-size: 0.82rem !important;
-          }
-          .work-card-role-year {
-            font-size: 0.6rem !important;
-            margin-top: 2px !important;
-          }
-          .work-card-desc {
-            font-size: 0.65rem !important;
-            line-height: 1.35 !important;
-            -webkit-line-clamp: 2 !important;
+        }
+        @media (max-width: 768px) {
+          .artist-detail-container {
+            padding: 24px 16px !important;
           }
           .education-row, .award-row {
             grid-template-columns: 1fr !important;
@@ -410,8 +536,49 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           }
         }
         .connected-org-card:hover {
-          box-shadow: 0 8px 20px rgba(23, 20, 17, 0.08);
-          transform: translateY(-2px);
+          background: #F0EDE4 !important;
+        }
+        .press-link:hover {
+          text-decoration: underline !important;
+        }
+        .artist-work-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: rgba(23, 20, 17, 0.55);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          padding: 40px 20px;
+        }
+        .artist-drawer-main {
+          width: 640px;
+          max-width: 100%;
+          height: auto;
+          max-height: 88vh;
+          background-color: #FFFFFF;
+          box-shadow: 0 20px 50px rgba(23, 20, 17, 0.2);
+          border-radius: 10px;
+          border: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          position: relative;
+        }
+        @media (max-width: 768px) {
+          .artist-work-modal-backdrop {
+            padding: 0 !important;
+            align-items: flex-end !important;
+          }
+          .artist-drawer-main {
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 90vh !important;
+            max-height: 90vh !important;
+            border-radius: 16px 16px 0 0 !important;
+          }
         }
       ` }} />
       
@@ -436,7 +603,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         borderBottom: "1px solid var(--border)",
       }}>
         <div style={{
-          maxWidth: "1120px", margin: "0 auto", padding: "0 32px", height: "56px",
+          maxWidth: "1040px", margin: "0 auto", padding: "0 24px", height: "56px",
           display: "flex", alignItems: "center", justifyContent: "space-between"
         }}>
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
@@ -456,8 +623,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </header>
 
-      <div style={{ maxWidth: "1120px", margin: "0 auto", padding: "40px 32px" }}>
-        
+      <div className="artist-detail-container">
+
         {/* Back Link — returns to whichever /artists filter view the user came from */}
         <button
           onClick={() => {
@@ -470,7 +637,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           style={{
             background: "none", border: "none", padding: 0, cursor: "pointer",
             textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px",
-            color: "var(--ink-muted)", fontSize: "0.85rem", fontWeight: 700, marginBottom: "40px"
+            color: "var(--ink-muted)", fontSize: "0.8rem", fontWeight: 700, marginBottom: "32px"
           }}
         >
           ← 아티스트 둘러보기
@@ -503,12 +670,17 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           borderRadius: "20px",
           overflow: "hidden",
           boxShadow: "0 12px 32px rgba(23, 20, 17, 0.03)",
-          marginBottom: "80px"
+          marginBottom: "60px"
         }}>
           {/* Mock Browser Header */}
           <div style={{
-            background: "#FAF8F5", borderBottom: "1px solid var(--border)",
-            padding: "10px 20px", display: "flex", alignItems: "center", gap: "6px"
+            background: "#FAF8F5",
+            borderBottom: "1px solid var(--border)",
+            padding: "12px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            position: "relative"
           }}>
             <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EAE6DD" }} />
             <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EAE6DD" }} />
@@ -532,12 +704,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               gap: "36px",
               borderBottom: "1px solid var(--border)",
               paddingBottom: "36px",
-              marginBottom: "40px"
+              marginBottom: "32px"
             }}>
-              {/* Col 1: Connected Organization — a small network card, not a
-                  new large section. Priority: official artist_companies
-                  connection > artists.company text fallback > Independent Artist.
-                  Never auto-connects by name matching a company string. */}
+              {/* Col 1: Connected Organization */}
               <div style={{ minWidth: 0 }}>
                 <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
                   CONNECTED ORGANIZATION
@@ -548,14 +717,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     className="connected-org-card"
                     style={{
                       display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
-                      padding: "10px", borderRadius: "12px", border: "1px solid var(--border)",
-                      background: "#FAF8F5", transition: "all 0.15s ease", minWidth: 0,
+                      padding: "10px", borderRadius: "4px", border: "1px solid var(--border)",
+                      background: "#FAF8F5", transition: "background 0.15s ease", minWidth: 0,
                     }}
                   >
                     <img
                       src={artist.connectedCompany.company.profile_image_url || "/images/placeholders/cake-placeholder.png"}
                       alt={artist.connectedCompany.company.name}
-                      style={{ width: "40px", height: "40px", borderRadius: "10px", objectFit: "cover", flexShrink: 0 }}
+                      style={{ width: "40px", height: "40px", borderRadius: "4px", objectFit: "cover", flexShrink: 0 }}
                     />
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
@@ -587,12 +756,12 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     className="connected-org-card"
                     style={{
                       display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
-                      padding: "10px", borderRadius: "12px", border: "1px dashed var(--border-dark)",
-                      background: "#FAF8F5", transition: "all 0.15s ease", minWidth: 0,
+                      padding: "10px", borderRadius: "4px", border: "1px dashed var(--border-dark)",
+                      background: "#FAF8F5", transition: "background 0.15s ease", minWidth: 0,
                     }}
                   >
                     <div style={{
-                      width: "40px", height: "40px", borderRadius: "10px", background: "var(--bg-warm)",
+                      width: "40px", height: "40px", borderRadius: "4px", background: "var(--bg-warm)",
                       display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", flexShrink: 0,
                     }}>
                       🏢
@@ -629,22 +798,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 <p style={{ fontSize: "0.85rem", color: "var(--navy)", lineHeight: 1.6, whiteSpace: "pre-line", margin: 0 }}>
                   {artist.bio || artist.bio_short || "POPOK 아티스트 레지스트리에 정식 등록된 창작자입니다. 흩어져 있는 활동과 기록을 수집하여 포트폴리오를 구성해 나가는 여정에 있습니다."}
                 </p>
-                {toStringArray(artist.current_activity).length > 0 && (
-                  <div style={{ marginTop: "12px" }}>
-                    <span className="mono" style={{ fontSize: "0.58rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.08em" }}>
-                      CURRENT
-                    </span>
-                    <p style={{
-                      fontSize: "0.8rem", color: "var(--navy)", lineHeight: 1.5, margin: "4px 0 0",
-                      display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
-                    }}>
-                      {toStringArray(artist.current_activity).join(" · ")}
-                    </p>
-                  </div>
-                )}
               </div>
 
-              {/* Col 3: Contact — up to 3 candidates, priority-ordered and deduped */}
+              {/* Col 3: Contact Info */}
               <div>
                 <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
                   CONTACT INFO
@@ -658,10 +814,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                         target={c.href.startsWith("mailto:") ? undefined : "_blank"}
                         rel="noopener noreferrer"
                         style={{
-                          color: idx === 0 ? "var(--navy)" : "var(--ink-muted)",
-                          fontWeight: idx === 0 ? 700 : 500,
+                          color: "var(--navy)",
+                          fontWeight: 700,
                           textDecoration: "none",
-                          fontFamily: idx === 0 ? "inherit" : "monospace",
                           overflowWrap: "break-word",
                           wordBreak: "break-all",
                         }}
@@ -670,15 +825,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       </a>
                     ))
                   ) : (
-                    <span style={{ color: "var(--ink-faint)" }}>등록된 연락처가 없습니다.</span>
+                    <span style={{ color: "var(--ink-muted)", fontSize: "0.75rem" }}>
+                      등록된 연락처 정보가 없습니다.
+                    </span>
                   )}
-                  <span style={{ color: "var(--ink-muted)", fontFamily: "monospace" }}>{artist.name}@popok.kr</span>
                 </div>
               </div>
             </div>
 
             {/* View count — small and unobtrusive, right below profile info */}
-            <div style={{ textAlign: "right", marginBottom: "-8px" }}>
+            <div style={{ textAlign: "right", marginBottom: "8px" }}>
               <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
                 조회수 {(artist.view_count ?? 0).toLocaleString("ko-KR")}회
               </span>
@@ -702,7 +858,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       background: idx % 2 === 0 ? "var(--accent)" : "var(--navy)",
                       color: idx % 2 === 0 ? "var(--navy)" : "#FFFFFF",
                       border: "none",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
                     }}
                   >
                     {tag}
@@ -736,9 +891,12 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </section>
 
+        {/* ── REPRESENTATIVE GALLERY (Unconditional, returns null if empty) ── */}
+        <RepresentativeGallery images={artist.profile_image_urls} />
+
         {/* ── 2.5. VIDEO PROFILE (Additional Video Section) ── */}
         {artist.youtube_url && (
-          <section style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "8px", marginTop: "-30px", paddingBottom: "60px" }}>
+          <section style={{ ...SECTION_STYLE, display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "24px" }}>
               <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>
                 Video Profile
@@ -755,8 +913,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               background: "#171411",
               borderRadius: "20px",
               border: "2px solid var(--navy)",
-              overflow: "hidden",
               boxShadow: "0 20px 40px rgba(23, 20, 17, 0.15)",
+              overflow: "hidden",
             }}>
               {(() => {
                 const url = artist.youtube_url;
@@ -806,10 +964,35 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
-        {/* ──────────────── 3. SELECTED WORKS (Visual Card Layouts - Split) ──────────────── */}
-        <section style={{ marginBottom: "80px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "28px" }}>
-            <h3 className="display" style={{ fontSize: "1.2rem", color: "var(--navy)", textTransform: "uppercase", margin: 0 }}>
+        {/* ──────────────── 3. ACTIVITY TIMELINE — current_activity + affiliations only ──────────────── */}
+        {activityTimeline.length > 0 && (
+          <section style={SECTION_STYLE}>
+            <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, marginBottom: "24px" }}>
+              Activity Timeline
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px", borderLeft: "1px solid var(--border)", paddingLeft: "16px", marginLeft: "4px" }}>
+              {activityTimeline.map((entry, idx) => (
+                <div key={idx} style={{ position: "relative" }}>
+                  <span style={{
+                    position: "absolute", left: "-20px", top: "6px", width: "5px", height: "5px",
+                    borderRadius: "50%", background: "var(--accent-dark)"
+                  }} />
+                  <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.05em", display: "block", marginBottom: "3px" }}>
+                    {entry.year ? `${entry.year} · ${entry.label}` : entry.label}
+                  </span>
+                  <p style={{ fontSize: "0.85rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
+                    {entry.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ──────────────── 4. SELECTED WORKS — flat editorial grid, whole-tile click ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "28px" }}>
+            <h3 className="mono" style={SECTION_LABEL_STYLE}>
               Selected Works
             </h3>
             <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>
@@ -818,48 +1001,31 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </div>
 
           {displayWorks.length === 0 ? (
-            <p style={{ color: "var(--ink-muted)", fontSize: "0.85rem", padding: "20px 0" }}>등록된 작품 포트폴리오가 없습니다.</p>
+            <div style={{ padding: "50px 24px", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "4px", color: "var(--ink-muted)", fontSize: "0.82rem" }}>
+              등록된 작품 포트폴리오가 없습니다.
+            </div>
           ) : (
-            /* Visual Responsive Grid */
             <div className="works-grid">
               {displayWorks.map((work) => (
                 <div
                   key={work.id}
-                  style={{
-                    background: "#FFFFFF",
-                    border: "1px solid var(--border)",
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    boxShadow: "0 4px 16px rgba(23, 20, 17, 0.02)",
-                    transition: "all 0.2s ease"
-                  }}
-                  className="work-card hover-scale-img"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-4px)";
-                    e.currentTarget.style.boxShadow = "0 12px 24px rgba(23, 20, 17, 0.06)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "none";
-                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(23, 20, 17, 0.02)";
-                  }}
+                  className="work-tile"
+                  onClick={() => setActiveWork(work)}
+                  style={{ display: "flex", flexDirection: "column", height: "100%" }}
                 >
-                  {/* Visual Preview Banner */}
-                  <div className="work-card-media-wrapper" style={{ position: "relative", width: "100%", aspectRatio: "1.4", overflow: "hidden", background: "#F5F1E8" }}>
+                  {/* Image */}
+                  <div className="work-tile-image-wrapper">
                     {work.image && !work.image.includes("cake-placeholder") ? (
                       <img
                         src={work.image}
                         alt={work.title}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        className="work-tile-image"
                       />
                     ) : (
                       /* Same "no image" placeholder treatment as the Company Detail portfolio grid */
                       <div style={{
                         width: "100%", height: "100%", display: "flex", flexDirection: "column",
                         alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "8px",
-                        borderBottom: "1px solid var(--border)"
                       }}>
                         <span style={{
                           fontWeight: 950, fontSize: "1rem", color: "var(--navy)", letterSpacing: "-0.04em",
@@ -873,64 +1039,67 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                         </span>
                       </div>
                     )}
-                    
+
                     <span style={{
-                      position: "absolute", top: "12px", right: "12px", background: "var(--navy)",
-                      color: "#FFFFFF", padding: "4px 10px", borderRadius: "20px", fontSize: "0.62rem",
+                      position: "absolute", top: "10px", right: "10px", background: "var(--navy)",
+                      color: "#FFFFFF", padding: "3px 8px", borderRadius: "2px", fontSize: "0.62rem",
                       fontWeight: 700, zIndex: 1
                     }}>
                       {work.year}
                     </span>
                   </div>
 
-                  {/* Visual Content info */}
-                  <div className="work-card-info-wrapper" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <div>
-                      <h4 className="work-card-title" style={{ fontSize: "1.1rem", fontWeight: 850, color: "var(--navy)", margin: 0, letterSpacing: "-0.01em" }}>
-                        {work.title}
-                      </h4>
+                  {/* Caption */}
+                  <div style={{ paddingTop: "12px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
+                    <div className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase" }}>
                       {(work.role || work.genre) && (
-                        <span className="mono work-card-role-year" style={{ fontSize: "0.65rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginTop: "4px" }}>
+                        <span style={{ fontWeight: 700, color: "var(--accent-dark)" }}>
                           {[work.role, work.genre].filter(Boolean).join(" · ")}
                         </span>
                       )}
-                      {work.venue && (
-                        <span style={{ fontSize: "0.68rem", color: "var(--ink-muted)", display: "block", marginTop: "2px" }}>
-                          📍 {work.venue}
-                        </span>
-                      )}
+                      {work.venue && <span>· {work.venue}</span>}
                     </div>
-
+                    <h4 style={{
+                      fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", margin: "4px 0 2px",
+                      letterSpacing: "-0.01em", lineHeight: 1.35,
+                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                    }}>
+                      {work.title}
+                    </h4>
                     {work.description && (
-                      <p className="work-card-desc" style={{
-                        fontSize: "0.8rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0,
-                        display: "-webkit-box", WebkitLineClamp: "3", WebkitBoxOrient: "vertical", overflow: "hidden"
+                      <p style={{
+                        fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "2px 0 0",
+                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
                       }}>
                         {work.description}
                       </p>
                     )}
 
-                    <button
-                      onClick={() => setActiveWork(work)}
-                      className="btn-outline"
-                      style={{
-                        width: "100%", padding: "10px", borderRadius: "10px", fontSize: "0.78rem",
-                        fontWeight: 800, cursor: "pointer", marginTop: "12px", display: "flex",
-                        alignItems: "center", justifyContent: "center", gap: "4px"
-                      }}
-                    >
-                      View Detail ↗
-                    </button>
-                    {work.externalLink && (
-                      <a
-                        href={work.externalLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--accent-dark)", textAlign: "center", textDecoration: "none" }}
+                    <div style={{ marginTop: "auto", paddingTop: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                      <button
+                        type="button"
+                        onClick={() => setActiveWork(work)}
+                        className="work-tile-title"
+                        style={{
+                          background: "none", border: "none", padding: 0, cursor: "pointer",
+                          fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)",
+                          display: "inline-flex", alignItems: "center", gap: "4px",
+                        }}
                       >
-                        외부 링크 ↗
-                      </a>
-                    )}
+                        View Detail <span>→</span>
+                      </button>
+                      {work.externalLink && (
+                        <a
+                          href={work.externalLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--ink-muted)", textDecoration: "none" }}
+                        >
+                          외부 링크 ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -938,54 +1107,23 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           )}
         </section>
 
-        {/* ──────────────── 4. ACTIVITY TIMELINE — current_activity + affiliations only ──────────────── */}
-        {activityTimeline.length > 0 && (
-          <section style={{ marginBottom: "64px" }}>
-            <h3 className="display" style={{
-              fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
-              borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
-            }}>
-              Activity Timeline
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px", borderLeft: "1.5px solid var(--border)", paddingLeft: "16px", marginLeft: "8px" }}>
-              {activityTimeline.map((entry, idx) => (
-                <div key={idx} style={{ position: "relative" }}>
-                  <span style={{
-                    position: "absolute", left: "-21px", top: "5px", width: "8px", height: "8px",
-                    borderRadius: "50%", background: "#C8C2B7", border: "2px solid var(--bg-warm)"
-                  }} />
-                  <span className="mono" style={{ fontSize: "0.62rem", color: "var(--accent-dark)", fontWeight: 800, display: "block", marginBottom: "2px" }}>
-                    {entry.year ? `${entry.year} · ${entry.label}` : entry.label}
-                  </span>
-                  <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
-                    {entry.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ──────────────── 5. EDUCATION — plain strings, no separate year/school/major fields ──────────────── */}
         {educationList.length > 0 && (
-          <section style={{ marginBottom: "64px" }}>
-            <h3 className="display" style={{
-              fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
-              borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
-            }}>
+          <section style={SECTION_STYLE}>
+            <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, marginBottom: "24px" }}>
               Education
             </h3>
-            <div className="education-list" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <div className="education-list" style={{ display: "flex", flexDirection: "column" }}>
               {educationList.map((entry, idx) => (
                 <div
                   key={idx}
                   className="education-row"
                   style={{
-                    display: "grid", gridTemplateColumns: "100px 1fr", gap: "16px",
-                    paddingBottom: "14px", borderBottom: idx < educationList.length - 1 ? "1px solid var(--border)" : "none",
+                    display: "grid", gridTemplateColumns: "40px 1fr", gap: "16px",
+                    padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
                   }}
                 >
-                  <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+                  <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
                     {String(idx + 1).padStart(2, "0")}
                   </span>
                   <p style={{ fontSize: "0.85rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.5, overflowWrap: "break-word", wordBreak: "keep-all" }}>
@@ -999,21 +1137,15 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
         {/* ──────────────── 6. AWARDS & COMPETITIONS ──────────────── */}
         {combinedAwardsCount > 0 && (
-          <section style={{ marginBottom: "64px" }}>
-            <h3 className="display" style={{
-              fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
-              borderBottom: "1px solid var(--border)", paddingBottom: "12px", marginBottom: "24px"
-            }}>
+          <section style={SECTION_STYLE}>
+            <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, marginBottom: "24px" }}>
               {splitAwardsAndCompetitions ? "Awards" : "Awards & Competitions"}
             </h3>
             <AwardRows items={splitAwardsAndCompetitions ? awardsList : [...awardsList, ...competitionsList]} />
 
             {splitAwardsAndCompetitions && competitionsList.length > 0 && (
               <>
-                <h3 className="display" style={{
-                  fontSize: "1.1rem", color: "var(--navy)", textTransform: "uppercase",
-                  borderBottom: "1px solid var(--border)", paddingBottom: "12px", margin: "40px 0 24px"
-                }}>
+                <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, margin: "36px 0 24px" }}>
                   Competitions
                 </h3>
                 <AwardRows items={competitionsList} />
@@ -1024,11 +1156,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
         {/* ──────────────── 7. REVIEWS & ARTICLES — review_links, flat list ──────────────── */}
         {reviewItems.length > 0 && (
-          <section style={{ marginBottom: "80px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderBottom: "1.5px solid var(--navy)", paddingBottom: "12px", marginBottom: "8px" }}>
-              <h3 className="display" style={{
-                fontSize: "1.15rem", color: "var(--navy)", textTransform: "uppercase", margin: 0
-              }}>
+          <section style={SECTION_STYLE}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "20px" }}>
+              <h3 className="mono" style={SECTION_LABEL_STYLE}>
                 Reviews & Articles
               </h3>
               <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)" }}>
@@ -1047,10 +1177,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 const row = (
                   <div style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "14px 4px", borderTop: idx > 0 ? "1px solid var(--border)" : "none",
+                    padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
                   }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
-                      <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--navy)", overflowWrap: "break-word" }}>
+                      <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--navy)", overflowWrap: "break-word" }}>
                         {title}
                       </span>
                       <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>
@@ -1059,9 +1189,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     </div>
                     {url && (
                       <span style={{
-                        fontSize: "0.72rem", border: "1px solid var(--navy)", borderRadius: "20px",
-                        padding: "5px 12px", color: "var(--navy)", background: "#FFFFFF",
-                        fontWeight: 800, whiteSpace: "nowrap", flexShrink: 0, marginLeft: "12px",
+                        fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)",
+                        whiteSpace: "nowrap", flexShrink: 0, marginLeft: "12px",
                       }}>
                         Read ↗
                       </span>
@@ -1075,7 +1204,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ textDecoration: "none", color: "inherit", borderRadius: "8px" }}
+                    className="press-link"
+                    style={{ textDecoration: "none", color: "inherit" }}
                   >
                     {row}
                   </a>
@@ -1087,59 +1217,59 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
-        {/* ──────────────── 6. DIGITAL ARTIST CARD HERO (맨 밑에 배치) ──────────────── */}
-        <section style={{
-          display: "flex", flexDirection: "column", alignItems: "center",
-          marginBottom: "80px", borderTop: "1.5px solid var(--border)", paddingTop: "48px"
-        }}>
-          <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "32px" }}>
-            <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-              POPOK DIGITAL PASS CARD
-            </span>
-            <h3 style={{ fontSize: "1.6rem", fontWeight: 900, color: "var(--navy)", marginTop: "6px", letterSpacing: "-0.02em" }}>
-              Official Creative ID
-            </h3>
-            <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>
-              아티스트의 신원을 인증하고 간편하게 정보를 전달하는 디지털 명함 카드입니다.
-            </p>
-          </div>
+        {/* ──────────────── 9. DIGITAL CARD & SHARE ──────────────── */}
+        <section style={{ ...SECTION_STYLE, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
+            DIGITAL CARD & QR
+          </span>
+          <h3 style={{ fontSize: "1.3rem", fontWeight: 900, color: "var(--navy)", margin: 0, marginBottom: "6px" }}>
+            {artist.name} 작가의 명함을 공유해보세요
+          </h3>
+          <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", marginTop: 0, marginBottom: "28px" }}>
+            카드에 마우스를 올리거나 클릭하면 뒷면 QR 코드를 스캔할 수 있습니다.
+          </p>
 
-          {/* Popok Card aligned (Click to flip) */}
-          <div style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "24px" }}>
+          {/* Visual 3D Flippable Digital Business Card */}
+          <div style={{ marginBottom: "28px", width: "100%", display: "flex", justifyContent: "center" }}>
             <PopokCard
               name={artist.name}
-              nameEn={artist.name_en}
+              nameEn={artist.name_en || undefined}
               genre={artist.genre}
               instagram={artist.instagram}
-              id={artist.id}
-              slug={artist.slug || artist.id}
-              profileImage={artist.profileImage}
+              id={String(artist.recordId || artist.id || "")}
+              slug={artist.slug || artist.id || id}
+              profileImage={artist.profile_image_url || undefined}
             />
           </div>
 
-          {/* Action layout buttons */}
-          <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-            <button 
+          <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+            <button
               onClick={handleShareUrl}
-              className="btn-outline"
-              style={{ padding: "10px 24px", borderRadius: "30px", fontSize: "0.8rem", fontWeight: 800, cursor: "pointer" }}
+              style={{
+                padding: "11px 22px", borderRadius: "4px", border: "1px solid var(--navy)",
+                background: "transparent", color: "var(--navy)", fontSize: "0.78rem", fontWeight: 800,
+                textTransform: "uppercase", letterSpacing: "0.03em", cursor: "pointer",
+              }}
             >
-              🔗 Copy URL
+              Copy URL
             </button>
-            <button 
+            <button
               onClick={handleDownloadQr}
-              className="btn-outline"
-              style={{ padding: "10px 24px", borderRadius: "30px", fontSize: "0.8rem", fontWeight: 800, cursor: "pointer" }}
+              style={{
+                padding: "11px 22px", borderRadius: "4px", border: "1px solid var(--navy)",
+                background: "transparent", color: "var(--navy)", fontSize: "0.78rem", fontWeight: 800,
+                textTransform: "uppercase", letterSpacing: "0.03em", cursor: "pointer",
+              }}
             >
-              💾 Save QR
+              Save QR
             </button>
           </div>
         </section>
 
-        {/* ──────────────── 7. FOOTER METRICS ──────────────── */}
+        {/* ──────────────── 10. FOOTER METRICS ──────────────── */}
         <footer style={{
           display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "20px",
-          borderTop: "1px solid var(--border)", paddingTop: "24px",
+          padding: "24px 0",
           fontSize: "0.72rem", color: "var(--ink-faint)", fontFamily: "monospace"
         }}>
           <div style={{ display: "flex", gap: "16px" }}>
@@ -1154,165 +1284,264 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
       </div>
 
-      {/* ──────────────── 8. WORK DETAIL BOTTOM SHEET PANEL (Embedded video & fallbacks) ──────────────── */}
+      {/* ──────────────── 8. WORK DETAIL MODAL ──────────────── */}
       {activeWork && parsedActiveMedia && (
-        <>
-          {/* Dimmed Blur Backdrop Overlay */}
-          <div className="bottom-sheet-overlay" onClick={() => setActiveWork(null)} />
-          
-          {/* Sliding Bottom Panel Drawer */}
-          <div className="bottom-sheet-panel">
-            
-            {/* Top Drag Handle Indicator Bar */}
-            <div style={{ width: "40px", height: "4px", background: "#EAE6DD", borderRadius: "2px", margin: "12px auto 6px auto", flexShrink: 0 }} />
-
-            {/* Main scrollable body */}
-            <div style={{ overflowY: "auto", padding: "12px 32px 32px 32px", display: "flex", flexDirection: "column", gap: "24px" }}>
-              
-              {/* Header Info */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: "12px" }}>
-                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--accent-dark)", fontWeight: 800 }}>
-                  PROJECT SPEC SHEET
+        <div className="artist-work-modal-backdrop" onClick={() => setActiveWork(null)}>
+          <div className="artist-drawer-main" onClick={(e) => e.stopPropagation()}>
+            <div
+              style={{
+                position: "sticky",
+                top: 0,
+                backgroundColor: "rgba(255,255,255,0.96)",
+                backdropFilter: "blur(8px)",
+                padding: "16px 24px",
+                borderBottom: "1px solid var(--border)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                zIndex: 10,
+              }}
+            >
+              <div style={{ minWidth: 0 }}>
+                <span className="mono" style={{ fontSize: "0.68rem", fontWeight: 800, color: "var(--accent-dark)", letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: "2px" }}>
+                  {[activeWork.role, activeWork.genre].filter(Boolean).join(" · ") || "WORK ARCHIVE"}
                 </span>
-                <button
-                  onClick={() => setActiveWork(null)}
-                  style={{
-                    width: "28px", height: "28px", borderRadius: "50%", border: "1px solid var(--border)",
-                    background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: "0.75rem", color: "var(--navy)"
-                  }}
-                >
-                  ✕
-                </button>
+                <h3 style={{ fontSize: "1.15rem", fontWeight: 950, color: "var(--navy)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.02em" }}>
+                  {activeWork.title}
+                </h3>
               </div>
+              <button onClick={() => setActiveWork(null)} style={{ border: "none", background: "none", fontSize: "1.6rem", fontWeight: 300, cursor: "pointer", color: "var(--ink-muted)", padding: "4px 8px", lineHeight: 1 }}>
+                ×
+              </button>
+            </div>
 
-              {/* Grid content split on desktop */}
-              <div className="responsive-stack-320" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "32px" }}>
-                
-                {/* Left: Embedded Video Player / Project Image / Logo Placeholder */}
-                <div style={{
-                  width: "100%",
-                  aspectRatio: parsedActiveMedia.type === "youtube"
-                    ? ((parsedActiveMedia as any).aspectRatio || getYouTubePreviewAspectRatio(parsedActiveMedia.url || ""))
-                    : (parsedActiveMedia.type === "vimeo" || parsedActiveMedia.type === "video") ? "16 / 9" : "4 / 3",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  border: "1px solid var(--border)",
-                  background: "#171411",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  position: "relative"
-                }}>
-                  {activeWork.image && !activeWork.image.includes("cake-placeholder") ? (
-                    <img
-                      src={activeWork.image}
-                      alt={activeWork.title}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    /* Same "no image" placeholder treatment as the Company Detail portfolio grid */
-                    <div style={{
-                      width: "100%", height: "100%", display: "flex", flexDirection: "column",
-                      alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "10px"
-                    }}>
-                      <span style={{
-                        fontWeight: 950, fontSize: "1.5rem", color: "var(--navy)", letterSpacing: "-0.04em",
-                        display: "flex", alignItems: "center", gap: "2px"
+            {/* Drawer Content */}
+            <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+              {/* Media Section */}
+              {(() => {
+                const workImages = normalizeWorkImages(activeWork);
+                return (
+                  <div style={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: parsedActiveMedia.type === "youtube"
+                      ? ((parsedActiveMedia as any).aspectRatio || getYouTubePreviewAspectRatio(parsedActiveMedia.url || ""))
+                      : (parsedActiveMedia.type === "vimeo" || parsedActiveMedia.type === "video") ? "16 / 9" : "1.6",
+                    backgroundColor: "#171411",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    border: "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    userSelect: "none",
+                  }}>
+                    {parsedActiveMedia.type === "youtube" && isYouTubeUrl(parsedActiveMedia.url || "") ? (
+                      <iframe
+                        src={getYouTubeEmbedUrl(parsedActiveMedia.url || "") ? `${getYouTubeEmbedUrl(parsedActiveMedia.url || "")}?autoplay=0&controls=1&rel=0` : ""}
+                        style={{ width: "100%", height: "100%", border: 0 }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title={activeWork.title}
+                      />
+                    ) : parsedActiveMedia.type === "vimeo" && getVimeoEmbedUrl(parsedActiveMedia.url || "") ? (
+                      <iframe
+                        src={getVimeoEmbedUrl(parsedActiveMedia.url || "") || ""}
+                        style={{ width: "100%", height: "100%", border: 0 }}
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                        title={activeWork.title}
+                      />
+                    ) : parsedActiveMedia.type === "video" && parsedActiveMedia.src ? (
+                      <video
+                        src={parsedActiveMedia.src}
+                        poster={parsedActiveMedia.poster || activeWork.image}
+                        controls
+                        playsInline
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
+                    ) : workImages.length > 0 ? (
+                      <>
+                        <img
+                          src={workImages[activeImageIndex] || workImages[0]}
+                          alt={`${activeWork.title} ${activeImageIndex + 1}`}
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                        />
+
+                        {workImages.length > 1 && (
+                          <>
+                            {/* Prev Button */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveImageIndex((prev) => (prev === 0 ? workImages.length - 1 : prev - 1));
+                              }}
+                              aria-label="이전 이미지"
+                              style={{
+                                position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
+                                width: "36px", height: "36px", borderRadius: "50%",
+                                backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
+                                border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 5,
+                              }}
+                            >
+                              ‹
+                            </button>
+
+                            {/* Next Button */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveImageIndex((prev) => (prev === workImages.length - 1 ? 0 : prev + 1));
+                              }}
+                              aria-label="다음 이미지"
+                              style={{
+                                position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
+                                width: "36px", height: "36px", borderRadius: "50%",
+                                backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
+                                border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 5,
+                              }}
+                            >
+                              ›
+                            </button>
+
+                            {/* Counter Badge */}
+                            <span className="mono" style={{
+                              position: "absolute", bottom: "12px", right: "12px",
+                              background: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
+                              padding: "3px 8px", borderRadius: "10px", fontSize: "0.68rem",
+                              fontWeight: 700, backdropFilter: "blur(4px)", zIndex: 5,
+                            }}>
+                              {activeImageIndex + 1} / {workImages.length}
+                            </span>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <div style={{
+                        width: "100%", height: "100%", display: "flex", flexDirection: "column",
+                        alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "10px"
                       }}>
-                        POPOK
-                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
-                      </span>
-                      <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                        준비중
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: Technical Spec Sheet details */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "6px" }}>
-                      <h4 style={{ fontSize: "1.35rem", fontWeight: 950, color: "var(--navy)", margin: 0 }}>
-                        {activeWork.title}
-                      </h4>
-                      <span className="mono" style={{ color: "var(--ink-muted)", fontSize: "0.8rem" }}>({activeWork.year})</span>
-                    </div>
-                    {activeWork.role && (
-                      <span className="tag" style={{ background: "var(--accent)", color: "var(--navy)", border: "none", fontSize: "0.65rem", fontWeight: 800 }}>
-                        {activeWork.role}
-                      </span>
+                        <span style={{
+                          fontWeight: 950, fontSize: "1.5rem", color: "var(--navy)", letterSpacing: "-0.04em",
+                          display: "flex", alignItems: "center", gap: "2px"
+                        }}>
+                          POPOK
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
+                        </span>
+                        <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                          준비중
+                        </span>
+                      </div>
                     )}
                   </div>
+                );
+              })()}
 
-                  {activeWork.description && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                        PROJECT DESCRIPTION
-                      </span>
-                      <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.6, margin: 0 }}>
-                        {activeWork.description}
-                      </p>
-                    </div>
+              {/* Meta Info & Description */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <span className="mono" style={{ fontSize: "0.8rem", color: "var(--ink-muted)", fontWeight: 700 }}>
+                    {activeWork.year}
+                  </span>
+                  {activeWork.venue && (
+                    <span className="mono" style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>
+                      · {activeWork.venue}
+                    </span>
                   )}
-
-                  {activeWork.credits && (
-                    <div style={{
-                      display: "flex", flexDirection: "column", gap: "6px", background: "#FAF8F5",
-                      border: "1px solid var(--border)", padding: "16px", borderRadius: "12px"
-                    }}>
-                      <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                        CREDITS / CONTRIBUTORS
-                      </span>
-                      <p style={{ fontSize: "0.78rem", color: "var(--navy)", fontWeight: 700, fontFamily: "monospace", margin: 0, lineHeight: 1.4 }}>
-                        {activeWork.credits}
-                      </p>
-                    </div>
+                  {activeWork.role && (
+                    <span className="tag" style={{ background: "var(--accent)", color: "var(--navy)", border: "none", fontSize: "0.65rem", fontWeight: 800 }}>
+                      {activeWork.role}
+                    </span>
                   )}
                 </div>
 
-              </div>
+                {activeWork.description && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
+                      PROJECT DESCRIPTION
+                    </span>
+                    <p style={{ fontSize: "0.85rem", color: "var(--navy)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line" }}>
+                      {activeWork.description}
+                    </p>
+                  </div>
+                )}
 
-              {/* Video button footer action */}
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px", marginTop: "12px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--ink-muted)", fontFamily: "monospace" }}>
-                  <span>ARCHIVE ID</span>
-                  <span style={{ fontWeight: 800, color: "var(--navy)" }}>{activeWork.id}</span>
-                </div>
-                
-                {activeWork.videoUrl ? (
-                  <a
-                    href={activeWork.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-lime"
-                    style={{
-                      textDecoration: "none", display: "block", textAlign: "center", padding: "14px",
-                      borderRadius: "24px", fontSize: "0.85rem", fontWeight: 800, cursor: "pointer"
-                    }}
-                  >
-                    Watch Video ↗
-                  </a>
-                ) : (
-                  <button
-                    disabled
-                    style={{
-                      display: "block", width: "100%", padding: "14px", borderRadius: "24px",
-                      border: "none", background: "var(--border)", color: "var(--ink-faint)",
-                      fontSize: "0.85rem", fontWeight: 700, cursor: "not-allowed"
-                    }}
-                  >
-                    No External Video Available
-                  </button>
+                {activeWork.credits && (
+                  <div style={{
+                    display: "flex", flexDirection: "column", gap: "6px", background: "#FAF8F5",
+                    border: "1px solid var(--border)", padding: "16px", borderRadius: "8px"
+                  }}>
+                    <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
+                      CREDITS / CONTRIBUTORS
+                    </span>
+                    <p style={{ fontSize: "0.78rem", color: "var(--navy)", fontWeight: 700, fontFamily: "monospace", margin: 0, lineHeight: 1.45 }}>
+                      {activeWork.credits}
+                    </p>
+                  </div>
                 )}
               </div>
 
+              {/* Action Button Footer */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+                <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>
+                  ID: {activeWork.id}
+                </span>
+                {(activeWork.videoUrl || activeWork.externalLink) ? (
+                  <a
+                    href={activeWork.videoUrl || activeWork.externalLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      padding: "10px 20px", borderRadius: "20px", background: "var(--navy)",
+                      color: "#FFFFFF", fontSize: "0.8rem", fontWeight: 800, textDecoration: "none",
+                      display: "inline-flex", alignItems: "center", gap: "4px"
+                    }}
+                  >
+                    {activeWork.videoUrl ? "Watch Video ↗" : "외부 링크 ↗"}
+                  </a>
+                ) : (
+                  <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontFamily: "monospace" }}>
+                    No External Link
+                  </span>
+                )}
+              </div>
             </div>
-
           </div>
-        </>
+        </div>
       )}
+
+      {/* 포퐄 보내기 CTA — was previously nested inside the
+          `{activeWork && parsedActiveMedia && (...)}` work-detail bottom
+          sheet fragment above, which only renders after a viewer clicks
+          into a specific work. That meant this section never mounted
+          during normal browsing at all (true for every viewer state,
+          including logged-out), regardless of the viewer-state fetch or
+          isSelf logic. It now sits at the top level of the page so it
+          always mounts once the artist record has loaded. `artist.status`
+          is not gated further here — /api/artists/[id] (via
+          getArtistById/getArtistBySlug in lib/artists.ts) does not filter
+          by status at all, so a viewer already looking at this page has
+          already been served the artist regardless of status; the DB
+          default is also `status || "published"`. The viewer's own
+          profile is hidden via isSelf inside SendPortfolioSection, not
+          here. portfolioViewerState always has a value (defaults to the
+          logged-out shape) — never gated on it being "loaded" first, so a
+          slow/failed fetch can no longer hide this entire section.
+          Rendered directly (no wrapping container div) so it lays out
+          exactly like on the company page — SendPortfolioSection already
+          centers its own content at 1040px internally. */}
+      <SendPortfolioSection
+        target={{ type: "artist", id: artist.recordId || artist.id, name: artist.name, imageUrl: artist.profile_image_url || artist.profileImage || null }}
+        viewerState={portfolioViewerState}
+        currentPath={pathname}
+        onToast={triggerToast}
+      />
 
     </div>
   );
@@ -1332,7 +1561,7 @@ function AwardRows({ items }: { items: AwardLike[] }) {
           className="award-row"
           style={{
             display: "grid", gridTemplateColumns: "80px 1fr", gap: "16px",
-            padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border)" : "none",
+            padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
           }}
         >
           <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>

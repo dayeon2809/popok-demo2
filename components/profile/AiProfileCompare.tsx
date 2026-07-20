@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ParsedProfile } from "@/lib/profileParser";
+import { normalizeArtistCurrentActivity, cleanArtistCurrentActivityForPayload } from "@/lib/artist-profile";
 
 interface AiProfileCompareProps {
   currentProfile: {
@@ -59,7 +60,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
   });
 
   // Helper to check array duplicates
-  const compareArrays = (currentArr: any[], parsedArr: any[], type: "works" | "affiliations" | "awards" | "competitions" | "education" | "links") => {
+  const compareArrays = (currentArr: any[], parsedArr: any[], type: "works" | "affiliations" | "awards" | "competitions" | "education" | "current_activity" | "links") => {
     return parsedArr.map((parsedItem, idx) => {
       let matchIdx = -1;
 
@@ -73,7 +74,10 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
           cleanString(cur.title) === cleanString(parsedItem.title) &&
           cleanString(cur.year) === cleanString(parsedItem.year)
         );
-      } else if (type === "education") {
+      } else if (type === "education" || type === "current_activity") {
+        // Plain string arrays — same match rule for both, but compared as
+        // fully separate lists (never merged into one another; current
+        // activity and education are distinct DB columns).
         matchIdx = currentArr.findIndex(cur => cleanString(cur) === cleanString(parsedItem));
       } else if (type === "affiliations") {
         matchIdx = currentArr.findIndex(cur =>
@@ -122,6 +126,19 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
   const [awardsComp, setAwardsComp] = useState(() => compareArrays(currentProfile.awards, parsedProfile.awards, "awards"));
   const [competitionsComp, setCompetitionsComp] = useState(() => compareArrays(currentProfile.competitions, parsedProfile.competitions, "competitions"));
   const [educationComp, setEducationComp] = useState(() => compareArrays(currentProfile.education, parsedProfile.education, "education"));
+  // Normalized before comparison (trim/drop-empty) via lib/artist-profile.ts
+  // — the same function the dashboard and public page use — so a stray
+  // blank entry from either side never shows up as a spurious "new" row.
+  // Kept as its own comp/checked state pair, entirely separate from
+  // affiliationsComp — current_activity and affiliations are different DB
+  // columns and are never merged into each other.
+  const [currentActivityComp, setCurrentActivityComp] = useState(() =>
+    compareArrays(
+      normalizeArtistCurrentActivity(currentProfile.current_activity),
+      normalizeArtistCurrentActivity(parsedProfile.current_activity),
+      "current_activity"
+    )
+  );
   const [linksComp, setLinksComp] = useState(() => compareArrays(currentProfile.links, parsedProfile.links, "links"));
 
   // Check state arrays
@@ -130,6 +147,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
   const [checkedAwards, setCheckedAwards] = useState(() => awardsComp.map(a => a.defaultChecked));
   const [checkedCompetitions, setCheckedCompetitions] = useState(() => competitionsComp.map(c => c.defaultChecked));
   const [checkedEducation, setCheckedEducation] = useState(() => educationComp.map(e => e.defaultChecked));
+  const [checkedCurrentActivity, setCheckedCurrentActivity] = useState(() => currentActivityComp.map(c => c.defaultChecked));
   const [checkedLinks, setCheckedLinks] = useState(() => linksComp.map(l => l.defaultChecked));
 
   // Perform Merge
@@ -213,6 +231,19 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
       }
     });
 
+    // Current activity merge — same append-only rule as education (plain
+    // string arrays never produce a "conflict" status, only "new" or
+    // "identical"). cleanArtistCurrentActivityForPayload trims and drops
+    // any blank entries while preserving order, matching how the dashboard
+    // and save API normalize this field.
+    let mergedCurrentActivity = [...currentProfile.current_activity];
+    currentActivityComp.forEach((comp, idx) => {
+      if (checkedCurrentActivity[idx] && comp.status === "new") {
+        mergedCurrentActivity.push(comp.item);
+      }
+    });
+    mergedCurrentActivity = cleanArtistCurrentActivityForPayload(mergedCurrentActivity);
+
     // Links merge
     let mergedLinks = [...currentProfile.links];
     linksComp.forEach((comp, idx) => {
@@ -229,6 +260,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
       artist: mergedArtist,
       works: mergedWorks,
       affiliations: mergedAffiliations,
+      current_activity: mergedCurrentActivity,
       awards: mergedAwards,
       competitions: mergedCompetitions,
       education: mergedEducation,
@@ -359,6 +391,14 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
           checkedAffiliations,
           setCheckedAffiliations,
           (item) => `${item.name} (${item.position || "소속원"})`
+        )}
+
+        {renderArraySection(
+          "현재 활동 비교 (Current Activity)",
+          currentActivityComp,
+          checkedCurrentActivity,
+          setCheckedCurrentActivity,
+          (item) => String(item)
         )}
 
         {renderArraySection(

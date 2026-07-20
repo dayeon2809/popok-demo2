@@ -62,7 +62,7 @@ export default function ArtistsClient() {
   const searchParams = useSearchParams();
 
   const [query, setQuery] = useState<string>(() => searchParams.get("q") || "");
-  const [selectedField, setSelectedField] = useState<string>(() => searchParams.get("category") || "dance");
+  const [selectedField, setSelectedField] = useState<string>(() => searchParams.get("category") || "all");
   const [selectedSubField, setSelectedSubField] = useState<string>(() => searchParams.get("sub") || "all");
   const [selectedType, setSelectedType] = useState<string>(() => searchParams.get("type") || "all");
   const [selectedConsonant, setSelectedConsonant] = useState<string>(() => searchParams.get("cho") || "all");

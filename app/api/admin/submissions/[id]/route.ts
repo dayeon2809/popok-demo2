@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { parsedArtistProfileSchema, type ParsedArtistProfile } from "@/lib/parsedProfile";
+import { notifyArtistProfileApproved } from "@/lib/email/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -274,6 +275,17 @@ export async function POST(
       if (updateSubErr) {
         console.warn("Submissions status update failed:", updateSubErr);
       }
+
+      // No auth.users account is linked to a submission at this point (see
+      // notifyArtistProfileApproved's docstring) — sends to the submission's
+      // own email field. Awaited so it completes before this function
+      // returns, but never allowed to turn a successful publish into an
+      // error response.
+      await notifyArtistProfileApproved({
+        submissionId: String(numericId),
+        submissionEmail: subData.email || "",
+        artistName: name,
+      }).catch((err) => console.error("[POST publish] Notification error:", err));
 
       return NextResponse.json({ success: true, slug, artistId });
     }

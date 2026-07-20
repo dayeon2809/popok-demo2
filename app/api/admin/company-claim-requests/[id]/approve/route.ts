@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { notifyArtistCompanyConnectionApproved } from "@/lib/email/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,22 @@ export async function POST(
       console.error("[POST approve] Request status update error:", claimUpdateError);
       return NextResponse.json({ success: false, error: "신청 상태 업데이트에 실패했습니다." }, { status: 500 });
     }
+
+    // Notification is a side effect of a successful approval, never the
+    // other way around — both DB writes above have already committed by
+    // this point. Awaited (not fire-and-forget) so it actually completes
+    // before this serverless function returns/freezes, but its outcome
+    // never affects the response below — sendPopokEmail never throws, and
+    // any failure is only ever recorded in email_notification_logs.
+    // sendPopokEmail's own idempotency (the log table's unique index) is
+    // what actually prevents a resend if this route is called again for an
+    // already-approved request.
+    await notifyArtistCompanyConnectionApproved({
+      requestId,
+      recipientUserId: targetUserId,
+      artistName: reqObj.applicant_name || "회원",
+      companyName: reqObj.companies?.name || "단체",
+    }).catch((err) => console.error("[POST approve] Notification error:", err));
 
     return NextResponse.json({
       success: true,

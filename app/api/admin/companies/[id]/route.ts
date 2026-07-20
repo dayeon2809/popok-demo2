@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { getOrganizationApplicationByCompanyId } from "@/lib/companies";
 import { cleanWorksForPayload } from "@/lib/company-works";
+import { normalizeCompanyRepresentativeImages, cleanCompanyAwardsForPayload } from "@/lib/company";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ const EDITABLE_FIELDS = [
   "name", "name_en", "slug", "verified", "genre", "category", "city_or_region",
   "bio_short", "bio", "profile_image_url", "motion_video_url", "email",
   "instagram", "website", "portfolio_url",
-  "profile_image_urls", "current_activity", "works", "awards", "review_links", "links",
+  "profile_image_urls", "representative_images", "current_activity", "works", "awards", "review_links", "links",
   "source_text",
   "founded_year", "brand_color", "mission", "vision", "core_values", "history",
 ];
@@ -134,6 +135,12 @@ export async function PATCH(
     // or a string credits value reach the DB.
     if (update.works !== undefined) {
       update.works = cleanWorksForPayload(update.works);
+    }
+    if (update.representative_images !== undefined) {
+      update.representative_images = normalizeCompanyRepresentativeImages(update.representative_images);
+    }
+    if (update.awards !== undefined) {
+      update.awards = cleanCompanyAwardsForPayload(update.awards);
     }
 
     if (Object.keys(update).length === 0) {

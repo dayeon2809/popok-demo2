@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient, getSupabaseServer } from "@/lib/supabaseServer";
+import {
+  cleanArtistEducationForPayload,
+  cleanArtistCurrentActivityForPayload,
+  cleanArtistAffiliationsForPayload,
+  cleanArtistAwardsForPayload,
+  cleanArtistCompetitionsForPayload,
+} from "@/lib/artist-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -103,11 +110,11 @@ export async function POST(request: Request) {
       bio: typeof bio === "string" ? bio : null,
       bio_short: typeof bio_short === "string" ? bio_short : null,
       works: Array.isArray(works) ? works : [],
-      affiliations: Array.isArray(affiliations) ? affiliations : [],
-      current_activity: Array.isArray(current_activity) ? current_activity : [],
-      awards: Array.isArray(awards) ? awards : [],
-      competitions: Array.isArray(competitions) ? competitions : [],
-      education: Array.isArray(education) ? education : [],
+      affiliations: cleanArtistAffiliationsForPayload(affiliations),
+      current_activity: cleanArtistCurrentActivityForPayload(current_activity),
+      awards: cleanArtistAwardsForPayload(awards),
+      competitions: cleanArtistCompetitionsForPayload(competitions),
+      education: cleanArtistEducationForPayload(education),
       links: Array.isArray(links) ? links : [],
     };
 

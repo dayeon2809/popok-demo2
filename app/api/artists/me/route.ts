@@ -1,5 +1,15 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import {
+  cleanArtistEducationForPayload,
+  cleanArtistCurrentActivityForPayload,
+  cleanArtistAffiliationsForPayload,
+  cleanArtistAwardsForPayload,
+  cleanArtistCompetitionsForPayload,
+  cleanArtistRepresentativeImagesForPayload,
+  normalizeArtistRepresentativeImages,
+} from "@/lib/artist-profile";
+import { cleanWorksForPayload, normalizeWorks } from "@/lib/works";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +32,11 @@ export async function GET() {
     if (artistError) {
       console.error("[GET /api/artists/me] DB query error:", artistError);
       return NextResponse.json({ success: false, error: "아티스트 조회에 실패했습니다." }, { status: 500 });
+    }
+
+    if (artist) {
+      artist.profile_image_urls = normalizeArtistRepresentativeImages(artist.profile_image_urls);
+      artist.works = normalizeWorks(artist.works);
     }
 
     return NextResponse.json({ success: true, data: artist });
@@ -62,12 +77,14 @@ export async function POST(request: Request) {
       genre,
       role,
       profile_image_url,
+      profile_image_urls,
       motion_video_url,
       youtube_url,
       instagram,
       website,
       works,
       affiliations,
+      current_activity,
       education,
       awards,
       competitions,
@@ -86,15 +103,17 @@ export async function POST(request: Request) {
     if (genre !== undefined) updateData.genre = genre;
     if (role !== undefined) updateData.role = role;
     if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
+    if (profile_image_urls !== undefined) updateData.profile_image_urls = cleanArtistRepresentativeImagesForPayload(profile_image_urls);
     if (motion_video_url !== undefined) updateData.motion_video_url = motion_video_url;
     if (youtube_url !== undefined) updateData.youtube_url = youtube_url;
     if (instagram !== undefined) updateData.instagram = instagram;
     if (website !== undefined) updateData.website = website;
-    if (works !== undefined) updateData.works = works;
-    if (affiliations !== undefined) updateData.affiliations = affiliations;
-    if (education !== undefined) updateData.education = education;
-    if (awards !== undefined) updateData.awards = awards;
-    if (competitions !== undefined) updateData.competitions = competitions;
+    if (works !== undefined) updateData.works = cleanWorksForPayload(works);
+    if (affiliations !== undefined) updateData.affiliations = cleanArtistAffiliationsForPayload(affiliations);
+    if (current_activity !== undefined) updateData.current_activity = cleanArtistCurrentActivityForPayload(current_activity);
+    if (education !== undefined) updateData.education = cleanArtistEducationForPayload(education);
+    if (awards !== undefined) updateData.awards = cleanArtistAwardsForPayload(awards);
+    if (competitions !== undefined) updateData.competitions = cleanArtistCompetitionsForPayload(competitions);
     if (links !== undefined) updateData.links = links;
     
     if (slug !== undefined) {
@@ -127,3 +146,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "서버 처리 중 오류가 발생했습니다." }, { status: 500 });
   }
 }
+

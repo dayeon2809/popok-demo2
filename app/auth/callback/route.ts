@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import { isSafeRelativeRedirect } from "@/lib/safeRedirect";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
+  const redirectParam = searchParams.get("redirect");
+  const returnPath = isSafeRelativeRedirect(redirectParam) ? redirectParam : null;
 
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "popok.kr";
   const proto = request.headers.get("x-forwarded-proto") || "https";
@@ -38,8 +41,9 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}/onboarding`);
       }
 
-      console.error("[Auth Callback] Redirecting to /my-popok. Reason: artist exists");
-      return NextResponse.redirect(`${origin}/my-popok`);
+      const destination = returnPath || "/my-popok";
+      console.error("[Auth Callback] Redirecting to", destination, ". Reason: artist exists");
+      return NextResponse.redirect(`${origin}${destination}`);
     } else {
       console.error("[Auth Callback] Failed: authError is present or user is null.");
     }

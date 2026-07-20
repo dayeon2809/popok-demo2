@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { getOrganizationApplicationByCompanyId } from "@/lib/companies";
+import { notifyCompanyProfileApproved } from "@/lib/email/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +69,22 @@ export async function POST(
       console.error(`[POST /api/admin/companies/${id}/publish] update error:`, updateError);
       return NextResponse.json({ success: false, error: "공개 처리에 실패했습니다." }, { status: 500 });
     }
+
+    // This is the moment the company page actually goes live — the real
+    // "단체 등록 승인" event a rep would expect an email about (as opposed to
+    // the earlier organization_applications "approved" step, which only
+    // creates a still-invisible draft company). No auth.users account is
+    // linked to the application at this point either, so this sends to the
+    // application's own contact email, not an account email. Awaited so it
+    // completes before this function returns, but never turns a successful
+    // publish into an error response.
+    const application = await getOrganizationApplicationByCompanyId(id).catch(() => null);
+    await notifyCompanyProfileApproved({
+      companyId: id,
+      applicantEmail: application?.email || "",
+      recipientName: application?.contact_name || c.name || "대표자",
+      companyName: c.name || "단체",
+    }).catch((err) => console.error(`[POST /api/admin/companies/${id}/publish] Notification error:`, err));
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

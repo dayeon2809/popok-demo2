@@ -137,6 +137,10 @@ export interface Company {
   bio?: string | null;
   profile_image_url?: string | null;
   profile_image_urls?: string[];
+  // "Brand mood" gallery (up to 3) shown near the top of the company detail
+  // page — separate concept from per-work images (works[].images). See
+  // lib/company.ts normalizeCompanyRepresentativeImages().
+  representative_images?: string[] | null;
   motion_video_url?: string | null;
   email?: string | null;
   instagram?: string | null;
@@ -178,7 +182,8 @@ export interface Company {
 
   // JSONB Arrays
   works?: any[] | null;
-  awards?: any[] | null;
+  // { year?, title?, organization?, result? } — see lib/company.ts normalizeCompanyAwards()
+  awards?: Array<{ year?: string; title?: string; organization?: string; result?: string }> | null;
   review_links?: any[] | null;
   links?: any[] | null;
 }

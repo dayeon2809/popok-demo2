@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, getSupabaseServer } from "@/lib/supabaseServer";
 import { mapCompanyRowToCompany } from "@/lib/companies";
 import { cleanWorksForPayload } from "@/lib/company-works";
+import { normalizeCompanyRepresentativeImages, cleanCompanyAwardsForPayload } from "@/lib/company";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,7 @@ export async function PUT(
     // statement fail with 42703. Re-add only after an actual migration lands.
     if (body.profile_image_url !== undefined) updateData.profile_image_url = typeof body.profile_image_url === "string" ? body.profile_image_url.trim() || null : null;
     if (Array.isArray(body.profile_image_urls)) updateData.profile_image_urls = body.profile_image_urls;
+    if (Array.isArray(body.representative_images)) updateData.representative_images = normalizeCompanyRepresentativeImages(body.representative_images);
 
     if (body.email !== undefined) updateData.email = typeof body.email === "string" ? body.email.trim() || null : null;
     if (body.instagram !== undefined) updateData.instagram = typeof body.instagram === "string" ? body.instagram.trim() || null : null;
@@ -78,6 +80,7 @@ export async function PUT(
     if (Array.isArray(body.history)) updateData.history = body.history;
     if (Array.isArray(body.review_links)) updateData.review_links = body.review_links;
     if (Array.isArray(body.links)) updateData.links = body.links;
+    if (Array.isArray(body.awards)) updateData.awards = cleanCompanyAwardsForPayload(body.awards);
 
     const { data: updatedRow, error: updateError } = await (supabase.from("companies" as any) as any)
       .update(updateData)

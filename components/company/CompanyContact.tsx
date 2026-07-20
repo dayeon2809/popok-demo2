@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import type { Company } from "@/types";
+import { normalizeOptionalCompanyText } from "@/lib/company";
 
 interface CompanyContactProps {
   company: Company;
@@ -37,9 +38,15 @@ export default function CompanyContact({ company }: CompanyContactProps) {
 
   const hasReviews = Object.keys(groupedReviews).length > 0;
 
-  const emailText = company.email || "inquiry@popok-dance.org";
-  const webText = company.website || "www.popok-dance.org";
-  const instaText = company.instagram || "@popok_dance_official";
+  // No fallback values — company.email/website/instagram are all null for
+  // most companies in the live DB; a placeholder like "www.popok-dance.org"
+  // is fabricated UI text, not real data, so it's just hidden when unset.
+  const emailText = normalizeOptionalCompanyText(company.email);
+  const webText = normalizeOptionalCompanyText(company.website);
+  const instaText = normalizeOptionalCompanyText(company.instagram);
+  const hasContactInfo = !!(emailText || webText || instaText);
+
+  if (!hasReviews && !hasContactInfo) return null;
 
   return (
     <section
@@ -82,7 +89,7 @@ export default function CompanyContact({ company }: CompanyContactProps) {
       <div className="contact-grid-container">
         
         {/* Press Links (Grouped by Work) */}
-        {hasReviews ? (
+        {hasReviews && (
           <div>
             <h3
               className="mono"
@@ -167,11 +174,10 @@ export default function CompanyContact({ company }: CompanyContactProps) {
               })}
             </div>
           </div>
-        ) : (
-          <div style={{ display: "none" }} />
         )}
 
         {/* Contact info */}
+        {hasContactInfo && (
         <div>
           <h3
             className="mono"
@@ -188,34 +194,41 @@ export default function CompanyContact({ company }: CompanyContactProps) {
           </h3>
 
           <div className="contact-info-card">
-            <div>
-              <span className="mono" style={{ display: "block", fontSize: "0.62rem", marginBottom: "4px" }}>
-                Official Email
-              </span>
-              <a href={`mailto:${emailText}`} style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", textDecoration: "none", borderBottom: `1.5px solid ${brandAccent}`, paddingBottom: "2px" }}>
-                {emailText}
-              </a>
-            </div>
+            {emailText && (
+              <div>
+                <span className="mono" style={{ display: "block", fontSize: "0.62rem", marginBottom: "4px" }}>
+                  Official Email
+                </span>
+                <a href={`mailto:${emailText}`} style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", textDecoration: "none", borderBottom: `1.5px solid ${brandAccent}`, paddingBottom: "2px" }}>
+                  {emailText}
+                </a>
+              </div>
+            )}
 
-            <div>
-              <span className="mono" style={{ display: "block", fontSize: "0.62rem", marginBottom: "4px" }}>
-                Website
-              </span>
-              <a href={webText.startsWith("http") ? webText : `https://${webText}`} target="_blank" rel="noreferrer" style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}>
-                {webText} ↗
-              </a>
-            </div>
+            {webText && (
+              <div>
+                <span className="mono" style={{ display: "block", fontSize: "0.62rem", marginBottom: "4px" }}>
+                  Website
+                </span>
+                <a href={webText.startsWith("http") ? webText : `https://${webText}`} target="_blank" rel="noreferrer" style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}>
+                  {webText} ↗
+                </a>
+              </div>
+            )}
 
-            <div>
-              <span className="mono" style={{ display: "block", fontSize: "0.62rem", marginBottom: "4px" }}>
-                Instagram
-              </span>
-              <a href={instaText.startsWith("http") ? instaText : `https://instagram.com/${instaText.replace("@", "")}`} target="_blank" rel="noreferrer" style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}>
-                {instaText} ↗
-              </a>
-            </div>
+            {instaText && (
+              <div>
+                <span className="mono" style={{ display: "block", fontSize: "0.62rem", marginBottom: "4px" }}>
+                  Instagram
+                </span>
+                <a href={instaText.startsWith("http") ? instaText : `https://instagram.com/${instaText.replace("@", "")}`} target="_blank" rel="noreferrer" style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}>
+                  {instaText} ↗
+                </a>
+              </div>
+            )}
           </div>
         </div>
+        )}
 
       </div>
     </section>

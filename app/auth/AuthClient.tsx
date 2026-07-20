@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
-export default function AuthClient() {
+interface AuthClientProps {
+  returnPath?: string | null;
+}
+
+export default function AuthClient({ returnPath }: AuthClientProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [profileType, setProfileType] = useState<"artist" | "organization" | null>(null);
@@ -16,7 +20,9 @@ export default function AuthClient() {
       if (typeof window !== "undefined") {
         sessionStorage.setItem("popok_login_pending", "true");
       }
-      const redirectTo = `${window.location.origin}/auth/callback`;
+      const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+      if (returnPath) callbackUrl.searchParams.set("redirect", returnPath);
+      const redirectTo = callbackUrl.toString();
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

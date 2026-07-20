@@ -6,6 +6,7 @@ import {
   getRelatedCompanies,
 } from "@/lib/companies";
 import { getUpcomingPerformancesByCompanyId } from "@/lib/performances";
+import { getPortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
 import CompanyClientView from "./CompanyClientView";
 
 export const dynamic = "force-dynamic";
@@ -28,11 +29,13 @@ export default async function CompanyDetailPage({
     notFound();
   }
 
-  // Fetch connected artists, related companies, and upcoming performances in parallel
-  const [fetchedArtists, relatedCompanies, upcomingPerformances] = await Promise.all([
+  // Fetch connected artists, related companies, upcoming performances, and the
+  // viewer's "포퐄 보내기" state in parallel
+  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState] = await Promise.all([
     getConnectedArtistsByCompanyId(company.id),
     getRelatedCompanies(company.id),
     getUpcomingPerformancesByCompanyId(company.id),
+    getPortfolioRequestViewerState({ type: "company", id: company.id }),
   ]);
 
   // Mockup: 공원(GONGWON) — add placeholder "연결 아티스트" cards for design/demo
@@ -53,6 +56,7 @@ export default async function CompanyDetailPage({
       artists={artists}
       relatedCompanies={relatedCompanies}
       upcomingPerformances={upcomingPerformances}
+      sendPortfolioViewerState={sendPortfolioViewerState}
     />
   );
 }

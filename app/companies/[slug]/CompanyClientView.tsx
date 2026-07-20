@@ -2,26 +2,31 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { Company } from "@/types";
 import { analytics } from "@/lib/analytics";
+import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
 
 // Import custom company components
 import CompanyCardStack from "@/components/company/CompanyCardStack";
 import CompanyBrochureHeader from "@/components/company/CompanyBrochureHeader";
+import CompanyGallery from "@/components/company/CompanyGallery";
 import CompanyIdentity from "@/components/company/CompanyIdentity";
 import CompanyPortfolio from "@/components/company/CompanyPortfolio";
 import CompanyHistory from "@/components/company/CompanyHistory";
 import CompanyUpcomingPerformances from "@/components/company/CompanyUpcomingPerformances";
 import CompanyArtists from "@/components/company/CompanyArtists";
 import CompanyContact from "@/components/company/CompanyContact";
+import CompanyAwardsLinks from "@/components/company/CompanyAwardsLinks";
 import RelatedCompanies from "@/components/company/RelatedCompanies";
+import SendPortfolioSection from "@/components/portfolio-requests/SendPortfolioSection";
 
 interface CompanyClientViewProps {
   company: Company;
   artists: any[];
   relatedCompanies: Company[];
   upcomingPerformances: any[];
+  sendPortfolioViewerState: PortfolioRequestViewerState;
 }
 
 export default function CompanyClientView({
@@ -29,8 +34,10 @@ export default function CompanyClientView({
   artists,
   relatedCompanies,
   upcomingPerformances = [],
+  sendPortfolioViewerState,
 }: CompanyClientViewProps) {
       const router = useRouter();
+  const pathname = usePathname();
   const [toastMsg, setToastMsg] = useState("");
   const brandAccent = company.brand_color || "#C8EE52"; // default popok lime
 
@@ -216,6 +223,9 @@ export default function CompanyClientView({
         
         <CompanyBrochureHeader company={adaptedCompany as any} artistCount={artists.length} />
 
+        {/* 2b. REPRESENTATIVE IMAGE GALLERY */}
+        <CompanyGallery images={adaptedCompany.representative_images} />
+
         {/* 3. IDENTITY (Mission, Vision, Values) */}
         <CompanyIdentity company={adaptedCompany as any} />
 
@@ -234,10 +244,21 @@ export default function CompanyClientView({
         {/* 8. PRESS & CONTACT */}
         <CompanyContact company={adaptedCompany as any} />
 
+        {/* 8b. AWARDS & LINKS */}
+        <CompanyAwardsLinks company={adaptedCompany as any} />
+
         {/* 9. RELATED DISCOVERY */}
         <RelatedCompanies currentCompany={adaptedCompany as any} relatedCompanies={relatedCompanies} />
 
       </div>
+
+      {/* 10. SEND PORTFOLIO CTA */}
+      <SendPortfolioSection
+        target={{ type: "company", id: company.id, name: company.name, imageUrl: company.profile_image_url }}
+        viewerState={sendPortfolioViewerState}
+        currentPath={pathname}
+        onToast={triggerToast}
+      />
 
       {/* Toast Notification */}
       {toastMsg && (

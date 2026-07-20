@@ -1,5 +1,6 @@
 import { getSupabaseServer } from "./supabaseServer";
 import { toStringArray } from "./normalize";
+import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards } from "./company";
 import type { Company, ConnectedCompany } from "@/types";
 
 export function mapCompanyRowToCompany(record: any): Company {
@@ -18,6 +19,7 @@ export function mapCompanyRowToCompany(record: any): Company {
     bio: record.bio || null,
     profile_image_url: record.profile_image_url || null,
     profile_image_urls: Array.isArray(record.profile_image_urls) ? record.profile_image_urls : [],
+    representative_images: normalizeCompanyRepresentativeImages(record.representative_images),
     motion_video_url: record.motion_video_url || null,
     email: record.email || null,
     instagram: record.instagram || null,
@@ -44,7 +46,7 @@ export function mapCompanyRowToCompany(record: any): Company {
 
     // Base jsonb mappings
     works: Array.isArray(record.works) ? record.works : [],
-    awards: Array.isArray(record.awards) ? record.awards : [],
+    awards: normalizeCompanyAwards(record.awards),
     review_links: Array.isArray(record.review_links) ? record.review_links : [],
     links: Array.isArray(record.links) ? record.links : [],
   };
@@ -170,6 +172,65 @@ export async function getPrimaryConnectedCompanyByArtistId(artistId: string): Pr
     return null;
   } catch (err) {
     console.error("[getPrimaryConnectedCompanyByArtistId] Unexpected error:", err);
+    return null;
+  }
+}
+
+export interface PrimaryCompanyArtist {
+  id: string;
+  name: string;
+  name_en?: string | null;
+  slug?: string | null;
+  role?: string | null;
+  genre?: string | null;
+  profile_image_url?: string | null;
+}
+
+/**
+ * Reverse of getPrimaryConnectedCompanyByArtistId: given a company_id, finds
+ * its current primary representative (artist_companies row with
+ * is_current=true AND is_primary=true). Used to resolve who a "포퐄 보내기"
+ * request's `recipient_artist_id` snapshot points at.
+ *
+ * That snapshot is historical only — live access control for "received
+ * requests" always re-runs this same query fresh (see the RLS policies in
+ * supabase/migrations/20260720010000_add_representative_images_and_portfolio_requests.sql
+ * and app/api/portfolio-requests/received/route.ts), so a representative
+ * change is picked up immediately without touching existing request rows.
+ *
+ * No fallback to a merely-current (non-primary) artist, unlike the artist->
+ * company direction — a company with no primary rep simply has no recipient
+ * yet, and the request is still saved against company_id (see section 10 of
+ * the "포퐄 보내기" spec).
+ */
+export async function getPrimaryArtistByCompanyId(companyId: string): Promise<PrimaryCompanyArtist | null> {
+  try {
+    const supabase = getSupabaseServer();
+    const { data, error } = await supabase
+      .from("artist_companies" as any)
+      .select("created_at, artists(id, name, name_en, slug, role, genre, profile_image_url)")
+      .eq("company_id", companyId)
+      .eq("is_current", true)
+      .eq("is_primary", true)
+      .order("created_at", { ascending: true })
+      .limit(1);
+
+    if (error || !data || data.length === 0) return null;
+
+    const artist = (data[0] as any).artists;
+    if (!artist) return null;
+
+    return {
+      id: String(artist.id),
+      name: artist.name || "",
+      name_en: artist.name_en || null,
+      slug: artist.slug || null,
+      role: artist.role || null,
+      genre: artist.genre || null,
+      profile_image_url: artist.profile_image_url || null,
+    };
+  } catch (err) {
+    console.error("[getPrimaryArtistByCompanyId] Unexpected error:", err);
     return null;
   }
 }

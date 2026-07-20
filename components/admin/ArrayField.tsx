@@ -61,12 +61,14 @@ export function ArrayField<T>({
   onChange,
   newItem,
   renderItem,
+  addLabel = "+ 항목 추가",
 }: {
   label: string;
   items: T[];
   onChange: (items: T[]) => void;
   newItem: () => T;
   renderItem: (item: T, setItem: (next: T) => void) => React.ReactNode;
+  addLabel?: string;
 }) {
   const move = (idx: number, dir: -1 | 1) => {
     const target = idx + dir;
@@ -87,7 +89,7 @@ export function ArrayField<T>({
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
         <label style={labelStyle}>{label}</label>
-        <button type="button" onClick={add} style={actionBtnStyle}>+ 항목 추가</button>
+        <button type="button" onClick={add} style={actionBtnStyle}>{addLabel}</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         {items.length === 0 && (

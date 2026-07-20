@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { Company } from "@/types";
 import { normalizeWorkImages, cleanWorksForPayload } from "@/lib/company-works";
+import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards, cleanCompanyAwardsForPayload, type CompanyAward } from "@/lib/company";
+import { ArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 
 interface CompanyCmsEditorProps {
   company: Company;
@@ -145,6 +147,7 @@ interface PayloadFields {
   bio: string;
   brandColor: string;
   profileImageUrl: string;
+  representativeImages: string[];
   email: string;
   instagram: string;
   website: string;
@@ -154,6 +157,7 @@ interface PayloadFields {
   history: any[];
   reviewLinks: ReviewItem[];
   links: any[];
+  awards: CompanyAward[];
 }
 
 // Builds the exact object shape sent to PUT /api/companies/[id]/update.
@@ -173,6 +177,7 @@ const buildPayload = (f: PayloadFields) => ({
   bio: f.bio.trim(),
   brand_color: f.brandColor.trim(),
   profile_image_url: f.profileImageUrl.trim(),
+  representative_images: normalizeCompanyRepresentativeImages(f.representativeImages),
   email: f.email.trim(),
   instagram: f.instagram.trim(),
   website: f.website.trim(),
@@ -182,6 +187,7 @@ const buildPayload = (f: PayloadFields) => ({
   history: f.history,
   review_links: f.reviewLinks,
   links: f.links,
+  awards: cleanCompanyAwardsForPayload(f.awards),
 });
 
 // Builds the same payload shape directly from a loaded Company row — this is what
@@ -201,6 +207,7 @@ const snapshotFromCompany = (c: any) =>
     bio: c.bio || "",
     brandColor: c.brand_color || "#C8EE52",
     profileImageUrl: c.profile_image_url || "",
+    representativeImages: normalizeCompanyRepresentativeImages(c.representative_images),
     email: c.email || "",
     instagram: c.instagram || "",
     website: c.website || "",
@@ -210,6 +217,7 @@ const snapshotFromCompany = (c: any) =>
     history: Array.isArray(c.history) ? c.history : [],
     reviewLinks: deriveReviewsFromRaw(c.review_links),
     links: Array.isArray(c.links) ? c.links : [],
+    awards: normalizeCompanyAwards(c.awards),
   });
 
 // Treats null/undefined/"" as equivalent, trims strings, and deep-compares
@@ -250,6 +258,12 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
   // Media state: Single Representative Image
   const [profileImageUrl, setProfileImageUrl] = useState(company.profile_image_url || "");
 
+  // Media state: Representative Image Gallery (up to 3, separate from works images)
+  const [representativeImages, setRepresentativeImages] = useState<string[]>(() =>
+    normalizeCompanyRepresentativeImages(company.representative_images)
+  );
+  const [uploadingRepImageSlot, setUploadingRepImageSlot] = useState<number | null>(null);
+
   // Contact states
   const [email, setEmail] = useState(company.email || "");
   const [instagram, setInstagram] = useState(company.instagram || "");
@@ -269,6 +283,9 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
   const [reviewLinks, setReviewLinks] = useState<ReviewItem[]>(() => deriveReviewsFromRaw(company.review_links));
 
   const [links, setLinks] = useState<any[]>(Array.isArray(company.links) ? company.links : []);
+
+  // Awards state — shared shape/normalizer with the admin editor (lib/company.ts)
+  const [awards, setAwards] = useState<CompanyAward[]>(() => normalizeCompanyAwards(company.awards));
 
   // Immutable snapshot of the last-loaded/last-saved company, in outgoing-payload shape.
   // Save diffs live state against this so only actually-changed fields are ever sent.
@@ -346,6 +363,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     setBioShort(company.bio_short || "");
     setBio(company.bio || "");
     setProfileImageUrl(company.profile_image_url || "");
+    setRepresentativeImages(normalizeCompanyRepresentativeImages(company.representative_images));
     setEmail(company.email || "");
     setInstagram(company.instagram || "");
     setWebsite(company.website || "");
@@ -355,6 +373,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     setHistory(Array.isArray(company.history) ? company.history : []);
     setReviewLinks(deriveReviewsFromRaw(company.review_links));
     setLinks(Array.isArray(company.links) ? company.links : []);
+    setAwards(normalizeCompanyAwards(company.awards));
 
     // This company load (fresh fetch or post-save refresh) becomes the new diff baseline.
     originalSnapshotRef.current = snapshotFromCompany(company);
@@ -436,6 +455,58 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     }
   };
 
+  // Representative Image Gallery (up to 3) — separate concept from the single
+  // profile_image_url above and from per-work images; drag-and-drop reorder
+  // isn't available (no DnD library in this project), so reordering uses
+  // simple move-left/right buttons, which also work on mobile touchscreens.
+  const handleRepImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, slotIndex: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (representativeImages.length >= 3 && slotIndex >= representativeImages.length) return;
+
+    setUploadingRepImageSlot(slotIndex);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("path", `companies/${company.id}/representative`);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success && data.url) {
+        setRepresentativeImages((prev) => {
+          const next = [...prev];
+          next[slotIndex] = data.url;
+          return normalizeCompanyRepresentativeImages(next);
+        });
+        triggerToast("대표 이미지가 업로드되었습니다.");
+      } else {
+        triggerToast(data.error || "이미지 업로드 실패");
+      }
+    } catch {
+      triggerToast("업로드 중 오류가 발생했습니다.");
+    } finally {
+      setUploadingRepImageSlot(null);
+    }
+  };
+
+  const handleRemoveRepImage = (idx: number) => {
+    setRepresentativeImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleMoveRepImage = (idx: number, direction: -1 | 1) => {
+    setRepresentativeImages((prev) => {
+      const target = idx + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+  };
+
   // Save changes handler — sends only the fields that actually changed since load/last-save.
   const handleSave = async () => {
     if (!name.trim()) {
@@ -462,6 +533,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
       bio,
       brandColor,
       profileImageUrl,
+      representativeImages,
       email,
       instagram,
       website,
@@ -471,6 +543,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
       history,
       reviewLinks,
       links,
+      awards,
     });
 
     const original = originalSnapshotRef.current;
@@ -1160,6 +1233,126 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
                 </div>
               </div>
             </div>
+
+            <div style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "24px", background: "#FAF9F5" }}>
+              <label style={{ display: "block", fontSize: "0.95rem", fontWeight: 900, color: "var(--navy)", marginBottom: "4px" }}>
+                대표 이미지
+              </label>
+              <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", margin: "0 0 16px 0", lineHeight: 1.5 }}>
+                단체를 잘 보여주는 대표 이미지를 최대 3장 등록해주세요. 단체 상세페이지 상단 갤러리에 노출됩니다. 첫 번째 이미지가 메인 이미지입니다.
+              </p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
+                {[0, 1, 2].map((slotIdx) => {
+                  const imgUrl = representativeImages[slotIdx];
+                  const canUpload = imgUrl || slotIdx === representativeImages.length;
+                  return (
+                    <div key={slotIdx} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          aspectRatio: "1.1",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: imgUrl ? "1.5px solid var(--border)" : "1.5px dashed var(--border)",
+                          background: "#FFFFFF",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {imgUrl ? (
+                          <>
+                            <img src={imgUrl} alt={`대표 이미지 ${slotIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            {slotIdx === 0 && (
+                              <span
+                                className="mono"
+                                style={{
+                                  position: "absolute",
+                                  top: "6px",
+                                  left: "6px",
+                                  fontSize: "0.62rem",
+                                  fontWeight: 800,
+                                  color: "#FFFFFF",
+                                  background: "rgba(23, 20, 17, 0.75)",
+                                  padding: "3px 8px",
+                                  borderRadius: "10px",
+                                }}
+                              >
+                                메인 이미지
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>
+                            {uploadingRepImageSlot === slotIdx ? "업로드 중..." : "이미지 없음"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          onChange={(e) => handleRepImageUpload(e, slotIdx)}
+                          disabled={!canUpload}
+                          style={{ display: "none" }}
+                          id={`rep-image-upload-${slotIdx}`}
+                        />
+                        <label
+                          htmlFor={`rep-image-upload-${slotIdx}`}
+                          style={{
+                            flex: 1,
+                            padding: "6px 8px",
+                            fontSize: "0.7rem",
+                            fontWeight: 800,
+                            color: canUpload ? "var(--navy)" : "var(--ink-faint)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "4px",
+                            cursor: canUpload ? "pointer" : "not-allowed",
+                            textAlign: "center",
+                            background: "#FFFFFF",
+                          }}
+                        >
+                          {imgUrl ? "변경" : canUpload ? "업로드" : "-"}
+                        </label>
+                        {imgUrl && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveRepImage(slotIdx, -1)}
+                              disabled={slotIdx === 0}
+                              title="왼쪽으로 이동"
+                              style={{ width: "24px", height: "24px", fontSize: "0.7rem", border: "1px solid var(--border)", borderRadius: "4px", background: "#FFFFFF", cursor: slotIdx === 0 ? "not-allowed" : "pointer", opacity: slotIdx === 0 ? 0.4 : 1 }}
+                            >
+                              ◀
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveRepImage(slotIdx, 1)}
+                              disabled={slotIdx === representativeImages.length - 1}
+                              title="오른쪽으로 이동"
+                              style={{ width: "24px", height: "24px", fontSize: "0.7rem", border: "1px solid var(--border)", borderRadius: "4px", background: "#FFFFFF", cursor: slotIdx === representativeImages.length - 1 ? "not-allowed" : "pointer", opacity: slotIdx === representativeImages.length - 1 ? 0.4 : 1 }}
+                            >
+                              ▶
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveRepImage(slotIdx)}
+                              title="삭제"
+                              style={{ width: "24px", height: "24px", fontSize: "0.7rem", color: "#991B1B", border: "1px solid #FCA5A5", borderRadius: "4px", background: "#FFFFFF", cursor: "pointer" }}
+                            >
+                              ✕
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
 
@@ -1842,6 +2035,47 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
                 </div>
               ))
             )}
+
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: "20px" }}>
+              <ArrayField<CompanyAward>
+                label="수상 및 선정 내역 (Awards)"
+                items={awards}
+                onChange={setAwards}
+                newItem={() => ({})}
+                addLabel="+ 수상 및 선정 내역 추가"
+                renderItem={(item, set) => (
+                  <>
+                    <div>
+                      <label style={labelStyle}>연도</label>
+                      <input
+                        style={inputStyle}
+                        placeholder="2026"
+                        value={item.year ?? ""}
+                        onChange={(e) => set({ ...item, year: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>수상·선정 내용</label>
+                      <input
+                        style={inputStyle}
+                        placeholder="올해의 신작(후보) 선정"
+                        value={item.title || ""}
+                        onChange={(e) => set({ ...item, title: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>주최·기관명</label>
+                      <input
+                        style={inputStyle}
+                        placeholder="한국문화예술위원회"
+                        value={item.organization || ""}
+                        onChange={(e) => set({ ...item, organization: e.target.value })}
+                      />
+                    </div>
+                  </>
+                )}
+              />
+            </div>
           </div>
         )}
 

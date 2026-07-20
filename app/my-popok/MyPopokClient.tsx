@@ -8,6 +8,26 @@ import AiProfileCompare from "@/components/profile/AiProfileCompare";
 import { analytics } from "@/lib/analytics";
 import CompanyCmsEditor from "@/components/company/CompanyCmsEditor";
 import CompanyClaimModal from "@/components/company/CompanyClaimModal";
+import ReceivedPortfolioRequests from "@/components/portfolio-requests/ReceivedPortfolioRequests";
+import SentPortfolioRequests from "@/components/portfolio-requests/SentPortfolioRequests";
+import { ArrayField, StringArrayField } from "@/components/admin/ArrayField";
+import {
+  normalizeArtistEducation,
+  normalizeArtistCurrentActivity,
+  normalizeArtistAffiliations,
+  normalizeArtistAwards,
+  normalizeArtistCompetitions,
+  normalizeArtistRepresentativeImages,
+  cleanArtistRepresentativeImagesForPayload,
+  cleanArtistEducationForPayload,
+  cleanArtistCurrentActivityForPayload,
+  cleanArtistAffiliationsForPayload,
+  cleanArtistAwardsForPayload,
+  cleanArtistCompetitionsForPayload,
+  type ArtistAffiliation,
+  type ArtistAward,
+} from "@/lib/artist-profile";
+import { normalizeWorkImages, normalizeWorks, cleanWorksForPayload, cleanWorkForPayload } from "@/lib/works";
 import type { Company } from "@/types";
 
 interface Work {
@@ -17,7 +37,9 @@ interface Work {
   description?: string;
   role?: string;
   image_url?: string;
+  images?: string[];
   video_url?: string;
+  credits?: any;
 }
 
 interface Artist {
@@ -30,6 +52,7 @@ interface Artist {
   bio?: string | null;
   bio_short?: string | null;
   profile_image_url?: string | null;
+  profile_image_urls?: string[];
   motion_video_url?: string | null;
   youtube_url?: string | null;
   instagram?: string | null;
@@ -37,10 +60,11 @@ interface Artist {
   works?: Work[] | null;
   status?: string | null;
   verified?: boolean | null;
-  affiliations?: any[];
+  affiliations?: ArtistAffiliation[];
+  current_activity?: string[];
   education?: string[];
-  awards?: any[];
-  competitions?: any[];
+  awards?: ArtistAward[];
+  competitions?: ArtistAward[];
   links?: any[];
 }
 
@@ -60,9 +84,21 @@ export default function MyPopokClient({
 }) {
   const [artist, setArtist] = useState<Artist>(initialArtist);
   const [ownedCompanies, setOwnedCompanies] = useState<Company[]>(initialOwnedCompanies);
-  const [selectedContext, setSelectedContext] = useState<string>("artist"); // "artist" or company.id
+  const [selectedContext, setSelectedContext] = useState<string>("artist"); // "artist" | "received-requests" | "sent-requests" | company.id
   const [claimModalOpen, setClaimModalOpen] = useState(false);
   const isPremium = false; // Stripe payment connection toggle point
+
+  // Deep-link support: /my-popok?tab=received-portfolios (used by the
+  // "새로운 포퐄이 도착했습니다" email's CTA button) or ?tab=sent-portfolios.
+  // Reads window.location directly (not next/navigation's useSearchParams())
+  // so this doesn't force a Suspense boundary onto the whole dashboard for
+  // one deep-link param.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab === "received-portfolios") setSelectedContext("received-requests");
+    else if (tab === "sent-portfolios") setSelectedContext("sent-requests");
+  }, []);
 
   // Form states
   const [name, setName] = useState(artist.name || "");
@@ -73,19 +109,30 @@ export default function MyPopokClient({
   const [bio, setBio] = useState(artist.bio || "");
   const [bioShort, setBioShort] = useState(artist.bio_short || "");
   const [profileImageUrl, setProfileImageUrl] = useState(artist.profile_image_url || "");
+  const [profileImageUrls, setProfileImageUrls] = useState<string[]>(() =>
+    normalizeArtistRepresentativeImages(artist.profile_image_urls)
+  );
   const [motionVideoUrl, setMotionVideoUrl] = useState(artist.motion_video_url || "");
   const [youtubeUrl, setYoutubeUrl] = useState(artist.youtube_url || "");
   const [instagram, setInstagram] = useState(artist.instagram || "");
   const [website, setWebsite] = useState(artist.website || "");
-  const [works, setWorks] = useState<Work[]>(
-    Array.isArray(artist.works) ? artist.works : []
+  const [works, setWorks] = useState<Work[]>(() =>
+    (Array.isArray(artist.works) ? artist.works : []).map(w => ({
+      ...w,
+      images: normalizeWorkImages(w)
+    }))
   );
 
-  // Extra profile fields hooks for AI parsing
-  const [affiliations, setAffiliations] = useState<any[]>(artist.affiliations || []);
-  const [education, setEducation] = useState<string[]>(artist.education || []);
-  const [awards, setAwards] = useState<any[]>(artist.awards || []);
-  const [competitions, setCompetitions] = useState<any[]>(artist.competitions || []);
+  // Activity Timeline / Education / Awards & Competitions — normalized on
+  // load via lib/artist-profile.ts so any legacy/malformed shape in the DB
+  // (defensive only; live data has none as of 2026-07-21) never breaks the
+  // edit form. Same normalizers the public page uses, so what's editable
+  // here always matches what's rendered there.
+  const [affiliations, setAffiliations] = useState<ArtistAffiliation[]>(() => normalizeArtistAffiliations(artist.affiliations));
+  const [currentActivity, setCurrentActivity] = useState<string[]>(() => normalizeArtistCurrentActivity(artist.current_activity));
+  const [education, setEducation] = useState<string[]>(() => normalizeArtistEducation(artist.education));
+  const [awards, setAwards] = useState<ArtistAward[]>(() => normalizeArtistAwards(artist.awards));
+  const [competitions, setCompetitions] = useState<ArtistAward[]>(() => normalizeArtistCompetitions(artist.competitions));
   const [links, setLinks] = useState<any[]>(artist.links || []);
 
   // AI Update modal states
@@ -185,48 +232,99 @@ export default function MyPopokClient({
     return () => clearTimeout(timer);
   }, [slug, initialArtist.slug]);
 
-  // Image Upload handler
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, target: "profile" | number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Slot upload indicator
+  const [uploadingSlot, setUploadingSlot] = useState<string | null>(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("path", "artists/media");
-    formData.append("bucket", "artist-media");
-
-    if (target === "profile") {
-      setUploadingImage(true);
-    }
-
+  // Generic File Upload helper
+  const uploadImageFile = async (file: File, slotKey: string): Promise<string | null> => {
+    setUploadingSlot(slotKey);
     try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("path", "artists/media");
+      formData.append("bucket", "artist-media");
+
       const res = await fetch("/api/upload", {
         method: "POST",
-        body: formData
+        body: formData,
       });
       const data = await res.json();
-
       if (res.ok && data.success && data.url) {
-        if (target === "profile") {
-          setProfileImageUrl(data.url);
-        } else {
-          const updatedWorks = [...works];
-          updatedWorks[target] = {
-            ...updatedWorks[target],
-            image_url: data.url
-          };
-          setWorks(updatedWorks);
-        }
+        return data.url;
       } else {
         alert(data.error || "이미지 업로드에 실패했습니다.");
+        return null;
       }
-    } catch (err) {
+    } catch {
       alert("이미지 업로드 중 오류가 발생했습니다.");
+      return null;
     } finally {
-      if (target === "profile") {
-        setUploadingImage(false);
-      }
+      setUploadingSlot(null);
     }
+  };
+
+  // Profile Image Upload handler
+  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    const url = await uploadImageFile(file, "profile");
+    if (url) setProfileImageUrl(url);
+    setUploadingImage(false);
+  };
+
+  // Representative Image Upload handler (up to 3 images)
+  const handleRepresentativeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, slotIdx: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadImageFile(file, `rep_${slotIdx}`);
+    if (url) {
+      const updated = [...profileImageUrls];
+      updated[slotIdx] = url;
+      setProfileImageUrls(cleanArtistRepresentativeImagesForPayload(updated));
+    }
+  };
+
+  // Representative Image Remove handler (slot removal from state only)
+  const handleRemoveRepresentativeImage = (slotIdx: number) => {
+    const updated = profileImageUrls.filter((_, idx) => idx !== slotIdx);
+    setProfileImageUrls(updated);
+  };
+
+  // Work Image Upload handler (up to 4 images per work)
+  const handleWorkImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, workIdx: number, imgIdx?: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const slotKey = `work_${workIdx}_${imgIdx ?? "new"}`;
+    const url = await uploadImageFile(file, slotKey);
+    if (url) {
+      const updatedWorks = [...works];
+      const targetWork = { ...updatedWorks[workIdx] };
+      const currentImages = normalizeWorkImages(targetWork);
+
+      if (imgIdx !== undefined && imgIdx < currentImages.length) {
+        currentImages[imgIdx] = url;
+      } else if (currentImages.length < 4) {
+        currentImages.push(url);
+      }
+
+      targetWork.images = currentImages;
+      targetWork.image_url = currentImages[0] || "";
+      updatedWorks[workIdx] = targetWork;
+      setWorks(updatedWorks);
+    }
+  };
+
+  // Work Image Remove handler
+  const handleRemoveWorkImage = (workIdx: number, imgIdx: number) => {
+    const updatedWorks = [...works];
+    const targetWork = { ...updatedWorks[workIdx] };
+    const currentImages = normalizeWorkImages(targetWork).filter((_, idx) => idx !== imgIdx);
+
+    targetWork.images = currentImages;
+    targetWork.image_url = currentImages[0] || "";
+    updatedWorks[workIdx] = targetWork;
+    setWorks(updatedWorks);
   };
 
   // Add work item
@@ -238,6 +336,7 @@ export default function MyPopokClient({
       role: "",
       description: "",
       image_url: "",
+      images: [],
       video_url: ""
     };
     setWorks([...works, newWork]);
@@ -275,15 +374,7 @@ export default function MyPopokClient({
     setSaveSuccess(false);
 
     try {
-      const cleanedWorks = works.map(w => ({
-        id: w.id,
-        title: w.title ? w.title.trim() : "",
-        year: w.year,
-        role: w.role ? w.role.trim() : "",
-        description: w.description ? w.description.trim() : "",
-        image_url: w.image_url || "",
-        video_url: w.video_url || (w as any).video || (w as any).videoUrl || ""
-      }));
+      const cleanedWorks = cleanWorksForPayload(works);
 
       const res = await fetch("/api/artists/me", {
         method: "POST",
@@ -297,15 +388,17 @@ export default function MyPopokClient({
           bio: bio.trim() || null,
           bio_short: bioShort.trim() || null,
           profile_image_url: profileImageUrl || null,
+          profile_image_urls: cleanArtistRepresentativeImagesForPayload(profileImageUrls),
           motion_video_url: motionVideoUrl.trim() || null,
           youtube_url: youtubeUrl.trim() || null,
           instagram: instagram.trim() || null,
           website: website.trim() || null,
           works: cleanedWorks,
-          affiliations,
-          education,
-          awards,
-          competitions,
+          affiliations: cleanArtistAffiliationsForPayload(affiliations),
+          current_activity: cleanArtistCurrentActivityForPayload(currentActivity),
+          education: cleanArtistEducationForPayload(education),
+          awards: cleanArtistAwardsForPayload(awards),
+          competitions: cleanArtistCompetitionsForPayload(competitions),
           links
         })
       });
@@ -313,6 +406,12 @@ export default function MyPopokClient({
       const data = await res.json();
       if (res.ok && data.success) {
         setArtist(data.data);
+        if (data.data?.profile_image_urls) {
+          setProfileImageUrls(normalizeArtistRepresentativeImages(data.data.profile_image_urls));
+        }
+        if (data.data?.works) {
+          setWorks(normalizeWorks(data.data.works));
+        }
         setSaveSuccess(true);
         if (newWorksCount > 0) {
           analytics.workCreated(newWorksCount);
@@ -446,6 +545,44 @@ export default function MyPopokClient({
                   </span>
                 </button>
               ))}
+
+              <span style={{ color: "var(--border-dark)", fontSize: "0.8rem", margin: "0 4px" }}>|</span>
+
+              <button
+                type="button"
+                onClick={() => setSelectedContext("received-requests")}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "0.82rem",
+                  fontWeight: 800,
+                  border: selectedContext === "received-requests" ? "1.5px solid var(--navy)" : "1px solid var(--border)",
+                  backgroundColor: selectedContext === "received-requests" ? "var(--navy)" : "#FFFFFF",
+                  color: selectedContext === "received-requests" ? "#FFFFFF" : "var(--navy)",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                받은 포퐄
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedContext("sent-requests")}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "0.82rem",
+                  fontWeight: 800,
+                  border: selectedContext === "sent-requests" ? "1.5px solid var(--navy)" : "1px solid var(--border)",
+                  backgroundColor: selectedContext === "sent-requests" ? "var(--navy)" : "#FFFFFF",
+                  color: selectedContext === "sent-requests" ? "#FFFFFF" : "var(--navy)",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                보낸 포퐄
+              </button>
             </div>
           </div>
 
@@ -470,12 +607,16 @@ export default function MyPopokClient({
           </button>
         </div>
 
-        {/* CONDITIONAL RENDER: ORGANIZATION CMS OR PERSONAL ARTIST CMS */}
+        {/* CONDITIONAL RENDER: ORGANIZATION CMS, PORTFOLIO REQUESTS, OR PERSONAL ARTIST CMS */}
         {selectedCompany ? (
           <CompanyCmsEditor
             company={selectedCompany}
             onSaveSuccess={handleUpdateOwnedCompanyInState}
           />
+        ) : selectedContext === "received-requests" ? (
+          <ReceivedPortfolioRequests onToast={(msg) => alert(msg)} />
+        ) : selectedContext === "sent-requests" ? (
+          <SentPortfolioRequests onToast={(msg) => alert(msg)} />
         ) : (
           <>
         {/* PREMIUM CMS DASHBOARD HERO PANEL */}
@@ -651,12 +792,12 @@ export default function MyPopokClient({
           {/* Main Edit Form */}
           <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             
-            {/* Card 1: 기본 정보 */}
+            {/* Card 1: 기본 정보 & 프로필/대표 이미지 갤러리 */}
             <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
-                1. 기본 활동 정보
+                1. 기본 활동 정보 & 프로필 이미지
               </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
                   <label style={labelStyle}>
                     이름 (필수)
@@ -702,13 +843,147 @@ export default function MyPopokClient({
                     <input type="text" value={role} onChange={(e) => setRole(e.target.value)} placeholder="예: 안무가" style={inputStyle} />
                   </label>
                 </div>
+
+                {/* 프로필 이미지 (프로필 썸네일·사진 1장) */}
+                <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "16px" }}>
+                  <label style={{ ...labelStyle, fontSize: "0.85rem", color: "var(--navy)" }}>
+                    프로필 사진 (프로필 썸네일 1장)
+                  </label>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "8px" }}>
+                    <div style={{
+                      width: "90px", height: "90px", borderRadius: "50%", overflow: "hidden",
+                      border: "2px solid var(--border)", background: "var(--bg-warm)",
+                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                    }}>
+                      {profileImageUrl ? (
+                        <img src={profileImageUrl} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <span style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>사진 없음</span>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px", flexGrow: 1 }}>
+                      <input
+                        type="text"
+                        value={profileImageUrl}
+                        onChange={(e) => setProfileImageUrl(e.target.value)}
+                        placeholder="https://..."
+                        style={inputStyle}
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfileImageUpload}
+                        style={{ display: "none" }}
+                        id="profile-photo-file-input"
+                        disabled={uploadingImage || uploadingSlot === "profile"}
+                      />
+                      <label
+                        htmlFor="profile-photo-file-input"
+                        className="btn-outline"
+                        style={{
+                          padding: "8px 14px", borderRadius: "8px", fontSize: "0.78rem",
+                          fontWeight: 800, cursor: (uploadingImage || uploadingSlot === "profile") ? "not-allowed" : "pointer",
+                          display: "inline-flex", justifyContent: "center", alignItems: "center",
+                          border: "1.5px solid var(--navy)", width: "fit-content"
+                        }}
+                      >
+                        {uploadingSlot === "profile" ? "업로드 중..." : "📸 사진 업로드"}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 대표 이미지 갤러리 (공개 상세페이지 대표 갤러리 최대 3장) */}
+                <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                    <label style={{ ...labelStyle, fontSize: "0.85rem", color: "var(--navy)", margin: 0 }}>
+                      공개 상세페이지 대표 이미지 갤러리 (최대 3장)
+                    </label>
+                    <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700 }}>
+                      {profileImageUrls.length} / 3 장
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", display: "block", marginBottom: "12px" }}>
+                    공개 프로필 하단 갤러리 영역에 표출됩니다. (프로필 사진과 별개로 관리됩니다)
+                  </span>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+                    {[0, 1, 2].map((slotIdx) => {
+                      const imgUrl = profileImageUrls[slotIdx];
+                      const isUploadingThis = uploadingSlot === `rep_${slotIdx}`;
+                      return (
+                        <div
+                          key={slotIdx}
+                          style={{
+                            position: "relative",
+                            aspectRatio: "1.3 / 1",
+                            borderRadius: "10px",
+                            border: "1.5px dashed var(--border)",
+                            background: "#FAF9F5",
+                            overflow: "hidden",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "6px"
+                          }}
+                        >
+                          {imgUrl ? (
+                            <>
+                              <img src={imgUrl} alt={`대표 이미지 ${slotIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveRepresentativeImage(slotIdx)}
+                                style={{
+                                  position: "absolute", top: "6px", right: "6px",
+                                  width: "24px", height: "24px", borderRadius: "50%",
+                                  background: "rgba(23, 20, 17, 0.8)", color: "#FFFFFF",
+                                  border: "none", cursor: "pointer", fontSize: "0.9rem",
+                                  display: "flex", alignItems: "center", justifyContent: "center"
+                                }}
+                                title="슬롯 제거"
+                              >
+                                ×
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleRepresentativeImageUpload(e, slotIdx)}
+                                style={{ display: "none" }}
+                                id={`rep-img-input-${slotIdx}`}
+                                disabled={Boolean(uploadingSlot)}
+                              />
+                              <label
+                                htmlFor={`rep-img-input-${slotIdx}`}
+                                style={{
+                                  width: "100%", height: "100%", display: "flex",
+                                  flexDirection: "column", alignItems: "center", justifyContent: "center",
+                                  cursor: uploadingSlot ? "not-allowed" : "pointer", gap: "4px"
+                                }}
+                              >
+                                <span style={{ fontSize: "1.1rem" }}>{isUploadingThis ? "⏳" : "🖼️"}</span>
+                                <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--navy)" }}>
+                                  {isUploadingThis ? "업로드 중..." : `대표 ${slotIdx + 1}`}
+                                </span>
+                              </label>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
             </div>
 
             {/* Card 2: 프로필 미디어 및 소개 */}
             <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
-                2. 프로필 소개 및 미디어
+                2. 프로필 소개 및 비디어 URL
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
                 <label style={labelStyle}>
@@ -733,115 +1008,26 @@ export default function MyPopokClient({
                   />
                 </label>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "20px" }} className="form-row-2col">
-                  <label style={labelStyle}>
-                    대표 프로필 이미지 URL
-                    <input type="text" value={profileImageUrl} onChange={(e) => setProfileImageUrl(e.target.value)} placeholder="https://..." style={inputStyle} />
-                    <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", marginTop: "4px" }}>또는 아래 업로드 버튼으로 직접 등록하세요.</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, "profile")}
-                      style={{ display: "none" }}
-                      id="profile-img-upload-input"
-                    />
-                    <label
-                      htmlFor="profile-img-upload-input"
-                      className="btn-outline"
-                      style={{
-                        padding: "10px 14px",
-                        borderRadius: "10px",
-                        textAlign: "center",
-                        fontSize: "0.82rem",
-                        fontWeight: 800,
-                        cursor: uploadingImage ? "not-allowed" : "pointer",
-                        marginTop: "8px",
-                        display: "inline-flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        border: "1.5px solid var(--navy)"
-                      }}
-                    >
-                      {uploadingImage ? "이미지 업로드 중..." : "📸 파일 업로드하기"}
-                    </label>
-                  </label>
-                  <div style={{
-                    border: "1px solid var(--border)",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    width: "120px",
-                    height: "120px",
-                    background: "var(--bg-warm)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0
-                  }}>
-                    {profileImageUrl ? (
-                      <img src={profileImageUrl} alt="Profile Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <span style={{ fontSize: "0.8rem", color: "var(--ink-faint)" }}>이미지 없음</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* REPRESENTATIVE PROFILE IMAGE SELECTOR FROM WORKS LIST */}
-                {workImages.length > 0 && (
-                  <div style={{ border: "1px dashed var(--border-dark)", borderRadius: "14px", padding: "16px", background: "var(--bg-warm)", maxWidth: "100%", minWidth: 0, boxSizing: "border-box" }}>
-                    <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 850, color: "var(--navy)", marginBottom: "10px" }}>
-                      💡 작품 이미지에서 대표 이미지 지정
-                    </span>
-                    <div style={{ display: "flex", gap: "8px", overflowX: "auto", paddingBottom: "6px", width: "100%", maxWidth: "100%", minWidth: 0 }} className="no-scrollbar">
-                      {workImages.map((url, index) => (
-                        <div
-                          key={index}
-                          onClick={() => setProfileImageUrl(url)}
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            borderRadius: "8px",
-                            overflow: "hidden",
-                            border: profileImageUrl === url ? "2.5px solid var(--accent-dark)" : "1.5px solid var(--border)",
-                            cursor: "pointer",
-                            position: "relative",
-                            flexShrink: 0
-                          }}
-                        >
-                          <img src={url} alt={`Work img ${index}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          {profileImageUrl === url && (
-                            <div style={{ position: "absolute", top: "2px", right: "2px", background: "var(--accent-dark)", color: "var(--navy)", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "8px", fontWeight: 900 }}>✓</div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <label style={labelStyle}>
-                  모션 프로필 영상
-                  <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 500, display: "block", marginBottom: "4px" }}>
-                    아티스트 상세페이지에 처음 표시되는 세로형 프로필 영상입니다.
-                    9:16 비율의 YouTube Shorts, Vimeo 세로 영상 또는 MP4 링크를 권장합니다.
-                  </span>
-                  <input type="text" value={motionVideoUrl} onChange={(e) => setMotionVideoUrl(e.target.value)} placeholder="예: https://youtube.com/embed/..." style={inputStyle} />
-                </label>
-
-                <label style={labelStyle}>
-                  추가 소개 영상
-                  <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 500, display: "block", marginBottom: "4px" }}>
-                    상세페이지 본문에 표시되는 가로형 소개 또는 하이라이트 영상입니다.
-                  </span>
-                  <input type="text" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="예: https://www.youtube.com/watch?v=..." style={inputStyle} />
-                </label>
-
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
                   <label style={labelStyle}>
-                    인스타그램 아이디
-                    <input type="text" value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="username" style={inputStyle} />
+                    15초 모션 영상 URL
+                    <input
+                      type="text"
+                      value={motionVideoUrl}
+                      onChange={(e) => setMotionVideoUrl(e.target.value)}
+                      placeholder="https://... (MP4 / WebM)"
+                      style={inputStyle}
+                    />
                   </label>
                   <label style={labelStyle}>
-                    개인 웹사이트 주소
-                    <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://..." style={inputStyle} />
+                    유튜브 소개/하이라이트 영상 URL
+                    <input
+                      type="text"
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=..."
+                      style={inputStyle}
+                    />
                   </label>
                 </div>
               </div>
@@ -961,81 +1147,85 @@ export default function MyPopokClient({
                         />
                       </label>
 
-                      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "16px", alignItems: "end" }} className="form-row-2col">
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                          <label style={labelStyle}>
-                            작품 이미지 대표 URL
-                            <input
-                              type="text"
-                              value={work.image_url || ""}
-                              onChange={(e) => handleWorkInputChange(idx, "image_url", e.target.value)}
-                              placeholder="https://..."
-                              style={inputStyle}
-                            />
+                      {/* Work Multi-Images (Up to 4 images) */}
+                      <div style={{ marginTop: "12px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                          <label style={{ ...labelStyle, fontSize: "0.8rem", color: "var(--navy)", margin: 0 }}>
+                            작품 이미지 (최대 4장)
                           </label>
-                          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleImageUpload(e, idx)}
-                              style={{ display: "none" }}
-                              id={`work-image-input-${idx}`}
-                            />
-                            <label
-                              htmlFor={`work-image-input-${idx}`}
-                              className="btn-outline"
-                              style={{
-                                padding: "8px 12px",
-                                borderRadius: "10px",
-                                fontSize: "0.78rem",
-                                fontWeight: 800,
-                                cursor: "pointer",
-                                display: "inline-flex",
-                                justifyContent: "center",
-                                border: "1.5px solid var(--navy)"
-                              }}
-                            >
-                              📷 파일 업로드
-                            </label>
+                          <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700 }}>
+                            {normalizeWorkImages(work).length} / 4 장
+                          </span>
+                        </div>
 
-                            {/* SELECT WORK IMAGE AS REPRESENTATIVE PORTRAIT INLINE */}
-                            {work.image_url && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setProfileImageUrl(work.image_url || "");
-                                  alert("대표 이미지로 임시 설정되었습니다! 최상단 저장하기 버튼을 누르면 적용됩니다.");
-                                }}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+                          {[0, 1, 2, 3].map((imgIdx) => {
+                            const workImgs = normalizeWorkImages(work);
+                            const imgUrl = workImgs[imgIdx];
+                            const isUploadingThis = uploadingSlot === `work_${idx}_${imgIdx}`;
+                            return (
+                              <div
+                                key={imgIdx}
                                 style={{
-                                  border: "1.5px solid var(--navy)",
-                                  borderRadius: "10px",
-                                  padding: "8px 12px",
-                                  fontSize: "0.78rem",
-                                  fontWeight: 800,
-                                  background: profileImageUrl === work.image_url ? "var(--accent)" : "#FFFFFF",
-                                  cursor: "pointer"
+                                  position: "relative",
+                                  aspectRatio: "1.3 / 1",
+                                  borderRadius: "8px",
+                                  border: "1.5px dashed var(--border)",
+                                  background: "#FFFFFF",
+                                  overflow: "hidden",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  padding: "4px"
                                 }}
                               >
-                                {profileImageUrl === work.image_url ? "★ 대표 설정됨" : "☆ 대표로 설정"}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{
-                          border: "1px solid var(--border)",
-                          borderRadius: "10px",
-                          height: "90px",
-                          overflow: "hidden",
-                          background: "var(--bg-warm)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center"
-                        }}>
-                          {work.image_url ? (
-                            <img src={work.image_url} alt="Work Preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          ) : (
-                            <span style={{ fontSize: "0.75rem", color: "var(--ink-faint)" }}>이미지 없음</span>
-                          )}
+                                {imgUrl ? (
+                                  <>
+                                    <img src={imgUrl} alt={`Work ${idx + 1} Img ${imgIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveWorkImage(idx, imgIdx)}
+                                      style={{
+                                        position: "absolute", top: "4px", right: "4px",
+                                        width: "20px", height: "20px", borderRadius: "50%",
+                                        background: "rgba(23, 20, 17, 0.8)", color: "#FFFFFF",
+                                        border: "none", cursor: "pointer", fontSize: "0.8rem",
+                                        display: "flex", alignItems: "center", justifyContent: "center"
+                                      }}
+                                      title="이미지 삭제"
+                                    >
+                                      ×
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleWorkImageUpload(e, idx, imgIdx)}
+                                      style={{ display: "none" }}
+                                      id={`work-img-input-${idx}-${imgIdx}`}
+                                      disabled={Boolean(uploadingSlot)}
+                                    />
+                                    <label
+                                      htmlFor={`work-img-input-${idx}-${imgIdx}`}
+                                      style={{
+                                        width: "100%", height: "100%", display: "flex",
+                                        flexDirection: "column", alignItems: "center", justifyContent: "center",
+                                        cursor: uploadingSlot ? "not-allowed" : "pointer", gap: "2px"
+                                      }}
+                                    >
+                                      <span style={{ fontSize: "1rem" }}>{isUploadingThis ? "⏳" : "📷"}</span>
+                                      <span style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--navy)" }}>
+                                        {isUploadingThis ? "업로드..." : `+ 이미지 ${imgIdx + 1}`}
+                                      </span>
+                                    </label>
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
@@ -1076,6 +1266,87 @@ export default function MyPopokClient({
                   </Link>
                 </div>
               )}
+            </div>
+
+            {/* Card 4: 활동 타임라인 (공개 페이지의 ACTIVITY TIMELINE — current_activity + affiliations) */}
+            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                4. 활동 타임라인
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                <StringArrayField
+                  label="현재 활동 (CURRENT)"
+                  items={currentActivity}
+                  onChange={setCurrentActivity}
+                  placeholder="예: OO컴퍼니 출강 중"
+                />
+                <ArrayField<ArtistAffiliation>
+                  label="소속 / 활동 이력 (AFFILIATION)"
+                  items={affiliations}
+                  onChange={setAffiliations}
+                  newItem={() => ({})}
+                  addLabel="+ 소속·활동 이력 추가"
+                  renderItem={(item, set) => (
+                    <>
+                      <input style={inputStyle} placeholder="소속/프로젝트명" value={item.name || ""} onChange={(e) => set({ ...item, name: e.target.value })} />
+                      <input style={inputStyle} placeholder="역할/직책 (선택)" value={item.position || ""} onChange={(e) => set({ ...item, position: e.target.value })} />
+                      <input style={inputStyle} placeholder="연도 (선택)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                    </>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Card 5: 학력 */}
+            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                5. 학력
+              </h2>
+              <StringArrayField
+                label="학력 (Education)"
+                items={education}
+                onChange={setEducation}
+                placeholder="예: 한국예술종합학교 무용이론과 졸업"
+              />
+            </div>
+
+            {/* Card 6: 수상 및 선정 / 콩쿠르 및 진출 */}
+            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                6. 수상 및 선정
+              </h2>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                <ArrayField<ArtistAward>
+                  label="수상 및 선정 내역 (Awards)"
+                  items={awards}
+                  onChange={setAwards}
+                  newItem={() => ({})}
+                  addLabel="+ 수상 및 선정 내역 추가"
+                  renderItem={(item, set) => (
+                    <>
+                      <input style={inputStyle} placeholder="연도 (예: 2026)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                      <input style={inputStyle} placeholder="수상·선정명" value={item.title || ""} onChange={(e) => set({ ...item, title: e.target.value })} />
+                      <input style={inputStyle} placeholder="주최 기관 (선택)" value={item.organization || ""} onChange={(e) => set({ ...item, organization: e.target.value })} />
+                      <input style={inputStyle} placeholder="결과 (선택, 예: 대상)" value={item.result || ""} onChange={(e) => set({ ...item, result: e.target.value })} />
+                    </>
+                  )}
+                />
+                <ArrayField<ArtistAward>
+                  label="콩쿠르 및 진출 (Competitions)"
+                  items={competitions}
+                  onChange={setCompetitions}
+                  newItem={() => ({})}
+                  addLabel="+ 콩쿠르 및 진출 내역 추가"
+                  renderItem={(item, set) => (
+                    <>
+                      <input style={inputStyle} placeholder="연도 (예: 2025)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                      <input style={inputStyle} placeholder="콩쿠르명" value={item.title || ""} onChange={(e) => set({ ...item, title: e.target.value })} />
+                      <input style={inputStyle} placeholder="주최 기관 (선택)" value={item.organization || ""} onChange={(e) => set({ ...item, organization: e.target.value })} />
+                      <input style={inputStyle} placeholder="결과 (선택, 예: 본선 진출)" value={item.result || ""} onChange={(e) => set({ ...item, result: e.target.value })} />
+                    </>
+                  )}
+                />
+              </div>
             </div>
           </div>
 
@@ -1257,7 +1528,7 @@ export default function MyPopokClient({
                   bio,
                   works,
                   affiliations,
-                  current_activity: [],
+                  current_activity: currentActivity,
                   awards,
                   competitions,
                   education,
@@ -1275,6 +1546,7 @@ export default function MyPopokClient({
 
                   if (merged.works) setWorks(merged.works);
                   if (merged.affiliations) setAffiliations(merged.affiliations);
+                  if (merged.current_activity) setCurrentActivity(merged.current_activity);
                   if (merged.awards) setAwards(merged.awards);
                   if (merged.competitions) setCompetitions(merged.competitions);
                   if (merged.education) setEducation(merged.education);

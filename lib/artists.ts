@@ -85,6 +85,7 @@ export function mapArtistRowToArtist(record: any): Artist {
   return {
     id: record.slug || String(record.id),
     recordId: String(record.id),
+    slug: record.slug || record.id || "",
     name: record.name || "",
     name_en: record.name_en || null,
     /** @deprecated Deletion candidate in future database migration */
