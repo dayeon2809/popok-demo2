@@ -6,6 +6,9 @@ import PopokCard from "@/components/PopokCard";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import AiProfileCompare from "@/components/profile/AiProfileCompare";
 import { analytics } from "@/lib/analytics";
+import CompanyCmsEditor from "@/components/company/CompanyCmsEditor";
+import CompanyClaimModal from "@/components/company/CompanyClaimModal";
+import type { Company } from "@/types";
 
 interface Work {
   id: string;
@@ -46,8 +49,19 @@ const PROFILE_TYPE_LABEL: Record<string, string> = {
   organization: "단체",
 };
 
-export default function MyPopokClient({ initialArtist, profileType }: { initialArtist: Artist; profileType?: string | null }) {
+export default function MyPopokClient({
+  initialArtist,
+  profileType,
+  initialOwnedCompanies = [],
+}: {
+  initialArtist: Artist;
+  profileType?: string | null;
+  initialOwnedCompanies?: Company[];
+}) {
   const [artist, setArtist] = useState<Artist>(initialArtist);
+  const [ownedCompanies, setOwnedCompanies] = useState<Company[]>(initialOwnedCompanies);
+  const [selectedContext, setSelectedContext] = useState<string>("artist"); // "artist" or company.id
+  const [claimModalOpen, setClaimModalOpen] = useState(false);
   const isPremium = false; // Stripe payment connection toggle point
 
   // Form states
@@ -342,10 +356,128 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
       .filter((url): url is string => typeof url === "string" && url.trim().length > 0);
   }, [works]);
 
+  const selectedCompany = useMemo(() => {
+    if (selectedContext === "artist") return null;
+    return ownedCompanies.find((c) => c.id === selectedContext) || null;
+  }, [selectedContext, ownedCompanies]);
+
+  const handleUpdateOwnedCompanyInState = (updatedCompany: Company) => {
+    setOwnedCompanies((prev) =>
+      prev.map((c) => (c.id === updatedCompany.id ? updatedCompany : c))
+    );
+  };
+
   return (
     <div style={{ background: "var(--bg-warm)", minHeight: "100vh", padding: "40px 16px 120px" }}>
       <div className="my-popok-container" style={{ maxWidth: "1080px", margin: "0 auto" }}>
         
+        {/* ACCOUNT / ORGANIZATION CONTEXT SWITCHER BAR */}
+        <div
+          style={{
+            marginBottom: "24px",
+            background: "#FFFFFF",
+            borderRadius: "16px",
+            border: "1.5px solid var(--border)",
+            padding: "16px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "16px",
+            boxShadow: "0 4px 16px rgba(23, 20, 17, 0.03)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+            <span className="mono" style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--ink-muted)", textTransform: "uppercase" }}>
+              내 프로필 / 단체 관리:
+            </span>
+
+            {/* Profile Options */}
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => setSelectedContext("artist")}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "20px",
+                  fontSize: "0.82rem",
+                  fontWeight: 800,
+                  border: selectedContext === "artist" ? "1.5px solid var(--navy)" : "1px solid var(--border)",
+                  backgroundColor: selectedContext === "artist" ? "var(--navy)" : "#FFFFFF",
+                  color: selectedContext === "artist" ? "#FFFFFF" : "var(--navy)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span>○ 내 프로필</span>
+                <span style={{ opacity: 0.75, fontSize: "0.75rem" }}>({artist.name})</span>
+              </button>
+
+              {ownedCompanies.length > 0 && (
+                <span style={{ color: "var(--border-dark)", fontSize: "0.8rem", margin: "0 4px" }}>|</span>
+              )}
+
+              {ownedCompanies.map((comp) => (
+                <button
+                  key={comp.id}
+                  type="button"
+                  onClick={() => setSelectedContext(comp.id)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "20px",
+                    fontSize: "0.82rem",
+                    fontWeight: 800,
+                    border: selectedContext === comp.id ? "1.5px solid var(--navy)" : "1px solid var(--border)",
+                    backgroundColor: selectedContext === comp.id ? "var(--navy)" : "#FFFFFF",
+                    color: selectedContext === comp.id ? "#FFFFFF" : "var(--navy)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <span>○ {comp.name}</span>
+                  <span style={{ fontSize: "0.62rem", background: selectedContext === comp.id ? "rgba(255,255,255,0.2)" : "var(--bg-warm)", padding: "2px 6px", borderRadius: "10px" }}>
+                    단체
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setClaimModalOpen(true)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontSize: "0.82rem",
+              fontWeight: 800,
+              color: "var(--navy)",
+              background: "#FAF9F5",
+              border: "1.5px solid var(--navy)",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = "var(--navy)"}
+            onMouseOut={(e) => e.currentTarget.style.background = "#FAF9F5"}
+          >
+            + 단체 연결 신청
+          </button>
+        </div>
+
+        {/* CONDITIONAL RENDER: ORGANIZATION CMS OR PERSONAL ARTIST CMS */}
+        {selectedCompany ? (
+          <CompanyCmsEditor
+            company={selectedCompany}
+            onSaveSuccess={handleUpdateOwnedCompanyInState}
+          />
+        ) : (
+          <>
         {/* PREMIUM CMS DASHBOARD HERO PANEL */}
         <section style={{
           background: "#FFFFFF",
@@ -984,8 +1116,8 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
           </div>
 
         </div>
-
-      </div>
+      </>
+      )}
 
       {/* SHARE AND QR GENERATION MODAL DIALOG */}
       {shareModalOpen && (
@@ -1156,6 +1288,15 @@ export default function MyPopokClient({ initialArtist, profileType }: { initialA
           </div>
         </div>
       )}
+
+      </div>
+
+      {/* Company Claim Modal */}
+      <CompanyClaimModal
+        isOpen={claimModalOpen}
+        onClose={() => setClaimModalOpen(false)}
+        userName={artist.name}
+      />
 
       {/* Visual responsive styles for sidebar/editor stack */}
       <style>{`

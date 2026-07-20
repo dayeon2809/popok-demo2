@@ -148,7 +148,6 @@ export interface Company {
 
   // Rich Brand/Company Extensions
   brand_color?: string | null;
-  slogan?: string | null;
   mission?: string | null;
   vision?: string | null;
   values?: string[] | null;
@@ -157,8 +156,24 @@ export interface Company {
   founded_year?: number | null;
   history?: Array<{ year: string; event: string }> | null;
   projects?: Array<{ title: string; date?: string; link?: string; description?: string }> | null;
-  press_links?: Array<{ title: string; source?: string; url?: string }> | null;
+  press_links?: Array<{ title: string; publisher?: string; source?: string; date?: string; url?: string; description?: string }> | null;
+
+  /**
+   * @deprecated `companies.slogan` does not exist on the connected Supabase DB
+   * (confirmed via live schema probe, not just current_schema.sql). Always
+   * null from mapCompanyRowToCompany. Not writable — do not add back to any
+   * save payload or API allowlist unless the column is actually migrated in.
+   */
+  slogan?: string | null;
+  /**
+   * @deprecated `companies.logo_url` does not exist on the connected Supabase
+   * DB. Always null from mapCompanyRowToCompany. Not writable.
+   */
   logo_url?: string | null;
+  /**
+   * @deprecated `companies.hero_image_url` does not exist on the connected
+   * Supabase DB. Always null from mapCompanyRowToCompany. Not writable.
+   */
   hero_image_url?: string | null;
 
   // JSONB Arrays

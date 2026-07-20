@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { getOrganizationApplicationByCompanyId } from "@/lib/companies";
+import { cleanWorksForPayload } from "@/lib/company-works";
 
 export const dynamic = "force-dynamic";
 
@@ -125,6 +126,14 @@ export async function PATCH(
       if (Object.prototype.hasOwnProperty.call(body, field)) {
         update[field] = body[field];
       }
+    }
+
+    // Same save contract as the self-serve CMS (app/api/companies/[id]/update):
+    // canonical images[]/structured-credits[] only, regardless of what shape the
+    // admin editor's client state happens to hold — never legacy image/image_url
+    // or a string credits value reach the DB.
+    if (update.works !== undefined) {
+      update.works = cleanWorksForPayload(update.works);
     }
 
     if (Object.keys(update).length === 0) {

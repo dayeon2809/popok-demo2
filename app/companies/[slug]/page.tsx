@@ -29,11 +29,23 @@ export default async function CompanyDetailPage({
   }
 
   // Fetch connected artists, related companies, and upcoming performances in parallel
-  const [artists, relatedCompanies, upcomingPerformances] = await Promise.all([
+  const [fetchedArtists, relatedCompanies, upcomingPerformances] = await Promise.all([
     getConnectedArtistsByCompanyId(company.id),
     getRelatedCompanies(company.id),
     getUpcomingPerformancesByCompanyId(company.id),
   ]);
+
+  // Mockup: 공원(GONGWON) — add placeholder "연결 아티스트" cards for design/demo
+  // purposes only, alongside whatever real artist_companies rows already exist.
+  const mockArtists =
+    company.slug === "gongwon"
+      ? [
+          { id: "mock-ahn-seyoung", name: "안세영", name_en: "Ahn Se-young", profile_image_url: null, slug: null, role: "소속 아티스트", is_current: true, is_primary: false },
+          { id: "mock-baek-seohyun", name: "백서현", name_en: "Baek Seo-hyun", profile_image_url: null, slug: null, role: "소속 아티스트", is_current: true, is_primary: false },
+          { id: "mock-lee-changmin", name: "이창민", name_en: "Lee Chang-min", profile_image_url: null, slug: null, role: "소속 아티스트", is_current: true, is_primary: false },
+        ]
+      : [];
+  const artists = [...fetchedArtists, ...mockArtists];
 
   return (
     <CompanyClientView

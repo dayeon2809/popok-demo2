@@ -26,7 +26,9 @@ export default function CompanyContact({ company }: CompanyContactProps) {
       if (!groups[key]) groups[key] = [];
       groups[key].push({
         title: item.title || "",
-        source: item.source || "",
+        // CMS/API write `publisher` (see CompanyCmsEditor's ReviewItem, review_links
+        // payload) — `item.source` was always undefined for CMS-entered reviews.
+        source: item.publisher || item.source || "",
         url: item.url || "",
       });
     });

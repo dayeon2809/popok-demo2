@@ -74,6 +74,7 @@ export async function GET(req: NextRequest) {
       genre: c.genre,
       category: c.category,
       city_or_region: c.city_or_region,
+      owner_id: c.owner_id || null,
       connectedArtistsCount: countByCompany.get(c.id) || 0,
       fromApplication: fromApplicationSet.has(c.id),
       createdAt: c.created_at,

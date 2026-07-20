@@ -15,6 +15,7 @@ interface AdminCompanyRow {
   genre: string | null;
   category: string | null;
   city_or_region: string | null;
+  owner_id?: string | null;
   connectedArtistsCount: number;
   fromApplication: boolean;
   createdAt: string | null;
@@ -87,6 +88,28 @@ export default function AdminCompaniesPage() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFilter, searchQuery]);
+
+  const handleUnlinkOwner = async (company: AdminCompanyRow) => {
+    if (!confirm(`'${company.name}' 단체의 대표 연결을 해제하시겠습니까? (owner_id = NULL)`)) return;
+    setStatusUpdatingId(company.id);
+    try {
+      const res = await fetch(`/api/admin/companies/${company.id}/unlink-owner`, {
+        method: "POST",
+        headers: authHeader(),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "대표 해제에 실패했습니다.");
+        return;
+      }
+      alert("대표 연결이 해제되었습니다.");
+      await fetchCompanies();
+    } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
 
   const handleStatusAction = async (company: AdminCompanyRow, action: "publish" | "unpublish" | "archive") => {
     setStatusUpdatingId(company.id);
@@ -196,11 +219,18 @@ export default function AdminCompaniesPage() {
                     <td style={{ padding: "12px 14px" }}>
                       <div style={{ fontWeight: 800, color: "var(--navy)" }}>{c.name}</div>
                       {c.name_en && <div style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>{c.name_en}</div>}
-                      {c.verified && (
-                        <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "6px" }}>
-                          VERIFIED
-                        </span>
-                      )}
+                      <div style={{ display: "flex", gap: "4px", marginTop: "4px", flexWrap: "wrap" }}>
+                        {c.verified && (
+                          <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "6px" }}>
+                            VERIFIED
+                          </span>
+                        )}
+                        {c.owner_id && (
+                          <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "#047857", background: "#ECFDF5", padding: "2px 6px", borderRadius: "6px" }}>
+                            대표 연결됨
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ padding: "12px 14px", fontFamily: "monospace", fontSize: "0.78rem", color: "var(--ink-muted)" }}>
                       {c.slug || "-"}
@@ -221,6 +251,16 @@ export default function AdminCompaniesPage() {
                     </td>
                     <td style={{ padding: "12px 14px", textAlign: "right" }}>
                       <div style={{ display: "inline-flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                        {c.owner_id && (
+                          <button
+                            type="button"
+                            onClick={() => handleUnlinkOwner(c)}
+                            disabled={statusUpdatingId === c.id}
+                            style={{ ...actionBtnStyle, color: "#991B1B", borderColor: "#FCA5A5" }}
+                          >
+                            대표 해제
+                          </button>
+                        )}
                         {c.slug && (
                           <Link href={`/admin/companies/${c.id}/preview`} style={{ ...actionBtnStyle, textDecoration: "none", display: "inline-block" }}>
                             미리보기

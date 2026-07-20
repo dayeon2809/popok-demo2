@@ -49,6 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "이주의 공연 관리", path: "/admin/performances" },
     { name: "Organizations", path: "/admin/organizations" },
     { name: "Companies", path: "/admin/companies" },
+    { name: "대표 권한 신청", path: "/admin/company-claim-requests" },
   ];
 
   return (

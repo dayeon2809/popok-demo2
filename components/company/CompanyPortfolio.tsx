@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { Company } from "@/types";
+import { normalizeWorkImages } from "@/lib/company-works";
 import WorkDrawer from "./WorkDrawer";
 
 interface CompanyPortfolioProps {
@@ -31,6 +32,20 @@ const WorkImagePlaceholder = ({ company }: { company: any }) => (
   </div>
 );
 
+function formatShortRole(role: string | null | undefined): string {
+  if (!role || !role.trim()) return "안무";
+  const trimmed = role.trim();
+  // If role contains long credit list (e.g., "안무: 윤경근, 드라마투르그: 박지현...")
+  if (trimmed.includes(":") || trimmed.includes("드라마투르그") || trimmed.includes("무용수:") || trimmed.length > 30) {
+    const firstPart = trimmed.split(":")[0].trim();
+    if (firstPart && firstPart.length < 20) {
+      return firstPart;
+    }
+    return "안무";
+  }
+  return trimmed;
+}
+
 export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
   const [activeWork, setActiveWork] = useState<any | null>(null);
 
@@ -44,7 +59,7 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
       }}
     >
       <style jsx global>{`
-                        .portfolio-grid {
+        .portfolio-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
           gap: 36px 28px;
@@ -151,10 +166,9 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
       ) : (
         <div className="portfolio-grid">
           {works.map((work: any, idx: number) => {
-            const hasImage = !!(work.image_url || work.image || (work.media && work.media.src));
-            const imageUrl = hasImage
-              ? (work.image_url || work.image || (work.media && work.media.src))
-              : "";
+            const workImages = normalizeWorkImages(work);
+            const hasImage = workImages.length > 0;
+            const imageUrl = hasImage ? workImages[0] : "";
 
             return (
               <div
@@ -185,7 +199,7 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
                     <span>{work.year || "n.d."}</span>
                   </div>
                   <h4 className="work-title">{work.title}</h4>
-                  <div className="work-role">{work.role || "Choreography / Artist"}</div>
+                  <div className="work-role">{formatShortRole(work.role)}</div>
                 </div>
               </div>
             );

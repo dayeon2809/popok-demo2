@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import { ArrayField, StringArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
+import { normalizeWorkImages, creditsToDisplayString } from "@/lib/company-works";
 
 // Public Preview Components — kept in lockstep with app/companies/[slug]/CompanyClientView.tsx
 // so the admin Live Preview never drifts from the real public page structure.
@@ -356,12 +357,15 @@ export default function AdminCompanyEditPage() {
     }
   };
 
+  // Admin only ever manages ONE representative image (images[0]) — any
+  // additional images[1..3] set via the self-serve CMS are preserved as-is,
+  // never truncated just because this screen doesn't have slots to show them.
   const handleUploadWorkImage = async (idx: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("bucket", "artist-media");
     formData.append("path", `companies/works`);
-    
+
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -371,7 +375,9 @@ export default function AdminCompanyEditPage() {
       if (data.success && data.url) {
         const newWorks = company ? [...company.works] : [];
         if (newWorks[idx]) {
-          newWorks[idx] = { ...newWorks[idx], image_url: data.url, image: data.url };
+          const existingImages = normalizeWorkImages(newWorks[idx]);
+          const nextImages = [data.url, ...existingImages.slice(1)];
+          newWorks[idx] = { ...newWorks[idx], images: nextImages };
           updateField("works", newWorks);
           alert("이미지 업로드가 완료되었습니다.");
         }
@@ -381,6 +387,28 @@ export default function AdminCompanyEditPage() {
     } catch (err) {
       alert("네트워크 오류가 발생했습니다.");
     }
+  };
+
+  // Replaces only the representative slot (images[0]) from a manually-typed
+  // URL — same preserve-the-rest rule as the uploader above.
+  const handleSetWorkRepresentativeImageUrl = (idx: number, url: string) => {
+    if (!company) return;
+    const newWorks = [...company.works];
+    const existingImages = normalizeWorkImages(newWorks[idx]);
+    const trimmed = url.trim();
+    const nextImages = trimmed ? [trimmed, ...existingImages.slice(1)] : existingImages.slice(1);
+    newWorks[idx] = { ...newWorks[idx], images: nextImages };
+    updateField("works", newWorks);
+  };
+
+  // Removes only the representative image (images[0]); any images[1..3] added
+  // via the CMS shift up and are kept — this is NOT "delete all images".
+  const handleRemoveWorkRepresentativeImage = (idx: number) => {
+    if (!company) return;
+    const newWorks = [...company.works];
+    const existingImages = normalizeWorkImages(newWorks[idx]);
+    newWorks[idx] = { ...newWorks[idx], images: existingImages.slice(1) };
+    updateField("works", newWorks);
   };
 
   const handleJumpToEdit = (panelKey: string) => {
@@ -1746,9 +1774,11 @@ export default function AdminCompanyEditPage() {
                             />
                           </div>
                           
-                          {/* Image upload inputs */}
+                          {/* Image upload — admin manages only the representative image
+                              (images[0]). Any images[1..3] set via the self-serve CMS
+                              are preserved even though this screen can't show them. */}
                           <div style={fieldRowStyle}>
-                            <label style={labelStyle}>작품 이미지 업로드</label>
+                            <label style={labelStyle}>대표 이미지 업로드</label>
                             <div style={{ display: "flex", gap: "10px", alignItems: "center", marginTop: "4px" }}>
                               <input
                                 type="file"
@@ -1759,22 +1789,33 @@ export default function AdminCompanyEditPage() {
                                 }}
                                 style={{ fontSize: "0.78rem" }}
                               />
-                              {(work.image_url || work.image) && (
-                                <img src={work.image_url || work.image} alt="" style={{ width: "40px", height: "40px", borderRadius: "6px", objectFit: "cover", border: "1px solid var(--border)" }} />
+                              {normalizeWorkImages(work)[0] && (
+                                <img src={normalizeWorkImages(work)[0]} alt="" style={{ width: "40px", height: "40px", borderRadius: "6px", objectFit: "cover", border: "1px solid var(--border)" }} />
+                              )}
+                              {normalizeWorkImages(work)[0] && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveWorkRepresentativeImage(idx)}
+                                  style={{ ...dangerBtnStyle, padding: "3px 8px", fontSize: "0.68rem" }}
+                                  title="대표 이미지만 제거합니다. 2~4번째 이미지(CMS에서 추가된 경우)는 유지됩니다."
+                                >
+                                  대표 이미지 제거
+                                </button>
                               )}
                             </div>
+                            {normalizeWorkImages(work).length > 1 && (
+                              <span style={{ fontSize: "0.7rem", color: "var(--ink-faint)", marginTop: "4px", display: "block" }}>
+                                총 {normalizeWorkImages(work).length}장 저장됨 — 관리자 화면은 대표 이미지(1번)만 교체/제거하며, 나머지는 대표자 CMS에서 확인·관리할 수 있습니다.
+                              </span>
+                            )}
                           </div>
 
                           <div style={fieldRowStyle}>
-                            <label style={labelStyle}>작품 이미지 URL (직접 입력 또는 업로드 시 자동 입력)</label>
+                            <label style={labelStyle}>대표 이미지 URL (직접 입력 또는 업로드 시 자동 입력)</label>
                             <input
                               style={inputStyle}
-                              value={work.image_url || work.image || ""}
-                              onChange={(e) => {
-                                const newWorks = [...company.works];
-                                newWorks[idx] = { ...work, image_url: e.target.value, image: e.target.value };
-                                updateField("works", newWorks);
-                              }}
+                              value={normalizeWorkImages(work)[0] || ""}
+                              onChange={(e) => handleSetWorkRepresentativeImageUrl(idx, e.target.value)}
                             />
                           </div>
 
@@ -1785,13 +1826,13 @@ export default function AdminCompanyEditPage() {
                               value={work.video_url || work.video || ""}
                               onChange={(e) => {
                                 const newWorks = [...company.works];
-                                newWorks[idx] = { ...work, video_url: e.target.value, video: e.target.value };
+                                newWorks[idx] = { ...work, video_url: e.target.value };
                                 updateField("works", newWorks);
                               }}
                             />
                           </div>
                         </div>
-                        
+
                         <div style={{ ...fieldRowStyle, marginBottom: "12px" }}>
                           <label style={labelStyle}>작품 설명</label>
                           <textarea
@@ -1805,27 +1846,30 @@ export default function AdminCompanyEditPage() {
                             }}
                           />
                         </div>
-                        
+
                         <div style={fieldRowStyle}>
-                          <label style={labelStyle}>크레딧 (참여 예술가 및 연출 등)</label>
+                          <label style={labelStyle}>크레딧 (참여 예술가 및 연출 등) — 줄마다 &quot;역할: 이름, 이름2&quot;</label>
                           <textarea
                             rows={2}
                             style={{ ...inputStyle, resize: "vertical" }}
-                            value={work.credits || work.role || ""}
+                            value={creditsToDisplayString(work)}
                             onChange={(e) => {
                               const newWorks = [...company.works];
-                              newWorks[idx] = { ...work, credits: e.target.value, role: e.target.value };
+                              // Stored as a plain string here for editing only — the save
+                              // routes (both CMS and admin) normalize this into the
+                              // canonical structured credits[] via lib/company-works.
+                              newWorks[idx] = { ...work, credits: e.target.value };
                               updateField("works", newWorks);
                             }}
                           />
                         </div>
                       </div>
                     ))}
-                    
+
                     <button
                       type="button"
                       onClick={() => {
-                        updateField("works", [...company.works, { title: "", genre: "", image_url: "", video_url: "", description: "", credits: "" }]);
+                        updateField("works", [...company.works, { id: `work_${Date.now()}`, title: "", genre: "", images: [], video_url: "", description: "", credits: "" }]);
                       }}
                       style={{ ...secondaryBtnStyle, alignSelf: "flex-start" }}
                     >
