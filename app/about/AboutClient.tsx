@@ -211,7 +211,7 @@ export default function AboutClient() {
             </span>
             <h3 style={{ fontSize: "1.1rem", fontWeight: 900, color: "var(--navy)", margin: "0 0 8px" }}>공연 기획 & 매칭 플랫폼</h3>
             <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: 0 }}>
-              기획자 및 연출진이 원하는 장르와 스타일의 무용수/안무가를 찾고, Piece of Cake 데이터베이스의 공연 타임라인과 즉각 연동하여 캐스팅 기회를 주선합니다.
+              기획자 및 연출진이 원하는 장르와 스타일의 무용수/안무가를 찾고, POPOK 데이터베이스의 공연 타임라인과 즉각 연동하여 캐스팅 기회를 주선합니다.
             </p>
           </div>
         </div>

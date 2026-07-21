@@ -91,7 +91,7 @@ export default function StatsCTA({
           fontWeight: 700,
           margin: 0
         }}>
-          Piece of Cake는 흩어진 공연 기록을 하나의 도메인으로 연결해 나갑니다.
+          POPOK은 흩어진 공연 기록을 하나의 도메인으로 연결해 나갑니다.
         </p>
       </div>
 

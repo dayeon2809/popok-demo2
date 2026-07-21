@@ -151,7 +151,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   };
 
   const GENRE_OPTIONS = ["현대무용", "발레", "한국무용", "음악", "미술"];
-  const ROLE_OPTIONS = ["무용수", "안무가", "기획자", "단원", "예술감독"];
+  const ROLE_OPTIONS = ["무용수", "안무가", "기획자", "단원", "예술감독", "작곡가", "지휘자", "연주자", "성악가"];
 
   return (
     <div style={{
