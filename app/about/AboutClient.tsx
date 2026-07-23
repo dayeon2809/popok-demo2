@@ -67,7 +67,7 @@ export default function AboutClient() {
   const t = ABOUT_COPY[language];
 
   return (
-    <div style={{ background: "var(--bg-warm)", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ background: "#FFFFFF", minHeight: "100vh", overflowX: "hidden" }}>
       
       {/* ── 1. ABOUT HERO ── */}
       <section style={{
@@ -148,7 +148,7 @@ export default function AboutClient() {
                 padding: "24px",
                 display: "flex",
                 flexDirection: "column",
-                background: "var(--bg-warm)",
+                background: "#FFFFFF",
                 justifyContent: "space-between",
                 height: "240px"
               }}>

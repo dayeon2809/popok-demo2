@@ -202,7 +202,7 @@ export default function AuthNav() {
 
       <style>{`
         .account-menu-item:hover {
-          background: var(--bg-warm);
+          background: rgba(23, 20, 17, 0.05);
         }
       `}</style>
     </div>

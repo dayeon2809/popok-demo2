@@ -20,18 +20,31 @@ export default function CompanyCard({ company }: CompanyCardProps) {
   return (
     <Link
       href={getCompanyDetailHref(company.slug || company.id)}
-      style={{ textDecoration: "none", color: "inherit", display: "block" }}
+      style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}
     >
       <div className="company-showcase-card">
         <style jsx>{`
           .company-showcase-card {
             background: #ffffff;
             border: 1.5px solid var(--border);
-            border-radius: 16px;
+            border-radius: 18px;
             overflow: hidden;
             box-shadow: 0 8px 24px rgba(23, 20, 17, 0.04);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
             min-width: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+          }
+          .company-showcase-card:hover {
+            border-color: var(--navy);
+            box-shadow: 0 12px 28px rgba(23, 20, 17, 0.08);
+          }
+          .company-showcase-card :global(img) {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+          .company-showcase-card:hover :global(img) {
+            transform: scale(1.03);
           }
           .company-showcase-info {
             padding: 16px;
@@ -39,13 +52,12 @@ export default function CompanyCard({ company }: CompanyCardProps) {
             flex-direction: column;
             gap: 6px;
             min-width: 0;
-            min-height: 135px;
+            flex: 1 1 auto;
           }
           @media (max-width: 480px) {
             .company-showcase-info {
               padding: 12px !important;
               gap: 4px !important;
-              min-height: 0 !important;
             }
             .company-showcase-info h4 {
               font-size: 0.88rem !important;
@@ -56,7 +68,7 @@ export default function CompanyCard({ company }: CompanyCardProps) {
             }
           }
         `}</style>
-        <div style={{ width: "100%", aspectRatio: "1.2", background: "var(--bg-warm)", overflow: "hidden" }}>
+        <div style={{ width: "100%", aspectRatio: "1.2", background: "#FAF9F5", overflow: "hidden", flexShrink: 0 }}>
           {showImage ? (
             <img
               src={company.profile_image_url!}
@@ -83,10 +95,11 @@ export default function CompanyCard({ company }: CompanyCardProps) {
           )}
         </div>
         <div className="company-showcase-info">
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
             <h4 style={{
               fontSize: "1rem", fontWeight: 900, color: "var(--navy)", margin: 0,
               overflowWrap: "break-word", wordBreak: "keep-all",
+              display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical", overflow: "hidden",
             }}>
               {company.name}
             </h4>
@@ -99,24 +112,22 @@ export default function CompanyCard({ company }: CompanyCardProps) {
               </span>
             )}
           </div>
-          {company.name_en && (
-            <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)" }}>
-              {company.name_en}
-            </span>
-          )}
-          {(company.genre || company.city_or_region) && (
-            <div style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 600 }}>
-              {[company.genre, company.city_or_region].filter(Boolean).join(" · ")}
-            </div>
-          )}
-          {company.bio_short && (
-            <p className="company-showcase-bio" style={{
-              fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "4px 0 0",
-              display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-            }}>
+          {/* name_en/genre rows always reserve their line height (visibility toggle,
+              not conditional unmount) so every card's info block is the same total
+              height regardless of which optional fields a given company has. */}
+          <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", visibility: company.name_en ? "visible" : "hidden" }}>
+            {company.name_en || "—"}
+          </span>
+          <div style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 600, visibility: (company.genre || company.city_or_region) ? "visible" : "hidden" }}>
+            {[company.genre, company.city_or_region].filter(Boolean).join(" · ") || "—"}
+          </div>
+          <p className="company-showcase-bio" style={{
+            fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "4px 0 0",
+            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+            minHeight: "calc(0.78rem * 1.5 * 2)",
+          }}>
               {company.bio_short}
             </p>
-          )}
         </div>
       </div>
     </Link>

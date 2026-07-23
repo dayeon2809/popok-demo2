@@ -250,6 +250,28 @@ export async function getArtistById(id: string): Promise<Artist | null> {
   return demoArtists.find(d => d.id === id || d.slug === id || d.name === id) || null;
 }
 
+/**
+ * Published artists other than excludeId, for the artist detail page's
+ * "더 탐색할 예술가들" section — mirrors getRelatedCompanies's semantics
+ * (published, exclude self, limit N) but scoped to artists.recordId (uuid),
+ * matching lib/companies.ts:getRelatedCompanies exactly in shape.
+ */
+export async function getRelatedArtists(excludeId: string, limit = 3): Promise<Artist[]> {
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("artists" as any)
+    .select("*")
+    .eq("status", "published")
+    .neq("id", excludeId)
+    .or("artist_type.is.null,artist_type.neq.organization")
+    .limit(limit);
+
+  if (error) {
+    console.error("[getRelatedArtists] Supabase error:", error);
+    return [];
+  }
+  return (data || []).map(mapArtistRowToArtist);
+}
 
 export async function searchArtists(
   query: string,

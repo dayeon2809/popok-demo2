@@ -444,8 +444,8 @@ export default function ArtistsClient() {
               width: "100%",
               padding: "12px 16px",
               fontSize: "0.95rem",
-              borderRadius: "12px",
-              border: "1.5px solid var(--border)",
+              borderRadius: "4px",
+              border: "1px solid var(--border)",
               background: "#FFFFFF",
             }}
           />

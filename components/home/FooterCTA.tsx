@@ -67,14 +67,13 @@ export default function FooterCTA() {
           background: "var(--navy)",
           color: "#FFFFFF",
           padding: "16px 36px",
-          borderRadius: "12px",
+          borderRadius: "999px",
           fontSize: "0.95rem",
           fontWeight: 800,
           display: "inline-flex",
           alignItems: "center",
           gap: "8px",
           transition: "all 0.2s ease",
-          boxShadow: "0 6px 20px rgba(23, 20, 17, 0.12)"
         }}
           onMouseOver={(e) => {
             e.currentTarget.style.transform = "translateY(-2px)";

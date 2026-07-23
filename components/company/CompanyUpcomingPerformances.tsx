@@ -1,19 +1,30 @@
 "use client";
 
 import React from "react";
-import type { Company, Performance } from "@/types";
+import type { Performance } from "@/types";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 
 interface CompanyUpcomingPerformancesProps {
-  company: Company;
   performances: Performance[];
+  /** Poster-placeholder accent stripe color — company's brand_color, or the artist page's fixed accent. */
+  accentColor?: string | null;
+  /**
+   * Company page always shows a "준비 중" empty state (a company's schedule
+   * section is a permanent fixture of that page). The artist page's spec
+   * asks for the section to be entirely hidden when there's nothing upcoming
+   * instead, so it defaults true here but the artist page passes false.
+   */
+  showEmptyState?: boolean;
 }
 
 export default function CompanyUpcomingPerformances({
-  company,
   performances = [],
+  accentColor,
+  showEmptyState = true,
 }: CompanyUpcomingPerformancesProps) {
-  const brandAccent = company.brand_color || "#C8EE52"; // default popok point color
+  const brandAccent = accentColor || "#C8EE52"; // default popok point color
+
+  if (!showEmptyState && performances.length === 0) return null;
 
   const formatPerformanceDates = (startDate?: string | null, endDate?: string | null) => {
     if (!startDate) return "";

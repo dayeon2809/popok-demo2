@@ -248,7 +248,7 @@ export default function CompanyClientView({
         <CompanyHistory company={adaptedCompany as any} />
 
                         {/* 6. UPCOMING PERFORMANCES */}
-        <CompanyUpcomingPerformances company={adaptedCompany as any} performances={upcomingPerformances} />
+        <CompanyUpcomingPerformances accentColor={adaptedCompany.brand_color} performances={upcomingPerformances} />
 
         {/* 7. AFFILIATED ARTISTS */}
         <CompanyArtists company={adaptedCompany as any} artists={artists} />

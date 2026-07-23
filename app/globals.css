@@ -20,11 +20,11 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { background: var(--bg-warm); color: var(--ink); scroll-behavior: smooth; overflow-x: hidden; }
+html { background: #FFFFFF; color: var(--ink); scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-  background: var(--bg-warm);
+  background: #FFFFFF;
   color: var(--ink);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

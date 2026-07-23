@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 
 export default function LegalLayout({ document }: LegalLayoutProps) {
   return (
-    <main style={{ background: "var(--bg-warm)", minHeight: "100vh" }}>
+    <main style={{ background: "#FFFFFF", minHeight: "100vh" }}>
       {/* Main Document Content */}
       <article style={{
         maxWidth: "900px",

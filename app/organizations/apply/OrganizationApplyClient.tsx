@@ -324,7 +324,7 @@ export default function OrganizationApplyClient() {
 
         {orgNameFromQuery && (
           <div style={{
-            background: "var(--bg-warm)",
+            background: "#FFFFFF",
             border: "1px dashed var(--border-dark)",
             borderRadius: "12px",
             padding: "14px 16px",
@@ -582,7 +582,7 @@ export default function OrganizationApplyClient() {
             <div style={{
               fontSize: "0.78rem",
               color: "var(--ink-muted)",
-              background: "var(--bg-warm)",
+              background: "#FFFFFF",
               padding: "10px 14px",
               borderRadius: "8px",
               border: "1px dashed var(--border-dark)",

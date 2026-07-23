@@ -98,7 +98,7 @@ export default function Header() {
   return (
     <nav style={{
       position: "sticky", top: 0, zIndex: 200,
-      background: "rgba(245,241,232,0.92)",
+      background: "rgba(255,255,255,0.92)",
       backdropFilter: "blur(8px)",
       WebkitBackdropFilter: "blur(8px)",
       borderBottom: "1px solid var(--border)",
@@ -208,7 +208,7 @@ export default function Header() {
           className="header-mobile-panel"
           style={{
             position: "absolute", top: "100%", left: 0, right: 0,
-            background: "var(--bg-warm)",
+            background: "#FFFFFF",
             borderTop: "1.5px solid var(--border)",
             boxShadow: "0 12px 24px rgba(30,45,64,0.08)",
             padding: "8px 20px 16px",

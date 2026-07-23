@@ -472,7 +472,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               나만의 디지털 명함 및 포트폴리오를 만들어 보세요.
             </p>
             <div style={{
-              background: "var(--bg-warm)",
+              background: "#FFFFFF",
               padding: "16px",
               borderRadius: "12px",
               border: "1px dashed var(--border-dark)",

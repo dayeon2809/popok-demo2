@@ -186,7 +186,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
         {profileType === "organization" && (
           <div>
             <div style={{
-              background: "var(--bg-warm)",
+              background: "#FFFFFF",
               padding: "16px",
               borderRadius: "12px",
               border: "1px dashed var(--border-dark)",

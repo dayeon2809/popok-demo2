@@ -228,6 +228,54 @@ export async function getUpcomingPerformancesByCompanyId(companyId: string): Pro
   }
 }
 
+/**
+ * Upcoming published performances a specific artist is linked to via the
+ * performance_artists junction table (supabase/migrations/create_performance_artists.sql),
+ * for the artist detail page's "Upcoming Performance" section. Mirrors
+ * getUpcomingPerformancesByCompanyId's semantics (published, not-yet-ended,
+ * soonest first) but joins from the artist side instead of company_id.
+ *
+ * artistId must be the artist's real DB uuid (Artist.recordId), not the
+ * slug-preferred Artist.id.
+ */
+export async function getUpcomingPerformancesByArtistId(artistId: string): Promise<Performance[]> {
+  try {
+    const supabase = getSupabaseServer();
+    const today = getSeoulToday();
+
+    const { data, error } = await supabase
+      .from("performance_artists" as any)
+      .select(`
+        performances (
+          id, title, slug, poster_url, venue, start_date, end_date,
+          organizer, genre, category, status, company_id, external_url,
+          ticket_url, source_url, description, display_order, created_at, updated_at
+        )
+      `)
+      .eq("artist_id", artistId);
+
+    if (error) {
+      console.error("[getUpcomingPerformancesByArtistId] Supabase error:", error);
+      return [];
+    }
+
+    const rows = (data || []).map((row: any) => row.performances).filter(Boolean);
+    const mapped = rows.map(mapPerformanceRowToPerformance);
+
+    return mapped
+      .filter((perf) => {
+        if (perf.status !== "published") return false;
+        const effectiveEndDate = perf.endDate ?? perf.startDate;
+        if (!effectiveEndDate) return false;
+        return effectiveEndDate >= today;
+      })
+      .sort((a, b) => (a.startDate || "").localeCompare(b.startDate || ""));
+  } catch (err) {
+    console.error("[getUpcomingPerformancesByArtistId] Unexpected error:", err);
+    return [];
+  }
+}
+
 // The bucket performance posters live in — the same public "artist-media"
 // bucket artist/company images already use (see app/api/upload/route.ts),
 // under a performances/{id}/ prefix. No dedicated bucket for this feature.

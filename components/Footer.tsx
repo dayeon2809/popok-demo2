@@ -12,7 +12,7 @@ export default function Footer() {
     <footer style={{
       borderTop: "1px solid var(--border)",
       padding: "64px 32px 48px",
-      background: "var(--bg-warm)",
+      background: "#FFFFFF",
     }}>
       {/* Main Row */}
       <div className="footer-inner" style={{

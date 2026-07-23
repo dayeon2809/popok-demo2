@@ -86,7 +86,7 @@ export default function TestimonialsPreview() {
               width: "320px",
               scrollSnapAlign: "start",
               background: "#FFFFFF",
-              borderRadius: "20px",
+              borderRadius: "18px",
               border: "1.5px solid var(--border)",
               padding: "28px 24px",
               display: "flex",

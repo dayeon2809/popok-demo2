@@ -12,7 +12,7 @@ export default function FAQSection() {
   };
 
   return (
-    <section id="faq" className="home-section" style={{ background: "var(--bg-warm)", padding: "100px 32px" }}>
+    <section id="faq" className="home-section" style={{ background: "#FFFFFF", borderTop: "1px solid var(--border)", padding: "100px 32px" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
           <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>

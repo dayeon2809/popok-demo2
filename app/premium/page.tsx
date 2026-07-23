@@ -152,7 +152,7 @@ export default function PremiumPage() {
   };
 
   return (
-    <div style={{ background: "var(--bg-warm)", minHeight: "100vh" }}>
+    <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
       {/* Toast */}
       {toastMsg && (
         <div style={{

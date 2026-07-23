@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import PopokCard from "@/components/PopokCard";
+import FlippingArtistCard from "./FlippingArtistCard";
 import type { Artist } from "@/types";
 
 interface ArtistCarouselProps {
@@ -68,6 +68,7 @@ export default function ArtistCarousel({ title, subtitle, artists, showNewBadge 
       padding: "60px 32px",
       maxWidth: "1120px",
       margin: "0 auto",
+      borderTop: "1px solid var(--border)",
     }}>
       <div style={{
         display: "flex",
@@ -146,7 +147,7 @@ export default function ArtistCarousel({ title, subtitle, artists, showNewBadge 
                     every ratio intact, instead of relying on PopokCard's own fixed px
                     values to somehow shrink themselves. Desktop is untouched (scale: 1). */}
                 <div className="artist-carousel-scale" style={{ position: "relative" }}>
-                  <PopokCard
+                  <FlippingArtistCard
                     name={a.name}
                     nameEn={a.name_en || undefined}
                     genre={a.genre || "CREATIVE"}

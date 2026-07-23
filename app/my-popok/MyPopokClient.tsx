@@ -467,7 +467,7 @@ export default function MyPopokClient({
   };
 
   return (
-    <div style={{ background: "var(--bg-warm)", minHeight: "100vh", padding: "40px 16px 120px" }}>
+    <div style={{ background: "#FFFFFF", minHeight: "100vh", padding: "40px 16px 120px" }}>
       <div className="my-popok-container" style={{ maxWidth: "1080px", margin: "0 auto" }}>
         
         {/* ACCOUNT / ORGANIZATION CONTEXT SWITCHER BAR */}
@@ -540,7 +540,7 @@ export default function MyPopokClient({
                   }}
                 >
                   <span>○ {comp.name}</span>
-                  <span style={{ fontSize: "0.62rem", background: selectedContext === comp.id ? "rgba(255,255,255,0.2)" : "var(--bg-warm)", padding: "2px 6px", borderRadius: "10px" }}>
+                  <span style={{ fontSize: "0.62rem", background: selectedContext === comp.id ? "rgba(255,255,255,0.2)" : "#FAF9F5", padding: "2px 6px", borderRadius: "10px" }}>
                     단체
                   </span>
                 </button>
@@ -682,7 +682,7 @@ export default function MyPopokClient({
 
             {/* Public Link Box */}
             <div className="public-link-box" style={{
-              background: "var(--bg-warm)",
+              background: "#FFFFFF",
               border: "1px solid var(--border)",
               borderRadius: "14px",
               padding: "16px",
@@ -719,7 +719,7 @@ export default function MyPopokClient({
 
           {/* Right panel: Actions Box & Quick Save */}
           <div style={{
-            background: "var(--bg-warm)",
+            background: "#FFFFFF",
             border: "1px solid var(--border)",
             borderRadius: "18px",
             padding: "24px",
@@ -852,7 +852,7 @@ export default function MyPopokClient({
                   <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "8px" }}>
                     <div style={{
                       width: "90px", height: "90px", borderRadius: "50%", overflow: "hidden",
-                      border: "2px solid var(--border)", background: "var(--bg-warm)",
+                      border: "2px solid var(--border)", background: "#FAF9F5",
                       display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
                     }}>
                       {profileImageUrl ? (
@@ -1055,7 +1055,7 @@ export default function MyPopokClient({
               </div>
 
               {works.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px", background: "var(--bg-warm)", borderRadius: "12px", border: "1px dashed var(--border-dark)" }}>
+                <div style={{ textAlign: "center", padding: "40px", background: "#FFFFFF", borderRadius: "12px", border: "1px dashed var(--border-dark)" }}>
                   <span style={{ fontSize: "2rem", display: "block", marginBottom: "8px" }}>📁</span>
                   <span style={{ fontSize: "0.85rem", color: "var(--ink-muted)" }}>등록된 대표 작품이 없습니다. 작품 추가를 클릭해 등록해 보세요.</span>
                 </div>
@@ -1422,7 +1422,7 @@ export default function MyPopokClient({
             {/* QR Code Frame */}
             <div style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
-              padding: "20px", background: "var(--bg-warm)", borderRadius: "14px",
+              padding: "20px", background: "#FFFFFF", borderRadius: "14px",
               border: "1px solid var(--border)", marginBottom: "24px"
             }}>
               <img

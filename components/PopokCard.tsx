@@ -11,6 +11,10 @@ interface PopokCardProps {
   id: string;
   slug?: string;
   profileImage?: string;
+  /** Optional controlled flip state (mirrors components/company/DigitalCard.tsx). Omit to let the card manage flip state itself (default, unchanged behavior). */
+  flipped?: boolean;
+  /** Fires with the next flip state whenever the card is toggled, controlled or not. */
+  onFlipChange?: (flipped: boolean) => void;
 }
 
 // NEXT_PUBLIC_ vars are inlined at build time, so this is identical in the
@@ -26,10 +30,20 @@ export default function PopokCard({
   id,
   slug,
   profileImage,
+  flipped: flippedProp,
+  onFlipChange,
 }: PopokCardProps) {
-  const [flipped, setFlipped] = useState(false);
+  const [internalFlipped, setInternalFlipped] = useState(false);
+  const isControlled = flippedProp !== undefined;
+  const flipped = isControlled ? flippedProp : internalFlipped;
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const toggleFlip = () => {
+    const next = !flipped;
+    if (!isControlled) setInternalFlipped(next);
+    onFlipChange?.(next);
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return;
@@ -83,7 +97,7 @@ export default function PopokCard({
       {/* 3D Flip Card stage wrapper */}
       <div
         ref={cardRef}
-        onClick={() => setFlipped(!flipped)}
+        onClick={toggleFlip}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className={`flip-card-container ${flipped ? "flipped" : ""}`}
@@ -139,7 +153,7 @@ export default function PopokCard({
             {/* Profile Picture (Centered Grayscale Portrait) */}
             <div style={{
               margin: "12px 0", width: "100%", aspectRatio: "1.05", borderRadius: "10px",
-              overflow: "hidden", border: "1px solid var(--border)", background: "#F5F1E8",
+              overflow: "hidden", border: "1px solid var(--border)", background: "#FAF9F5",
               position: "relative"
             }}>
               <img
@@ -306,7 +320,7 @@ export default function PopokCard({
         gap: "6px",
         cursor: "pointer",
         transition: "opacity 0.2s"
-      }} onClick={() => setFlipped(!flipped)}>
+      }} onClick={toggleFlip}>
         <span>↻</span>
         <span>Tap to flip card</span>
       </div>

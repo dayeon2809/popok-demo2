@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
@@ -23,8 +24,12 @@ import {
 } from "@/lib/artist-profile";
 import SendPortfolioSection from "@/components/portfolio-requests/SendPortfolioSection";
 import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
-import RepresentativeGallery from "@/components/RepresentativeGallery";
 import { normalizeWorkImages } from "@/lib/works";
+import CompanyUpcomingPerformances from "@/components/company/CompanyUpcomingPerformances";
+import SectionHeader from "@/components/ui/SectionHeader";
+import RelatedArtists from "@/components/RelatedArtists";
+import { useAutoFlip } from "@/lib/useAutoFlip";
+import type { Performance, Artist } from "@/types";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -46,13 +51,6 @@ const DEFAULT_PORTFOLIO_VIEWER_STATE: PortfolioRequestViewerState = {
 // card boxes or shadows, just a thin bottom border and consistent vertical
 // rhythm between sections.
 const SECTION_STYLE: CSSProperties = { padding: "50px 0", borderBottom: "1px solid var(--border)" };
-const SECTION_LABEL_STYLE: CSSProperties = {
-  fontSize: "0.72rem",
-  fontWeight: 800,
-  color: "var(--navy)",
-  letterSpacing: "0.08em",
-  textTransform: "uppercase",
-};
 
 interface WorkItem {
   id: string;
@@ -80,6 +78,23 @@ interface WorkItem {
   };
 }
 
+// Hero photo slider images — up to 3 representative photos (same field
+// RepresentativeGallery used to read), falling back to the single profile
+// image when none are set. Pulled out to module scope so both the
+// auto-advance effect (which runs before the component's loading/error
+// early-returns) and the render body can derive the same list without
+// duplicating the logic.
+function getHeroImages(artist: any): string[] {
+  if (!artist) return [];
+  const urls = (Array.isArray(artist.profile_image_urls) ? artist.profile_image_urls : [])
+    .map((u: any) => (typeof u === "string" ? u.trim() : ""))
+    .filter(Boolean)
+    .slice(0, 3);
+  if (urls.length > 0) return urls;
+  const fallback = artist.profile_image_url || artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`;
+  return [fallback];
+}
+
 export default function ArtistDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [id, setId] = useState("");
@@ -92,6 +107,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
   const [portfolioViewerState, setPortfolioViewerState] = useState<PortfolioRequestViewerState>(DEFAULT_PORTFOLIO_VIEWER_STATE);
+  const [upcomingPerformances, setUpcomingPerformances] = useState<Performance[]>([]);
+  const [relatedArtists, setRelatedArtists] = useState<Artist[]>([]);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [heroTouchStartX, setHeroTouchStartX] = useState<number | null>(null);
+  const heroAutoAdvancePausedRef = useRef(false);
+  const heroAutoAdvanceResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heroCardFlip = useAutoFlip();
+  const digitalCardFlip = useAutoFlip();
   const pathname = usePathname();
 
   const handleOpenWork = (work: WorkItem) => {
@@ -102,6 +125,30 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     setActiveImageIndex(0);
   }, [activeWork]);
+
+  // Hero photo slider — auto-advance every 3s, pausing briefly whenever the
+  // viewer manually navigates (arrows/dots/swipe) so a manual pick doesn't
+  // get immediately overridden by the timer.
+  const pauseHeroAutoAdvance = (delay = 6000) => {
+    heroAutoAdvancePausedRef.current = true;
+    if (heroAutoAdvanceResumeTimerRef.current) clearTimeout(heroAutoAdvanceResumeTimerRef.current);
+    heroAutoAdvanceResumeTimerRef.current = setTimeout(() => {
+      heroAutoAdvancePausedRef.current = false;
+    }, delay);
+  };
+
+  useEffect(() => {
+    const images = getHeroImages(artist);
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      if (heroAutoAdvancePausedRef.current) return;
+      setHeroImageIndex((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => {
+      clearInterval(interval);
+      if (heroAutoAdvanceResumeTimerRef.current) clearTimeout(heroAutoAdvanceResumeTimerRef.current);
+    };
+  }, [artist]);
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -133,6 +180,38 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       })
       .catch((err) => {
         console.error("[artist portfolio CTA] viewer-state fetch failed", err);
+      });
+  }, [artist?.recordId]);
+
+  // Upcoming Performance section data — client-fetched (this page stays a
+  // single client component, see app/api/artists/[id]/upcoming-performances)
+  // rather than doing the company page's server-side Promise.all fetch.
+  // Empty array is the safe default: the section renders nothing until a
+  // real result arrives (CompanyUpcomingPerformances's showEmptyState=false).
+  useEffect(() => {
+    const recordId = artist?.recordId;
+    if (!recordId) return;
+    fetch(`/api/artists/${encodeURIComponent(recordId)}/upcoming-performances`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (Array.isArray(res?.data)) setUpcomingPerformances(res.data);
+      })
+      .catch(() => {
+        // Non-critical section — never break the detail page.
+      });
+  }, [artist?.recordId]);
+
+  // "더 탐색할 예술가들" section data — same client-fetch pattern as above.
+  useEffect(() => {
+    const recordId = artist?.recordId;
+    if (!recordId) return;
+    fetch(`/api/artists/${encodeURIComponent(recordId)}/related`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (Array.isArray(res?.data)) setRelatedArtists(res.data);
+      })
+      .catch(() => {
+        // Non-critical section — never break the detail page.
       });
   }, [artist?.recordId]);
 
@@ -352,7 +431,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const timelineRest = timelineEntries.filter((e) => e.label !== "CURRENT");
   const timelineDated = timelineRest.filter((e) => e.year !== null).sort((a, b) => (b.year as number) - (a.year as number));
   const timelineUndated = timelineRest.filter((e) => e.year === null);
-  const activityTimeline: TimelineEntry[] = [...timelineCurrent, ...timelineDated, ...timelineUndated];
 
   // ── Education — plain strings in practice (no separate year/school/major
   // fields), so each entry is rendered as-is, original order preserved.
@@ -436,6 +514,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const englishName = artist.name_en || (artist.name ? artist.name.toUpperCase() : "CREATIVE");
   const tags = Array.isArray(artist.tags) ? artist.tags : [artist.field, artist.genre].filter(Boolean);
 
+  const heroImages: string[] = getHeroImages(artist);
+  const heroImageAt = ((heroImageIndex % heroImages.length) + heroImages.length) % heroImages.length;
+  const goToHeroImage = (dir: "prev" | "next") => {
+    pauseHeroAutoAdvance();
+    setHeroImageIndex((prev) => {
+      const next = dir === "next" ? prev + 1 : prev - 1;
+      return ((next % heroImages.length) + heroImages.length) % heroImages.length;
+    });
+  };
+
   const getCoordinates = () => {
     let hash = 0;
     for (let i = 0; i < artist.id.length; i++) {
@@ -478,7 +566,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   })() : null;
 
   return (
-    <div style={{ background: "var(--bg-warm)", minHeight: "100vh", paddingBottom: "100px" }}>
+    <div style={{ background: "#FFFFFF", minHeight: "100vh", paddingBottom: "100px" }}>
       <style dangerouslySetInnerHTML={{ __html: `
         .artist-detail-container {
           max-width: 1040px;
@@ -489,14 +577,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           column-gap: 24px;
-          row-gap: 32px;
+          row-gap: 36px;
         }
         .work-tile {
           cursor: pointer;
         }
         .work-tile-image-wrapper {
           position: relative;
-          aspect-ratio: 1.4;
+          aspect-ratio: 1.3;
           border-radius: 4px;
           overflow: hidden;
           border: 1px solid var(--border);
@@ -511,8 +599,18 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         .work-tile:hover .work-tile-image {
           transform: scale(1.03);
         }
-        .work-tile:hover .work-tile-title {
-          text-decoration: underline;
+        .work-tile-hover-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: flex-end;
+          padding: 16px;
+          background: linear-gradient(to top, rgba(23,20,17,0.55) 0%, rgba(23,20,17,0) 45%);
+          opacity: 0;
+          transition: opacity 0.25s ease;
+        }
+        .work-tile:hover .work-tile-hover-overlay {
+          opacity: 1;
         }
         @media (max-width: 1024px) {
           .works-grid {
@@ -526,6 +624,21 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             grid-template-columns: 1fr !important;
           }
         }
+        .magazine-timeline-row {
+          display: grid;
+          grid-template-columns: 90px 1fr;
+          gap: 20px;
+          padding: 16px 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .magazine-timeline-row:last-child {
+          border-bottom: none;
+        }
+        .magazine-timeline-year {
+          font-size: 0.72rem;
+          font-weight: 800;
+          color: var(--ink-faint);
+        }
         @media (max-width: 768px) {
           .artist-detail-container {
             padding: 24px 16px !important;
@@ -533,6 +646,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           .education-row, .award-row {
             grid-template-columns: 1fr !important;
             gap: 4px !important;
+          }
+          .magazine-timeline-row {
+            grid-template-columns: 1fr !important;
+            gap: 4px !important;
+          }
+          .artist-hero-grid {
+            grid-template-columns: 1fr !important;
+            gap: 32px !important;
           }
         }
         .connected-org-card:hover {
@@ -597,7 +718,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       {/* Dynamic Header */}
       <header style={{
         position: "sticky", top: 0, zIndex: 100,
-        background: "rgba(245,241,232,0.92)",
+        background: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
         borderBottom: "1px solid var(--border)",
@@ -643,71 +764,119 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           ← 아티스트 둘러보기
         </button>
 
-        {/* ──────────────── 1. MOTION PROFILE (Reels-like vertical preview - TOP) ──────────────── */}
-        <section style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "60px" }}>
-          <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "24px" }}>
-            <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-              Motion Profile Preview
-            </span>
-            <h3 style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--navy)", marginTop: "4px", letterSpacing: "-0.02em" }}>
-              15초 모션 프로필 미리보기
-            </h3>
-          </div>
+        {/* ──────────────── HERO — brochure-style: image + identity left, small digital-portfolio preview right (matches CompanyBrochureHeader's grid) ──────────────── */}
+        <section style={{ ...SECTION_STYLE, paddingTop: 0 }}>
+          <div className="artist-hero-grid" style={{ display: "grid", gridTemplateColumns: "1.8fr 1fr", gap: "48px", alignItems: "start" }}>
+            {/* Left: image + identity */}
+            <div>
+              <div
+                style={{
+                  position: "relative", width: "100%", aspectRatio: "16 / 10", borderRadius: "4px", overflow: "hidden",
+                  border: "1px solid var(--border)", background: "#FAF9F5", marginBottom: "28px",
+                }}
+                onTouchStart={(e) => setHeroTouchStartX(e.touches[0].clientX)}
+                onTouchEnd={(e) => {
+                  if (heroTouchStartX === null || heroImages.length <= 1) return;
+                  const diffX = heroTouchStartX - e.changedTouches[0].clientX;
+                  if (Math.abs(diffX) > 35) goToHeroImage(diffX > 0 ? "next" : "prev");
+                  setHeroTouchStartX(null);
+                }}
+              >
+                {/* All slides stacked + opacity-crossfaded, instead of swapping
+                    a single <img>'s src (which cuts instantly with no
+                    transition) — smooth fade between photos. */}
+                {heroImages.map((src, idx) => (
+                  <img
+                    key={src + idx}
+                    src={src}
+                    alt={artist.name}
+                    style={{
+                      position: "absolute", inset: 0,
+                      width: "100%", height: "100%", objectFit: "cover",
+                      opacity: idx === heroImageAt ? 1 : 0,
+                      transition: "opacity 0.6s ease",
+                    }}
+                  />
+                ))}
 
-          <MotionProfile
-            name={artist.name}
-            genre={artist.genre}
-            image={artist.profile_image_url || (Array.isArray(artist.profile_image_urls) && artist.profile_image_urls[0]) || artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
-            quote={artist.bio_short}
-            videoUrl={representativeVideoUrl}
-          />
-        </section>
+                {heroImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => goToHeroImage("prev")}
+                      aria-label="이전 사진"
+                      style={{
+                        position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
+                        width: "36px", height: "36px", borderRadius: "50%",
+                        backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
+                        border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 2,
+                      }}
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => goToHeroImage("next")}
+                      aria-label="다음 사진"
+                      style={{
+                        position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
+                        width: "36px", height: "36px", borderRadius: "50%",
+                        backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
+                        border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 2,
+                      }}
+                    >
+                      ›
+                    </button>
+                    <div style={{ position: "absolute", bottom: "12px", left: "50%", transform: "translateX(-50%)", display: "flex", gap: "6px", zIndex: 2 }}>
+                      {heroImages.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => { pauseHeroAutoAdvance(); setHeroImageIndex(idx); }}
+                          aria-label={`${idx + 1}번째 사진으로 이동`}
+                          style={{
+                            width: "6px", height: "6px", borderRadius: "50%", padding: 0, border: "none", cursor: "pointer",
+                            background: idx === heroImageAt ? "#FFFFFF" : "rgba(255,255,255,0.45)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
 
-        {/* ──────────────── 2. ABOUT / PROFILE (Mock web window framework) ──────────────── */}
-        <section style={{
-          background: "#FFFFFF",
-          border: "1px solid var(--border)",
-          borderRadius: "20px",
-          overflow: "hidden",
-          boxShadow: "0 12px 32px rgba(23, 20, 17, 0.03)",
-          marginBottom: "60px"
-        }}>
-          {/* Mock Browser Header */}
-          <div style={{
-            background: "#FAF8F5",
-            borderBottom: "1px solid var(--border)",
-            padding: "12px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            position: "relative"
-          }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EAE6DD" }} />
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EAE6DD" }} />
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EAE6DD" }} />
-            <div style={{
-              margin: "0 auto", background: "#FFFFFF", border: "1px solid var(--border)",
-              borderRadius: "4px", fontSize: "0.7rem", color: "var(--ink-muted)",
-              padding: "2px 24px", fontFamily: "monospace"
-            }}>
-              popok.kr/artists/{artist.id}
-            </div>
-          </div>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "10px", marginBottom: "8px" }}>
+                <h1 style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.4rem)", fontWeight: 900, color: "var(--navy)", margin: 0, letterSpacing: "-0.03em" }}>
+                  {artist.name}
+                </h1>
+                {artist.name_en && (
+                  <span className="mono" style={{ fontSize: "0.85rem", color: "var(--ink-muted)" }}>{artist.name_en}</span>
+                )}
+                {artist.verified && (
+                  <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 7px", borderRadius: "8px" }}>
+                    POPOK VERIFIED
+                  </span>
+                )}
+              </div>
 
-          {/* Browser Content */}
-          <div style={{ padding: "40px 32px" }}>
-            
-            {/* 3-Column Info Rows */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "36px",
-              borderBottom: "1px solid var(--border)",
-              paddingBottom: "36px",
-              marginBottom: "32px"
-            }}>
-              {/* Col 1: Connected Organization */}
-              <div style={{ minWidth: 0 }}>
+              {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).length > 0 && (
+                <span className="mono" style={{ fontSize: "0.75rem", color: "var(--accent-dark)", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", display: "block", marginBottom: "16px" }}>
+                  {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).join(" · ")}
+                </span>
+              )}
+
+              {artist.bio_short && (
+                <p style={{ fontSize: "1rem", color: "var(--navy)", lineHeight: 1.6, margin: "0 0 24px", maxWidth: "560px" }}>
+                  {artist.bio_short}
+                </p>
+              )}
+
+              {/* Connected organization */}
+              <div style={{ marginBottom: "24px" }}>
                 <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
                   CONNECTED ORGANIZATION
                 </span>
@@ -718,7 +887,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     style={{
                       display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
                       padding: "10px", borderRadius: "4px", border: "1px solid var(--border)",
-                      background: "#FAF8F5", transition: "background 0.15s ease", minWidth: 0,
+                      background: "#FAF9F5", transition: "background 0.15s ease", minWidth: 0, maxWidth: "420px",
                     }}
                   >
                     <img
@@ -737,17 +906,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                           </span>
                         )}
                       </div>
-                      {artist.connectedCompany.company.name_en && (
-                        <span className="mono" style={{ fontSize: "0.6rem", color: "var(--ink-faint)", display: "block" }}>
-                          {artist.connectedCompany.company.name_en}
-                        </span>
-                      )}
                       <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
                         {[artist.connectedCompany.role, artist.connectedCompany.company.genre, artist.connectedCompany.company.city_or_region].filter(Boolean).join(" · ")}
                       </div>
-                      <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--accent-dark)", display: "block", marginTop: "4px" }}>
-                        단체 포퐄 보기 →
-                      </span>
                     </div>
                   </Link>
                 ) : artist.company ? (
@@ -757,11 +918,11 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     style={{
                       display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
                       padding: "10px", borderRadius: "4px", border: "1px dashed var(--border-dark)",
-                      background: "#FAF8F5", transition: "background 0.15s ease", minWidth: 0,
+                      background: "#FAF9F5", transition: "background 0.15s ease", minWidth: 0, maxWidth: "420px",
                     }}
                   >
                     <div style={{
-                      width: "40px", height: "40px", borderRadius: "4px", background: "var(--bg-warm)",
+                      width: "40px", height: "40px", borderRadius: "4px", background: "#FAF9F5",
                       display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", flexShrink: 0,
                     }}>
                       🏢
@@ -773,126 +934,91 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
                         아직 POPOK 등록 전
                       </div>
-                      <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--accent-dark)", display: "block", marginTop: "4px" }}>
-                        단체 포퐄 등록하기 →
-                      </span>
                     </div>
                   </Link>
                 ) : (
-                  <div>
-                    <p style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--navy)", margin: 0 }}>
-                      Independent Artist
-                    </p>
-                    <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", marginTop: "4px" }}>
-                      현재 연결된 단체가 없습니다.
-                    </p>
-                  </div>
+                  <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: 0 }}>
+                    현재 연결된 단체가 없습니다.
+                  </p>
                 )}
               </div>
 
-              {/* Col 2: About Me */}
-              <div>
-                <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-                  ABOUT ME
-                </span>
-                <p style={{ fontSize: "0.85rem", color: "var(--navy)", lineHeight: 1.6, whiteSpace: "pre-line", margin: 0 }}>
-                  {artist.bio || artist.bio_short || "POPOK 아티스트 레지스트리에 정식 등록된 창작자입니다. 흩어져 있는 활동과 기록을 수집하여 포트폴리오를 구성해 나가는 여정에 있습니다."}
-                </p>
+              {/* SNS / Website / Portfolio / Share */}
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "16px" }}>
+                {contactCandidates.map((c, idx) => (
+                  <a
+                    key={idx}
+                    href={c.href}
+                    target={c.href.startsWith("mailto:") ? undefined : "_blank"}
+                    rel="noopener noreferrer"
+                    style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}
+                  >
+                    {c.label} ↗
+                  </a>
+                ))}
+                <button
+                  onClick={handleShareUrl}
+                  style={{
+                    background: "none", border: "1px solid var(--navy)", borderRadius: "999px",
+                    padding: "6px 16px", fontSize: "0.78rem", fontWeight: 800, color: "var(--navy)", cursor: "pointer",
+                  }}
+                >
+                  Share
+                </button>
               </div>
 
-              {/* Col 3: Contact Info */}
-              <div>
-                <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-                  CONTACT INFO
+              <div style={{ marginTop: "20px" }}>
+                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+                  조회수 {(artist.view_count ?? 0).toLocaleString("ko-KR")}회
                 </span>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.8rem" }}>
-                  {contactCandidates.length > 0 ? (
-                    contactCandidates.map((c, idx) => (
-                      <a
-                        key={idx}
-                        href={c.href}
-                        target={c.href.startsWith("mailto:") ? undefined : "_blank"}
-                        rel="noopener noreferrer"
-                        style={{
-                          color: "var(--navy)",
-                          fontWeight: 700,
-                          textDecoration: "none",
-                          overflowWrap: "break-word",
-                          wordBreak: "break-all",
-                        }}
-                      >
-                        {c.label} ↗
-                      </a>
-                    ))
-                  ) : (
-                    <span style={{ color: "var(--ink-muted)", fontSize: "0.75rem" }}>
-                      등록된 연락처 정보가 없습니다.
-                    </span>
-                  )}
+              </div>
+            </div>
+
+            {/* Right: small Digital Portfolio Preview — the full flip card + QR/share actions live in the Digital Card section at the bottom of the page */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+              <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em" }}>
+                DIGITAL PORTFOLIO PREVIEW
+              </span>
+              {/* PopokCard is designed at up to 310px wide with fixed (non-relative)
+                  padding/font-sizes inside — squeezing it into a narrower maxWidth
+                  directly clips its footer row (barcode + portfolio URL). Render it
+                  at its natural width and scale the whole block down uniformly
+                  instead, same technique as the homepage hero's .hero-card-scale. */}
+              <div style={{ width: "220px", height: "370px", display: "flex", justifyContent: "center" }}>
+                <div style={{ width: "310px", flexShrink: 0, transform: "scale(0.7097)", transformOrigin: "top center" }}>
+                  <PopokCard
+                    name={artist.name}
+                    nameEn={artist.name_en || undefined}
+                    genre={artist.genre}
+                    instagram={artist.instagram}
+                    id={String(artist.recordId || artist.id || "")}
+                    slug={artist.slug || artist.id || id}
+                    profileImage={artist.profile_image_url || undefined}
+                    flipped={heroCardFlip.flipped}
+                    onFlipChange={heroCardFlip.onFlipChange}
+                  />
                 </div>
               </div>
             </div>
-
-            {/* View count — small and unobtrusive, right below profile info */}
-            <div style={{ textAlign: "right", marginBottom: "8px" }}>
-              <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
-                조회수 {(artist.view_count ?? 0).toLocaleString("ko-KR")}회
-              </span>
-            </div>
-
-            {/* Typography Overlay Banner */}
-            <div style={{ position: "relative", textAlign: "center", padding: "20px 0", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-              <h2 className="display" style={{ fontSize: "clamp(2rem, 8vw, 5.5rem)", color: "rgba(23,20,17,0.03)", textTransform: "uppercase", fontWeight: 900, margin: 0 }}>
-                {englishName}
-              </h2>
-              {/* Absolute tag overlay */}
-              <div style={{ position: "absolute", display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center", pointerEvents: "none" }}>
-                {tags.map((tag: string, idx: number) => (
-                  <span
-                    key={tag}
-                    className="tag"
-                    style={{
-                      transform: idx % 2 === 0 ? "rotate(-2deg)" : "rotate(3deg)",
-                      fontSize: "0.7rem",
-                      fontWeight: 800,
-                      background: idx % 2 === 0 ? "var(--accent)" : "var(--navy)",
-                      color: idx % 2 === 0 ? "var(--navy)" : "#FFFFFF",
-                      border: "none",
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Name & basic info — compact, readable line under the watermark;
-                blank fields are skipped entirely rather than left as empty dots. */}
-            <div style={{
-              display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "center",
-              gap: "8px", marginTop: "12px", textAlign: "center",
-            }}>
-              <span style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--navy)" }}>{artist.name}</span>
-              {artist.name_en && (
-                <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>{artist.name_en}</span>
-              )}
-              {artist.verified && (
-                <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 7px", borderRadius: "8px" }}>
-                  POPOK VERIFIED
-                </span>
-              )}
-              {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).length > 0 && (
-                <span className="mono" style={{ fontSize: "0.7rem", color: "var(--accent-dark)", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                  {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).join(" · ")}
-                </span>
-              )}
-            </div>
-
           </div>
         </section>
 
-        {/* ── REPRESENTATIVE GALLERY (Unconditional, returns null if empty) ── */}
-        <RepresentativeGallery images={artist.profile_image_urls} />
+        {/* ──────────────── UPCOMING PERFORMANCE — reuses the company page's component, hidden entirely when empty ──────────────── */}
+        <CompanyUpcomingPerformances performances={upcomingPerformances} showEmptyState={false} />
+
+        {/* ──────────────── MOTION PROFILE (kept, widened/de-boxed so the video reads as the section's main content) ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <SectionHeader eyebrow="Motion Profile Preview" description="15초 모션 프로필 미리보기" />
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <MotionProfile
+              name={artist.name}
+              genre={artist.genre}
+              image={artist.profile_image_url || (Array.isArray(artist.profile_image_urls) && artist.profile_image_urls[0]) || artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
+              quote={artist.bio_short}
+              videoUrl={representativeVideoUrl}
+            />
+          </div>
+        </section>
 
         {/* ── 2.5. VIDEO PROFILE (Additional Video Section) ── */}
         {artist.youtube_url && (
@@ -964,41 +1090,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
-        {/* ──────────────── 3. ACTIVITY TIMELINE — current_activity + affiliations only ──────────────── */}
-        {activityTimeline.length > 0 && (
-          <section style={SECTION_STYLE}>
-            <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, marginBottom: "24px" }}>
-              Activity Timeline
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "14px", borderLeft: "1px solid var(--border)", paddingLeft: "16px", marginLeft: "4px" }}>
-              {activityTimeline.map((entry, idx) => (
-                <div key={idx} style={{ position: "relative" }}>
-                  <span style={{
-                    position: "absolute", left: "-20px", top: "6px", width: "5px", height: "5px",
-                    borderRadius: "50%", background: "var(--accent-dark)"
-                  }} />
-                  <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.05em", display: "block", marginBottom: "3px" }}>
-                    {entry.year ? `${entry.year} · ${entry.label}` : entry.label}
-                  </span>
-                  <p style={{ fontSize: "0.85rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.45 }}>
-                    {entry.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ──────────────── 4. SELECTED WORKS — flat editorial grid, whole-tile click ──────────────── */}
+        {/* ──────────────── SELECTED WORKS — large-image project gallery, 2-col desktop / 1-col mobile ──────────────── */}
         <section style={SECTION_STYLE}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "28px" }}>
-            <h3 className="mono" style={SECTION_LABEL_STYLE}>
-              Selected Works
-            </h3>
-            <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>
-              {displayWorks.length} WORKS ARCHIVED
-            </span>
-          </div>
+          <SectionHeader eyebrow="Selected Works" meta={`${displayWorks.length} WORKS ARCHIVED`} />
 
           {displayWorks.length === 0 ? (
             <div style={{ padding: "50px 24px", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "4px", color: "var(--ink-muted)", fontSize: "0.82rem" }}>
@@ -1013,7 +1107,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   onClick={() => setActiveWork(work)}
                   style={{ display: "flex", flexDirection: "column", height: "100%" }}
                 >
-                  {/* Image */}
+                  {/* Image — ~78% of the tile; hover reveals a zoom + arrow + "View Detail" overlay instead of a card lift */}
                   <div className="work-tile-image-wrapper">
                     {work.image && !work.image.includes("cake-placeholder") ? (
                       <img
@@ -1047,10 +1141,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     }}>
                       {work.year}
                     </span>
+
+                    <div className="work-tile-hover-overlay">
+                      <span className="mono" style={{ fontSize: "0.75rem", fontWeight: 800, color: "#FFFFFF", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        View Detail <span>→</span>
+                      </span>
+                    </div>
                   </div>
 
                   {/* Caption */}
-                  <div style={{ paddingTop: "12px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
+                  <div style={{ paddingTop: "14px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
                     <div className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase" }}>
                       {(work.role || work.genre) && (
                         <span style={{ fontWeight: 700, color: "var(--accent-dark)" }}>
@@ -1060,7 +1160,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                       {work.venue && <span>· {work.venue}</span>}
                     </div>
                     <h4 style={{
-                      fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", margin: "4px 0 2px",
+                      fontSize: "1.1rem", fontWeight: 800, color: "var(--navy)", margin: "6px 0 2px",
                       letterSpacing: "-0.01em", lineHeight: 1.35,
                       display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
                     }}>
@@ -1068,38 +1168,26 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     </h4>
                     {work.description && (
                       <p style={{
-                        fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "2px 0 0",
+                        fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "4px 0 0",
                         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
                       }}>
                         {work.description}
                       </p>
                     )}
 
-                    <div style={{ marginTop: "auto", paddingTop: "10px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                      <button
-                        type="button"
-                        onClick={() => setActiveWork(work)}
-                        className="work-tile-title"
-                        style={{
-                          background: "none", border: "none", padding: 0, cursor: "pointer",
-                          fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)",
-                          display: "inline-flex", alignItems: "center", gap: "4px",
-                        }}
-                      >
-                        View Detail <span>→</span>
-                      </button>
-                      {work.externalLink && (
+                    {work.externalLink && (
+                      <div style={{ marginTop: "auto", paddingTop: "10px" }}>
                         <a
                           href={work.externalLink}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--ink-muted)", textDecoration: "none" }}
+                          style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", textDecoration: "none" }}
                         >
                           외부 링크 ↗
                         </a>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1107,27 +1195,24 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           )}
         </section>
 
-        {/* ──────────────── 5. EDUCATION — plain strings, no separate year/school/major fields ──────────────── */}
-        {educationList.length > 0 && (
+        {/* ──────────────── ABOUT — plain readable layout, no card ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <SectionHeader eyebrow="About" />
+          <p style={{ fontSize: "0.98rem", color: "var(--navy)", lineHeight: 1.75, whiteSpace: "pre-line", margin: 0, maxWidth: "720px" }}>
+            {artist.bio || artist.bio_short || "POPOK 아티스트 레지스트리에 정식 등록된 창작자입니다. 흩어져 있는 활동과 기록을 수집하여 포트폴리오를 구성해 나가는 여정에 있습니다."}
+          </p>
+        </section>
+
+        {/* ──────────────── ACTIVITY TIMELINE — current_activity only now (affiliations moved into Career below); Magazine layout, no cards ──────────────── */}
+        {timelineCurrent.length > 0 && (
           <section style={SECTION_STYLE}>
-            <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, marginBottom: "24px" }}>
-              Education
-            </h3>
-            <div className="education-list" style={{ display: "flex", flexDirection: "column" }}>
-              {educationList.map((entry, idx) => (
-                <div
-                  key={idx}
-                  className="education-row"
-                  style={{
-                    display: "grid", gridTemplateColumns: "40px 1fr", gap: "16px",
-                    padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
-                  }}
-                >
-                  <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
-                    {String(idx + 1).padStart(2, "0")}
-                  </span>
-                  <p style={{ fontSize: "0.85rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.5, overflowWrap: "break-word", wordBreak: "keep-all" }}>
-                    {entry}
+            <SectionHeader eyebrow="Activity Timeline" />
+            <div className="magazine-timeline">
+              {timelineCurrent.map((entry, idx) => (
+                <div key={idx} className="magazine-timeline-row">
+                  <span className="mono magazine-timeline-year">CURRENT</span>
+                  <p style={{ fontSize: "0.92rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.5 }}>
+                    {entry.text}
                   </p>
                 </div>
               ))}
@@ -1135,66 +1220,97 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
-        {/* ──────────────── 6. AWARDS & COMPETITIONS ──────────────── */}
-        {combinedAwardsCount > 0 && (
+        {/* ──────────────── CAREER — Education → Awards → Competitions → Affiliation, one flowing section instead of separate boxed-off sections ──────────────── */}
+        {(educationList.length > 0 || combinedAwardsCount > 0 || timelineRest.length > 0) && (
           <section style={SECTION_STYLE}>
-            <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, marginBottom: "24px" }}>
-              {splitAwardsAndCompetitions ? "Awards" : "Awards & Competitions"}
-            </h3>
-            <AwardRows items={splitAwardsAndCompetitions ? awardsList : [...awardsList, ...competitionsList]} />
+            <SectionHeader eyebrow="Career" description="학력 · 수상 · 활동 이력" />
 
-            {splitAwardsAndCompetitions && competitionsList.length > 0 && (
-              <>
-                <h3 className="mono" style={{ ...SECTION_LABEL_STYLE, margin: "36px 0 24px" }}>
-                  Competitions
-                </h3>
-                <AwardRows items={competitionsList} />
-              </>
+            {educationList.length > 0 && (
+              <div style={{ marginBottom: "32px" }}>
+                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.08em", display: "block", marginBottom: "8px" }}>
+                  EDUCATION
+                </span>
+                <div className="education-list" style={{ display: "flex", flexDirection: "column" }}>
+                  {educationList.map((entry, idx) => (
+                    <div
+                      key={idx}
+                      className="education-row"
+                      style={{
+                        display: "grid", gridTemplateColumns: "40px 1fr", gap: "16px",
+                        padding: "12px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
+                      }}
+                    >
+                      <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <p style={{ fontSize: "0.85rem", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.5, overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                        {entry}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {combinedAwardsCount > 0 && (
+              <div style={{ marginBottom: "32px" }}>
+                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.08em", display: "block", marginBottom: "8px" }}>
+                  {splitAwardsAndCompetitions ? "AWARDS" : "AWARDS & COMPETITIONS"}
+                </span>
+                <AwardRows items={splitAwardsAndCompetitions ? awardsList : [...awardsList, ...competitionsList]} />
+
+                {splitAwardsAndCompetitions && competitionsList.length > 0 && (
+                  <>
+                    <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.08em", display: "block", margin: "24px 0 8px" }}>
+                      COMPETITIONS
+                    </span>
+                    <AwardRows items={competitionsList} />
+                  </>
+                )}
+              </div>
+            )}
+
+            {timelineRest.length > 0 && (
+              <div>
+                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.08em", display: "block", marginBottom: "8px" }}>
+                  AFFILIATION
+                </span>
+                <AwardRows
+                  items={[...timelineDated, ...timelineUndated].map((entry) => ({ year: entry.year ?? undefined, title: entry.text }))}
+                />
+              </div>
             )}
           </section>
         )}
 
-        {/* ──────────────── 7. REVIEWS & ARTICLES — review_links, flat list ──────────────── */}
+        {/* ──────────────── REVIEWS & ARTICLES — magazine style: quote / publisher / date / link, no cards ──────────────── */}
         {reviewItems.length > 0 && (
           <section style={SECTION_STYLE}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "20px" }}>
-              <h3 className="mono" style={SECTION_LABEL_STYLE}>
-                Reviews & Articles
-              </h3>
-              <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)" }}>
-                {reviewItems.length} ITEMS
-              </span>
-            </div>
+            <SectionHeader eyebrow="Reviews & Articles" meta={`${reviewItems.length} ITEMS`} />
 
             <div style={{ display: "flex", flexDirection: "column" }}>
               {reviewItems.map((rev, idx) => {
                 const url = typeof rev.url === "string" ? rev.url.trim() : "";
-                const title = rev.title || rev.publication || (url ? getReviewDomain(url) : "관련 자료");
-                const subtitle = [rev.work, rev.publication && rev.title ? rev.publication : null, rev.date || (rev.year ? safeYear(rev.year) : null)]
+                const quote = rev.title || rev.work || (url ? getReviewDomain(url) : "관련 자료");
+                const byline = [rev.publication, rev.date || (rev.year ? safeYear(rev.year) : null)]
                   .filter(Boolean)
                   .join(" · ") || "관련 평론 및 언론 보도";
 
                 const row = (
-                  <div style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "14px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
-                  }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
-                      <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--navy)", overflowWrap: "break-word" }}>
-                        {title}
+                  <div style={{ padding: "20px 0", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none" }}>
+                    <p style={{ fontSize: "1rem", fontStyle: "italic", color: "var(--navy)", fontWeight: 600, margin: 0, lineHeight: 1.5, overflowWrap: "break-word" }}>
+                      &ldquo;{quote}&rdquo;
+                    </p>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: "8px", gap: "12px" }}>
+                      <span className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>
+                        {byline}
                       </span>
-                      <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)" }}>
-                        {subtitle}
-                      </span>
+                      {url && (
+                        <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)", whiteSpace: "nowrap", flexShrink: 0 }}>
+                          Read ↗
+                        </span>
+                      )}
                     </div>
-                    {url && (
-                      <span style={{
-                        fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)",
-                        whiteSpace: "nowrap", flexShrink: 0, marginLeft: "12px",
-                      }}>
-                        Read ↗
-                      </span>
-                    )}
                   </div>
                 );
 
@@ -1222,10 +1338,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
             DIGITAL CARD & QR
           </span>
-          <h3 style={{ fontSize: "1.3rem", fontWeight: 900, color: "var(--navy)", margin: 0, marginBottom: "6px" }}>
+          <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", margin: 0, marginBottom: "6px" }}>
             {artist.name} 작가의 명함을 공유해보세요
           </h3>
-          <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", marginTop: 0, marginBottom: "28px" }}>
+          <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", marginTop: 0, marginBottom: "28px" }}>
             카드에 마우스를 올리거나 클릭하면 뒷면 QR 코드를 스캔할 수 있습니다.
           </p>
 
@@ -1239,6 +1355,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               id={String(artist.recordId || artist.id || "")}
               slug={artist.slug || artist.id || id}
               profileImage={artist.profile_image_url || undefined}
+              flipped={digitalCardFlip.flipped}
+              onFlipChange={digitalCardFlip.onFlipChange}
             />
           </div>
 
@@ -1266,6 +1384,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </section>
 
+        {/* ──────────────── 더 탐색할 예술가들 — mirrors the company page's "You may also like" ──────────────── */}
+        <RelatedArtists artists={relatedArtists} />
+
         {/* ──────────────── 10. FOOTER METRICS ──────────────── */}
         <footer style={{
           display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "20px",
@@ -1284,9 +1405,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
       </div>
 
-      {/* ──────────────── 8. WORK DETAIL MODAL ──────────────── */}
+      {/* ──────────────── 8. WORK DETAIL MODAL — same fade-in open as the company page's WorkDrawer ──────────────── */}
       {activeWork && parsedActiveMedia && (
-        <div className="artist-work-modal-backdrop" onClick={() => setActiveWork(null)}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="artist-work-modal-backdrop"
+          onClick={() => setActiveWork(null)}
+        >
           <div className="artist-drawer-main" onClick={(e) => e.stopPropagation()}>
             <div
               style={{
@@ -1513,7 +1641,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* 포퐄 보내기 CTA — was previously nested inside the

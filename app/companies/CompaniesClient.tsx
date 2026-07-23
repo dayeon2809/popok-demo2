@@ -86,10 +86,10 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
               onClick={() => setSelectedField(cat.key)}
               style={{
                 padding: "10px 18px",
-                borderRadius: "20px",
+                borderRadius: "4px",
                 fontSize: "0.85rem",
                 fontWeight: 700,
-                border: selectedField === cat.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                border: selectedField === cat.key ? "1px solid var(--navy)" : "1px solid var(--border)",
                 backgroundColor: selectedField === cat.key ? "var(--navy)" : "#FFFFFF",
                 color: selectedField === cat.key ? "#FFFFFF" : "var(--navy)",
                 cursor: "pointer",
@@ -112,8 +112,8 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
               width: "100%",
               padding: "12px 16px",
               fontSize: "0.95rem",
-              borderRadius: "12px",
-              border: "1.5px solid var(--border)",
+              borderRadius: "4px",
+              border: "1px solid var(--border)",
               background: "#FFFFFF",
             }}
           />
@@ -135,7 +135,7 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
                   display: "inline-block",
                   textDecoration: "none",
                   padding: "12px 24px",
-                  borderRadius: "12px",
+                  borderRadius: "999px",
                   fontSize: "0.88rem",
                   fontWeight: 800,
                 }}

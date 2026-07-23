@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import CompanyCard from "@/components/CompanyCard";
+import FlippingCompanyCard from "./FlippingCompanyCard";
 import type { Company } from "@/types";
 
 interface CompanyCarouselProps {
@@ -139,7 +139,7 @@ export default function CompanyCarousel({ title, subtitle, companies }: CompanyC
             }}>
               <div className="card-hover-wrapper" style={{ transition: "transform 0.3s ease" }}>
                 <div className="company-carousel-scale" style={{ position: "relative" }}>
-                  <CompanyCard company={c} />
+                  <FlippingCompanyCard company={c} />
                 </div>
               </div>
             </div>

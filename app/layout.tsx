@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" style={{ background: "#FFFFFF" }}>
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link
@@ -57,10 +57,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body>
+      <body style={{ background: "#FFFFFF" }}>
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
         <Header />
-        <main style={{ marginBottom: "80px" }}>{children}</main>
+        <main style={{ background: "#FFFFFF", paddingBottom: "80px" }}>{children}</main>
         <Footer />
       </body>
     </html>

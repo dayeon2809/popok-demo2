@@ -175,32 +175,32 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
 
           return (
             <div key={perf.id} style={{
-              minWidth: "320px",
-              maxWidth: "320px",
+              minWidth: "270px",
+              maxWidth: "270px",
               flex: "0 0 auto",
               scrollSnapAlign: "start",
             }}>
               <div style={{
                 background: "#FFFFFF",
                 border: "1.5px solid var(--border)",
-                borderRadius: "16px",
-                padding: "14px",
-                boxShadow: "0 6px 20px rgba(23, 20, 17, 0.03)",
-                minHeight: "440px",
+                borderRadius: "18px",
+                padding: "12px",
+                minHeight: "375px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                boxShadow: "0 8px 24px rgba(23, 20, 17, 0.04)",
+                transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                 cursor: "default"
               }} className="perf-card">
                 <div>
                   {/* Poster Area */}
-                  <div style={{
-                    width: "100%", height: "220px", borderRadius: "10px", overflow: "hidden",
-                    background: "var(--bg-warm)", border: "1px solid var(--border)",
+                  <div className="perf-card-poster" style={{
+                    width: "100%", height: "180px", borderRadius: "12px", overflow: "hidden",
+                    background: "#FAF9F5", border: "1px solid var(--border)",
                     position: "relative"
                   }}>
-                    <img src={perf.posterUrl || FALLBACK_POSTER} alt={perf.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img src={perf.posterUrl || FALLBACK_POSTER} alt={perf.title} className="perf-card-poster-img" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     {genreLabel && (
                       <span style={{
                         position: "absolute", top: "10px", left: "10px",
@@ -279,9 +279,9 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
                         href={link.href}
                         {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                         style={{
-                          textDecoration: "none", fontSize: "0.78rem", fontWeight: 900,
-                          color: "var(--navy)", padding: "6px 12px", background: "var(--accent)",
-                          borderRadius: "8px", border: "1px solid var(--navy)"
+                          textDecoration: "none", fontSize: "0.78rem", fontWeight: 800,
+                          color: "#FFFFFF", padding: "7px 14px", background: "var(--navy)",
+                          borderRadius: "10px",
                         }}
                       >
                         공연 정보 보기
@@ -298,8 +298,20 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
       </div>
       <style>{`
         .perf-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 12px 30px rgba(23, 20, 17, 0.08) !important;
+          border-color: var(--navy) !important;
+          box-shadow: 0 8px 24px rgba(23, 20, 17, 0.06) !important;
+        }
+        .perf-card-poster { transition: transform 0.2s ease; }
+        .perf-card-poster-img { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .perf-card:hover .perf-card-poster-img {
+          transform: scale(1.03);
+        }
+        @media (max-width: 768px) {
+          .performance-carousel-track {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+            gap: 16px !important;
+          }
         }
       `}</style>
     </section>

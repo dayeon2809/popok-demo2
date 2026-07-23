@@ -3,15 +3,22 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import type { Artist, Performance, Company } from "@/types";
+import type { InstagramStory } from "@/lib/instagram";
 import { useLanguage } from "@/lib/useLanguage";
 import PopokCard from "@/components/PopokCard";
 import ArtistCarousel from "@/components/home/ArtistCarousel";
 import CompanyCarousel from "@/components/home/CompanyCarousel";
 import PerformanceCarousel from "@/components/home/PerformanceCarousel";
+import WeeklyStories from "@/components/home/WeeklyStories";
 import TestimonialsPreview from "@/components/home/TestimonialsPreview";
 import FAQSection from "@/components/FAQSection";
 import FooterCTA from "@/components/home/FooterCTA";
 import StatsCTA from "@/components/home/StatsCTA";
+
+// "이주의 소식" is fully implemented (lib/instagram.ts + WeeklyStories) but
+// @popok.official's Instagram API access isn't set up yet — flip this to
+// true once INSTAGRAM_ACCESS_TOKEN/INSTAGRAM_USER_ID are ready in production.
+const WEEKLY_STORIES_ENABLED = false;
 
 const HOME_COPY = {
   ko: {
@@ -42,9 +49,11 @@ interface HomeClientProps {
   initialArtists: Artist[];
   initialPerformances: Performance[];
   initialCompanies: Company[];
+  initialWeeklyStories: InstagramStory[];
+  instagramConfigured: boolean;
 }
 
-export default function HomeClient({ initialArtists, initialPerformances, initialCompanies }: HomeClientProps) {
+export default function HomeClient({ initialArtists, initialPerformances, initialCompanies, initialWeeklyStories, instagramConfigured }: HomeClientProps) {
   const { language } = useLanguage();
   const t = HOME_COPY[language];
 
@@ -100,7 +109,7 @@ export default function HomeClient({ initialArtists, initialPerformances, initia
   }, [initialCompanies]);
 
   return (
-    <div style={{ background: "var(--bg-warm)", minHeight: "100vh", overflowX: "hidden" }}>
+    <div style={{ background: "#FFFFFF", minHeight: "100vh", overflowX: "hidden" }}>
       {/* ── 1. HERO SECTION (RETAINED) ── */}
       <section id="about" className="home-section" style={{
         maxWidth: "1120px",
@@ -181,20 +190,19 @@ export default function HomeClient({ initialArtists, initialPerformances, initia
               <Link href="/auth" className="btn-lime" style={{
                 textDecoration: "none",
                 padding: "16px 32px",
-                borderRadius: "12px",
+                borderRadius: "999px",
                 fontSize: "0.95rem",
                 fontWeight: 800,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                boxShadow: "0 4px 14px rgba(200, 238, 82, 0.2)"
               }}>
                 {t.getMyPopok} <span style={{ fontSize: "1.1rem" }}>→</span>
               </Link>
               <Link href="/about" className="btn-outline" style={{
                 textDecoration: "none",
                 padding: "16px 32px",
-                borderRadius: "12px",
+                borderRadius: "999px",
                 fontSize: "0.95rem",
                 fontWeight: 800,
                 display: "inline-flex",
@@ -250,167 +258,37 @@ export default function HomeClient({ initialArtists, initialPerformances, initia
                 </div>
               </div>
             ) : (
-              <>
-                {/* Fallback mockup — shown only when there are no published artists yet */}
-                {/* Back Card */}
-                <div className="float-card-2 hero-float-card" style={{
-                  position: "absolute",
-                  width: "250px",
-                  height: "360px",
-                  background: "var(--accent)",
-                  border: "1.5px solid var(--navy)",
-                  borderRadius: "18px",
-                  padding: "24px",
-                  boxShadow: "0 8px 32px rgba(23, 20, 17, 0.08)",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  zIndex: 1,
-                  transform: "rotate(6deg) translateX(40px)",
-                  transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-                  cursor: "pointer",
-                }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "rotate(2deg) scale(1.03) translateX(30px)";
-                    e.currentTarget.style.zIndex = "3";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "rotate(6deg) translateX(40px)";
-                    e.currentTarget.style.zIndex = "1";
-                  }}>
-                  <div>
-                    <div style={{ fontWeight: 950, fontSize: "1.2rem", color: "var(--navy)", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
-                      POPOK
-                      <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "var(--navy)" }} />
-                    </div>
+              /* Single static placeholder — shown only when there are no published
+                 artists with a profile image yet. One dominant visual, matching the
+                 real-artist branch above, instead of a two-card + QR-badge stack. */
+              <div className="hero-float-card" style={{
+                width: "270px",
+                background: "#FFFFFF",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                overflow: "hidden",
+                boxShadow: "0 16px 40px rgba(23, 20, 17, 0.06)",
+                zIndex: 2,
+              }}>
+                <div style={{ width: "100%", aspectRatio: "4 / 5", background: "#FAF9F5" }} />
+                <div style={{ padding: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
+                    <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", letterSpacing: "-0.02em" }}>JIAN CHOI</h3>
+                    <span className="mono" style={{ fontSize: "0.6rem", color: "var(--accent-dark)", fontWeight: 700 }}>Choreographer</span>
                   </div>
-                  <div>
-                    <p style={{
-                      fontSize: "1.6rem",
-                      fontWeight: 900,
-                      color: "var(--navy)",
-                      lineHeight: 1.25,
-                      letterSpacing: "-0.03em"
-                    }}>
-                      {t.backCardTitle.split("\n").map((line, index) => (
-                        <span key={line}>
-                          {line}
-                          {index === 0 && <br />}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
+                  <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.4, marginBottom: "12px" }}>
+                    {t.sampleBio}
+                  </p>
                   <div style={{
-                    fontFamily: "monospace",
-                    fontSize: "0.85rem",
-                    color: "var(--navy)",
-                    fontWeight: 700,
-                    letterSpacing: "-0.01em"
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    paddingTop: "10px", borderTop: "1px solid var(--border)",
+                    fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)",
                   }}>
-                    popok.kr/jianchoi
+                    <span>{t.viewWorks}</span>
+                    <span>→</span>
                   </div>
                 </div>
-
-                {/* Front Card */}
-                <div className="float-card-1 hero-float-card" style={{
-                  position: "absolute",
-                  width: "250px",
-                  height: "360px",
-                  background: "#FFFFFF",
-                  border: "1.5px solid var(--border)",
-                  borderRadius: "18px",
-                  padding: "16px",
-                  boxShadow: "0 16px 40px rgba(23, 20, 17, 0.08)",
-                  display: "flex",
-                  flexDirection: "column",
-                  zIndex: 2,
-                  transform: "rotate(-3deg) translateX(-40px)",
-                  transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-                  cursor: "pointer",
-                }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "rotate(0deg) scale(1.03) translateX(-30px)";
-                    e.currentTarget.style.zIndex = "3";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "rotate(-3deg) translateX(-40px)";
-                    e.currentTarget.style.zIndex = "2";
-                  }}>
-                  <div style={{
-                    width: "100%",
-                    height: "200px",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    marginBottom: "16px",
-                    background: "#EAE6DD",
-                    position: "relative"
-                  }}>
-                    <img
-                      src="https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=800"
-                      alt="JIAN CHOI"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        filter: "contrast(1.1)"
-                      }}
-                    />
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, justifyContent: "space-between" }}>
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-                        <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--navy)", letterSpacing: "-0.02em" }}>JIAN CHOI</h3>
-                        <span className="mono" style={{ fontSize: "0.62rem", color: "var(--accent-dark)", fontWeight: 700 }}>Choreographer</span>
-                      </div>
-                      <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", lineHeight: 1.4 }}>
-                        {t.sampleBio}
-                      </p>
-                    </div>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      paddingTop: "8px",
-                      borderTop: "1px solid var(--border)",
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      color: "var(--navy)"
-                    }}>
-                      <span>{t.viewWorks}</span>
-                      <span>→</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Circular QR Badge */}
-                <div style={{
-                  position: "absolute",
-                  bottom: "40px",
-                  right: "20px",
-                  width: "74px",
-                  height: "74px",
-                  borderRadius: "50%",
-                  background: "#FFFFFF",
-                  border: "1.5px solid var(--navy)",
-                  boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 3,
-                  transform: "rotate(-12deg)"
-                }}>
-                  <span style={{ fontSize: "0.45rem", fontWeight: 900, color: "var(--navy)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "3px" }}>SCAN</span>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--navy)" }}>
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                  </svg>
-                  <span style={{ fontSize: "0.45rem", fontWeight: 900, color: "var(--navy)", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: "3px" }}>SAVE CARD</span>
-                </div>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -430,6 +308,16 @@ export default function HomeClient({ initialArtists, initialPerformances, initia
         subtitle="POPOK에 등록된 아티스트와 단체의 새로운 공연을 만나보세요."
         performances={initialPerformances}
       />
+
+      {/* ── 3.5. 이주의 소식 (INSTAGRAM WEEKLY STORIES) ──
+          Implementation is done (lib/instagram.ts + this component), but
+          @popok.official's Instagram API access isn't set up yet — kept
+          hidden on the homepage until INSTAGRAM_ACCESS_TOKEN/INSTAGRAM_USER_ID
+          are ready. Flip WEEKLY_STORIES_ENABLED to true (below) to launch it;
+          no other code changes needed. */}
+      {WEEKLY_STORIES_ENABLED && (
+        <WeeklyStories stories={initialWeeklyStories} configured={instagramConfigured} />
+      )}
 
       {/* ── 4. 당신과 연결될 단체 (COMPANIES) ── */}
       <CompanyCarousel

@@ -46,7 +46,7 @@ export default async function CardResultPage({ params }: Props) {
   }
 
   return (
-    <main style={{ background: "var(--bg-warm)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <main style={{ background: "#FFFFFF", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <header style={{
         position: "sticky", top: 0, zIndex: 10,
