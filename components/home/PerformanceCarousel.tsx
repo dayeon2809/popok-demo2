@@ -9,6 +9,8 @@ interface PerformanceCarouselProps {
   title: string;
   subtitle?: string;
   performances: Performance[];
+  /** Optional link shown next to the title, e.g. to a full performance calendar. */
+  titleLink?: { label: string; href: string };
 }
 
 const FALLBACK_POSTER = "/images/placeholders/cake-placeholder.png";
@@ -41,7 +43,7 @@ function getPerformanceLink(perf: Performance): { href: string; external: boolea
   return href ? { href, external: true } : null;
 }
 
-export default function PerformanceCarousel({ title, subtitle, performances }: PerformanceCarouselProps) {
+export default function PerformanceCarousel({ title, subtitle, performances, titleLink }: PerformanceCarouselProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -124,6 +126,16 @@ export default function PerformanceCarousel({ title, subtitle, performances }: P
             <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "6px", fontWeight: 700 }}>
               {subtitle}
             </p>
+          )}
+          {titleLink && (
+            <div>
+              <Link
+                href={titleLink.href}
+                style={{ display: "inline-block", marginTop: "6px", fontSize: "0.85rem", fontWeight: 800, color: "var(--accent-dark)", textDecoration: "none", whiteSpace: "nowrap" }}
+              >
+                → {titleLink.label}
+              </Link>
+            </div>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

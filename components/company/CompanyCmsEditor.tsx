@@ -2181,7 +2181,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
               fontSize: "0.82rem",
             }}>
               💡 본 단체의 다가오는 일정은 POPOK AI 모니터링 및 관리자 검토를 거쳐 등록되는 항목으로, 직접 편집이 불가능합니다.<br />
-              새로운 일정을 등록하거나 정보를 수정하시려면 POPOK 관리자 문의(dayeon2809@gmail.com) 또는 피드백 채널을 이용해 주시기 바랍니다.
+              새로운 일정을 등록하거나 정보를 수정하시려면 POPOK 관리자 문의(popok.service@gmail.com) 또는 피드백 채널을 이용해 주시기 바랍니다.
             </div>
 
             {loadingSchedules ? (

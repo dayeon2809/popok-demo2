@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import FlippingCompanyCard from "./FlippingCompanyCard";
 import type { Company } from "@/types";
 
@@ -8,9 +9,11 @@ interface CompanyCarouselProps {
   title: string;
   subtitle?: string;
   companies: Company[];
+  /** Optional link shown below the subtitle, e.g. to the full company directory. */
+  moreLink?: { label: string; href: string };
 }
 
-export default function CompanyCarousel({ title, subtitle, companies }: CompanyCarouselProps) {
+export default function CompanyCarousel({ title, subtitle, companies, moreLink }: CompanyCarouselProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -89,6 +92,24 @@ export default function CompanyCarousel({ title, subtitle, companies }: CompanyC
             <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "6px", fontWeight: 700 }}>
               {subtitle}
             </p>
+          )}
+          {moreLink && (
+            <Link
+              href={moreLink.href}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                marginTop: "8px",
+                fontSize: "0.82rem",
+                fontWeight: 800,
+                color: "var(--navy)",
+                textDecoration: "underline",
+                textUnderlineOffset: "3px",
+              }}
+            >
+              {moreLink.label} →
+            </Link>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

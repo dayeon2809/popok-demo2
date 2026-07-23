@@ -9,6 +9,26 @@ interface CompanyCardProps {
   company: Company;
 }
 
+// Matches DigitalCard's brand-color badge (components/company/DigitalCard.tsx)
+// so the "POPOK VERIFIED" tag reads consistently between the homepage
+// carousel and this directory listing instead of always being plain lime.
+function getContrastTextColor(hexColor: string): string {
+  const hex = hexColor.replace("#", "");
+  if (hex.length !== 6 && hex.length !== 3) return "var(--navy)";
+  let r = 0, g = 0, b = 0;
+  if (hex.length === 6) {
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  } else {
+    r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+    g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+    b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+  }
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? "var(--navy)" : "#FFFFFF";
+}
+
 export default function CompanyCard({ company }: CompanyCardProps) {
   // `profile_image_url` is often a hotlinked external URL — it can 404 or
   // time out at render time even though it was valid when saved. Fall back
@@ -95,7 +115,7 @@ export default function CompanyCard({ company }: CompanyCardProps) {
           )}
         </div>
         <div className="company-showcase-info">
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", minHeight: "24px" }}>
+          <div>
             <h4 style={{
               fontSize: "1rem", fontWeight: 900, color: "var(--navy)", margin: 0,
               overflowWrap: "break-word", wordBreak: "keep-all",
@@ -105,8 +125,11 @@ export default function CompanyCard({ company }: CompanyCardProps) {
             </h4>
             {company.verified && (
               <span style={{
-                fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)",
-                background: "var(--accent)", padding: "2px 7px", borderRadius: "8px", whiteSpace: "nowrap",
+                display: "inline-block", marginTop: "4px",
+                fontSize: "0.6rem", fontWeight: 800,
+                color: company.brand_color ? getContrastTextColor(company.brand_color) : "var(--navy)",
+                background: company.brand_color || "var(--accent)",
+                padding: "2px 7px", borderRadius: "8px", whiteSpace: "nowrap",
               }}>
                 POPOK VERIFIED
               </span>
@@ -115,7 +138,7 @@ export default function CompanyCard({ company }: CompanyCardProps) {
           {/* name_en/genre rows always reserve their line height (visibility toggle,
               not conditional unmount) so every card's info block is the same total
               height regardless of which optional fields a given company has. */}
-          <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", visibility: company.name_en ? "visible" : "hidden" }}>
+          <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-muted)", visibility: company.name_en ? "visible" : "hidden" }}>
             {company.name_en || "—"}
           </span>
           <div style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontWeight: 600, visibility: (company.genre || company.city_or_region) ? "visible" : "hidden" }}>

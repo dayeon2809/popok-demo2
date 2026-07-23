@@ -89,10 +89,27 @@ export default function StatsCTA({
           fontSize: "0.85rem",
           color: "var(--ink-muted)",
           fontWeight: 700,
-          margin: 0
+          margin: "0 0 10px"
         }}>
           POPOK은 흩어진 공연 기록을 하나의 도메인으로 연결해 나갑니다.
         </p>
+        <a
+          href="https://knowledge-popok.netlify.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            fontSize: "0.82rem",
+            fontWeight: 800,
+            color: "var(--navy)",
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",
+          }}
+        >
+          POPOK이 구축한 데이터베이스 살펴보기 ↗
+        </a>
       </div>
 
       {/* Dark container */}

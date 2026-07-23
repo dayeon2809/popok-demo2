@@ -110,9 +110,9 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
             placeholder="이름, 장르, 대표작 등으로 단체 검색..."
             style={{
               width: "100%",
-              padding: "12px 16px",
+              padding: "12px 20px",
               fontSize: "0.95rem",
-              borderRadius: "4px",
+              borderRadius: "999px",
               border: "1px solid var(--border)",
               background: "#FFFFFF",
             }}

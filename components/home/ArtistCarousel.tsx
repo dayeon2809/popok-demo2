@@ -10,9 +10,11 @@ interface ArtistCarouselProps {
   subtitle?: string;
   artists: Artist[];
   showNewBadge?: boolean;
+  /** Optional link shown below the subtitle, e.g. to the full artist directory. */
+  moreLink?: { label: string; href: string };
 }
 
-export default function ArtistCarousel({ title, subtitle, artists, showNewBadge = false }: ArtistCarouselProps) {
+export default function ArtistCarousel({ title, subtitle, artists, showNewBadge = false, moreLink }: ArtistCarouselProps) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,6 +94,24 @@ export default function ArtistCarousel({ title, subtitle, artists, showNewBadge 
             <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "6px", fontWeight: 700 }}>
               {subtitle}
             </p>
+          )}
+          {moreLink && (
+            <Link
+              href={moreLink.href}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px",
+                marginTop: "8px",
+                fontSize: "0.82rem",
+                fontWeight: 800,
+                color: "var(--navy)",
+                textDecoration: "underline",
+                textUnderlineOffset: "3px",
+              }}
+            >
+              {moreLink.label} →
+            </Link>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

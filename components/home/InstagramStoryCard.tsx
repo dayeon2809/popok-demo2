@@ -13,40 +13,30 @@ function formatStoryDate(iso: string): string {
 
 interface InstagramStoryCardProps {
   story: InstagramStory;
-  featured?: boolean;
 }
 
 // The only piece of this feature that needs to be a client component (image
-// load-error fallback needs local state) — kept small on purpose so
-// WeeklyStories.tsx itself stays a plain presentational mapper.
-export default function InstagramStoryCard({ story, featured = false }: InstagramStoryCardProps) {
+// load-error fallback needs local state) — a full-bleed slide with the
+// image as background and caption text overlaid at the bottom, matching a
+// swipeable "card news" carousel rather than a small thumbnail grid.
+export default function InstagramStoryCard({ story }: InstagramStoryCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
-    <a
-      href={story.permalink}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={featured ? "weekly-story-card weekly-story-card--featured" : "weekly-story-card"}
-    >
-      <div className="weekly-story-thumb">
-        <img
-          src={imageFailed ? FALLBACK_IMAGE : story.imageUrl}
-          alt={story.title}
-          onError={() => setImageFailed(true)}
-        />
-        {(story.mediaType === "VIDEO" || story.mediaType === "REELS") && (
-          <span className="weekly-story-play-badge" aria-hidden="true">▶</span>
-        )}
-      </div>
-
-      <div className="weekly-story-info">
-        <span className="mono weekly-story-category">{story.category}</span>
-        <h4 className="weekly-story-title">{story.title}</h4>
-        {story.excerpt && <p className="weekly-story-excerpt">{story.excerpt}</p>}
-        <div className="weekly-story-meta">
-          <span className="mono weekly-story-date">{formatStoryDate(story.publishedAt)}</span>
-          <span className="weekly-story-ig">Instagram ↗</span>
+    <a href={story.permalink} target="_blank" rel="noopener noreferrer" className="news-slide">
+      <img
+        src={imageFailed ? FALLBACK_IMAGE : story.imageUrl}
+        alt={story.title}
+        onError={() => setImageFailed(true)}
+        className="news-slide-img"
+      />
+      <div className="news-slide-overlay">
+        <span className="news-slide-category">{story.category}</span>
+        <h3 className="news-slide-title">{story.title}</h3>
+        {story.excerpt && <p className="news-slide-excerpt">{story.excerpt}</p>}
+        <div className="news-slide-meta">
+          <span>{formatStoryDate(story.publishedAt)}</span>
+          <span>Instagram ↗</span>
         </div>
       </div>
     </a>

@@ -2,14 +2,14 @@
 // Instagram API (Graph API — Instagram API with Instagram Login, for a
 // Business/Creator account), normalizes it into InstagramStory[] for the
 // homepage's "이주의 소식" section, and never throws — every failure mode
-// (missing env vars, API error, network error) resolves to an empty array
+// (missing env var, API error, network error) resolves to an empty array
 // so the homepage never breaks because of this section.
 //
-// Requires INSTAGRAM_ACCESS_TOKEN + INSTAGRAM_USER_ID (see README notes in
-// the PR/report this shipped with for how to obtain them) — there is no
-// existing Instagram Graph API integration anywhere else in this repo to
-// reuse; app/api/instagram/preview/route.ts is an unrelated, unused OG-tag
-// HTML scraper, not this API, and is left untouched.
+// Requires only INSTAGRAM_ACCESS_TOKEN — calls the `me/media` endpoint
+// rather than `{user-id}/media`, so no separate INSTAGRAM_USER_ID lookup is
+// needed. There is no existing Instagram Graph API integration anywhere
+// else in this repo to reuse; app/api/instagram/preview/route.ts is an
+// unrelated, unused OG-tag HTML scraper, not this API, and is left untouched.
 
 export interface InstagramStory {
   id: string;
@@ -52,7 +52,7 @@ function devError(...args: unknown[]) {
 }
 
 export function isInstagramConfigured(): boolean {
-  return !!(process.env.INSTAGRAM_ACCESS_TOKEN && process.env.INSTAGRAM_USER_ID);
+  return !!process.env.INSTAGRAM_ACCESS_TOKEN;
 }
 
 // ── Caption parsing (kept separate from the fetch/normalize logic below so
@@ -121,29 +121,31 @@ function resolveMediaType(media: RawInstagramMedia): InstagramStory["mediaType"]
 interface GetWeeklyStoriesOptions {
   limit?: number;
   excludeIds?: string[];
-  excludeHashtags?: string[];
+  /** Only posts whose caption includes this hashtag are shown — lets the
+   *  Instagram account be run freely while the homepage stays curated. */
+  requireHashtag?: string;
 }
 
 /**
  * Latest @popok.official posts, normalized for the homepage. Always resolves
- * (never throws): missing env vars, a non-2xx API response, or a network
+ * (never throws): missing env var, a non-2xx API response, or a network
  * error all just yield an empty array, logged only in development.
  */
 export async function getWeeklyStories(options: GetWeeklyStoriesOptions = {}): Promise<InstagramStory[]> {
-  const { limit = 6, excludeIds = [], excludeHashtags = ["홈비노출"] } = options;
+  const { limit = 6, excludeIds = [], requireHashtag = "홈노출" } = options;
 
   const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-  const userId = process.env.INSTAGRAM_USER_ID;
-  if (!accessToken || !userId) {
-    devWarn("[getWeeklyStories] INSTAGRAM_ACCESS_TOKEN / INSTAGRAM_USER_ID not set — '이주의 소식' section will be hidden.");
+  if (!accessToken) {
+    devWarn("[getWeeklyStories] INSTAGRAM_ACCESS_TOKEN not set — '이주의 소식' section will be hidden.");
     return [];
   }
 
   try {
     // Fetch a larger pool than `limit` since the no-caption / no-image /
-    // excluded-hashtag / excluded-id filters below may drop some posts.
+    // video / missing-required-hashtag / excluded-id filters below may drop
+    // some posts.
     const poolSize = Math.max(limit * 3, 12);
-    const url = `${GRAPH_HOST}/${GRAPH_VERSION}/${encodeURIComponent(userId)}/media?fields=${encodeURIComponent(FIELDS)}&access_token=${encodeURIComponent(accessToken)}&limit=${poolSize}`;
+    const url = `${GRAPH_HOST}/${GRAPH_VERSION}/me/media?fields=${encodeURIComponent(FIELDS)}&access_token=${encodeURIComponent(accessToken)}&limit=${poolSize}`;
 
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) {
@@ -158,8 +160,9 @@ export async function getWeeklyStories(options: GetWeeklyStoriesOptions = {}): P
     const stories: InstagramStory[] = [];
     for (const media of rawMedia) {
       if (excludeIds.includes(media.id)) continue;
+      if (media.media_type === "VIDEO") continue;
       if (!media.caption || !media.caption.trim()) continue;
-      if (excludeHashtags.some((tag) => captionHasHashtag(media.caption, tag))) continue;
+      if (!captionHasHashtag(media.caption, requireHashtag)) continue;
 
       const imageUrl = pickImageUrl(media);
       if (!imageUrl) continue;
