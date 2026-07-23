@@ -219,7 +219,7 @@ export default function HomeClient({ initialArtists, initialPerformances, initia
         title="🏢 당신과 연결될 단체"
         subtitle="공연예술 단체와 프로젝트를 만나보세요."
         companies={newCompanies}
-        moreLink={{ label: "더 많은 단체 보기", href: "/companies" }}
+        moreLink={{ label: "나와 맞는 단체 찾기", href: "/companies" }}
       />
 
       {/* ── 4. 이번 주 공연 (PERFORMANCE CAROUSEL) ── */}

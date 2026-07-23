@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/States";
 import type { Company } from "@/types";
 import { analytics } from "@/lib/analytics";
 import CompanyCard from "@/components/CompanyCard";
+import CompanyRecommendationQuiz from "@/components/company/CompanyRecommendationQuiz";
 
 const CATEGORIES = [
   { key: "all", label: "ALL" },
@@ -75,6 +76,8 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
           단체
         </h1>
       </div>
+
+      <CompanyRecommendationQuiz companies={companies} />
 
       {/* ── FILTER & SEARCH BAR ── */}
       <div style={{ marginBottom: "40px", display: "flex", flexDirection: "column", gap: "16px" }}>

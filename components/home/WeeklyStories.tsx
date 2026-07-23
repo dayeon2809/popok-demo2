@@ -60,7 +60,7 @@ export default function WeeklyStories({ stories, configured }: WeeklyStoriesProp
         .news-carousel-track {
           display: flex;
           overflow-x: auto;
-          scroll-snap-type: x mandatory;
+          scroll-snap-type: x proximity;
           -webkit-overflow-scrolling: touch;
         }
         .news-carousel-track::-webkit-scrollbar { display: none; }
@@ -155,8 +155,12 @@ export default function WeeklyStories({ stories, configured }: WeeklyStoriesProp
           background: var(--navy);
         }
         @media (max-width: 640px) {
-          .news-slide { height: 320px; }
-          .news-slide-overlay { padding: 20px; }
+          .news-slide { height: 280px; }
+          .news-slide-overlay { padding: 14px 18px; }
+          .news-slide-category { font-size: 0.62rem; margin-bottom: 4px; }
+          .news-slide-title { font-size: 1rem; -webkit-line-clamp: 1; margin-bottom: 4px; }
+          .news-slide-excerpt { font-size: 0.75rem; -webkit-line-clamp: 1; margin-bottom: 6px; }
+          .news-slide-meta { font-size: 0.7rem; }
         }
       ` }} />
 
