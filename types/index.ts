@@ -128,6 +128,7 @@ export interface Company {
   name: string;
   name_en?: string | null;
   slug?: string | null;
+  owner_id?: string | null;
   status?: "draft" | "published" | "archived" | string;
   verified?: boolean;
   genre?: string | null;

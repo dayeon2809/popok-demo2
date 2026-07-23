@@ -226,7 +226,7 @@ export default function CompanyClientView({
             ← 단체 둘러보기
           </button>
           
-          <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} representativeArtist={representativeArtist} />
+          <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} representativeArtist={representativeArtist} connectedArtistCount={artists.length} />
         </div>
       </div>
 

@@ -33,8 +33,9 @@ export default function CompanyUpcomingPerformances({
       <style jsx global>{`
         .upcoming-performances-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-          gap: 40px 32px;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 220px));
+          justify-content: start;
+          gap: 28px 20px;
         }
         .performance-card {
           display: flex;
@@ -69,41 +70,41 @@ export default function CompanyUpcomingPerformances({
           transform: scale(1.02);
         }
         .performance-info {
-          padding: 20px;
+          padding: 14px;
           display: flex;
           flex-direction: column;
           flex-grow: 1;
         }
         .perf-genre-tag {
           font-family: monospace;
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           font-weight: 800;
           color: var(--ink-faint);
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
         .perf-title {
-          font-size: 1.05rem;
+          font-size: 0.9rem;
           font-weight: 900;
           color: var(--navy);
-          margin: 0 0 8px 0;
-          line-height: 1.35;
+          margin: 0 0 6px 0;
+          line-height: 1.3;
           letter-spacing: -0.02em;
         }
         .perf-meta-row {
-          font-size: 0.8rem;
+          font-size: 0.72rem;
           color: var(--ink-muted);
-          margin-bottom: 4px;
+          margin-bottom: 3px;
           display: flex;
           align-items: baseline;
           gap: 6px;
         }
         .perf-description {
-          font-size: 0.8rem;
+          font-size: 0.72rem;
           color: var(--ink-muted);
-          line-height: 1.5;
-          margin: 12px 0;
+          line-height: 1.4;
+          margin: 8px 0;
           display: -webkit-box;
           WebkitLineClamp: 2;
           WebkitBoxOrient: "vertical";
@@ -113,22 +114,33 @@ export default function CompanyUpcomingPerformances({
         }
         .perf-cta-row {
           margin-top: auto;
-          padding-top: 12px;
-          border-top: 1px solid var(--border-light);
+          padding-top: 10px;
+        }
+        .perf-cta-button {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          font-size: 0.78rem;
+          justify-content: center;
+          gap: 4px;
+          width: 100%;
+          padding: 8px 10px;
+          border-radius: 3px;
+          background: var(--navy);
+          color: #FFFFFF;
+          font-size: 0.72rem;
           font-weight: 800;
-          color: var(--navy);
+          letter-spacing: -0.01em;
         }
-        
+        .perf-cta-button--disabled {
+          background: #F0EEE9;
+          color: var(--ink-faint);
+        }
+
         /* Poster Placeholder */
         .poster-placeholder {
           width: 100%;
           height: 100%;
           background: #FAF8F5;
-          padding: 24px;
+          padding: 14px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -145,23 +157,23 @@ export default function CompanyUpcomingPerformances({
         .placeholder-date-badge {
           align-self: flex-start;
           font-family: monospace;
-          font-size: 0.72rem;
+          font-size: 0.65rem;
           font-weight: 800;
           color: var(--navy);
           border: 1px solid var(--navy);
-          padding: 2px 6px;
+          padding: 2px 5px;
           border-radius: 2px;
         }
         .placeholder-title {
-          font-size: 1.15rem;
+          font-size: 0.95rem;
           font-weight: 900;
           color: var(--navy);
-          line-height: 1.3;
+          line-height: 1.25;
           margin: 0;
           letter-spacing: -0.02em;
         }
         .placeholder-venue {
-          font-size: 0.8rem;
+          font-size: 0.72rem;
           font-weight: 700;
           color: var(--ink-muted);
         }
@@ -233,7 +245,7 @@ export default function CompanyUpcomingPerformances({
               marginBottom: "4px",
             }}
           >
-            다가오는 공연
+            다가오는 일정
           </h3>
           <span style={{ fontSize: "0.8rem", color: "var(--ink-muted)", fontWeight: 500 }}>
             이 단체의 새로운 공연과 활동 소식을 확인해보세요.
@@ -260,7 +272,7 @@ export default function CompanyUpcomingPerformances({
           </span>
           <div>
             <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--ink-muted)", margin: 0 }}>
-              다가오는 공연 소식을 준비 중입니다.
+              다가오는 일정 소식을 준비 중입니다.
             </p>
             <p style={{ fontSize: "0.78rem", color: "var(--ink-faint)", margin: "4px 0 0 0" }}>
               새로운 일정이 등록되면 가장 먼저 알려드릴게요.
@@ -276,6 +288,12 @@ export default function CompanyUpcomingPerformances({
           // carousel (lib/performanceLinks.ts). A performance with none of
           // the three still renders as a card, just without a clickable CTA.
           const link = getPerformanceExternalLink(perf);
+          // Label reflects what the resolved link actually points to — a
+          // dedicated ticketUrl gets "예매하기", anything else (externalUrl/
+          // sourceUrl) gets the more generic "공연 정보 보기".
+          const ctaLabel = link && link === (perf.ticketUrl && perf.ticketUrl.trim())
+            ? "예매하기"
+            : "공연 정보 보기";
           const CardTag = link ? "a" : "div";
 
           return (
@@ -338,11 +356,11 @@ export default function CompanyUpcomingPerformances({
                   {perf.description || `${perf.title} 공연 정보입니다. 자세한 예매 및 예매처 정보는 안내 링크를 확인해주시기 바랍니다.`}
                 </p>
 
-                {link && (
-                  <div className="perf-cta-row">
-                    <span>공연 정보 보기 ↗</span>
-                  </div>
-                )}
+                <div className="perf-cta-row">
+                  <span className={link ? "perf-cta-button" : "perf-cta-button perf-cta-button--disabled"}>
+                    {link ? `${ctaLabel} ↗` : "정보 준비중"}
+                  </span>
+                </div>
               </div>
             </CardTag>
           );

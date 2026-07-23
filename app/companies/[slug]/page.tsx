@@ -31,14 +31,30 @@ export default async function CompanyDetailPage({
   }
 
   // Fetch connected artists, related companies, upcoming performances,
-  // viewer's state, and the 1 representative artist in parallel
-  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState, representativeArtist] = await Promise.all([
+  // and viewer's state in parallel
+  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState] = await Promise.all([
     getConnectedArtistsByCompanyId(company.id),
     getRelatedCompanies(company.id),
     getUpcomingPerformancesByCompanyId(company.id),
     getPortfolioRequestViewerState({ type: "company", id: company.id }),
-    getRepresentativeArtistForCompany(company.id),
   ]);
+
+  // Derive representative artist using owner_id and current relation criteria
+  const repArtist = fetchedArtists.find(
+    (a: any) =>
+      company.owner_id != null &&
+      a.owner_id === company.owner_id &&
+      a.artistCompany?.is_current === true
+  ) || null;
+
+  const representativeArtist = repArtist
+    ? {
+        artist: repArtist,
+        is_primary: repArtist.artistCompany?.is_primary === true,
+        is_current: true,
+        role: repArtist.artistCompany?.role || null,
+      }
+    : null;
 
   if (process.env.NODE_ENV !== "production") {
     console.log("[company page representative]", {

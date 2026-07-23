@@ -38,6 +38,7 @@ interface ConnectedArtist {
     instagram: string | null;
     website: string | null;
     email: string | null;
+    owner_id?: string | null;
   } | null;
 }
 
@@ -125,6 +126,7 @@ interface CompanyDetail {
   name: string;
   name_en: string | null;
   slug: string | null;
+  owner_id: string | null;
   status: "draft" | "published" | "archived";
   verified: boolean;
   genre: string | null;
@@ -289,7 +291,7 @@ export default function AdminCompanyEditPage() {
 
   const [activeTab, setActiveTab] = useState<"preview" | "edit">("edit");
   const [expandedPanels, setExpandedPanels] = useState<Record<string, boolean>>({
-    basic: true, hero: true, identity: true, works: true, history: true, projects: true, artists: true, contact: true, awards: true, links: true
+    basic: true, hero: true, identity: true, works: true, history: true, artists: true, contact: true, awards: true, links: true, schedules: true
   });
 
   const [allArtists, setAllArtists] = useState<AdminArtistOption[]>([]);
@@ -306,6 +308,13 @@ export default function AdminCompanyEditPage() {
   const [uploadingSourceFile, setUploadingSourceFile] = useState(false);
   const [deletingSourceFile, setDeletingSourceFile] = useState(false);
   const sourceFileInputRef = useRef<HTMLInputElement>(null);
+
+  const [performances, setPerformances] = useState<any[]>([]);
+  const [loadingPerformances, setLoadingPerformances] = useState(false);
+  const [editingPerf, setEditingPerf] = useState<any | null>(null);
+  const [isPerfModalOpen, setIsPerfModalOpen] = useState(false);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [uploadedPostersTrack, setUploadedPostersTrack] = useState<string[]>([]);
 
   const authHeader = () => ({ "x-admin-passcode": sessionStorage.getItem("admin_passcode") || "" });
 
@@ -461,6 +470,21 @@ export default function AdminCompanyEditPage() {
     }
   };
 
+  const fetchPerformances = async () => {
+    setLoadingPerformances(true);
+    try {
+      const res = await fetch(`/api/admin/performances?companyId=${companyId}`, { headers: authHeader() });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPerformances(data.data || []);
+      }
+    } catch (err) {
+      console.error("fetchPerformances error:", err);
+    } finally {
+      setLoadingPerformances(false);
+    }
+  };
+
   const fetchArtists = async () => {
     try {
       const res = await fetch("/api/admin/artists", { headers: authHeader() });
@@ -477,6 +501,7 @@ export default function AdminCompanyEditPage() {
     if (!companyId) return;
     fetchCompany();
     fetchArtists();
+    fetchPerformances();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
 
@@ -533,7 +558,6 @@ export default function AdminCompanyEditPage() {
           instagram: company.instagram,
           website: company.website,
           portfolio_url: company.portfolio_url,
-          current_activity: company.current_activity,
           awards: company.awards,
           review_links: company.review_links,
           links: company.links,
@@ -671,6 +695,237 @@ export default function AdminCompanyEditPage() {
       }
       await fetchCompany();
     } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  };
+
+  const handleOpenAddPerf = () => {
+    const newId = self.crypto?.randomUUID ? self.crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+    setEditingPerf({
+      id: newId,
+      title: "",
+      startDate: "",
+      endDate: "",
+      venue: "",
+      description: "",
+      ticketUrl: "",
+      externalUrl: "",
+      posterUrl: "",
+      isPublished: false,
+      companyId: companyId,
+      isNew: true,
+    });
+    setUploadedPostersTrack([]);
+    setIsPerfModalOpen(true);
+  };
+
+  const handleOpenEditPerf = (perf: any) => {
+    setEditingPerf({
+      id: perf.id,
+      title: perf.title || "",
+      startDate: perf.startDate || "",
+      endDate: perf.endDate || "",
+      venue: perf.venue || "",
+      description: perf.description || "",
+      ticketUrl: perf.ticketUrl || "",
+      externalUrl: perf.externalUrl || "",
+      posterUrl: perf.posterUrl || "",
+      isPublished: perf.isPublished || false,
+      companyId: companyId,
+      isNew: false,
+    });
+    setUploadedPostersTrack([]);
+    setIsPerfModalOpen(true);
+  };
+
+  const handleClosePerfModal = async () => {
+    if (uploadedPostersTrack.length > 0) {
+      for (const path of uploadedPostersTrack) {
+        try {
+          await fetch("/api/admin/delete-file", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...authHeader(),
+            },
+            body: JSON.stringify({ bucket: "artist-media", path }),
+          });
+        } catch (e) {
+          console.error("Cleanup error:", e);
+        }
+      }
+    }
+    setEditingPerf(null);
+    setIsPerfModalOpen(false);
+  };
+
+  const handlePerfPosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("포스터 파일 크기는 5MB를 초과할 수 없습니다.");
+      return;
+    }
+
+    setUploadingPoster(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("bucket", "artist-media");
+      formData.append("path", `performances/${editingPerf.id}`);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setEditingPerf((prev: any) => ({ ...prev, posterUrl: data.url }));
+        if (data.path) {
+          setUploadedPostersTrack((prev) => [...prev, data.path]);
+        }
+      } else {
+        alert(data.error || "포스터 업로드에 실패했습니다.");
+      }
+    } catch {
+      alert("네트워크 오류가 발생했습니다.");
+    } finally {
+      setUploadingPoster(false);
+    }
+  };
+
+  const validatePerf = (perf: any): string | null => {
+    if (!perf.title.trim()) return "일정명을 입력해 주세요.";
+    if (!perf.startDate) return "시작일을 입력해 주세요.";
+    if (perf.startDate && perf.endDate && perf.endDate < perf.startDate) {
+      return "종료일은 시작일보다 빠를 수 없습니다.";
+    }
+    if (perf.externalUrl && !/^https?:\/\/.+/i.test(perf.externalUrl)) {
+      return "공식 링크는 http:// 또는 https://로 시작해야 합니다.";
+    }
+    if (perf.ticketUrl && !/^https?:\/\/.+/i.test(perf.ticketUrl)) {
+      return "예매 링크는 http:// 또는 https://로 시작해야 합니다.";
+    }
+    return null;
+  };
+
+  const handleSavePerf = async () => {
+    if (!editingPerf) return;
+
+    const validationError = validatePerf(editingPerf);
+    if (validationError) {
+      alert(validationError);
+      return;
+    }
+
+    try {
+      const isNew = editingPerf.isNew;
+      const url = isNew ? "/api/admin/performances" : `/api/admin/performances/${editingPerf.id}`;
+      const method = isNew ? "POST" : "PATCH";
+
+      const payload = {
+        id: editingPerf.id,
+        title: editingPerf.title.trim(),
+        startDate: editingPerf.startDate || null,
+        endDate: editingPerf.endDate || null,
+        venue: editingPerf.venue.trim() || null,
+        description: editingPerf.description.trim() || null,
+        externalUrl: editingPerf.externalUrl.trim() || null,
+        ticketUrl: editingPerf.ticketUrl.trim() || null,
+        posterUrl: editingPerf.posterUrl || null,
+        isPublished: editingPerf.isPublished,
+        companyId: companyId,
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeader(),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "일정 저장에 실패했습니다.");
+        return;
+      }
+
+      setUploadedPostersTrack([]);
+      setIsPerfModalOpen(false);
+      setEditingPerf(null);
+      await fetchPerformances();
+      alert("일정이 성공적으로 저장되었습니다.");
+    } catch (err) {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  };
+
+  const togglePerfPublish = async (perf: any) => {
+    const nextPublished = !perf.isPublished;
+    
+    if (!perf.title || !perf.title.trim()) {
+      alert("일정명이 비어 있어 공개할 수 없습니다.");
+      return;
+    }
+    if (!perf.startDate) {
+      alert("시작일이 없어 공개할 수 없습니다.");
+      return;
+    }
+    if (perf.startDate && perf.endDate && perf.endDate < perf.startDate) {
+      alert("종료일이 시작일보다 빨라 공개할 수 없습니다.");
+      return;
+    }
+    if (!companyId) {
+      alert("유효하지 않은 단체 ID입니다.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/performances/${perf.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeader(),
+        },
+        body: JSON.stringify({
+          isPublished: nextPublished,
+          companyId,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "상태 변경에 실패했습니다.");
+        return;
+      }
+
+      await fetchPerformances();
+    } catch {
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDeletePerf = async (perf: any) => {
+    if (!confirm(`일정 "${perf.title}"을(를) 삭제하시겠습니까?`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/performances/${perf.id}`, {
+        method: "DELETE",
+        headers: authHeader(),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.error || "삭제에 실패했습니다.");
+        return;
+      }
+
+      await fetchPerformances();
+      alert("일정이 삭제되었습니다.");
+    } catch {
       alert("네트워크 오류가 발생했습니다.");
     }
   };
@@ -867,11 +1122,20 @@ export default function AdminCompanyEditPage() {
     instagram: rel.artist?.instagram || null,
     website: rel.artist?.website || null,
     email: rel.artist?.email || null,
+    owner_id: rel.artist?.owner_id || null,
     role: rel.role || "CREATIVE",
     start_year: rel.start_year || null,
     end_year: rel.end_year || null,
     is_current: !!rel.is_current,
     is_primary: !!rel.is_primary,
+    artistCompany: {
+      id: rel.relationId,
+      role: rel.role || null,
+      is_primary: !!rel.is_primary,
+      is_current: !!rel.is_current,
+      start_year: rel.start_year || null,
+      end_year: rel.end_year || null,
+    }
   }));
 
   const renderSectionHeader = (title: string, panelKey: string, isEmpty: boolean) => (
@@ -926,9 +1190,9 @@ export default function AdminCompanyEditPage() {
                   <input type="checkbox" checked={rel.is_current} onChange={(e) => updateRelation(rel.relationId, { is_current: e.target.checked })} />
                   현재
                 </label>
-                <label style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "4px" }} title="이 아티스트의 주 소속 단체로 표시합니다.">
                   <input type="checkbox" checked={rel.is_primary} onChange={(e) => updateRelation(rel.relationId, { is_primary: e.target.checked })} />
-                  대표
+                  대표 소속 (주 소속)
                 </label>
               </div>
               {rel.artist?.slug && (
@@ -983,9 +1247,9 @@ export default function AdminCompanyEditPage() {
             <input type="checkbox" checked={newRelation.is_current} onChange={(e) => setNewRelation({ ...newRelation, is_current: e.target.checked })} />
             현재 소속
           </label>
-          <label style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "6px" }} title="이 아티스트의 주 소속 단체로 표시합니다.">
             <input type="checkbox" checked={newRelation.is_primary} onChange={(e) => setNewRelation({ ...newRelation, is_primary: e.target.checked })} />
-            대표 소속
+            대표 소속 (주 소속)
           </label>
         </div>
         <button type="button" onClick={() => submitNewRelation(false)} disabled={addingRelation || !selectedArtistId} style={primaryBtnStyle}>
@@ -1254,9 +1518,21 @@ export default function AdminCompanyEditPage() {
             <EditableSection title="디지털 카드" onEdit={() => handleJumpToEdit("basic")}>
               <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
                 {(() => {
-                  const rep = adaptedArtists.find((a: any) => a.is_primary === true);
-                  const repResult = rep ? ({ artist: rep, is_primary: true, is_current: rep.is_current !== false, role: rep.role || null } as any) : null;
-                  return <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} representativeArtist={repResult} />;
+                  const rep = adaptedArtists.find(
+                    (a: any) =>
+                      company.owner_id != null &&
+                      a.owner_id === company.owner_id &&
+                      a.artistCompany?.is_current === true
+                  );
+                  const repResult = rep
+                    ? ({
+                        artist: rep,
+                        is_primary: rep.artistCompany?.is_primary === true,
+                        is_current: true,
+                        role: rep.artistCompany?.role || null,
+                      } as any)
+                    : null;
+                  return <CompanyCardStack company={adaptedCompany as any} viewCount={company.view_count || 0} representativeArtist={repResult} connectedArtistCount={adaptedArtists.length} />;
                 })()}
               </div>
             </EditableSection>
@@ -1945,103 +2221,9 @@ export default function AdminCompanyEditPage() {
               )}
             </div>
 
-            {/* Panel 6: Projects */}
-            <div id="panel-projects" style={panelCardStyle}>
-              {renderSectionHeader("6. 현재 프로젝트 (Current Projects)", "projects", !company.current_activity || company.current_activity.length === 0)}
-              {expandedPanels.projects && (
-                <div style={{ padding: "20px" }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                    {(company.current_activity || []).map((proj: any, idx: number) => (
-                      <div key={idx} style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "16px", background: "#FAF8F5" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-                          <span style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--ink-faint)" }}>프로젝트 #{idx + 1}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newProj = company.current_activity.filter((_, i) => i !== idx);
-                              updateField("current_activity", newProj);
-                            }}
-                            style={{ ...dangerBtnStyle, padding: "4px 8px", fontSize: "0.72rem" }}
-                          >
-                            삭제
-                          </button>
-                        </div>
-                        
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }} className="admin-form-grid">
-                          <div style={fieldRowStyle}>
-                            <label style={labelStyle}>프로젝트명 *</label>
-                            <input
-                              style={inputStyle}
-                              value={proj.title || ""}
-                              onChange={(e) => {
-                                const newProj = [...company.current_activity];
-                                newProj[idx] = { ...proj, title: e.target.value };
-                                updateField("current_activity", newProj);
-                              }}
-                            />
-                          </div>
-                          <div style={fieldRowStyle}>
-                            <label style={labelStyle}>기간 (날짜)</label>
-                            <input
-                              style={inputStyle}
-                              placeholder="예: 2026.08.10 - 2026.11.20"
-                              value={proj.date || ""}
-                              onChange={(e) => {
-                                const newProj = [...company.current_activity];
-                                newProj[idx] = { ...proj, date: e.target.value };
-                                updateField("current_activity", newProj);
-                              }}
-                            />
-                          </div>
-                        </div>
-                        
-                        <div style={{ ...fieldRowStyle, marginBottom: "12px" }}>
-                          <label style={{ ...labelStyle }}>상세 설명</label>
-                          <textarea
-                            rows={2}
-                            style={{ ...inputStyle, resize: "vertical" }}
-                            value={proj.description || ""}
-                            onChange={(e) => {
-                              const newProj = [...company.current_activity];
-                              newProj[idx] = { ...proj, description: e.target.value };
-                              updateField("current_activity", newProj);
-                            }}
-                          />
-                        </div>
-                        
-                        <div style={fieldRowStyle}>
-                          <label style={labelStyle}>관련 정보 링크</label>
-                          <input
-                            style={inputStyle}
-                            placeholder="https://..."
-                            value={proj.link || ""}
-                            onChange={(e) => {
-                              const newProj = [...company.current_activity];
-                              newProj[idx] = { ...proj, link: e.target.value };
-                              updateField("current_activity", newProj);
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                    
-                    <button
-                      type="button"
-                      onClick={() => {
-                        updateField("current_activity", [...company.current_activity, { title: "", date: "", description: "", link: "" }]);
-                      }}
-                      style={{ ...secondaryBtnStyle, alignSelf: "flex-start" }}
-                    >
-                      + 프로젝트 추가
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Panel 7: Affiliated Artists */}
+            {/* Panel 6: Affiliated Artists */}
             <div id="panel-artists" style={panelCardStyle}>
-              {renderSectionHeader("7. 소속 아티스트 (Affiliated Artists)", "artists", company.connectedArtists.length === 0)}
+              {renderSectionHeader("6. 소속 아티스트 (Affiliated Artists)", "artists", company.connectedArtists.length === 0)}
               {expandedPanels.artists && (
                 <div style={{ padding: "20px" }}>
                   {renderArtistsForm()}
@@ -2049,9 +2231,9 @@ export default function AdminCompanyEditPage() {
               )}
             </div>
 
-            {/* Panel 8: Contact & Media */}
+            {/* Panel 7: Contact & Media */}
             <div id="panel-contact" style={panelCardStyle}>
-              {renderSectionHeader("8. 연락처 및 미디어 보도 (Contact & Press)", "contact", !company.email && !company.website && !company.instagram && !company.portfolio_url && (!company.review_links || company.review_links.length === 0))}
+              {renderSectionHeader("7. 연락처 및 미디어 보도 (Contact & Press)", "contact", !company.email && !company.website && !company.instagram && !company.portfolio_url && (!company.review_links || company.review_links.length === 0))}
               {expandedPanels.contact && (
                 <div style={{ padding: "20px" }}>
                   {renderContactForm()}
@@ -2059,9 +2241,9 @@ export default function AdminCompanyEditPage() {
               )}
             </div>
 
-            {/* Panel 9: Awards */}
+            {/* Panel 8: Awards */}
             <div id="panel-awards" style={panelCardStyle}>
-              {renderSectionHeader("9. 수상 실적 (Awards)", "awards", !company.awards || company.awards.length === 0)}
+              {renderSectionHeader("8. 수상 실적 (Awards)", "awards", !company.awards || company.awards.length === 0)}
               {expandedPanels.awards && (
                 <div style={{ padding: "20px" }}>
                   {renderAwardsForm()}
@@ -2069,16 +2251,299 @@ export default function AdminCompanyEditPage() {
               )}
             </div>
 
-            {/* Panel 10: Links */}
+            {/* Panel 9: Links */}
             <div id="panel-links" style={panelCardStyle}>
-              {renderSectionHeader("10. 외부 링크 (Links)", "links", !company.links || company.links.length === 0)}
+              {renderSectionHeader("9. 외부 링크 (Links)", "links", !company.links || company.links.length === 0)}
               {expandedPanels.links && (
                 <div style={{ padding: "20px" }}>
                   {renderLinksForm()}
                 </div>
               )}
             </div>
+            {/* Panel 10: Upcoming Schedules */}
+            <div id="panel-schedules" style={panelCardStyle}>
+              {renderSectionHeader("10. 다가오는 일정 (Upcoming Schedules)", "schedules", performances.length === 0)}
+              {expandedPanels.schedules && (
+                <div style={{ padding: "20px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                    <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", margin: 0 }}>
+                      단체 상세페이지에 표시할 공연과 활동 일정을 관리합니다.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddPerf}
+                      style={primaryBtnStyle}
+                    >
+                      + 일정 추가
+                    </button>
+                  </div>
 
+                  {loadingPerformances ? (
+                    <LoadingSpinner />
+                  ) : performances.length === 0 ? (
+                    <div style={{ padding: "20px 0", textAlign: "center", fontSize: "0.82rem", color: "var(--ink-faint)" }}>
+                      등록된 일정이 없습니다.
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {performances.map((perf) => (
+                        <div
+                          key={perf.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "16px",
+                            padding: "12px",
+                            border: "1px solid var(--border)",
+                            borderRadius: "10px",
+                            background: "#FAF8F5",
+                          }}
+                        >
+                          {/* Thumbnail */}
+                          <div
+                            style={{
+                              width: "48px",
+                              height: "64px",
+                              borderRadius: "6px",
+                              overflow: "hidden",
+                              background: "#EAE6DD",
+                              border: "1px solid var(--border)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {perf.posterUrl ? (
+                              <img src={perf.posterUrl} alt={perf.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            ) : (
+                              <span style={{ fontSize: "0.6rem", color: "var(--ink-faint)" }}>No Poster</span>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div style={{ flexGrow: 1 }}>
+                            <h4 style={{ fontSize: "0.88rem", fontWeight: 800, color: "var(--navy)", margin: "0 0 4px 0" }}>
+                              {perf.title}
+                            </h4>
+                            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", fontSize: "0.78rem", color: "var(--ink-muted)" }}>
+                              <span>📅 {perf.startDate}{perf.endDate && perf.endDate !== perf.startDate ? ` ~ ${perf.endDate}` : ""}</span>
+                              {perf.venue && <span>📍 {perf.venue}</span>}
+                            </div>
+                          </div>
+
+                          {/* Controls */}
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <button
+                              type="button"
+                              onClick={() => togglePerfPublish(perf)}
+                              style={{
+                                padding: "4px 8px",
+                                fontSize: "0.72rem",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                                border: "1px solid",
+                                background: perf.isPublished ? "#ECFDF5" : "#FFFBEB",
+                                borderColor: perf.isPublished ? "var(--verified)" : "#D97706",
+                                color: perf.isPublished ? "var(--verified)" : "#D97706",
+                                fontWeight: 800,
+                              }}
+                            >
+                              {perf.isPublished ? "공개" : "비공개"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditPerf(perf)}
+                              style={{ ...secondaryBtnStyle, padding: "4px 8px", fontSize: "0.72rem" }}
+                            >
+                              수정
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePerf(perf)}
+                              style={{ ...dangerBtnStyle, padding: "4px 8px", fontSize: "0.72rem" }}
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Editing Performance Modal */}
+      {isPerfModalOpen && editingPerf && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(23, 20, 17, 0.4)",
+            backdropFilter: "blur(4px)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "24px",
+          }}
+          onClick={handleClosePerfModal}
+        >
+          <div
+            style={{
+              background: "#FFFFFF",
+              border: "1.5px solid var(--border)",
+              borderRadius: "20px",
+              padding: "32px",
+              maxWidth: "500px",
+              width: "100%",
+              maxHeight: "85vh",
+              overflowY: "auto",
+              boxShadow: "0 20px 50px rgba(23, 20, 17, 0.15)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ fontSize: "1.15rem", fontWeight: 900, color: "var(--navy)", marginBottom: "18px" }}>
+              {editingPerf.isNew ? "일정 추가" : "일정 수정"}
+            </h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={fieldRowStyle}>
+                <label style={labelStyle}>일정명 *</label>
+                <input
+                  style={inputStyle}
+                  value={editingPerf.title}
+                  onChange={(e) => setEditingPerf({ ...editingPerf, title: e.target.value })}
+                  placeholder="예: 2026 정기공연"
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <div style={fieldRowStyle}>
+                  <label style={labelStyle}>시작일 *</label>
+                  <input
+                    type="date"
+                    style={inputStyle}
+                    value={editingPerf.startDate || ""}
+                    onChange={(e) => setEditingPerf({ ...editingPerf, startDate: e.target.value })}
+                  />
+                </div>
+                <div style={fieldRowStyle}>
+                  <label style={labelStyle}>종료일 (선택)</label>
+                  <input
+                    type="date"
+                    style={inputStyle}
+                    value={editingPerf.endDate || ""}
+                    onChange={(e) => setEditingPerf({ ...editingPerf, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={fieldRowStyle}>
+                <label style={labelStyle}>장소 (선택)</label>
+                <input
+                  style={inputStyle}
+                  value={editingPerf.venue || ""}
+                  onChange={(e) => setEditingPerf({ ...editingPerf, venue: e.target.value })}
+                  placeholder="예: 예술의전당 자유소극장"
+                />
+              </div>
+
+              <div style={fieldRowStyle}>
+                <label style={labelStyle}>소개 (선택)</label>
+                <textarea
+                  rows={3}
+                  style={{ ...inputStyle, resize: "vertical" }}
+                  value={editingPerf.description || ""}
+                  onChange={(e) => setEditingPerf({ ...editingPerf, description: e.target.value })}
+                  placeholder="일정에 대한 간단한 설명"
+                />
+              </div>
+
+              <div style={fieldRowStyle}>
+                <label style={labelStyle}>예매 링크 (선택)</label>
+                <input
+                  style={inputStyle}
+                  value={editingPerf.ticketUrl || ""}
+                  onChange={(e) => setEditingPerf({ ...editingPerf, ticketUrl: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+              <div style={fieldRowStyle}>
+                <label style={labelStyle}>공식 링크 (선택)</label>
+                <input
+                  style={inputStyle}
+                  value={editingPerf.externalUrl || ""}
+                  onChange={(e) => setEditingPerf({ ...editingPerf, externalUrl: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div style={fieldRowStyle}>
+                <label style={labelStyle}>포스터 이미지 (선택)</label>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
+                  <div style={{ width: "60px", height: "80px", borderRadius: "6px", overflow: "hidden", background: "#FAF9F5", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {editingPerf.posterUrl ? (
+                      <img src={editingPerf.posterUrl} alt="포스터" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      <span style={{ fontSize: "0.6rem", color: "var(--ink-faint)" }}>No Image</span>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePerfPosterUpload}
+                      disabled={uploadingPoster}
+                    />
+                    {uploadingPoster && <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>업로드 중...</span>}
+                    {editingPerf.posterUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingPerf({ ...editingPerf, posterUrl: "" })}
+                        style={{ ...secondaryBtnStyle, padding: "2px 6px", fontSize: "0.72rem", color: "#DC2626", borderColor: "#FCA5A5", alignSelf: "flex-start" }}
+                      >
+                        제거
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "20px", paddingTop: "4px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", fontWeight: 700, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={editingPerf.isPublished}
+                    onChange={(e) => setEditingPerf({ ...editingPerf, isPublished: e.target.checked })}
+                  />
+                  공개 여부
+                </label>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "12px" }}>
+                <button
+                  type="button"
+                  onClick={handleClosePerfModal}
+                  style={secondaryBtnStyle}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSavePerf}
+                  style={primaryBtnStyle}
+                  disabled={uploadingPoster}
+                >
+                  저장
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

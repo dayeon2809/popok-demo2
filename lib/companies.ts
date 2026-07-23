@@ -44,6 +44,7 @@ export function mapCompanyRowToCompany(record: any): Company {
     logo_url: record.logo_url || null,
     hero_image_url: record.hero_image_url || null,
     view_count: typeof record.view_count === "number" ? record.view_count : 0,
+    owner_id: record.owner_id || null,
 
     // Base jsonb mappings
     works: Array.isArray(record.works) ? record.works : [],
@@ -607,7 +608,7 @@ export async function getConnectedArtistsByCompanyId(companyId: string): Promise
     const supabase = getSupabaseServer();
     const { data, error } = await supabase
       .from("artist_companies" as any)
-      .select("role, start_year, end_year, is_current, is_primary, artists(id, name, name_en, profile_image_url, status, slug, instagram, website, email)")
+      .select("id, role, start_year, end_year, is_current, is_primary, artists(id, name, name_en, profile_image_url, status, slug, instagram, website, email, genre, owner_id)")
       .eq("company_id", companyId);
 
     if (error) {
@@ -626,11 +627,23 @@ export async function getConnectedArtistsByCompanyId(companyId: string): Promise
         instagram: row.artists.instagram || null,
         website: row.artists.website || null,
         email: row.artists.email || null,
+        genre: row.artists.genre || null,
+        owner_id: row.artists.owner_id || null,
+        // Flat legacy fields for backward compatibility
         role: row.role || null,
         start_year: row.start_year || null,
         end_year: row.end_year || null,
         is_current: !!row.is_current,
         is_primary: !!row.is_primary,
+        // Normalized relation block
+        artistCompany: {
+          id: String(row.id),
+          role: row.role || null,
+          is_primary: !!row.is_primary,
+          is_current: !!row.is_current,
+          start_year: row.start_year || null,
+          end_year: row.end_year || null,
+        }
       }));
   } catch (err) {
     console.error("[getConnectedArtistsByCompanyId] Unexpected error:", err);

@@ -207,17 +207,21 @@ export async function getUpcomingPerformancesByCompanyId(companyId: string): Pro
       .select("id, title, slug, poster_url, venue, start_date, end_date, organizer, genre, category, status, company_id, external_url, ticket_url, source_url, description, display_order, created_at, updated_at")
       .eq("company_id", companyId)
       .eq("status", "published")
-      .or(`end_date.gte.${today},end_date.is.null`)
-      .order("display_order", { ascending: true, nullsFirst: false })
-      .order("start_date", { ascending: true })
-      .order("created_at", { ascending: false });
+      .order("start_date", { ascending: true });
 
     if (error) {
       console.error("[getUpcomingPerformancesByCompanyId] Supabase error:", error);
       return [];
     }
 
-    return (data || []).map(mapPerformanceRowToPerformance);
+    const mapped = (data || []).map(mapPerformanceRowToPerformance);
+    const filtered = mapped.filter((perf) => {
+      const effectiveEndDate = perf.endDate ?? perf.startDate;
+      if (!effectiveEndDate) return false;
+      return effectiveEndDate >= today;
+    });
+
+    return filtered;
   } catch (err) {
     console.error("[getUpcomingPerformancesByCompanyId] Unexpected error:", err);
     return [];

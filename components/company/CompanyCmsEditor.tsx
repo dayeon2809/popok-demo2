@@ -301,8 +301,11 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
   // UI state
   const [saving, setSaving] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<"basic" | "identity" | "media" | "artists" | "works" | "reviews" | "history" | "contact">("basic");
+  const [activeTab, setActiveTab] = useState<"basic" | "identity" | "media" | "artists" | "works" | "reviews" | "history" | "contact" | "schedules">("basic");
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  const [companySchedules, setCompanySchedules] = useState<any[]>([]);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
 
   // Fetch connected artists
   const fetchConnectedArtists = useCallback(async () => {
@@ -325,6 +328,25 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
       fetchConnectedArtists();
     }
   }, [activeTab, fetchConnectedArtists]);
+
+  useEffect(() => {
+    if (!company.id) return;
+    const loadSchedules = async () => {
+      setLoadingSchedules(true);
+      try {
+        const res = await fetch(`/api/companies/${company.id}/performances`);
+        const data = await res.json();
+        if (data.success) {
+          setCompanySchedules(data.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load company schedules:", err);
+      } finally {
+        setLoadingSchedules(false);
+      }
+    };
+    loadSchedules();
+  }, [company.id, activeTab]);
 
   // Artist search handler
   useEffect(() => {
@@ -854,6 +876,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
           { key: "reviews", label: `기사 & 리뷰 (${reviewLinks.length})` },
           { key: "history", label: `연혁 (${history.length})` },
           { key: "contact", label: "연락처 & SNS" },
+          { key: "schedules", label: `다가오는 일정 (${companySchedules.length})` },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -2133,6 +2156,110 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
                 style={{ width: "100%", padding: "10px 14px", fontSize: "0.9rem", borderRadius: "6px", border: "1px solid var(--border)" }}
               />
             </div>
+          </div>
+        )}
+
+        {/* ── Tab 9: Schedules (Read-Only) ── */}
+        {activeTab === "schedules" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px", maxWidth: "800px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 900, color: "var(--navy)", margin: 0 }}>
+                다가오는 일정 (Schedules)
+              </h3>
+              <p style={{ fontSize: "0.82rem", color: "var(--accent-dark)", margin: "6px 0 0", fontWeight: 700 }}>
+                POPOK가 확인한 단체의 새로운 공연과 활동 일정입니다.
+              </p>
+            </div>
+
+            <div style={{
+              background: "#FAF9F5",
+              border: "1.5px solid var(--border)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "var(--navy)",
+              lineHeight: 1.5,
+              fontSize: "0.82rem",
+            }}>
+              💡 본 단체의 다가오는 일정은 POPOK AI 모니터링 및 관리자 검토를 거쳐 등록되는 항목으로, 직접 편집이 불가능합니다.<br />
+              새로운 일정을 등록하거나 정보를 수정하시려면 POPOK 관리자 문의(dayeon2809@gmail.com) 또는 피드백 채널을 이용해 주시기 바랍니다.
+            </div>
+
+            {loadingSchedules ? (
+              <div style={{ textAlign: "center", padding: "40px" }}>일정을 불러오는 중입니다...</div>
+            ) : companySchedules.length === 0 ? (
+              <div style={{ padding: "40px 0", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "8px", fontSize: "0.85rem", color: "var(--ink-faint)" }}>
+                등록된 일정이 없습니다.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {companySchedules.map((perf) => (
+                  <div
+                    key={perf.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                      padding: "16px",
+                      border: "1.5px solid var(--border)",
+                      borderRadius: "12px",
+                      background: "#FFFFFF",
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div
+                      style={{
+                        width: "60px",
+                        height: "80px",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        background: "var(--bg-warm)",
+                        border: "1px solid var(--border)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {perf.posterUrl ? (
+                        <img src={perf.posterUrl} alt={perf.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <span style={{ fontSize: "0.62rem", color: "var(--ink-faint)" }}>No Poster</span>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flexGrow: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                        <h4 style={{ fontSize: "0.95rem", fontWeight: 900, color: "var(--navy)", margin: 0 }}>
+                          {perf.title}
+                        </h4>
+                        <span
+                          style={{
+                            fontSize: "0.68rem",
+                            fontWeight: 800,
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            background: perf.isPublished ? "#ECFDF5" : "#FFFBEB",
+                            color: perf.isPublished ? "var(--verified)" : "#D97706",
+                          }}
+                        >
+                          {perf.isPublished ? "공개" : "비공개"}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", margin: "0 0 6px 0" }}>
+                        📅 {perf.startDate}{perf.endDate && perf.endDate !== perf.startDate ? ` ~ ${perf.endDate}` : ""}
+                        {perf.venue && ` | 📍 ${perf.venue}`}
+                      </p>
+                      {perf.description && (
+                        <p style={{ fontSize: "0.78rem", color: "var(--ink-faint)", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {perf.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

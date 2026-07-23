@@ -426,8 +426,8 @@ export default function HomeClient({ initialArtists, initialPerformances, initia
 
       {/* ── 3. 이번 주 공연 (PERFORMANCE CAROUSEL) ── */}
       <PerformanceCarousel
-        title="🎭 이번 주 공연"
-        subtitle="공연 현장에서 아티스트들의 에너지를 생생하게 느껴보세요."
+        title="🎭 POPOK 아티스트의 공연"
+        subtitle="POPOK에 등록된 아티스트와 단체의 새로운 공연을 만나보세요."
         performances={initialPerformances}
       />
 

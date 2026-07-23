@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { revalidatePath } from "next/cache";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { getPerformanceLifecycleStatus, isPerformanceDeletionPending } from "@/lib/date";
 
@@ -14,24 +15,28 @@ function checkAuth(req: NextRequest): boolean {
 const URL_PATTERN = /^https?:\/\/.+/i;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-// GET — the admin list. No pagination/search per the "간단한 Admin CMS" scope
-// (see AGENTS.md/PR context: performances list is small, this is a
-// homepage-curation tool, not a full performance archive).
+// GET — the admin list. Support optional companyId query parameter.
 export async function GET(req: NextRequest) {
   if (!checkAuth(req)) {
     return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
   }
 
+  const { searchParams } = new URL(req.url);
+  const companyId = searchParams.get("companyId");
+
   try {
     const supabase = getSupabaseServer();
-    // source_url is set on every crawler-imported row (479/480 of the current
-    // table — see the investigation report) and is never written by this
-    // admin form. Filtering it out keeps this "간단한 Admin CMS" list to just
-    // the performances the admin actually manages, without a new column.
-    const { data, error } = await supabase
+    let dbQuery = supabase
       .from("performances" as any)
-      .select("id, title, start_date, end_date, venue, description, genre, poster_url, organizer, external_url, company_id, status, featured, display_order, created_at, updated_at, companies ( id, name )")
-      .is("source_url", null)
+      .select("id, title, start_date, end_date, venue, description, genre, poster_url, organizer, external_url, ticket_url, company_id, status, featured, display_order, created_at, updated_at, companies ( id, name )");
+
+    if (companyId) {
+      dbQuery = dbQuery.eq("company_id", companyId);
+    } else {
+      dbQuery = dbQuery.is("source_url", null);
+    }
+
+    const { data, error } = await dbQuery
       .order("display_order", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: false });
 
@@ -51,6 +56,7 @@ export async function GET(req: NextRequest) {
       posterUrl: row.poster_url || null,
       organizer: row.organizer || null,
       externalUrl: row.external_url || null,
+      ticketUrl: row.ticket_url || null,
       companyId: row.company_id || null,
       companyName: row.companies?.name || null,
       isPublished: row.status === "published",
@@ -102,12 +108,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: "외부 링크는 http:// 또는 https://로 시작해야 합니다." }, { status: 400 });
     }
 
+    const ticketUrl = typeof body.ticketUrl === "string" ? body.ticketUrl.trim() : "";
+    if (ticketUrl && !URL_PATTERN.test(ticketUrl)) {
+      return NextResponse.json({ success: false, error: "예매 링크는 http:// 또는 https://로 시작해야 합니다." }, { status: 400 });
+    }
+
     const isPublished = !!body.isPublished;
     let isFeatured = !!body.isFeatured;
+    const companyId = typeof body.companyId === "string" && body.companyId ? body.companyId : null;
+
+    const supabase = getSupabaseServer();
+
+    let isCompanyEvent = false;
+    if (companyId) {
+      // 1. Verify company exists
+      const { data: companyExists, error: companyCheckError } = await supabase
+        .from("companies" as any)
+        .select("id")
+        .eq("id", companyId)
+        .maybeSingle();
+      
+      if (companyCheckError) {
+        console.error("[POST /api/admin/performances] Company check error:", companyCheckError);
+      }
+      if (companyExists) {
+        isCompanyEvent = true;
+      } else {
+        return NextResponse.json({ success: false, error: "존재하지 않는 단체 ID입니다." }, { status: 400 });
+      }
+    }
 
     if ((isPublished || isFeatured) && !externalUrl) {
-      return NextResponse.json({ success: false, error: "공개 또는 메인 노출을 하려면 외부 링크가 필요합니다." }, { status: 400 });
+      if (isFeatured || !isCompanyEvent) {
+        return NextResponse.json({ success: false, error: "공개 또는 메인 노출을 하려면 외부 링크가 필요합니다." }, { status: 400 });
+      }
     }
+
     if (isFeatured && !isPublished) {
       return NextResponse.json({ success: false, error: "메인 노출은 공개 상태에서만 설정할 수 있습니다. 먼저 공개로 전환해 주세요." }, { status: 400 });
     }
@@ -121,12 +157,7 @@ export async function POST(req: NextRequest) {
       displayOrder = n;
     }
 
-    const supabase = getSupabaseServer();
-
     const insertRow: Record<string, any> = {
-      // A client-supplied id lets the admin UI upload a poster to
-      // performances/{id}/... before the row exists yet — see
-      // app/admin/performances/page.tsx.
       id: typeof body.id === "string" && body.id ? body.id : randomUUID(),
       title,
       start_date: startDate,
@@ -137,7 +168,8 @@ export async function POST(req: NextRequest) {
       poster_url: typeof body.posterUrl === "string" ? body.posterUrl.trim() || null : null,
       organizer: typeof body.organizer === "string" ? body.organizer.trim() || null : null,
       external_url: externalUrl || null,
-      company_id: typeof body.companyId === "string" && body.companyId ? body.companyId : null,
+      ticket_url: ticketUrl || null,
+      company_id: companyId,
       status: isPublished ? "published" : "draft",
       featured: isFeatured,
       display_order: displayOrder,
@@ -151,6 +183,25 @@ export async function POST(req: NextRequest) {
     if (insertError) {
       console.error("[POST /api/admin/performances] Insert error:", insertError);
       return NextResponse.json({ success: false, error: `등록 실패: ${insertError.message}` }, { status: 500 });
+    }
+
+    // Server-side revalidation
+    try {
+      revalidatePath("/");
+      if (companyId) {
+        const { data: companyRecord } = await supabase
+          .from("companies" as any)
+          .select("slug")
+          .eq("id", companyId)
+          .maybeSingle();
+        
+        if ((companyRecord as any)?.slug) {
+          revalidatePath(`/companies/${(companyRecord as any).slug}`);
+        }
+        revalidatePath(`/admin/companies/${companyId}`);
+      }
+    } catch (revalErr) {
+      console.error("[POST /api/admin/performances] Revalidation error:", revalErr);
     }
 
     return NextResponse.json({ success: true, data: { id: created.id } });

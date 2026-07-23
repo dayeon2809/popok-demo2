@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { PERFORMANCE_POSTER_BUCKET, extractPerformancePosterPath } from "@/lib/performances";
 
@@ -35,7 +36,7 @@ export async function PATCH(
 
     const { data: existing, error: fetchError } = await supabase
       .from("performances" as any)
-      .select("id, start_date, end_date, external_url, status, featured, poster_url")
+      .select("id, start_date, end_date, external_url, ticket_url, status, featured, poster_url")
       .eq("id", id)
       .maybeSingle();
 
@@ -90,14 +91,46 @@ export async function PATCH(
       effectiveExternalUrl = url;
     }
 
+    if (body.ticketUrl !== undefined) {
+      const url = typeof body.ticketUrl === "string" ? body.ticketUrl.trim() : "";
+      if (url && !URL_PATTERN.test(url)) {
+        return NextResponse.json({ success: false, error: "예매 링크는 http:// 또는 https://로 시작해야 합니다." }, { status: 400 });
+      }
+      updateData.ticket_url = url || null;
+    }
+
     const effectivePublished =
       body.isPublished !== undefined ? !!body.isPublished : current.status === "published";
     const effectiveFeatured =
       body.isFeatured !== undefined ? !!body.isFeatured : !!current.featured;
 
-    if ((effectivePublished || effectiveFeatured) && !effectiveExternalUrl) {
-      return NextResponse.json({ success: false, error: "공개 또는 메인 노출을 하려면 외부 링크가 필요합니다." }, { status: 400 });
+    const companyId = body.companyId !== undefined ? (typeof body.companyId === "string" && body.companyId ? body.companyId : null) : current.company_id;
+
+    let isCompanyEvent = false;
+    if (companyId) {
+      // 1. Verify company exists in database
+      const { data: companyExists, error: companyCheckError } = await supabase
+        .from("companies" as any)
+        .select("id")
+        .eq("id", companyId)
+        .maybeSingle();
+      
+      if (companyCheckError) {
+        console.error(`[PATCH /api/admin/performances/${id}] Company check error:`, companyCheckError);
+      }
+      if (companyExists) {
+        isCompanyEvent = true;
+      } else {
+        return NextResponse.json({ success: false, error: "존재하지 않는 단체 ID입니다." }, { status: 400 });
+      }
     }
+
+    if ((effectivePublished || effectiveFeatured) && !effectiveExternalUrl) {
+      if (effectiveFeatured || !isCompanyEvent) {
+        return NextResponse.json({ success: false, error: "공개 또는 메인 노출을 하려면 외부 링크가 필요합니다." }, { status: 400 });
+      }
+    }
+
     if (effectiveFeatured && !effectivePublished) {
       return NextResponse.json({ success: false, error: "메인 노출은 공개 상태에서만 설정할 수 있습니다. 먼저 공개로 전환해 주세요." }, { status: 400 });
     }
@@ -110,7 +143,7 @@ export async function PATCH(
     if (typeof body.genre === "string") updateData.genre = body.genre.trim() || null;
     if (typeof body.organizer === "string") updateData.organizer = body.organizer.trim() || null;
     if (body.companyId !== undefined) {
-      updateData.company_id = typeof body.companyId === "string" && body.companyId ? body.companyId : null;
+      updateData.company_id = companyId;
     }
 
     let previousPosterPath: string | null = null;
@@ -143,6 +176,39 @@ export async function PATCH(
     if (updateError) {
       console.error(`[PATCH /api/admin/performances/${id}] Update error:`, updateError);
       return NextResponse.json({ success: false, error: `수정 실패: ${updateError.message}` }, { status: 500 });
+    }
+
+    // Helper function for server-side revalidation
+    const triggerRevalidation = async (compId: string | null) => {
+      try {
+        revalidatePath("/");
+        if (compId) {
+          const { data: comp } = await supabase
+            .from("companies" as any)
+            .select("slug")
+            .eq("id", compId)
+            .maybeSingle();
+          if ((comp as any)?.slug) {
+            revalidatePath(`/companies/${(comp as any).slug}`);
+          }
+          revalidatePath(`/admin/companies/${compId}`);
+        }
+      } catch (e) {
+        console.error("Revalidation error:", e);
+      }
+    };
+
+    // Revalidate paths on successful update
+    if (current.company_id) {
+      await triggerRevalidation(current.company_id);
+    }
+    if (companyId && companyId !== current.company_id) {
+      await triggerRevalidation(companyId);
+    }
+    if (!current.company_id && !companyId) {
+      try {
+        revalidatePath("/");
+      } catch {}
     }
 
     // Old poster is only removed after the new reference is safely committed.
@@ -182,7 +248,7 @@ export async function DELETE(
 
     const { data: existing, error: fetchError } = await supabase
       .from("performances" as any)
-      .select("poster_url")
+      .select("poster_url, company_id")
       .eq("id", id)
       .maybeSingle();
 
@@ -201,6 +267,26 @@ export async function DELETE(
     if (deleteError) {
       console.error(`[DELETE /api/admin/performances/${id}] Delete error:`, deleteError);
       return NextResponse.json({ success: false, error: `삭제 실패: ${deleteError.message}` }, { status: 500 });
+    }
+
+    // Trigger revalidations
+    try {
+      revalidatePath("/");
+      const companyId = (existing as any)?.company_id;
+      if (companyId) {
+        const { data: comp } = await supabase
+          .from("companies" as any)
+          .select("slug")
+          .eq("id", companyId)
+          .maybeSingle();
+        
+        if ((comp as any)?.slug) {
+          revalidatePath(`/companies/${(comp as any).slug}`);
+        }
+        revalidatePath(`/admin/companies/${companyId}`);
+      }
+    } catch (revalErr) {
+      console.error(`[DELETE /api/admin/performances/${id}] Revalidation error:`, revalErr);
     }
 
     if (posterPath) {
