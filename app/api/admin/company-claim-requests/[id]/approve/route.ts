@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { notifyArtistCompanyConnectionApproved } from "@/lib/email/notify";
+import { clearPrimaryFlagForArtist } from "@/lib/companies";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,47 @@ export async function POST(
     if (claimUpdateError) {
       console.error("[POST approve] Request status update error:", claimUpdateError);
       return NextResponse.json({ success: false, error: "신청 상태 업데이트에 실패했습니다." }, { status: 500 });
+    }
+
+    // 3. The claimed account's own artist profile (if any) becomes this
+    // company's representative artist_companies relation — without this,
+    // linking a manager/owner account never surfaces an artist card, since
+    // the storefront only reads the artist_companies join, never owner_id.
+    const { data: ownedArtist } = await supabase
+      .from("artists" as any)
+      .select("id")
+      .eq("owner_id", targetUserId)
+      .maybeSingle();
+
+    if (ownedArtist) {
+      const artistId = (ownedArtist as any).id as string;
+
+      await clearPrimaryFlagForArtist(artistId, companyId);
+
+      const { data: existingRelation } = await supabase
+        .from("artist_companies" as any)
+        .select("id")
+        .eq("artist_id", artistId)
+        .eq("company_id", companyId)
+        .is("role", null)
+        .maybeSingle();
+
+      if (existingRelation) {
+        await (supabase.from("artist_companies" as any) as any)
+          .update({ is_current: true, is_primary: true, updated_at: new Date().toISOString() })
+          .eq("id", (existingRelation as any).id);
+      } else {
+        const { error: relationInsertError } = await (supabase.from("artist_companies" as any) as any)
+          .insert({
+            artist_id: artistId,
+            company_id: companyId,
+            is_current: true,
+            is_primary: true,
+          });
+        if (relationInsertError) {
+          console.error("[POST approve] Representative relation insert error:", relationInsertError);
+        }
+      }
     }
 
     // Notification is a side effect of a successful approval, never the

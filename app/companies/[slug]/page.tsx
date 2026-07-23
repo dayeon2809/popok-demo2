@@ -4,7 +4,6 @@ import {
   getPublishedCompanyBySlug,
   getConnectedArtistsByCompanyId,
   getRelatedCompanies,
-  getRepresentativeArtistForCompany,
 } from "@/lib/companies";
 import { getUpcomingPerformancesByCompanyId } from "@/lib/performances";
 import { getPortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
@@ -39,13 +38,12 @@ export default async function CompanyDetailPage({
     getPortfolioRequestViewerState({ type: "company", id: company.id }),
   ]);
 
-  // Derive representative artist using owner_id and current relation criteria
-  const repArtist = fetchedArtists.find(
-    (a: any) =>
-      company.owner_id != null &&
-      a.owner_id === company.owner_id &&
-      a.artistCompany?.is_current === true
-  ) || null;
+  // Derive representative artist: admin-designated is_primary relation is the single source of truth
+  const primaryArtists = fetchedArtists.filter((a: any) => a.artistCompany?.is_primary === true);
+  const repArtist =
+    primaryArtists.find((a: any) => a.artistCompany?.is_current !== false) ||
+    primaryArtists[0] ||
+    null;
 
   const representativeArtist = repArtist
     ? {

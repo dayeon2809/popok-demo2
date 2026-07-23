@@ -1518,12 +1518,10 @@ export default function AdminCompanyEditPage() {
             <EditableSection title="디지털 카드" onEdit={() => handleJumpToEdit("basic")}>
               <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
                 {(() => {
-                  const rep = adaptedArtists.find(
-                    (a: any) =>
-                      company.owner_id != null &&
-                      a.owner_id === company.owner_id &&
-                      a.artistCompany?.is_current === true
-                  );
+                  const primaryArtists = adaptedArtists.filter((a: any) => a.artistCompany?.is_primary === true);
+                  const rep =
+                    primaryArtists.find((a: any) => a.artistCompany?.is_current !== false) ||
+                    primaryArtists[0];
                   const repResult = rep
                     ? ({
                         artist: rep,
