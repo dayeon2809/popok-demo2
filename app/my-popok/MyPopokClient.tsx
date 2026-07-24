@@ -2,9 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import QRCode from "qrcode";
 import PopokCard from "@/components/PopokCard";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import AiProfileCompare from "@/components/profile/AiProfileCompare";
+import WorksCardEditor from "@/components/profile/WorksCardEditor";
+import ProfileEditorNav, { type ProfileEditorSection } from "@/components/profile/ProfileEditorNav";
 import { analytics } from "@/lib/analytics";
 import CompanyCmsEditor from "@/components/company/CompanyCmsEditor";
 import CompanyClaimModal from "@/components/company/CompanyClaimModal";
@@ -27,7 +30,7 @@ import {
   type ArtistAffiliation,
   type ArtistAward,
 } from "@/lib/artist-profile";
-import { normalizeWorkImages, normalizeWorks, cleanWorksForPayload, cleanWorkForPayload } from "@/lib/works";
+import { normalizeWorkImages, normalizeWorks, cleanWorksForPayload } from "@/lib/works";
 import type { Company } from "@/types";
 
 interface Work {
@@ -116,6 +119,7 @@ export default function MyPopokClient({
   const [youtubeUrl, setYoutubeUrl] = useState(artist.youtube_url || "");
   const [instagram, setInstagram] = useState(artist.instagram || "");
   const [website, setWebsite] = useState(artist.website || "");
+  const [activeEditorSection, setActiveEditorSection] = useState<ProfileEditorSection>("basic");
   const [works, setWorks] = useState<Work[]>(() =>
     (Array.isArray(artist.works) ? artist.works : []).map(w => ({
       ...w,
@@ -328,7 +332,7 @@ export default function MyPopokClient({
   };
 
   // Add work item
-  const handleAddWork = () => {
+  const handleAddWork = (): string => {
     const newWork: Work = {
       id: `new-work-${Date.now()}`,
       title: "",
@@ -339,7 +343,8 @@ export default function MyPopokClient({
       images: [],
       video_url: ""
     };
-    setWorks([...works, newWork]);
+    setWorks(current => [...current, newWork]);
+    return newWork.id;
   };
 
   // Remove work item
@@ -357,6 +362,15 @@ export default function MyPopokClient({
     setWorks(updatedWorks);
   };
 
+  // Reorders the existing works array only; the DB/API shape remains unchanged.
+  const handleReorderWorks = (fromIndex: number, toIndex: number) => {
+    setWorks(current => {
+      const reordered = [...current];
+      const [moved] = reordered.splice(fromIndex, 1);
+      reordered.splice(toIndex, 0, moved);
+      return reordered;
+    });
+  };
   // Save profile edits
   const handleSave = async () => {
     if (!name.trim()) {
@@ -436,16 +450,102 @@ export default function MyPopokClient({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Download QR handler via canvas drawing or direct api download
-  const handleDownloadQR = () => {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(publicUrl)}`;
+  // Download a complete 900 × 1260 digital business card instead of a standalone QR.
+  const handleDownloadQR = async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 900;
+    canvas.height = 1260;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const roundRect = (x: number, y: number, width: number, height: number, radius: number) => {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + width, y, x + width, y + height, radius);
+      ctx.arcTo(x + width, y + height, x, y + height, radius);
+      ctx.arcTo(x, y + height, x, y, radius);
+      ctx.arcTo(x, y, x + width, y, radius);
+      ctx.closePath();
+    };
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    roundRect(28, 24, 844, 1212, 45);
+    ctx.fillStyle = "#C7F34A";
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#171411";
+    ctx.stroke();
+
+    ctx.fillStyle = "#171411";
+    ctx.font = "900 52px Arial, sans-serif";
+    ctx.fillText("POPOK·", 92, 130);
+
+    const passCode = Array.from(slug || artist.id).reduce((value, char) => ((value * 31) + char.charCodeAt(0)) >>> 0, 0).toString(16).toUpperCase().slice(-4).padStart(4, "0");
+    roundRect(570, 84, 222, 58, 10);
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.font = "800 24px Arial, sans-serif";
+    ctx.fillText(`PASS CODE: ${passCode}`, 590, 122);
+
+    ctx.font = "900 68px Arial, sans-serif";
+    ctx.fillText("Your work,", 94, 380);
+    ctx.fillText("connected.", 94, 458);
+
+    ctx.save();
+    ctx.globalAlpha = 0.13;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(450, 630, 310, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([8, 10]);
+    ctx.beginPath();
+    ctx.arc(450, 630, 205, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    const qrDataUrl = await QRCode.toDataURL(publicUrl, { width: 330, margin: 1, errorCorrectionLevel: "H", color: { dark: "#171411", light: "#FFFFFF" } });
+    const qrImage = new Image();
+    await new Promise<void>((resolve, reject) => {
+      qrImage.onload = () => resolve();
+      qrImage.onerror = () => reject(new Error("QR 이미지를 생성하지 못했습니다."));
+      qrImage.src = qrDataUrl;
+    });
+    roundRect(284, 580, 332, 332, 28);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fill();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#171411";
+    ctx.stroke();
+    ctx.drawImage(qrImage, 305, 601, 290, 290);
+
+    ctx.fillStyle = "#171411";
+    ctx.font = "500 16px Arial, sans-serif";
+    ctx.fillText("SCAN TO EXPLORE", 92, 1090);
+    ctx.font = "700 30px Arial, sans-serif";
+    const displayUrl = `popok.kr/${slug || artist.id}`;
+    ctx.fillText(displayUrl, 92, 1144);
+    const urlWidth = ctx.measureText(displayUrl).width;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(92, 1151);
+    ctx.lineTo(92 + urlWidth, 1151);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(785, 1118, 38, 0, Math.PI * 2);
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.font = "30px Arial, sans-serif";
+    ctx.fillText("↗", 770, 1129);
+
     const a = document.createElement("a");
-    a.href = qrUrl;
-    a.target = "_blank";
-    a.download = `popok-qr-${slug}.png`;
+    a.href = canvas.toDataURL("image/png");
+    a.download = `popok-card-${slug || artist.id}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    analytics.profileShared("download", "portfolio", slug || artist.id);
   };
 
   // Find all work images to list them as representative options
@@ -782,6 +882,10 @@ export default function MyPopokClient({
           </div>
         )}
 
+        <ProfileEditorNav active={activeEditorSection} onChange={setActiveEditorSection} />
+
+
+
         <div style={{
           display: "grid",
           gridTemplateColumns: "1.2fr 0.8fr",
@@ -793,7 +897,7 @@ export default function MyPopokClient({
           <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
             
             {/* Card 1: 기본 정보 & 프로필/대표 이미지 갤러리 */}
-            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div hidden={activeEditorSection !== "basic"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 1. 기본 활동 정보 & 프로필 이미지
               </h2>
@@ -981,7 +1085,7 @@ export default function MyPopokClient({
             </div>
 
             {/* Card 2: 프로필 미디어 및 소개 */}
-            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div hidden={activeEditorSection !== "intro"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 2. 프로필 소개 및 비디어 URL
               </h2>
@@ -1033,255 +1137,45 @@ export default function MyPopokClient({
               </div>
             </div>
 
+            <div hidden={activeEditorSection !== "works"}>
             {/* Card 3: 작품 목록 관리 (jsonb) */}
-            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
-                <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", margin: 0 }}>
-                  3. 작품 및 프로젝트 목록{" "}
-                  <span style={{ fontSize: "0.9rem", color: "var(--ink-muted)", marginLeft: "6px" }}>
-                    ({isPremium ? `${works.length}개` : `${works.length} / 3`})
-                  </span>
-                </h2>
-                {(isPremium || works.length < 3) && (
-                  <button
-                    type="button"
-                    onClick={handleAddWork}
-                    className="btn-lime"
-                    style={{ border: "none", padding: "8px 16px", borderRadius: "10px", fontSize: "0.82rem", fontWeight: 900, cursor: "pointer" }}
-                  >
-                    ＋ 작품 추가
-                  </button>
-                )}
+            <WorksCardEditor
+              works={works}
+              canAdd={isPremium || works.length < 3}
+              countLabel={isPremium ? `${works.length}개` : `${works.length} / 3`}
+              uploadingSlot={uploadingSlot}
+              onAdd={handleAddWork}
+              onRemove={handleRemoveWork}
+              onChange={handleWorkInputChange}
+              onImageUpload={handleWorkImageUpload}
+              onImageRemove={handleRemoveWorkImage}
+              onReorder={handleReorderWorks}
+            />
+
+            {!isPremium && works.length >= 3 && (
+              <div style={{ padding: "20px", background: "var(--navy)", borderRadius: "14px", color: "#FFFFFF", textAlign: "center" }}>
+                <strong>🔒 Premium</strong>
+                <p style={{ fontSize: "0.82rem", color: "#CBD5E1", margin: "8px 0 14px" }}>대표 작품을 무제한 등록하고 AI 자동 업데이트를 받아보세요.</p>
+                <Link href="/premium" onClick={() => analytics.premiumClick("dashboard")} className="btn-lime" style={{ display: "inline-block", textDecoration: "none", padding: "9px 18px", borderRadius: "8px", fontSize: "0.8rem", fontWeight: 900 }}>Premium 알아보기</Link>
               </div>
-
-              {works.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px", background: "#FFFFFF", borderRadius: "12px", border: "1px dashed var(--border-dark)" }}>
-                  <span style={{ fontSize: "2rem", display: "block", marginBottom: "8px" }}>📁</span>
-                  <span style={{ fontSize: "0.85rem", color: "var(--ink-muted)" }}>등록된 대표 작품이 없습니다. 작품 추가를 클릭해 등록해 보세요.</span>
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                  {works.map((work, idx) => (
-                    <div key={work.id || idx} style={{
-                      padding: "24px",
-                      borderRadius: "14px",
-                      border: "1.5px solid var(--border)",
-                      background: "#FAF8F5",
-                      position: "relative"
-                    }}>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveWork(idx)}
-                        style={{
-                          position: "absolute",
-                          top: "14px",
-                          right: "14px",
-                          border: 0,
-                          background: "transparent",
-                          color: "var(--needs-review)",
-                          fontWeight: 800,
-                          fontSize: "0.82rem",
-                          cursor: "pointer"
-                        }}
-                      >
-                        ✕ 삭제
-                      </button>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "12px" }} className="form-row-2col">
-                        <label style={labelStyle}>
-                          작품명 (Title)
-                          <input
-                            type="text"
-                            value={work.title}
-                            onChange={(e) => handleWorkInputChange(idx, "title", e.target.value)}
-                            placeholder="작품 제목"
-                            style={inputStyle}
-                          />
-                        </label>
-                        <label style={labelStyle}>
-                          제작년도 (Year)
-                          <input
-                            type="text"
-                            value={work.year || ""}
-                            onChange={(e) => handleWorkInputChange(idx, "year", e.target.value)}
-                            placeholder="예: 2025"
-                            style={inputStyle}
-                          />
-                        </label>
-                      </div>
-
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "12px" }} className="form-row-2col">
-                        <label style={labelStyle}>
-                          나의 역할 (Role)
-                          <input
-                            type="text"
-                            value={work.role || ""}
-                            onChange={(e) => handleWorkInputChange(idx, "role", e.target.value)}
-                            placeholder="예: 안무 및 출연"
-                            style={inputStyle}
-                          />
-                        </label>
-                        <label style={labelStyle}>
-                          작품 영상
-                          <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 500, display: "block", marginBottom: "4px" }}>
-                            이 작품을 소개하는 영상입니다.
-                          </span>
-                          <input
-                            type="text"
-                            value={work.video_url || ""}
-                            onChange={(e) => handleWorkInputChange(idx, "video_url", e.target.value)}
-                            placeholder="https://..."
-                            style={inputStyle}
-                          />
-                        </label>
-                      </div>
-
-                      <label style={labelStyle}>
-                        작품 소개 요약 (Description)
-                        <textarea
-                          value={work.description || ""}
-                          onChange={(e) => handleWorkInputChange(idx, "description", e.target.value)}
-                          placeholder="작품에 대한 간단한 설명을 입력해 주세요."
-                          rows={2}
-                          style={{ ...textareaStyle, marginBottom: "12px" }}
-                        />
-                      </label>
-
-                      {/* Work Multi-Images (Up to 4 images) */}
-                      <div style={{ marginTop: "12px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
-                          <label style={{ ...labelStyle, fontSize: "0.8rem", color: "var(--navy)", margin: 0 }}>
-                            작품 이미지 (최대 4장)
-                          </label>
-                          <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700 }}>
-                            {normalizeWorkImages(work).length} / 4 장
-                          </span>
-                        </div>
-
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
-                          {[0, 1, 2, 3].map((imgIdx) => {
-                            const workImgs = normalizeWorkImages(work);
-                            const imgUrl = workImgs[imgIdx];
-                            const isUploadingThis = uploadingSlot === `work_${idx}_${imgIdx}`;
-                            return (
-                              <div
-                                key={imgIdx}
-                                style={{
-                                  position: "relative",
-                                  aspectRatio: "1.3 / 1",
-                                  borderRadius: "8px",
-                                  border: "1.5px dashed var(--border)",
-                                  background: "#FFFFFF",
-                                  overflow: "hidden",
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  padding: "4px"
-                                }}
-                              >
-                                {imgUrl ? (
-                                  <>
-                                    <img src={imgUrl} alt={`Work ${idx + 1} Img ${imgIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveWorkImage(idx, imgIdx)}
-                                      style={{
-                                        position: "absolute", top: "4px", right: "4px",
-                                        width: "20px", height: "20px", borderRadius: "50%",
-                                        background: "rgba(23, 20, 17, 0.8)", color: "#FFFFFF",
-                                        border: "none", cursor: "pointer", fontSize: "0.8rem",
-                                        display: "flex", alignItems: "center", justifyContent: "center"
-                                      }}
-                                      title="이미지 삭제"
-                                    >
-                                      ×
-                                    </button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={(e) => handleWorkImageUpload(e, idx, imgIdx)}
-                                      style={{ display: "none" }}
-                                      id={`work-img-input-${idx}-${imgIdx}`}
-                                      disabled={Boolean(uploadingSlot)}
-                                    />
-                                    <label
-                                      htmlFor={`work-img-input-${idx}-${imgIdx}`}
-                                      style={{
-                                        width: "100%", height: "100%", display: "flex",
-                                        flexDirection: "column", alignItems: "center", justifyContent: "center",
-                                        cursor: uploadingSlot ? "not-allowed" : "pointer", gap: "2px"
-                                      }}
-                                    >
-                                      <span style={{ fontSize: "1rem" }}>{isUploadingThis ? "⏳" : "📷"}</span>
-                                      <span style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--navy)" }}>
-                                        {isUploadingThis ? "업로드..." : `+ 이미지 ${imgIdx + 1}`}
-                                      </span>
-                                    </label>
-                                  </>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Premium Gating Promo Card */}
-              {!isPremium && works.length >= 3 && (
-                <div style={{
-                  marginTop: "24px",
-                  padding: "24px",
-                  background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
-                  borderRadius: "14px",
-                  border: "1px solid #334155",
-                  color: "#FFFFFF",
-                  textAlign: "center",
-                  boxShadow: "0 10px 25px rgba(23, 20, 17, 0.12)"
-                }}>
-                  <div style={{ fontSize: "1.1rem", fontWeight: 900, marginBottom: "8px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-                    <span>🔒 Premium</span>
-                  </div>
-                  <p style={{ fontSize: "0.82rem", color: "#94A3B8", marginBottom: "16px", lineHeight: 1.5 }}>
-                    대표 작품을 무제한 등록하고 AI 자동 업데이트를 받아보세요.
-                  </p>
-                  <Link href="/premium" onClick={() => analytics.premiumClick("dashboard")} style={{
-                    display: "inline-block",
-                    textDecoration: "none",
-                    background: "var(--accent)",
-                    color: "var(--navy)",
-                    fontWeight: 900,
-                    fontSize: "0.82rem",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    border: "1.5px solid var(--navy)"
-                  }}>
-                    Premium 알아보기
-                  </Link>
-                </div>
-              )}
+            )}
             </div>
-
             {/* Card 4: 활동 타임라인 (공개 페이지의 ACTIVITY TIMELINE — current_activity + affiliations) */}
-            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div hidden={activeEditorSection !== "activity"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 4. 활동 타임라인
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                 <StringArrayField
                   label="현재 활동 (CURRENT)"
+                  variant="dashboard"
                   items={currentActivity}
                   onChange={setCurrentActivity}
                   placeholder="예: OO컴퍼니 출강 중"
                 />
                 <ArrayField<ArtistAffiliation>
                   label="소속 / 활동 이력 (AFFILIATION)"
+                  variant="dashboard"
                   items={affiliations}
                   onChange={setAffiliations}
                   newItem={() => ({})}
@@ -1298,12 +1192,13 @@ export default function MyPopokClient({
             </div>
 
             {/* Card 5: 학력 */}
-            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div hidden={activeEditorSection !== "education"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 5. 학력
               </h2>
               <StringArrayField
                 label="학력 (Education)"
+                variant="dashboard"
                 items={education}
                 onChange={setEducation}
                 placeholder="예: 한국예술종합학교 무용이론과 졸업"
@@ -1311,13 +1206,14 @@ export default function MyPopokClient({
             </div>
 
             {/* Card 6: 수상 및 선정 / 콩쿠르 및 진출 */}
-            <div className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+            <div hidden={activeEditorSection !== "awards"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                 6. 수상 및 선정
               </h2>
               <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                 <ArrayField<ArtistAward>
                   label="수상 및 선정 내역 (Awards)"
+                  variant="dashboard"
                   items={awards}
                   onChange={setAwards}
                   newItem={() => ({})}
@@ -1333,6 +1229,7 @@ export default function MyPopokClient({
                 />
                 <ArrayField<ArtistAward>
                   label="콩쿠르 및 진출 (Competitions)"
+                  variant="dashboard"
                   items={competitions}
                   onChange={setCompetitions}
                   newItem={() => ({})}
@@ -1436,7 +1333,7 @@ export default function MyPopokClient({
                 className="btn-outline"
                 style={{ fontSize: "0.78rem", fontWeight: 800, padding: "8px 16px", borderRadius: "8px", border: "1.5px solid var(--navy)" }}
               >
-                📥 QR 이미지 다운로드
+                📥 명함 이미지 다운로드
               </button>
             </div>
 
@@ -1544,7 +1441,16 @@ export default function MyPopokClient({
                   if (merged.artist.bio_short) setBioShort(merged.artist.bio_short);
                   if (merged.artist.bio) setBio(merged.artist.bio);
 
-                  if (merged.works) setWorks(merged.works);
+                  if (merged.works) {
+                    setWorks(merged.works.map((work: Work) => {
+                      const preservedImages = normalizeWorkImages(work);
+                      return {
+                        ...work,
+                        images: preservedImages,
+                        image_url: preservedImages[0] || work.image_url || "",
+                      };
+                    }));
+                  }
                   if (merged.affiliations) setAffiliations(merged.affiliations);
                   if (merged.current_activity) setCurrentActivity(merged.current_activity);
                   if (merged.awards) setAwards(merged.awards);
@@ -1604,6 +1510,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: "12px",
   padding: "13px 14px",
   fontFamily: "inherit",
+  fontWeight: 400,
   fontSize: "0.92rem",
   color: "var(--navy)",
   outline: "none",
@@ -1616,6 +1523,7 @@ const textareaStyle: React.CSSProperties = {
   borderRadius: "12px",
   padding: "13px 14px",
   fontFamily: "inherit",
+  fontWeight: 400,
   fontSize: "0.92rem",
   color: "var(--navy)",
   outline: "none",

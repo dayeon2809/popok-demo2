@@ -177,11 +177,18 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
         if (comp.status === "new") {
           mergedWorks.push(comp.item);
         } else if (comp.status === "conflict" && comp.matchingCurrentIndex >= 0) {
-          // Replace matching item with AI suggestion, but never blank out an existing description
+          // AI import is text-only. Start from the complete existing work so
+          // images, image_url, video_url, uploaded media, credits, and any
+          // unknown legacy media fields can never be erased by a sparse AI item.
           const existing = currentProfile.works[comp.matchingCurrentIndex];
+          const useAiText = (value: unknown, fallback: unknown) =>
+            typeof value === "string" && value.trim() ? value : fallback;
           mergedWorks[comp.matchingCurrentIndex] = {
-            ...comp.item,
-            description: comp.item.description?.trim() ? comp.item.description : existing?.description || "",
+            ...existing,
+            title: useAiText(comp.item.title, existing?.title),
+            year: useAiText(String(comp.item.year || ""), existing?.year),
+            role: useAiText(comp.item.role, existing?.role),
+            description: useAiText(comp.item.description, existing?.description),
           };
         }
       }
