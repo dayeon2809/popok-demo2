@@ -142,12 +142,14 @@ export async function getWeeklyStories(options: GetWeeklyStoriesOptions = {}): P
 
   try {
     // Fetch a larger pool than `limit` since the no-caption / no-image /
-    // video / missing-required-hashtag / excluded-id filters below may drop
+    // missing-caption / missing-image / required-hashtag / excluded-id filters may drop
     // some posts.
     const poolSize = Math.max(limit * 3, 12);
     const url = `${GRAPH_HOST}/${GRAPH_VERSION}/me/media?fields=${encodeURIComponent(FIELDS)}&access_token=${encodeURIComponent(accessToken)}&limit=${poolSize}`;
 
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    // Keep the homepage reasonably fresh after #홈노출 is added while still
+    // avoiding a Graph API request on every page view.
+    const res = await fetch(url, { next: { revalidate: 60 } });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       devError("[getWeeklyStories] Instagram API error", res.status, body);
@@ -160,7 +162,6 @@ export async function getWeeklyStories(options: GetWeeklyStoriesOptions = {}): P
     const stories: InstagramStory[] = [];
     for (const media of rawMedia) {
       if (excludeIds.includes(media.id)) continue;
-      if (media.media_type === "VIDEO") continue;
       if (!media.caption || !media.caption.trim()) continue;
       if (!captionHasHashtag(media.caption, requireHashtag)) continue;
 
