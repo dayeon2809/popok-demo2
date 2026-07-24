@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Company } from "@/types";
 import { normalizeWorkImages, normalizeWorkCredits } from "@/lib/company-works";
+import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
 interface WorkDrawerProps {
   work: any;
@@ -39,14 +40,8 @@ const WorkImagePlaceholder = ({ company }: { company: any }) => (
 
 export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) {
   const brandAccent = company.brand_color || "#171411";
+  useMobileBodyScrollLock();
 
-  // Prevent body scroll when drawer is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
 
   // Collect and deduplicate up to 4 images from work — same contract the CMS
   // and admin editors save to, so what's saved is exactly what's shown here.

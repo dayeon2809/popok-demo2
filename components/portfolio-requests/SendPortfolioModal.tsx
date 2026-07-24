@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { portfolioRequestCreateEndpoint, PORTFOLIO_REQUEST_COPY, type PortfolioRequestTarget } from "@/lib/portfolioRequests";
+import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
 interface SendPortfolioModalProps {
   target: PortfolioRequestTarget;
@@ -27,6 +28,7 @@ const MESSAGE_MAX = 500;
 export default function SendPortfolioModal({ target, senderArtist, onClose, onSent, onError }: SendPortfolioModalProps) {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  useMobileBodyScrollLock();
   const copy = PORTFOLIO_REQUEST_COPY[target.type];
 
   const senderPortfolioLink = `/artists/${senderArtist.slug || senderArtist.id}`;

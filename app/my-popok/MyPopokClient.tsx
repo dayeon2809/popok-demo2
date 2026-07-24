@@ -32,6 +32,7 @@ import {
 } from "@/lib/artist-profile";
 import { normalizeWorkImages, normalizeWorks, cleanWorksForPayload } from "@/lib/works";
 import type { Company } from "@/types";
+import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
 interface Work {
   id: string;
@@ -150,6 +151,7 @@ export default function MyPopokClient({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  useMobileBodyScrollLock(shareModalOpen || aiModalOpen || claimModalOpen);
   const [slugStatus, setSlugStatus] = useState<{
     valid: boolean;
     checking: boolean;
@@ -1290,7 +1292,7 @@ export default function MyPopokClient({
       {/* SHARE AND QR GENERATION MODAL DIALOG */}
       {shareModalOpen && (
         <div style={{
-          position: "fixed", inset: 0, background: "rgba(23, 20, 17, 0.5)", zIndex: 1000,
+          position: "fixed", inset: 0, background: "rgba(23, 20, 17, 0.5)", zIndex: 1000, overscrollBehavior: "contain",
           display: "flex", alignItems: "center", justifyContent: "center", padding: "16px"
         }}>
           <div style={{
@@ -1385,6 +1387,7 @@ export default function MyPopokClient({
         <div style={{
           position: "fixed",
           inset: 0,
+          overscrollBehavior: "contain",
           background: "rgba(23, 20, 17, 0.4)",
           backdropFilter: "blur(4px)",
           zIndex: 9999,

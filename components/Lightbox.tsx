@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
 interface LightboxProps {
   images: string[];
@@ -15,13 +16,8 @@ interface LightboxProps {
 // backdrop + blur, framer-motion fade/scale, Escape-to-close).
 export default function Lightbox({ images, initialIndex = 0, onClose }: LightboxProps) {
   const [index, setIndex] = useState(initialIndex);
+  useMobileBodyScrollLock();
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

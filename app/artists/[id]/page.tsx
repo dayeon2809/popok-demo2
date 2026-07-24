@@ -30,6 +30,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import RelatedArtists from "@/components/RelatedArtists";
 import { useAutoFlip } from "@/lib/useAutoFlip";
 import type { Performance, Artist } from "@/types";
+import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -103,6 +104,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null);
 
   const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
+  useMobileBodyScrollLock(Boolean(activeWork));
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
@@ -686,6 +688,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           display: flex;
           flex-direction: column;
           overflow-y: auto;
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
           position: relative;
         }
         @media (max-width: 768px) {

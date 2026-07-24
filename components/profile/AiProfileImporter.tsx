@@ -152,6 +152,17 @@ export default function AiProfileImporter({ onParsed, onCancel }: AiProfileImpor
 
 
     <details className={styles.details}>
+      <summary>업로드 후 어떻게 진행되나요?</summary>
+      <ol className={styles.processList}>
+        <li><span>1</span><p>이력서 업로드</p></li>
+        <li><span>2</span><p>AI가 활동 이력 정리</p></li>
+        <li><span>3</span><p>정리된 내용을 직접 확인하고 수정</p></li>
+        <li><span>4</span><p>작품 사진과 영상 추가</p></li>
+        <li><span>5</span><p>포트폴리오 공개</p></li>
+      </ol>
+      <p className={styles.processNotice}>AI가 정리한 내용은 자동으로 확정되지 않으며, 공개 전 직접 수정하고 확인할 수 있어요.</p>
+    </details>
+    <details className={styles.details}>
       <summary>간단한 작성 예시 보기</summary>
       <pre className={styles.example}>{RESUME_EXAMPLE}</pre>
       <p className={styles.exampleNote}>위 내용은 형식 안내용이며 사용자 데이터로 저장하거나 자동 입력하지 않습니다.</p>

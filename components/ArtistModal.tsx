@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { ArtistWithWorks } from "@/types";
 import { FIELD_LABELS, TYPE_LABELS } from "@/types";
 import { LoadingSpinner, ErrorMessage } from "./ui/States";
+import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
 function colorFromName(name: string): string {
   const colors = ["#F5A623","#1E2D40","#4A8C6F","#9B59B6","#E06060","#2980B9","#F39C12","#16A085"];
@@ -22,6 +23,7 @@ interface ArtistModalProps {
 
 export default function ArtistModal({ artist: a, loading, error, onClose }: ArtistModalProps) {
   const [toggledReviews, setToggledReviews] = useState<Record<string, boolean>>({});
+  useMobileBodyScrollLock();
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => e.key === "Escape" && onClose();
