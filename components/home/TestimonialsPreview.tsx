@@ -11,6 +11,7 @@ export default function TestimonialsPreview() {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || isPaused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const timerId = setInterval(() => {
       if (!el) return;
@@ -36,7 +37,7 @@ export default function TestimonialsPreview() {
   if (previewList.length === 0) return null;
 
   return (
-    <section className="home-section" style={{
+    <section className="home-section testimonials-preview-section" style={{
       background: "var(--navy)",
       padding: "80px 32px",
       overflow: "hidden",
@@ -81,6 +82,7 @@ export default function TestimonialsPreview() {
         {previewList.map((t, idx) => (
           <div
             key={idx}
+            className="testimonial-card"
             style={{
               flex: "0 0 auto",
               width: "320px",

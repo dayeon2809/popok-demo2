@@ -30,12 +30,7 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
     match: (pathname) => pathname === "/premium",
   },
   {
-    href: "/about#testimonials",
-    label: { ko: "이용 후기", en: "Testimonials" },
-    match: () => false,
-  },
-  {
-    href: "/about#faq",
+    href: "/#faq",
     label: { ko: "자주 묻는 질문", en: "FAQ" },
     match: () => false,
   },
@@ -94,6 +89,24 @@ export default function Header() {
     router.push("/");
     router.refresh();
   };
+
+  // Close the mobile menu on route change, and lock background scroll while
+  // it's open — otherwise the page underneath keeps scrolling behind it and,
+  // since the dropdown panel is only as tall as its content (not full-height),
+  // whatever's directly beneath its bottom edge (e.g. the Hero's CTA row)
+  // visually bleeds into view right at the panel boundary.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [menuOpen]);
 
   return (
     <nav style={{
@@ -204,19 +217,40 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <div
-          className="header-mobile-panel"
-          style={{
-            position: "absolute", top: "100%", left: 0, right: 0,
-            background: "#FFFFFF",
-            borderTop: "1.5px solid var(--border)",
-            boxShadow: "0 12px 24px rgba(30,45,64,0.08)",
-            padding: "8px 20px 16px",
-            display: "flex",
-            flexDirection: "column",
-            zIndex: 199,
-          }}
-        >
+        <>
+          {/* Full-viewport backdrop: without it, the dropdown panel below is
+              only as tall as its own content, so whatever page content sits
+              directly beneath its bottom edge (e.g. the Hero's CTA buttons)
+              shows through right at the boundary. This also gives a
+              tap-outside-to-close affordance and, combined with the
+              scroll-lock effect above, keeps the page from scrolling behind
+              the open menu. */}
+          <div
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+            style={{
+              position: "fixed", inset: 0,
+              background: "rgba(23, 20, 17, 0.35)",
+              zIndex: 198,
+            }}
+          />
+          <div
+            className="header-mobile-panel"
+            style={{
+              position: "absolute", top: "100%", left: 0, right: 0,
+              background: "#FFFFFF",
+              borderTop: "1.5px solid var(--border)",
+              borderBottomLeftRadius: "16px",
+              borderBottomRightRadius: "16px",
+              boxShadow: "0 12px 24px rgba(30,45,64,0.12)",
+              padding: "8px 20px 16px",
+              display: "flex",
+              flexDirection: "column",
+              maxHeight: "calc(100vh - 56px)",
+              overflowY: "auto",
+              zIndex: 199,
+            }}
+          >
           {NAV_ITEMS.map((item) => {
             const active = item.match(pathname);
             return (
@@ -295,7 +329,8 @@ export default function Header() {
               </button>
             </>
           )}
-        </div>
+          </div>
+        </>
       )}
     </nav>
   );

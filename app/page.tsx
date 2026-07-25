@@ -1,17 +1,19 @@
 import { getPublishedArtists } from "@/lib/artists";
 import { getUpcomingPerformances } from "@/lib/performances";
 import { getPublishedCompanies } from "@/lib/companies";
-import { getWeeklyStories, isInstagramConfigured } from "@/lib/instagram";
+import { getWeeklyStories } from "@/lib/instagram";
+import { getViewerHeroState } from "@/lib/viewerState";
 import HomeClient from "./HomeClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [artists, performances, companies, weeklyStories] = await Promise.all([
+  const [artists, performances, companies, weeklyStories, viewer] = await Promise.all([
     getPublishedArtists(),
-    getUpcomingPerformances(),
+    getUpcomingPerformances(14),
     getPublishedCompanies(),
     getWeeklyStories(),
+    getViewerHeroState(),
   ]);
 
   return (
@@ -20,7 +22,8 @@ export default async function HomePage() {
       initialPerformances={performances}
       initialCompanies={companies}
       initialWeeklyStories={weeklyStories}
-      instagramConfigured={isInstagramConfigured()}
+      isLoggedIn={viewer.isLoggedIn}
+      myArtistSlug={viewer.myArtistSlug}
     />
   );
 }

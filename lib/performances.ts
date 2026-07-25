@@ -1,6 +1,7 @@
 import { getSupabaseServer } from "./supabaseServer";
 import { mapArtistRowToArtist } from "./artists";
-import { getSeoulToday, filterUpcomingPerformances, parseDateOnly } from "./date";
+import { getSeoulToday, parseDateOnly } from "./date";
+import { prepareHomeUpcomingPerformances } from "./deduplicatePerformances";
 import type { Performance, RelatedPerformanceArtist } from "@/types";
 
 // Selects performances plus their linked artists via performance_artists.
@@ -90,20 +91,13 @@ export async function getPublishedPerformances(limit?: number): Promise<Performa
   }
 }
 
-// Fetch a wider candidate pool than the final display `limit` so the
-// in-memory "this week, then nearest future" selection below has enough
-// future performances to pick from when this week is thin — without
-// scanning the entire table on every homepage request.
-const UPCOMING_CANDIDATE_POOL_SIZE = 50;
-
 /**
  * Performances for the homepage "이번 주 공연" carousel, recalculated on every
  * call against the current Asia/Seoul date (never the server/deploy
  * platform's local timezone):
- *   1. Published, not-yet-ended performances this week (today's in-progress
- *      ones first, then soonest start date)
- *   2. If this week doesn't fill `limit`, the nearest upcoming performances
- *      afterward — never anything that has already ended.
+ *   1. Fetch every published, not-yet-ended candidate.
+ *   2. Exclude invalid/past rows and merge duplicate DB rows.
+ *   3. Sort this week first, then nearest future, and only then apply `limit`.
  * See lib/date.ts (getSeoulToday / getWeeklyPerformanceRange /
  * filterUpcomingPerformances) for the reusable, independently-testable date
  * logic this relies on.
@@ -125,8 +119,7 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
       .select(`${PERFORMANCE_SELECT_WITH_ARTISTS}, companies ( name )` as any)
       .eq("status", "published")
       .or(`end_date.gte.${today},end_date.is.null`)
-      .order("start_date", { ascending: true })
-      .limit(UPCOMING_CANDIDATE_POOL_SIZE);
+      .order("start_date", { ascending: true });
 
     if (error) {
       console.error("[getUpcomingPerformances] Supabase error:", error);
@@ -147,7 +140,7 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
       }
     }
 
-    return filterUpcomingPerformances(mapped, new Date(), limit);
+    return prepareHomeUpcomingPerformances(mapped, new Date(), limit);
   } catch (err) {
     console.error("[getUpcomingPerformances] Unexpected error:", err);
     return [];

@@ -29,6 +29,14 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  /* Korean text has no spaces between "words" (조사/어미가 붙은 단위), so the
+     browser's default CJK line-breaking will split mid-word ("이어가는" ->
+     "이어가"+"는") whenever a line runs long — exactly the "어색하게 한 글자씩
+     끊기는" 문제. keep-all breaks only at real word boundaries (spaces);
+     overflow-wrap is the safety net for the rare single token that's still
+     too long for its container (long URLs etc.). */
+  word-break: keep-all !important;
+  overflow-wrap: break-word !important;
 }
 
 .display { font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
@@ -186,9 +194,19 @@ input:focus, select:focus, textarea:focus {
   /* Home Artist Carousel (지금 만나볼/새롭게 등록된/지금 활동 중인 예술가):
      카드는 원래 크기(260px) 그대로 유지하고, 섹션 좌우 여백만 모바일에
      맞게 줄인다. */
-  .artist-carousel-section, .company-carousel-section { padding-left: 16px !important; padding-right: 16px !important; }
+  .artist-carousel-section, .company-carousel-section,
+  .artist-preview-section, .content-carousel-section { padding-left: 16px !important; padding-right: 16px !important; }
   .artist-carousel-track, .company-carousel-track { gap: 14px !important; }
 
+  /* Home Service Value (기록/홍보/콘텐츠/연결): 4단 가로 분할 -> 1단 스택,
+     세로 구분선 대신 위쪽 구분선으로 전환 */
+  .service-value-grid { grid-template-columns: 1fr !important; border-top: none !important; }
+  .service-value-item {
+    border-right: none !important;
+    border-top: 1px solid var(--border) !important;
+    padding: 20px 4px 4px !important;
+  }
+  .service-value-item:first-child { border-top: none !important; padding-top: 4px !important; }
 
   /* my-popok Dashboard mobile compatibility */
   .my-popok-container {
@@ -301,12 +319,32 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
+/* Dual-CTA rows (Hero, final CTA sections): below 480px, stack vertically at
+   full width instead of leaving two buttons fighting for a single line. */
+@media (max-width: 480px) {
+  .cta-row { flex-direction: column !important; align-items: stretch !important; }
+  .cta-row > a, .cta-row > button {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-height: 44px;
+  }
+}
+
 /* ── POPOK Custom Motion & Interactions ── */
 .seen-highlight {
   position: relative;
   z-index: 1;
   display: inline-block;
   white-space: nowrap;
+}
+/* On narrow screens the nowrap phrase this wraps (Hero's second title line)
+   is wider than the viewport — forcing it onto one line clips it off-screen
+   instead of wrapping. Below 480px, let it wrap like normal text; the lime
+   underline (::after, sized to 104% of the inline box) still draws correctly
+   under however many lines it ends up on. */
+@media (max-width: 480px) {
+  .seen-highlight { white-space: normal !important; }
 }
 .seen-highlight::after {
   content: "";
@@ -485,4 +523,198 @@ input:focus, select:focus, textarea:focus {
 
 .flip-card-container:hover .popok-card-img {
   transform: scale(1.03);
+}
+
+/* ── Home mobile polish ── */
+@media (max-width: 768px) {
+  .home-section {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .home-hero-section {
+    padding-top: 44px !important;
+    padding-bottom: 48px !important;
+  }
+  .home-hero-section .responsive-stack-320 { gap: 24px !important; }
+  .home-hero-section .fade-up > div:first-child {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    line-height: 1.4 !important;
+  }
+  .home-hero-section h1 {
+    font-size: clamp(2rem, 10vw, 2.6rem) !important;
+    overflow-wrap: anywhere;
+  }
+  .home-hero-section .seen-highlight {
+    display: inline !important;
+    white-space: normal !important;
+    background: linear-gradient(transparent 72%, var(--accent) 72%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .home-hero-section .seen-highlight::after { display: none !important; }
+  .hero-cta-actions { width: 100% !important; }
+  .hero-cta-actions > a {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .service-value-section,
+  .artist-support-section,
+  .comparison-section,
+  .artist-preview-section,
+  .home-premium-section {
+    padding-top: 48px !important;
+    padding-bottom: 48px !important;
+  }
+
+  .artist-support-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+  .artist-support-grid > div { min-width: 0 !important; padding: 16px !important; }
+  .artist-support-grid h3 { margin-top: 18px !important; }
+
+  .comparison-grid { gap: 14px !important; }
+  .comparison-grid > div { padding: 22px 18px !important; }
+
+  .artist-preview-header {
+    align-items: flex-start !important;
+    margin-bottom: 24px !important;
+  }
+  .artist-preview-header > div:first-child { min-width: 0 !important; flex: 1 1 220px !important; }
+  .artist-preview-controls { margin-left: auto !important; }
+  .artist-preview-track, .company-preview-track { gap: 14px !important; }
+  .artist-preview-card,
+  .company-preview-card {
+    min-width: min(300px, calc(100vw - 48px)) !important;
+    max-width: min(300px, calc(100vw - 48px)) !important;
+    flex-basis: min(300px, calc(100vw - 48px)) !important;
+  }
+
+  .home-premium-panel {
+    padding: 32px 20px !important;
+    gap: 28px !important;
+    border-radius: 20px !important;
+  }
+  .home-premium-panel > div:last-child { padding: 22px 18px !important; }
+
+  .home-footer-cta {
+    padding-top: 64px !important;
+    padding-bottom: 64px !important;
+  }
+  .home-footer-cta h2 {
+    font-size: 1.9rem !important;
+    line-height: 1.22 !important;
+  }
+  .home-footer-cta h2 br { display: none !important; }
+  .home-footer-cta .cta-row {
+    width: 100% !important;
+    flex-direction: column !important;
+  }
+  .home-footer-cta .cta-row > a {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .home-section { padding-left: 16px !important; padding-right: 16px !important; }
+  .home-hero-section h1 { font-size: 1.9rem !important; }
+  .home-footer-cta h2 { font-size: 1.7rem !important; }
+  /* calc(100vw - 40px) exactly matched the visible track width at this
+     breakpoint, leaving 0px of the next card peeking — nothing hinted that
+     the row was swipeable. Reserve extra width so ~26px of the next card
+     stays visible (see .artist-preview-track's own 4px padding). */
+  .artist-preview-card,
+  .company-preview-card {
+    min-width: calc(100vw - 80px) !important;
+    max-width: calc(100vw - 80px) !important;
+    flex-basis: calc(100vw - 80px) !important;
+  }
+  .artist-preview-controls button,
+  .company-preview-controls button { width: 40px !important; height: 40px !important; }
+}
+/* ── About real people mobile slider ── */
+@media (max-width: 768px) {
+  .real-people-section {
+    padding-top: 48px !important;
+    padding-bottom: 48px !important;
+  }
+  .real-people-header {
+    align-items: flex-start !important;
+    margin-bottom: 24px !important;
+  }
+  .real-people-header h2 {
+    flex: 1 1 220px !important;
+    min-width: 0 !important;
+  }
+  .real-people-controls { margin-left: auto !important; }
+  .real-people-track { gap: 14px !important; }
+  .real-people-card {
+    flex-basis: min(300px, calc(100vw - 48px)) !important;
+    width: min(300px, calc(100vw - 48px)) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .real-people-card {
+    flex-basis: calc(100vw - 40px) !important;
+    width: calc(100vw - 40px) !important;
+  }
+  .real-people-controls button { width: 32px !important; height: 32px !important; }
+}
+
+.home-footer-title-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18em;
+  font-size: 1.12em;
+}
+
+/* ── About final responsive audit ── */
+@media (max-width: 768px) {
+  .about-hero-section {
+    padding-top: 52px !important;
+    padding-bottom: 48px !important;
+  }
+  .about-hero-section h1 {
+    font-size: clamp(1.85rem, 8.5vw, 2.45rem) !important;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+  .about-hero-section p {
+    font-size: 0.96rem !important;
+    word-break: keep-all;
+  }
+  .desktop-only-break { display: none !important; }
+  .activity-flow-row,
+  .activity-flow-row > div,
+  .activity-flow-row > div > div {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .activity-flow-row > div > div { white-space: normal !important; }
+  .company-editorial-card {
+    flex-basis: min(340px, calc(100vw - 48px)) !important;
+    width: min(340px, calc(100vw - 48px)) !important;
+  }
+  .home-footer-cta h2 { font-size: 2.05rem !important; }
+  .home-footer-title-copy { gap: 0.28em; }
+}
+
+@media (max-width: 380px) {
+  .about-hero-section h1 { font-size: 1.82rem !important; }
+  .company-editorial-card {
+    flex-basis: calc(100vw - 40px) !important;
+    width: calc(100vw - 40px) !important;
+  }
+  .home-footer-cta h2 { font-size: 1.85rem !important; }
 }

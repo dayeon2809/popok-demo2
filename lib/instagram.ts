@@ -40,6 +40,10 @@ interface RawInstagramMedia {
   children?: { data: RawInstagramChild[] };
 }
 
+// Single source of truth for @popok.official's public profile URL — shared
+// by the homepage content section's "더 보기" CTA and the footer's social link.
+export const POPOK_INSTAGRAM_PROFILE_URL = "https://www.instagram.com/popok.official/";
+
 const GRAPH_HOST = "https://graph.instagram.com";
 const GRAPH_VERSION = "v23.0";
 const FIELDS = "id,caption,media_type,media_product_type,media_url,thumbnail_url,permalink,timestamp,children{media_type,media_url,thumbnail_url}";

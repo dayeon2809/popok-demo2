@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import type { Performance } from "@/types";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 
@@ -14,6 +15,23 @@ interface PerformanceCarouselProps {
 }
 
 const FALLBACK_POSTER = "/images/placeholders/cake-placeholder.png";
+
+// A broken/unreachable poster_url (crawled data, expired hotlink, etc.) would
+// otherwise show the browser's bare broken-image icon over the card — falls
+// back to the same placeholder used when there's no poster_url at all.
+function PosterImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <img
+      src={failed ? FALLBACK_POSTER : src}
+      alt={alt}
+      className="perf-card-poster-img"
+      loading="lazy"
+      onError={() => setFailed(true)}
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+    />
+  );
+}
 
 // "2026. 7. 18 – 7. 20" style Korean date range. Falls back gracefully on
 // missing/invalid dates instead of printing "Invalid Date".
@@ -98,20 +116,26 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
 
   return (
     <section className="home-section" style={{
-      padding: "60px 32px",
+      padding: "80px 24px",
       maxWidth: "1120px",
       margin: "0 auto",
       borderTop: "1px solid var(--border)",
       borderBottom: "1px solid var(--border)",
     }}>
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-end",
-        marginBottom: "32px",
-        gap: "16px",
-        flexWrap: "wrap"
-      }}>
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          marginBottom: "32px",
+          gap: "16px",
+          flexWrap: "wrap"
+        }}
+      >
         <div>
           <h2 className="display" style={{
             fontSize: "clamp(1.6rem, 3.5vw, 2.2rem)",
@@ -156,9 +180,13 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
             →
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 0.1 }}
         ref={sliderRef}
         onMouseEnter={() => { pausedRef.current = true; }}
         onMouseLeave={() => { pausedRef.current = false; }}
@@ -212,7 +240,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
                     background: "#FAF9F5", border: "1px solid var(--border)",
                     position: "relative"
                   }}>
-                    <img src={perf.posterUrl || FALLBACK_POSTER} alt={perf.title} className="perf-card-poster-img" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <PosterImage src={perf.posterUrl || FALLBACK_POSTER} alt={perf.title} />
                     {genreLabel && (
                       <span style={{
                         position: "absolute", top: "10px", left: "10px",
@@ -260,6 +288,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
                             <img
                               src={artist.profileImage || FALLBACK_POSTER}
                               alt={artist.name}
+                              loading="lazy"
                               style={{ width: "22px", height: "22px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border)", flexShrink: 0 }}
                             />
                             <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)" }}>
@@ -307,7 +336,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
             </div>
           );
         })}
-      </div>
+      </motion.div>
       <style>{`
         .perf-card:hover {
           border-color: var(--navy) !important;

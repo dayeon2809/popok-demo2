@@ -1,18 +1,22 @@
 "use client";
 
+import React from "react";
+
 export type BillingCycle = "monthly" | "annual";
 
 interface PremiumPlanCardProps {
   name: string;
   tagline?: string;
-  price: number;
+  price?: number;
   originalPrice?: number;
-  billingCycle: BillingCycle;
+  billingCycle?: BillingCycle;
   badge?: string;
   highlight?: boolean;
   features: string[];
-  ctaLabel: string;
-  onSubscribe: () => void;
+  ctaLabel?: string;
+  onSubscribe?: () => void;
+  customPriceNode?: React.ReactNode;
+  customButtonNode?: React.ReactNode;
 }
 
 export default function PremiumPlanCard({
@@ -20,16 +24,18 @@ export default function PremiumPlanCard({
   tagline,
   price,
   originalPrice,
-  billingCycle,
+  billingCycle = "monthly",
   badge,
   highlight,
   features,
-  ctaLabel,
-  onSubscribe,
+  ctaLabel = "",
+  onSubscribe = () => {},
+  customPriceNode,
+  customButtonNode,
 }: PremiumPlanCardProps) {
   const isFree = price === 0;
   const unit = billingCycle === "monthly" ? "월" : "년";
-  const showOriginalPrice = !isFree && !!originalPrice && originalPrice > price;
+  const showOriginalPrice = price !== undefined && !isFree && !!originalPrice && originalPrice > price;
 
   return (
     <div
@@ -80,31 +86,35 @@ export default function PremiumPlanCard({
       </div>
 
       {/* Price */}
-      <div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
-          {showOriginalPrice && (
-            <span style={{ fontSize: "1.1rem", color: "var(--ink-faint)", fontWeight: 700, textDecoration: "line-through" }}>
-              {originalPrice!.toLocaleString()}원
+      {customPriceNode ? (
+        customPriceNode
+      ) : (
+        <div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", flexWrap: "wrap" }}>
+            {showOriginalPrice && (
+              <span style={{ fontSize: "1.1rem", color: "var(--ink-faint)", fontWeight: 700, textDecoration: "line-through" }}>
+                {originalPrice!.toLocaleString()}원
+              </span>
+            )}
+            <span style={{ fontSize: "2rem", fontWeight: 900, color: "var(--navy)", letterSpacing: "-0.03em" }}>
+              {isFree ? "0원" : `${price?.toLocaleString()}원`}
             </span>
-          )}
-          <span style={{ fontSize: "2rem", fontWeight: 900, color: "var(--navy)", letterSpacing: "-0.03em" }}>
-            {isFree ? "0원" : `${price.toLocaleString()}원`}
-          </span>
-          {!isFree && (
-            <span style={{ fontSize: "0.85rem", color: "var(--ink-muted)", fontWeight: 700 }}>
-              / {unit}
+            {!isFree && (
+              <span style={{ fontSize: "0.85rem", color: "var(--ink-muted)", fontWeight: 700 }}>
+                / {unit}
+              </span>
+            )}
+          </div>
+          {badge && !isFree && (
+            <span
+              className="tag"
+              style={{ marginTop: "10px", display: "inline-block", background: "var(--accent)", color: "var(--navy)", border: "none" }}
+            >
+              {badge}
             </span>
           )}
         </div>
-        {badge && !isFree && (
-          <span
-            className="tag"
-            style={{ marginTop: "10px", display: "inline-block", background: "var(--accent)", color: "var(--navy)", border: "none" }}
-          >
-            {badge}
-          </span>
-        )}
-      </div>
+      )}
 
       {/* Features */}
       <ul style={{ display: "flex", flexDirection: "column", gap: "12px", listStyle: "none", flexGrow: 1 }}>
@@ -119,22 +129,26 @@ export default function PremiumPlanCard({
       </ul>
 
       {/* CTA */}
-      <button
-        type="button"
-        onClick={onSubscribe}
-        className={highlight ? "btn-lime" : "btn-outline"}
-        style={{
-          width: "100%",
-          padding: "14px",
-          borderRadius: "12px",
-          fontSize: "0.9rem",
-          fontWeight: 800,
-          cursor: "pointer",
-          border: highlight ? "none" : undefined,
-        }}
-      >
-        {ctaLabel}
-      </button>
+      {customButtonNode ? (
+        customButtonNode
+      ) : (
+        <button
+          type="button"
+          onClick={onSubscribe}
+          className={highlight ? "btn-lime" : "btn-outline"}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: "12px",
+            fontSize: "0.9rem",
+            fontWeight: 800,
+            cursor: "pointer",
+            border: highlight ? "none" : undefined,
+          }}
+        >
+          {ctaLabel}
+        </button>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLanguage } from "@/lib/useLanguage";
 import { analytics } from "@/lib/analytics";
+import { POPOK_INSTAGRAM_PROFILE_URL } from "@/lib/instagram";
 
 export default function Footer() {
   const { language } = useLanguage();
@@ -48,7 +49,7 @@ export default function Footer() {
           </div>
           <div className="footer-inner" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink)", fontWeight: 700, letterSpacing: "0.1em" }}>Social</span>
-            <a href="https://www.instagram.com/popok.official/" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Instagram</a>
+            <a href={POPOK_INSTAGRAM_PROFILE_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Instagram</a>
             <a href="mailto:popok.service@gmail.com" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Contact</a>
           </div>
         </div>

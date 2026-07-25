@@ -113,15 +113,17 @@ export default function TestimonialsSection() {
             </div>
             <div style={{
               display: "flex",
-              alignItems: "center",
+              alignItems: "flex-start",
               justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "6px 10px",
               borderTop: "1px solid var(--border)",
               paddingTop: "14px",
             }}>
               <span style={{ fontSize: "0.88rem", fontWeight: 800, color: "var(--navy)" }}>
                 {t.name}
               </span>
-              <span className="tag">{t.genre}</span>
+              <span className="tag" style={{ flexShrink: 0 }}>{t.genre}</span>
             </div>
           </div>
         ))}
