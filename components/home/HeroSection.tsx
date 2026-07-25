@@ -18,14 +18,14 @@ const COPY = {
     titleLine1: "창작은 당신이.",
     titleLine2: "나머지는 POPOK이.",
     body: "포트폴리오 제작부터 공연 홍보, 콘텐츠 제작, 활동 관리까지.\n예술인의 활동을 더 많은 기회로 연결합니다.",
-    secondaryCta: "아티스트 둘러보기",
+    secondaryCta: "포퐄 소개 보기",
   },
   en: {
     badge: "A portfolio & activity platform for performing artists",
     titleLine1: "You focus on creating.",
     titleLine2: "POPOK takes care of the rest.",
     body: "From portfolios to performance promotion, content, and ongoing updates —\nwe connect your work to more opportunities.",
-    secondaryCta: "Explore Artists",
+    secondaryCta: "About POPOK",
   },
 };
 
@@ -166,7 +166,7 @@ export default function HeroSection({ language, heroArtist, ctaHref, ctaLabel }:
             }}>
               {ctaLabel} <span style={{ fontSize: "1.1rem" }}>→</span>
             </Link>
-            <Link href="/artists" className="btn-outline" style={{
+            <Link href="/about" className="btn-outline" style={{
               textDecoration: "none",
               padding: "16px 32px",
               borderRadius: "999px",
