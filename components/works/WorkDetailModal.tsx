@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import { normalizeWorkImages, normalizeWorkCredits } from "@/lib/works";
 import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
@@ -43,7 +43,7 @@ const WorkImagePlaceholder = ({ accentColor }: { accentColor: string }) => (
 // Shared work-detail modal — used by both the company page
 // (components/company/CompanyPortfolio.tsx) and the individual artist page
 // (app/artists/[id]/page.tsx) so the two never visually drift apart again.
-// Single source of truth for the backdrop/panel chrome, image carousel,
+// Single source of truth for the backdrop/panel chrome, image archive,
 // description, performance info, video, credits, and references sections;
 // every section is purely data-driven (rendered only when the relevant
 // field exists on `work`), so the same component works for both entities'
@@ -54,48 +54,6 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
   // Collect and deduplicate up to 4 images — same contract the CMS and
   // admin editors save to, so what's saved is exactly what's shown here.
   const images = useMemo(() => normalizeWorkImages(work), [work]);
-
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // Reset slide index to 0 whenever work changes
-  useEffect(() => {
-    setCurrentImageIndex(0);
-  }, [work]);
-
-  // Keyboard navigation (ArrowLeft / ArrowRight)
-  useEffect(() => {
-    if (images.length <= 1) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-      } else if (e.key === "ArrowRight") {
-        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [images.length]);
-
-  // Touch swipe gesture handlers for mobile
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null || images.length <= 1) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diffX = touchStartX - touchEndX;
-    if (Math.abs(diffX) > 35) {
-      if (diffX > 0) {
-        setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-      } else {
-        setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-      }
-    }
-    setTouchStartX(null);
-  };
 
   // Group credits by role for structured layout — falls back to a single
   // "안무/역할" entry from `work.role` when no structured credits exist, so
@@ -210,6 +168,32 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
           grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
           gap: 20px 16px;
         }
+        .work-archive {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        .work-archive-item { margin: 0; }
+        .work-archive-image {
+          display: block;
+          width: 100%;
+          height: auto;
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          background: #f3f1eb;
+        }
+        .work-archive-caption {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          padding-top: 8px;
+          color: var(--ink-faint);
+          font-size: 0.64rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
         @media (max-width: 768px) {
           .work-modal-backdrop {
             padding: 0 !important;
@@ -315,184 +299,36 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
         {/* Drawer Content */}
         <div style={{ padding: "24px" }}>
 
-          {/* 1. Image Carousel (Max 4 images) */}
+          {/* 1. Vertical image archive (Max 4 images) */}
           <div style={{ marginBottom: "28px" }}>
             {images.length === 0 ? (
               <WorkImagePlaceholder accentColor={accentColor} />
             ) : (
-              <div>
-                <div
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    aspectRatio: "1.6",
-                    backgroundColor: "#171411",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    border: "1px solid var(--border)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    userSelect: "none",
-                  }}
-                >
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={currentImageIndex}
-                      src={images[currentImageIndex]}
-                      alt={`${work.title} slide ${currentImageIndex + 1}`}
-                      initial={{ opacity: 0.4, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0.4, scale: 0.98 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </AnimatePresence>
-
-                  {/* Prev / Next arrows & Counter badge ONLY when images.length > 1 */}
-                  {images.length > 1 && (
-                    <>
-                      {/* Prev Arrow */}
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-                        }}
-                        aria-label="이전 이미지"
-                        style={{
-                          position: "absolute",
-                          left: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          backgroundColor: "rgba(23, 20, 17, 0.75)",
-                          color: "#FFFFFF",
-                          border: "1px solid rgba(255, 255, 255, 0.25)",
-                          backdropFilter: "blur(4px)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          fontSize: "1.3rem",
-                          lineHeight: 1,
-                          zIndex: 5,
-                        }}
-                      >
-                        ‹
-                      </motion.button>
-
-                      {/* Next Arrow */}
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-                        }}
-                        aria-label="다음 이미지"
-                        style={{
-                          position: "absolute",
-                          right: "12px",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "50%",
-                          backgroundColor: "rgba(23, 20, 17, 0.75)",
-                          color: "#FFFFFF",
-                          border: "1px solid rgba(255, 255, 255, 0.25)",
-                          backdropFilter: "blur(4px)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          fontSize: "1.3rem",
-                          lineHeight: 1,
-                          zIndex: 5,
-                        }}
-                      >
-                        ›
-                      </motion.button>
-
-                      {/* Image Counter Badge (1 / N) */}
-                      <div
-                        className="mono"
-                        style={{
-                          position: "absolute",
-                          bottom: "12px",
-                          right: "12px",
-                          backgroundColor: "rgba(23, 20, 17, 0.8)",
-                          color: "#FFFFFF",
-                          fontSize: "0.68rem",
-                          fontWeight: 800,
-                          padding: "4px 10px",
-                          borderRadius: "12px",
-                          border: "1px solid rgba(255, 255, 255, 0.2)",
-                          backdropFilter: "blur(4px)",
-                          zIndex: 5,
-                        }}
-                      >
-                        {currentImageIndex + 1} / {images.length}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Thumbnail Strip ONLY when images.length > 1 */}
-                {images.length > 1 && (
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "8px",
-                      marginTop: "10px",
-                      overflowX: "auto",
-                      paddingBottom: "4px",
-                    }}
+              <div className="work-archive" aria-label={`${work.title} 작품 이미지 아카이브`}>
+                {images.map((imgUrl, idx) => (
+                  <motion.figure
+                    key={imgUrl}
+                    className="work-archive-item"
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.12 }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
                   >
-                    {images.map((imgUrl, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setCurrentImageIndex(idx)}
-                        style={{
-                          border: idx === currentImageIndex ? `2.5px solid ${accentColor}` : "1px solid var(--border)",
-                          borderRadius: "4px",
-                          padding: 0,
-                          backgroundColor: "#171411",
-                          cursor: "pointer",
-                          opacity: idx === currentImageIndex ? 1 : 0.5,
-                          flexShrink: 0,
-                          width: "64px",
-                          height: "44px",
-                          overflow: "hidden",
-                          transition: "all 0.15s ease",
-                        }}
-                      >
-                        <img
-                          src={imgUrl}
-                          alt={`thumbnail ${idx + 1}`}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                    <img
+                      className="work-archive-image"
+                      src={imgUrl}
+                      alt={`${work.title} 작품 기록 이미지 ${idx + 1}`}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                    />
+                    <figcaption className="work-archive-caption mono">
+                      <span>Archive {String(idx + 1).padStart(2, "0")}</span>
+                      <span>{String(idx + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}</span>
+                    </figcaption>
+                  </motion.figure>
+                ))}
               </div>
             )}
           </div>
-
           {/* 2. Description ("About this project") */}
           <div style={{ marginBottom: "28px" }}>
             <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
