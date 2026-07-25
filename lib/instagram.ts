@@ -105,6 +105,45 @@ export function captionHasHashtag(caption: string | null | undefined, tag: strin
   return (caption || "").includes(`#${tag}`);
 }
 
+// ── Company↔Instagram tag matching ─────────────────────────────────────
+// Convention: POPOK posts a company's dedicated hashtag ("#<이름>포퐄") on any
+// post about that company, e.g. "공원" → "#공원포퐄". Pure/testable so the
+// tag format and matching logic can change without touching the fetch code.
+
+/**
+ * Builds a company's dedicated Instagram tag: strip whitespace and any
+ * character that isn't a letter/number/underscore (Instagram hashtags can't
+ * contain punctuation or symbols, and stray punctuation would also break
+ * exact-tag comparison), then wrap as "#<name>포퐄". Returns "" if nothing
+ * taggable remains (e.g. empty/punctuation-only input).
+ */
+export function createCompanyInstagramTag(companyName: string | null | undefined): string {
+  const sanitized = (companyName || "")
+    .replace(/\s+/g, "")
+    .replace(/[^\p{L}\p{N}_]/gu, "");
+  if (!sanitized) return "";
+  return `#${sanitized}포퐄`;
+}
+
+/** All hashtags (with leading "#") appearing in a caption, in order. */
+export function extractHashtags(caption: string | null | undefined): string[] {
+  if (!caption) return [];
+  return caption.match(/#[\p{L}\p{N}_]+/gu) || [];
+}
+
+/**
+ * True only if `caption` contains the company's exact dedicated tag as a
+ * standalone hashtag (case-insensitive) — e.g. "#공원포퐄" matches but
+ * "#공원포퐄프로젝트" does not, since it's parsed as one longer, different
+ * hashtag rather than a substring of it.
+ */
+export function hasCompanyInstagramTag(caption: string | null | undefined, companyName: string | null | undefined): boolean {
+  const tag = createCompanyInstagramTag(companyName);
+  if (!tag) return false;
+  const target = tag.toLowerCase();
+  return extractHashtags(caption).some((h) => h.toLowerCase() === target);
+}
+
 function pickImageUrl(media: RawInstagramMedia): string | null {
   if (media.media_type === "IMAGE") return media.media_url || null;
   if (media.media_type === "VIDEO") return media.thumbnail_url || media.media_url || null;
@@ -120,6 +159,50 @@ function resolveMediaType(media: RawInstagramMedia): InstagramStory["mediaType"]
     return media.media_product_type === "REELS" ? "REELS" : "VIDEO";
   }
   return (media.media_type as "IMAGE" | "CAROUSEL_ALBUM" | undefined) || "IMAGE";
+}
+
+// Shared by getWeeklyStories/getCompanyStories: fetches a pool of the
+// account's latest raw media, or null if the integration isn't configured.
+// Never throws — an API/network failure resolves to an empty pool instead.
+async function fetchMediaPool(poolSize: number, logLabel: string): Promise<RawInstagramMedia[]> {
+  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+  if (!accessToken) {
+    devWarn(`[${logLabel}] INSTAGRAM_ACCESS_TOKEN not set.`);
+    return [];
+  }
+
+  try {
+    const url = `${GRAPH_HOST}/${GRAPH_VERSION}/me/media?fields=${encodeURIComponent(FIELDS)}&access_token=${encodeURIComponent(accessToken)}&limit=${poolSize}`;
+
+    // Keep results reasonably fresh while still avoiding a Graph API request
+    // on every page view.
+    const res = await fetch(url, { next: { revalidate: 60 } });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      devError(`[${logLabel}] Instagram API error`, res.status, body);
+      return [];
+    }
+
+    const json = await res.json();
+    return Array.isArray(json?.data) ? json.data : [];
+  } catch (err) {
+    devError(`[${logLabel}] Unexpected error:`, err);
+    return [];
+  }
+}
+
+function toStory(media: RawInstagramMedia, imageUrl: string): InstagramStory {
+  const title = extractStoryTitle(media.caption);
+  return {
+    id: media.id,
+    title,
+    excerpt: extractStoryExcerpt(media.caption, title),
+    imageUrl,
+    permalink: media.permalink,
+    publishedAt: media.timestamp,
+    mediaType: resolveMediaType(media),
+    category: inferStoryCategory(media.caption),
+  };
 }
 
 interface GetWeeklyStoriesOptions {
@@ -138,58 +221,55 @@ interface GetWeeklyStoriesOptions {
 export async function getWeeklyStories(options: GetWeeklyStoriesOptions = {}): Promise<InstagramStory[]> {
   const { limit = 6, excludeIds = [], requireHashtag = "홈노출" } = options;
 
-  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-  if (!accessToken) {
-    devWarn("[getWeeklyStories] INSTAGRAM_ACCESS_TOKEN not set — '이주의 소식' section will be hidden.");
-    return [];
+  // Fetch a larger pool than `limit` since the no-caption / no-image /
+  // required-hashtag / excluded-id filters may drop some posts.
+  const poolSize = Math.max(limit * 3, 12);
+  const rawMedia = await fetchMediaPool(poolSize, "getWeeklyStories");
+
+  const stories: InstagramStory[] = [];
+  for (const media of rawMedia) {
+    if (excludeIds.includes(media.id)) continue;
+    if (!media.caption || !media.caption.trim()) continue;
+    if (!captionHasHashtag(media.caption, requireHashtag)) continue;
+
+    const imageUrl = pickImageUrl(media);
+    if (!imageUrl) continue;
+
+    stories.push(toStory(media, imageUrl));
+    if (stories.length >= limit) break;
   }
 
-  try {
-    // Fetch a larger pool than `limit` since the no-caption / no-image /
-    // missing-caption / missing-image / required-hashtag / excluded-id filters may drop
-    // some posts.
-    const poolSize = Math.max(limit * 3, 12);
-    const url = `${GRAPH_HOST}/${GRAPH_VERSION}/me/media?fields=${encodeURIComponent(FIELDS)}&access_token=${encodeURIComponent(accessToken)}&limit=${poolSize}`;
+  return stories;
+}
 
-    // Keep the homepage reasonably fresh after #홈노출 is added while still
-    // avoiding a Graph API request on every page view.
-    const res = await fetch(url, { next: { revalidate: 60 } });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      devError("[getWeeklyStories] Instagram API error", res.status, body);
-      return [];
-    }
+interface GetCompanyStoriesOptions {
+  limit?: number;
+}
 
-    const json = await res.json();
-    const rawMedia: RawInstagramMedia[] = Array.isArray(json?.data) ? json.data : [];
+/**
+ * @popok.official posts tagged with this company's dedicated Instagram tag
+ * (see createCompanyInstagramTag — "#<단체명>포퐄", e.g. "#공원포퐄" for
+ * "공원") — shown at the bottom of the company's detail page. Scans a wider
+ * pool than getWeeklyStories since a specific tag match is much rarer than
+ * the curated homepage hashtag, and is not restricted to #홈노출 since this
+ * isn't the homepage feed. Always resolves; never throws.
+ */
+export async function getCompanyStories(companyName: string | null | undefined, options: GetCompanyStoriesOptions = {}): Promise<InstagramStory[]> {
+  if (!createCompanyInstagramTag(companyName)) return [];
 
-    const stories: InstagramStory[] = [];
-    for (const media of rawMedia) {
-      if (excludeIds.includes(media.id)) continue;
-      if (!media.caption || !media.caption.trim()) continue;
-      if (!captionHasHashtag(media.caption, requireHashtag)) continue;
+  const { limit = 6 } = options;
+  const rawMedia = await fetchMediaPool(50, "getCompanyStories");
 
-      const imageUrl = pickImageUrl(media);
-      if (!imageUrl) continue;
+  const stories: InstagramStory[] = [];
+  for (const media of rawMedia) {
+    if (!hasCompanyInstagramTag(media.caption, companyName)) continue;
 
-      const title = extractStoryTitle(media.caption);
-      stories.push({
-        id: media.id,
-        title,
-        excerpt: extractStoryExcerpt(media.caption, title),
-        imageUrl,
-        permalink: media.permalink,
-        publishedAt: media.timestamp,
-        mediaType: resolveMediaType(media),
-        category: inferStoryCategory(media.caption),
-      });
+    const imageUrl = pickImageUrl(media);
+    if (!imageUrl) continue;
 
-      if (stories.length >= limit) break;
-    }
-
-    return stories;
-  } catch (err) {
-    devError("[getWeeklyStories] Unexpected error:", err);
-    return [];
+    stories.push(toStory(media, imageUrl));
+    if (stories.length >= limit) break;
   }
+
+  return stories;
 }

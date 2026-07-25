@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import {
-  cleanArtistEducationForPayload,
-  cleanArtistCurrentActivityForPayload,
-  cleanArtistAffiliationsForPayload,
-  cleanArtistAwardsForPayload,
-  cleanArtistCompetitionsForPayload,
-  cleanArtistRepresentativeImagesForPayload,
+  buildArtistUpdateFromPayload,
   normalizeArtistRepresentativeImages,
 } from "@/lib/artist-profile";
-import { cleanWorksForPayload, normalizeWorks } from "@/lib/works";
+import { normalizeWorks } from "@/lib/works";
 
 export const dynamic = "force-dynamic";
 
@@ -69,61 +64,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "수정할 아티스트 프로필이 존재하지 않습니다." }, { status: 404 });
     }
 
-    const {
-      name,
-      name_en,
-      bio,
-      bio_short,
-      genre,
-      role,
-      profile_image_url,
-      profile_image_urls,
-      motion_video_url,
-      youtube_url,
-      instagram,
-      website,
-      works,
-      affiliations,
-      current_activity,
-      education,
-      awards,
-      competitions,
-      links,
-      slug
-    } = updatePayload;
-
-    const updateData: Record<string, any> = {
-      updated_at: new Date().toISOString()
-    };
-
-    if (name !== undefined) updateData.name = name;
-    if (name_en !== undefined) updateData.name_en = name_en;
-    if (bio !== undefined) updateData.bio = bio;
-    if (bio_short !== undefined) updateData.bio_short = bio_short;
-    if (genre !== undefined) updateData.genre = genre;
-    if (role !== undefined) updateData.role = role;
-    if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
-    if (profile_image_urls !== undefined) updateData.profile_image_urls = cleanArtistRepresentativeImagesForPayload(profile_image_urls);
-    if (motion_video_url !== undefined) updateData.motion_video_url = motion_video_url;
-    if (youtube_url !== undefined) updateData.youtube_url = youtube_url;
-    if (instagram !== undefined) updateData.instagram = instagram;
-    if (website !== undefined) updateData.website = website;
-    if (works !== undefined) updateData.works = cleanWorksForPayload(works);
-    if (affiliations !== undefined) updateData.affiliations = cleanArtistAffiliationsForPayload(affiliations);
-    if (current_activity !== undefined) updateData.current_activity = cleanArtistCurrentActivityForPayload(current_activity);
-    if (education !== undefined) updateData.education = cleanArtistEducationForPayload(education);
-    if (awards !== undefined) updateData.awards = cleanArtistAwardsForPayload(awards);
-    if (competitions !== undefined) updateData.competitions = cleanArtistCompetitionsForPayload(competitions);
-    if (links !== undefined) updateData.links = links;
-    
-    if (slug !== undefined) {
-      // Validate slug format
-      const cleanSlug = slug.trim().toLowerCase();
-      const slugRegex = /^[a-z0-9-]+$/;
-      if (cleanSlug.length < 3 || !slugRegex.test(cleanSlug)) {
-        return NextResponse.json({ success: false, error: "주소 형식이 올바르지 않습니다. (최소 3자, 영문 소문자/숫자/하이픈만 가능)" }, { status: 400 });
-      }
-      updateData.slug = cleanSlug;
+    const { updateData, error: buildError } = buildArtistUpdateFromPayload(updatePayload);
+    if (buildError) {
+      return NextResponse.json({ success: false, error: buildError }, { status: 400 });
     }
 
     // Apply strict check on owner_id to prevent users from updating other records

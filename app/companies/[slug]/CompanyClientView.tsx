@@ -7,6 +7,7 @@ import type { Company } from "@/types";
 import { analytics } from "@/lib/analytics";
 import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
 import type { RepresentativeArtistResult } from "@/lib/companies";
+import type { InstagramStory } from "@/lib/instagram";
 
 // Import custom company components
 import CompanyCardStack from "@/components/company/CompanyCardStack";
@@ -20,6 +21,7 @@ import CompanyArtists from "@/components/company/CompanyArtists";
 import CompanyContact from "@/components/company/CompanyContact";
 import CompanyAwardsLinks from "@/components/company/CompanyAwardsLinks";
 import RelatedCompanies from "@/components/company/RelatedCompanies";
+import CompanyInstagramPosts from "@/components/company/CompanyInstagramPosts";
 import SendPortfolioSection from "@/components/portfolio-requests/SendPortfolioSection";
 
 interface CompanyClientViewProps {
@@ -29,6 +31,7 @@ interface CompanyClientViewProps {
   upcomingPerformances: any[];
   sendPortfolioViewerState: PortfolioRequestViewerState;
   representativeArtist?: RepresentativeArtistResult | null;
+  instagramStories?: InstagramStory[];
 }
 
 export default function CompanyClientView({
@@ -38,6 +41,7 @@ export default function CompanyClientView({
   upcomingPerformances = [],
   sendPortfolioViewerState,
   representativeArtist,
+  instagramStories = [],
 }: CompanyClientViewProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -250,6 +254,9 @@ export default function CompanyClientView({
                         {/* 6. UPCOMING PERFORMANCES */}
         <CompanyUpcomingPerformances accentColor={adaptedCompany.brand_color} performances={upcomingPerformances} />
 
+        {/* 6b. INSTAGRAM MENTIONS */}
+        <CompanyInstagramPosts stories={instagramStories} brandAccent={brandAccent} />
+
         {/* 7. AFFILIATED ARTISTS */}
         <CompanyArtists company={adaptedCompany as any} artists={artists} />
 
@@ -264,7 +271,7 @@ export default function CompanyClientView({
 
       </div>
 
-      {/* 10. SEND PORTFOLIO CTA */}
+      {/* 11. SEND PORTFOLIO CTA */}
       <SendPortfolioSection
         target={{ type: "company", id: company.id, name: company.name, imageUrl: company.profile_image_url }}
         viewerState={sendPortfolioViewerState}

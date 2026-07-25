@@ -18,6 +18,7 @@
 // write path), so no existing data is ever dropped on read.
 
 import { toStringArray, toObjectArray } from "./normalize";
+import { cleanWorksForPayload } from "./works";
 
 // ── Education — plain string list. Kept as strings rather than a
 // structured {school, department, degree} object: 0/13 live rows use a
@@ -156,4 +157,83 @@ export function normalizeArtistRepresentativeImages(value: unknown): string[] {
   return Array.from(new Set(cleaned)).slice(0, 3);
 }
 export const cleanArtistRepresentativeImagesForPayload = normalizeArtistRepresentativeImages;
+
+export interface BuildArtistUpdateResult {
+  updateData: Record<string, any>;
+  error?: string;
+}
+
+/**
+ * Builds the `artists` table update payload from a raw request body — the
+ * single source of truth for which fields are editable and how each JSONB
+ * column gets normalized, shared by the self-serve save route (POST
+ * /api/artists/me) and the admin-override save route (PATCH
+ * /api/admin/artists/[id]) so an admin edit merges and saves data exactly
+ * the way a user's own edit does. Only whitelisted keys present (!==
+ * undefined) in `input` are included, so a partial payload never clobbers
+ * unrelated columns — callers apply this on top of an `.eq("id", ...)`
+ * update (plus `.eq("owner_id", ...)` for the self-serve route only).
+ * Does not touch `owner_id` or `status` — ownership is never reassigned by
+ * a profile edit, and status is a separate moderation concern each caller
+ * handles on its own.
+ */
+export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildArtistUpdateResult {
+  const {
+    name,
+    name_en,
+    bio,
+    bio_short,
+    genre,
+    role,
+    profile_image_url,
+    profile_image_urls,
+    motion_video_url,
+    youtube_url,
+    instagram,
+    website,
+    works,
+    affiliations,
+    current_activity,
+    education,
+    awards,
+    competitions,
+    links,
+    slug,
+  } = input || {};
+
+  const updateData: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (name !== undefined) updateData.name = name;
+  if (name_en !== undefined) updateData.name_en = name_en;
+  if (bio !== undefined) updateData.bio = bio;
+  if (bio_short !== undefined) updateData.bio_short = bio_short;
+  if (genre !== undefined) updateData.genre = genre;
+  if (role !== undefined) updateData.role = role;
+  if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
+  if (profile_image_urls !== undefined) updateData.profile_image_urls = cleanArtistRepresentativeImagesForPayload(profile_image_urls);
+  if (motion_video_url !== undefined) updateData.motion_video_url = motion_video_url;
+  if (youtube_url !== undefined) updateData.youtube_url = youtube_url;
+  if (instagram !== undefined) updateData.instagram = instagram;
+  if (website !== undefined) updateData.website = website;
+  if (works !== undefined) updateData.works = cleanWorksForPayload(works);
+  if (affiliations !== undefined) updateData.affiliations = cleanArtistAffiliationsForPayload(affiliations);
+  if (current_activity !== undefined) updateData.current_activity = cleanArtistCurrentActivityForPayload(current_activity);
+  if (education !== undefined) updateData.education = cleanArtistEducationForPayload(education);
+  if (awards !== undefined) updateData.awards = cleanArtistAwardsForPayload(awards);
+  if (competitions !== undefined) updateData.competitions = cleanArtistCompetitionsForPayload(competitions);
+  if (links !== undefined) updateData.links = links;
+
+  if (slug !== undefined) {
+    const cleanSlug = String(slug).trim().toLowerCase();
+    const slugRegex = /^[a-z0-9-]+$/;
+    if (cleanSlug.length < 3 || !slugRegex.test(cleanSlug)) {
+      return { updateData: {}, error: "주소 형식이 올바르지 않습니다. (최소 3자, 영문 소문자/숫자/하이픈만 가능)" };
+    }
+    updateData.slug = cleanSlug;
+  }
+
+  return { updateData };
+}
 

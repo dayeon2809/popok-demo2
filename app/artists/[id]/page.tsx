@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
 import { analytics } from "@/lib/analytics";
 import MotionProfile from "@/components/MotionProfile";
 import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
-import { getYouTubePreviewAspectRatio, isYouTubeUrl } from "@/lib/youtube";
+import { isYouTubeUrl } from "@/lib/youtube";
 import { isSameVideoUrl, getYouTubeEmbedUrl, isDirectVideoUrl } from "@/lib/video";
 import { isVimeoUrl, getVimeoEmbedUrl } from "@/lib/videoLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
@@ -30,7 +29,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import RelatedArtists from "@/components/RelatedArtists";
 import { useAutoFlip } from "@/lib/useAutoFlip";
 import type { Performance, Artist } from "@/types";
-import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
+import WorkDetailModal from "@/components/works/WorkDetailModal";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -104,8 +103,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null);
 
   const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
-  useMobileBodyScrollLock(Boolean(activeWork));
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
   const [portfolioViewerState, setPortfolioViewerState] = useState<PortfolioRequestViewerState>(DEFAULT_PORTFOLIO_VIEWER_STATE);
@@ -118,15 +115,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const heroCardFlip = useAutoFlip();
   const digitalCardFlip = useAutoFlip();
   const pathname = usePathname();
-
-  const handleOpenWork = (work: WorkItem) => {
-    setActiveImageIndex(0);
-    setActiveWork(work);
-  };
-
-  useEffect(() => {
-    setActiveImageIndex(0);
-  }, [activeWork]);
 
   // Hero photo slider — auto-advance every 3s, pausing briefly whenever the
   // viewer manually navigates (arrows/dots/swipe) so a manual pick doesn't
@@ -314,23 +302,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  // Keyboard Arrow navigation for active work modal carousel
-  useEffect(() => {
-    if (!activeWork) return;
-    const images = normalizeWorkImages(activeWork);
-    if (images.length <= 1) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        setActiveImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-      } else if (e.key === "ArrowRight") {
-        setActiveImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeWork]);
 
   const handleShareUrl = () => {
     if (typeof window !== "undefined") {
@@ -536,37 +507,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     return `${lat}° N, ${lng}° E`;
   };
 
-  const parsedActiveMedia = activeWork ? (() => {
-    if (activeWork.media && typeof activeWork.media === "object") {
-      return {
-        ...activeWork.media,
-        previewStart: activeWork.media.previewStart ?? activeWork.previewStart ?? 0,
-        previewEnd: activeWork.media.previewEnd ?? activeWork.previewEnd ?? 15,
-        aspectRatio: activeWork.media.aspectRatio ?? activeWork.previewAspectRatio,
-      };
-    }
-    const videoUrl = activeWork.videoUrl || "";
-    if (videoUrl.trim()) {
-      const url = videoUrl.trim();
-      if (url.includes("youtube.com") || url.includes("youtu.be") || url.includes("youtube-nocookie.com")) {
-        return {
-          type: "youtube" as const,
-          url,
-          previewStart: activeWork.previewStart ?? 0,
-          previewEnd: activeWork.previewEnd ?? 15,
-          aspectRatio: activeWork.previewAspectRatio,
-        };
-      }
-      if (url.includes("vimeo.com")) {
-        return { type: "vimeo" as const, url };
-      }
-      if (url.endsWith(".mp4") || url.includes("/media/") || url.includes("/motion/")) {
-        return { type: "video" as const, src: url, poster: activeWork.image };
-      }
-    }
-    return { type: "image" as const, src: activeWork.image };
-  })() : null;
-
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh", paddingBottom: "100px" }}>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -663,47 +603,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         }
         .press-link:hover {
           text-decoration: underline !important;
-        }
-        .artist-work-modal-backdrop {
-          position: fixed;
-          inset: 0;
-          z-index: 1000;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: rgba(23, 20, 17, 0.55);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-          padding: 40px 20px;
-        }
-        .artist-drawer-main {
-          width: 640px;
-          max-width: 100%;
-          height: auto;
-          max-height: 88vh;
-          background-color: #FFFFFF;
-          box-shadow: 0 20px 50px rgba(23, 20, 17, 0.2);
-          border-radius: 10px;
-          border: 1px solid var(--border);
-          display: flex;
-          flex-direction: column;
-          overflow-y: auto;
-          overscroll-behavior: contain;
-          -webkit-overflow-scrolling: touch;
-          position: relative;
-        }
-        @media (max-width: 768px) {
-          .artist-work-modal-backdrop {
-            padding: 0 !important;
-            align-items: flex-end !important;
-          }
-          .artist-drawer-main {
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 90vh !important;
-            max-height: 90vh !important;
-            border-radius: 16px 16px 0 0 !important;
-          }
         }
       ` }} />
       
@@ -1409,247 +1308,19 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
       </div>
 
-      {/* ──────────────── 8. WORK DETAIL MODAL — same fade-in open as the company page's WorkDrawer ──────────────── */}
-      {activeWork && parsedActiveMedia && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="artist-work-modal-backdrop"
-          onClick={() => setActiveWork(null)}
-        >
-          <div className="artist-drawer-main" onClick={(e) => e.stopPropagation()}>
-            <div
-              style={{
-                position: "sticky",
-                top: 0,
-                backgroundColor: "rgba(255,255,255,0.96)",
-                backdropFilter: "blur(8px)",
-                padding: "16px 24px",
-                borderBottom: "1px solid var(--border)",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                zIndex: 10,
-              }}
-            >
-              <div style={{ minWidth: 0 }}>
-                <span className="mono" style={{ fontSize: "0.68rem", fontWeight: 800, color: "var(--accent-dark)", letterSpacing: "0.08em", textTransform: "uppercase", display: "block", marginBottom: "2px" }}>
-                  {[activeWork.role, activeWork.genre].filter(Boolean).join(" · ") || "WORK ARCHIVE"}
-                </span>
-                <h3 style={{ fontSize: "1.15rem", fontWeight: 950, color: "var(--navy)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "-0.02em" }}>
-                  {activeWork.title}
-                </h3>
-              </div>
-              <button onClick={() => setActiveWork(null)} style={{ border: "none", background: "none", fontSize: "1.6rem", fontWeight: 300, cursor: "pointer", color: "var(--ink-muted)", padding: "4px 8px", lineHeight: 1 }}>
-                ×
-              </button>
-            </div>
-
-            {/* Drawer Content */}
-            <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* Media Section */}
-              {(() => {
-                const workImages = normalizeWorkImages(activeWork);
-                return (
-                  <div style={{
-                    position: "relative",
-                    width: "100%",
-                    aspectRatio: parsedActiveMedia.type === "youtube"
-                      ? ((parsedActiveMedia as any).aspectRatio || getYouTubePreviewAspectRatio(parsedActiveMedia.url || ""))
-                      : (parsedActiveMedia.type === "vimeo" || parsedActiveMedia.type === "video") ? "16 / 9" : "1.6",
-                    backgroundColor: "#171411",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    border: "1px solid var(--border)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    userSelect: "none",
-                  }}>
-                    {parsedActiveMedia.type === "youtube" && isYouTubeUrl(parsedActiveMedia.url || "") ? (
-                      <iframe
-                        src={getYouTubeEmbedUrl(parsedActiveMedia.url || "") ? `${getYouTubeEmbedUrl(parsedActiveMedia.url || "")}?autoplay=0&controls=1&rel=0` : ""}
-                        style={{ width: "100%", height: "100%", border: 0 }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title={activeWork.title}
-                      />
-                    ) : parsedActiveMedia.type === "vimeo" && getVimeoEmbedUrl(parsedActiveMedia.url || "") ? (
-                      <iframe
-                        src={getVimeoEmbedUrl(parsedActiveMedia.url || "") || ""}
-                        style={{ width: "100%", height: "100%", border: 0 }}
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                        title={activeWork.title}
-                      />
-                    ) : parsedActiveMedia.type === "video" && parsedActiveMedia.src ? (
-                      <video
-                        src={parsedActiveMedia.src}
-                        poster={parsedActiveMedia.poster || activeWork.image}
-                        controls
-                        playsInline
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      />
-                    ) : workImages.length > 0 ? (
-                      <>
-                        <img
-                          src={workImages[activeImageIndex] || workImages[0]}
-                          alt={`${activeWork.title} ${activeImageIndex + 1}`}
-                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                        />
-
-                        {workImages.length > 1 && (
-                          <>
-                            {/* Prev Button */}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveImageIndex((prev) => (prev === 0 ? workImages.length - 1 : prev - 1));
-                              }}
-                              aria-label="이전 이미지"
-                              style={{
-                                position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
-                                width: "36px", height: "36px", borderRadius: "50%",
-                                backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
-                                border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 5,
-                              }}
-                            >
-                              ‹
-                            </button>
-
-                            {/* Next Button */}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveImageIndex((prev) => (prev === workImages.length - 1 ? 0 : prev + 1));
-                              }}
-                              aria-label="다음 이미지"
-                              style={{
-                                position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
-                                width: "36px", height: "36px", borderRadius: "50%",
-                                backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
-                                border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 5,
-                              }}
-                            >
-                              ›
-                            </button>
-
-                            {/* Counter Badge */}
-                            <span className="mono" style={{
-                              position: "absolute", bottom: "12px", right: "12px",
-                              background: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
-                              padding: "3px 8px", borderRadius: "10px", fontSize: "0.68rem",
-                              fontWeight: 700, backdropFilter: "blur(4px)", zIndex: 5,
-                            }}>
-                              {activeImageIndex + 1} / {workImages.length}
-                            </span>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <div style={{
-                        width: "100%", height: "100%", display: "flex", flexDirection: "column",
-                        alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "10px"
-                      }}>
-                        <span style={{
-                          fontWeight: 950, fontSize: "1.5rem", color: "var(--navy)", letterSpacing: "-0.04em",
-                          display: "flex", alignItems: "center", gap: "2px"
-                        }}>
-                          POPOK
-                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
-                        </span>
-                        <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                          준비중
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* Meta Info & Description */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                  <span className="mono" style={{ fontSize: "0.8rem", color: "var(--ink-muted)", fontWeight: 700 }}>
-                    {activeWork.year}
-                  </span>
-                  {activeWork.venue && (
-                    <span className="mono" style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>
-                      · {activeWork.venue}
-                    </span>
-                  )}
-                  {activeWork.role && (
-                    <span className="tag" style={{ background: "var(--accent)", color: "var(--navy)", border: "none", fontSize: "0.65rem", fontWeight: 800 }}>
-                      {activeWork.role}
-                    </span>
-                  )}
-                </div>
-
-                {activeWork.description && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                      PROJECT DESCRIPTION
-                    </span>
-                    <p style={{ fontSize: "0.85rem", color: "var(--navy)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-line" }}>
-                      {activeWork.description}
-                    </p>
-                  </div>
-                )}
-
-                {activeWork.credits && (
-                  <div style={{
-                    display: "flex", flexDirection: "column", gap: "6px", background: "#FAF8F5",
-                    border: "1px solid var(--border)", padding: "16px", borderRadius: "8px"
-                  }}>
-                    <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.05em" }}>
-                      CREDITS / CONTRIBUTORS
-                    </span>
-                    <p style={{ fontSize: "0.78rem", color: "var(--navy)", fontWeight: 700, fontFamily: "monospace", margin: 0, lineHeight: 1.45 }}>
-                      {activeWork.credits}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Button Footer */}
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: "16px", marginTop: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-                <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>
-                  ID: {activeWork.id}
-                </span>
-                {(activeWork.videoUrl || activeWork.externalLink) ? (
-                  <a
-                    href={activeWork.videoUrl || activeWork.externalLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      padding: "10px 20px", borderRadius: "20px", background: "var(--navy)",
-                      color: "#FFFFFF", fontSize: "0.8rem", fontWeight: 800, textDecoration: "none",
-                      display: "inline-flex", alignItems: "center", gap: "4px"
-                    }}
-                  >
-                    {activeWork.videoUrl ? "Watch Video ↗" : "외부 링크 ↗"}
-                  </a>
-                ) : (
-                  <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", fontFamily: "monospace" }}>
-                    No External Link
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
+      {/* ──────────────── 8. WORK DETAIL MODAL — shared with the company
+          page's work modal (components/works/WorkDetailModal.tsx) so both
+          stay visually identical instead of drifting apart again. ──────────────── */}
+      {activeWork && (
+        <WorkDetailModal
+          work={activeWork}
+          accentColor="var(--accent-dark)"
+          onClose={() => setActiveWork(null)}
+        />
       )}
 
       {/* 포퐄 보내기 CTA — was previously nested inside the
-          `{activeWork && parsedActiveMedia && (...)}` work-detail bottom
+          `{activeWork && (...)}` work-detail bottom
           sheet fragment above, which only renders after a viewer clicks
           into a specific work. That meant this section never mounted
           during normal browsing at all (true for every viewer state,

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import type { Company } from "@/types";
 import { normalizeWorkImages } from "@/lib/company-works";
-import WorkDrawer from "./WorkDrawer";
+import WorkDetailModal from "@/components/works/WorkDetailModal";
 
 interface CompanyPortfolioProps {
   company: Company;
@@ -208,9 +208,9 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
       )}
 
       {activeWork && (
-        <WorkDrawer
+        <WorkDetailModal
           work={activeWork}
-          company={company}
+          accentColor={company.brand_color || "#171411"}
           onClose={() => setActiveWork(null)}
         />
       )}

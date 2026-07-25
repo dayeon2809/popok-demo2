@@ -81,10 +81,32 @@ export default function MyPopokClient({
   initialArtist,
   profileType,
   initialOwnedCompanies = [],
+  adminMode = false,
+  saveEndpoint = "/api/artists/me",
+  saveMethod = "POST",
+  saveHeaders = {},
+  ownerStatusLabel,
 }: {
   initialArtist: Artist;
   profileType?: string | null;
   initialOwnedCompanies?: Company[];
+  /**
+   * True when this form is mounted from /admin/artists/[id]/edit instead of
+   * /my-popok. Reuses this exact component (same fields, same save-payload
+   * shape) rather than a separate admin form — only differences are: the
+   * company-management / 받은·보낸 포퐄 context switcher (self-serve-account
+   * concepts that don't apply to "an admin editing someone else's artist")
+   * is hidden in favor of an admin notice banner, and saves go to
+   * `saveEndpoint`/`saveMethod`/`saveHeaders` instead of the self-serve route.
+   */
+  adminMode?: boolean;
+  /** Save request target — defaults to the self-serve POST /api/artists/me. */
+  saveEndpoint?: string;
+  saveMethod?: "POST" | "PATCH";
+  /** Extra headers merged into the save request (e.g. the admin passcode). */
+  saveHeaders?: Record<string, string>;
+  /** Admin-mode-only: precomputed ownership status text, e.g. "연결된 사용자 있음" / "소유자 없는 프로필". */
+  ownerStatusLabel?: string;
 }) {
   const [artist, setArtist] = useState<Artist>(initialArtist);
   const [ownedCompanies, setOwnedCompanies] = useState<Company[]>(initialOwnedCompanies);
@@ -392,9 +414,9 @@ export default function MyPopokClient({
     try {
       const cleanedWorks = cleanWorksForPayload(works);
 
-      const res = await fetch("/api/artists/me", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch(saveEndpoint, {
+        method: saveMethod,
+        headers: { "Content-Type": "application/json", ...saveHeaders },
         body: JSON.stringify({
           name: name.trim(),
           name_en: nameEn.trim() || null,
@@ -572,7 +594,47 @@ export default function MyPopokClient({
     <div style={{ background: "#FFFFFF", minHeight: "100vh", padding: "40px 16px 120px" }}>
       <div className="my-popok-container" style={{ maxWidth: "1080px", margin: "0 auto" }}>
         
+        {/* ADMIN OVERRIDE NOTICE — replaces the self-serve account switcher
+            below (company management / 받은·보낸 포퐄 don't apply when an
+            admin is editing someone else's artist profile). */}
+        {adminMode && (
+          <div
+            style={{
+              marginBottom: "24px",
+              background: "#FFFBEB",
+              borderRadius: "16px",
+              border: "1.5px solid #FCD34D",
+              padding: "14px 24px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: "1.1rem" }} aria-hidden="true">🛠️</span>
+            <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "#92400E" }}>
+              관리자 권한으로 아티스트 프로필을 편집하고 있습니다.
+            </span>
+            {ownerStatusLabel && (
+              <span
+                style={{
+                  fontSize: "0.72rem",
+                  fontWeight: 800,
+                  color: "#92400E",
+                  background: "rgba(255,255,255,0.6)",
+                  border: "1px solid #FCD34D",
+                  borderRadius: "10px",
+                  padding: "3px 10px",
+                }}
+              >
+                {ownerStatusLabel}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* ACCOUNT / ORGANIZATION CONTEXT SWITCHER BAR */}
+        {!adminMode && (
         <div
           style={{
             marginBottom: "24px",
@@ -708,6 +770,7 @@ export default function MyPopokClient({
             + 단체 연결 신청
           </button>
         </div>
+        )}
 
         {/* CONDITIONAL RENDER: ORGANIZATION CMS, PORTFOLIO REQUESTS, OR PERSONAL ARTIST CMS */}
         {selectedCompany ? (
@@ -1143,8 +1206,8 @@ export default function MyPopokClient({
             {/* Card 3: 작품 목록 관리 (jsonb) */}
             <WorksCardEditor
               works={works}
-              canAdd={isPremium || works.length < 3}
-              countLabel={isPremium ? `${works.length}개` : `${works.length} / 3`}
+              canAdd
+              countLabel={`${works.length}개`}
               uploadingSlot={uploadingSlot}
               onAdd={handleAddWork}
               onRemove={handleRemoveWork}
@@ -1154,13 +1217,35 @@ export default function MyPopokClient({
               onReorder={handleReorderWorks}
             />
 
-            {!isPremium && works.length >= 3 && (
-              <div style={{ padding: "20px", background: "var(--navy)", borderRadius: "14px", color: "#FFFFFF", textAlign: "center" }}>
-                <strong>🔒 Premium</strong>
-                <p style={{ fontSize: "0.82rem", color: "#CBD5E1", margin: "8px 0 14px" }}>대표 작품을 무제한 등록하고 AI 자동 업데이트를 받아보세요.</p>
-                <Link href="/premium" onClick={() => analytics.premiumClick("dashboard")} className="btn-lime" style={{ display: "inline-block", textDecoration: "none", padding: "9px 18px", borderRadius: "8px", fontSize: "0.8rem", fontWeight: 900 }}>Premium 알아보기</Link>
-              </div>
-            )}
+            {/* Premium은 아직 오픈 전 — 초기 운영 단계라 작품 개수 제한 없이
+                누구나 모든 기능을 쓸 수 있다. 이 안내 카드는 그 상태를
+                설명하는 용도로만 항상 노출한다(더 이상 개수 제한 도달 시에만
+                뜨는 업셀 배너가 아님). */}
+            <div style={{ padding: "20px", background: "var(--navy)", borderRadius: "14px", color: "#FFFFFF", textAlign: "center" }}>
+              <strong>✨ POPOK Premium (Coming Soon)</strong>
+              <p style={{ fontSize: "0.82rem", color: "#CBD5E1", margin: "8px 0 14px", lineHeight: 1.6 }}>
+                현재는 오픈 기념으로 모든 기능을 무료로 이용하실 수 있습니다.<br />
+                앞으로 AI 활동 관리, 자동 포트폴리오 업데이트, 공연 홍보 등 다양한 Premium 기능이 추가될 예정입니다.<br />
+                감사합니다 💚
+              </p>
+              <button
+                type="button"
+                disabled
+                style={{
+                  display: "inline-block",
+                  padding: "9px 18px",
+                  borderRadius: "8px",
+                  fontSize: "0.8rem",
+                  fontWeight: 900,
+                  background: "rgba(255,255,255,0.15)",
+                  color: "rgba(255,255,255,0.65)",
+                  border: "none",
+                  cursor: "not-allowed",
+                }}
+              >
+                현재 모든 기능 무료 이용 중
+              </button>
+            </div>
             </div>
             {/* Card 4: 활동 타임라인 (공개 페이지의 ACTIVITY TIMELINE — current_activity + affiliations) */}
             <div hidden={activeEditorSection !== "activity"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>

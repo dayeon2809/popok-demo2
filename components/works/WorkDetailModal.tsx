@@ -2,17 +2,19 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Company } from "@/types";
-import { normalizeWorkImages, normalizeWorkCredits } from "@/lib/company-works";
+import { normalizeWorkImages, normalizeWorkCredits } from "@/lib/works";
 import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
-interface WorkDrawerProps {
+interface WorkDetailModalProps {
   work: any;
-  company: Company;
+  /** Brand/accent color for the genre label, active thumbnail border, and
+   *  reference links — a company's brand_color, or a fixed accent for
+   *  contexts (like the individual artist page) with no per-entity color. */
+  accentColor?: string;
   onClose: () => void;
 }
 
-const WorkImagePlaceholder = ({ company }: { company: any }) => (
+const WorkImagePlaceholder = ({ accentColor }: { accentColor: string }) => (
   <div
     style={{
       width: "100%",
@@ -30,7 +32,7 @@ const WorkImagePlaceholder = ({ company }: { company: any }) => (
   >
     <span style={{ fontWeight: 950, fontSize: "1.1rem", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
       POPOK
-      <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: company.brand_color || "#171411" }} />
+      <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: accentColor }} />
     </span>
     <span style={{ fontSize: "0.62rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
       No Image Archive
@@ -38,13 +40,19 @@ const WorkImagePlaceholder = ({ company }: { company: any }) => (
   </div>
 );
 
-export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) {
-  const brandAccent = company.brand_color || "#171411";
+// Shared work-detail modal — used by both the company page
+// (components/company/CompanyPortfolio.tsx) and the individual artist page
+// (app/artists/[id]/page.tsx) so the two never visually drift apart again.
+// Single source of truth for the backdrop/panel chrome, image carousel,
+// description, performance info, video, credits, and references sections;
+// every section is purely data-driven (rendered only when the relevant
+// field exists on `work`), so the same component works for both entities'
+// slightly different work shapes without any per-context branching.
+export default function WorkDetailModal({ work, accentColor = "#171411", onClose }: WorkDetailModalProps) {
   useMobileBodyScrollLock();
 
-
-  // Collect and deduplicate up to 4 images from work — same contract the CMS
-  // and admin editors save to, so what's saved is exactly what's shown here.
+  // Collect and deduplicate up to 4 images — same contract the CMS and
+  // admin editors save to, so what's saved is exactly what's shown here.
   const images = useMemo(() => normalizeWorkImages(work), [work]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -89,16 +97,19 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
     setTouchStartX(null);
   };
 
-  // Group credits by role for structured layout — same contract the CMS and
-  // admin editors save to.
+  // Group credits by role for structured layout — falls back to a single
+  // "안무/역할" entry from `work.role` when no structured credits exist, so
+  // an individual artist's simple role string still renders sensibly here.
   const groupedCredits = useMemo(
     () => normalizeWorkCredits(work).map((c): [string, string[]] => [c.role, c.names]),
     [work]
   );
 
-  // Video renderer
+  // Video renderer — checks both DB-column (video_url) and camelCase
+  // (videoUrl) field names since the artist page's WorkItem shape uses the
+  // latter.
   const renderVideo = () => {
-    const videoUrl = work.video_url || work.video || (work.media && work.media.url) || "";
+    const videoUrl = work.video_url || work.videoUrl || work.video || (work.media && work.media.url) || "";
     if (!videoUrl) return null;
 
     if (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be")) {
@@ -144,10 +155,14 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
 
     return (
       <div style={{ padding: "16px", background: "var(--bg-warm)", fontSize: "0.8rem", textAlign: "center" }}>
-        재생 주소: <a href={videoUrl} target="_blank" rel="noreferrer" style={{ color: brandAccent }}>{videoUrl}</a>
+        재생 주소: <a href={videoUrl} target="_blank" rel="noreferrer" style={{ color: accentColor }}>{videoUrl}</a>
       </div>
     );
   };
+
+  const hasVideo = Boolean(work.video_url || work.videoUrl || work.video || (work.media && work.media.url));
+  const referenceLink = work.externalLink || work.url || work.link || "";
+  const hasReferences = Boolean(work.links || referenceLink);
 
   return (
     <motion.div
@@ -183,6 +198,8 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           display: flex;
           flex-direction: column;
           overflow-y: auto;
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
           position: relative;
         }
         .drag-handle {
@@ -254,7 +271,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
               style={{
                 fontSize: "0.68rem",
                 fontWeight: 800,
-                color: brandAccent,
+                color: accentColor,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 display: "block",
@@ -301,7 +318,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           {/* 1. Image Carousel (Max 4 images) */}
           <div style={{ marginBottom: "28px" }}>
             {images.length === 0 ? (
-              <WorkImagePlaceholder company={company} />
+              <WorkImagePlaceholder accentColor={accentColor} />
             ) : (
               <div>
                 <div
@@ -450,7 +467,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
                         type="button"
                         onClick={() => setCurrentImageIndex(idx)}
                         style={{
-                          border: idx === currentImageIndex ? `2.5px solid ${brandAccent}` : "1px solid var(--border)",
+                          border: idx === currentImageIndex ? `2.5px solid ${accentColor}` : "1px solid var(--border)",
                           borderRadius: "4px",
                           padding: 0,
                           backgroundColor: "#171411",
@@ -487,7 +504,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           </div>
 
           {/* 3. Performance Information */}
-          {(work.venue || work.festival || work.year) && (
+          {(work.venue || work.festival || work.year || work.role) && (
             <div style={{ marginBottom: "28px" }}>
               <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
                 Performance Info
@@ -506,12 +523,13 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
                 {work.year && <div><strong style={{ fontWeight: 800 }}>일시/연도:</strong> {work.year}</div>}
                 {work.venue && <div><strong style={{ fontWeight: 800 }}>장소:</strong> {work.venue}</div>}
                 {work.festival && <div><strong style={{ fontWeight: 800 }}>축제/행사:</strong> {work.festival}</div>}
+                {work.role && <div><strong style={{ fontWeight: 800 }}>참여/역할:</strong> {work.role}</div>}
               </div>
             </div>
           )}
 
           {/* 4. Video Archive (Displayed below images & description if exists) */}
-          {(work.video_url || work.video || (work.media && work.media.url)) && (
+          {hasVideo && (
             <div style={{ marginBottom: "28px" }}>
               <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
                 Video Archive
@@ -620,7 +638,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
           </div>
 
           {/* References & Links */}
-          {(work.links || work.url || work.link) && (
+          {hasReferences && (
             <div>
               <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
                 References
@@ -635,7 +653,7 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
                       rel="noopener noreferrer"
                       style={{
                         fontSize: "0.82rem",
-                        color: brandAccent,
+                        color: accentColor,
                         fontWeight: 700,
                         textDecoration: "none",
                       }}
@@ -645,12 +663,12 @@ export default function WorkDrawer({ work, company, onClose }: WorkDrawerProps) 
                   ))
                 ) : (
                   <a
-                    href={work.url || work.link || work.video_url}
+                    href={referenceLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
                       fontSize: "0.82rem",
-                      color: brandAccent,
+                      color: accentColor,
                       fontWeight: 700,
                       textDecoration: "none",
                     }}

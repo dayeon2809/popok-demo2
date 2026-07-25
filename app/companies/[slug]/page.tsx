@@ -7,6 +7,7 @@ import {
 } from "@/lib/companies";
 import { getUpcomingPerformancesByCompanyId } from "@/lib/performances";
 import { getPortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
+import { getCompanyStories } from "@/lib/instagram";
 import CompanyClientView from "./CompanyClientView";
 
 export const dynamic = "force-dynamic";
@@ -30,12 +31,14 @@ export default async function CompanyDetailPage({
   }
 
   // Fetch connected artists, related companies, upcoming performances,
-  // and viewer's state in parallel
-  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState] = await Promise.all([
+  // viewer's state, and any @popok.official Instagram posts tagged with this
+  // company's dedicated tag (see lib/instagram.ts) in parallel
+  const [fetchedArtists, relatedCompanies, upcomingPerformances, sendPortfolioViewerState, instagramStories] = await Promise.all([
     getConnectedArtistsByCompanyId(company.id),
     getRelatedCompanies(company.id),
     getUpcomingPerformancesByCompanyId(company.id),
     getPortfolioRequestViewerState({ type: "company", id: company.id }),
+    getCompanyStories(company.name),
   ]);
 
   // Derive representative artist: admin-designated is_primary relation is the single source of truth
@@ -84,6 +87,7 @@ export default async function CompanyDetailPage({
       upcomingPerformances={upcomingPerformances}
       sendPortfolioViewerState={sendPortfolioViewerState}
       representativeArtist={representativeArtist}
+      instagramStories={instagramStories}
     />
   );
 }

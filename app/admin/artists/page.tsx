@@ -516,6 +516,9 @@ export default function AdminArtistsPage() {
                       <td style={{ padding: "12px 14px", textAlign: "right", position: "relative" }}>
                         <div style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
                           <button onClick={() => handleStartEdit(a)} style={actionBtnStyle}>수정</button>
+                          <Link href={`/admin/artists/${a.id}/edit`} style={{ ...actionBtnStyle, textDecoration: "none", display: "inline-block" }}>
+                            프로필 수정
+                          </Link>
                           {a.slug ? (
                             <Link href={`/artists/${a.slug}`} target="_blank" style={{ ...actionBtnStyle, textDecoration: "none", display: "inline-block" }}>
                               공개 프로필
