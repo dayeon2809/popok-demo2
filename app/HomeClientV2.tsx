@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Artist, Performance, Company } from "@/types";
 import type { InstagramStory } from "@/lib/instagram";
@@ -56,13 +57,23 @@ export default function HomeClientV2({
     const publishedArtists = initialArtists.filter(
       (artist) => showDraft || artist.status === "published" || !artist.status
     );
-    const real = buildRealFeedItems(publishedArtists, initialCompanies);
+    // Show only artists on the artist explore page
+    const real = buildRealFeedItems(publishedArtists, []);
     return padWithPlaceholders(real, FEED_DENSITY_TARGET);
-  }, [initialArtists, initialCompanies, showDraft]);
+  }, [initialArtists, showDraft]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
-      <div style={{ padding: "28px 16px 20px", textAlign: "center" }}>
+      <div style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {/* 아티스트 / 단체 토글 버튼 */}
+        <div className="discovery-toggle-container">
+          <Link href="/" className="discovery-toggle-btn active">
+            아티스트
+          </Link>
+          <Link href="/companies" className="discovery-toggle-btn">
+            단체
+          </Link>
+        </div>
         <AiDiscoveryPrototype variant="bar" />
       </div>
 

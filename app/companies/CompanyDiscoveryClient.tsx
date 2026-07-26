@@ -1,68 +1,78 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import CompanyCard from "@/components/CompanyCard";
-import DiscoveryCard from "@/components/discovery/DiscoveryCard";
-import DiscoveryGrid from "@/components/discovery/DiscoveryGrid";
-import DiscoveryLayout from "@/components/discovery/DiscoveryLayout";
-import KeywordSelector, { type KeywordGroup } from "@/components/discovery/KeywordSelector";
-import { EmptyState } from "@/components/ui/States";
-import { COMPANY_RECOMMENDATION_QUESTIONS, getFallbackCompanies, recommendCompanies } from "@/lib/companyRecommendation";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Company } from "@/types";
+import { buildRealFeedItems, padWithPlaceholders } from "@/lib/homeFeedPrototype";
+import HomeVisualFeed from "@/components/home/HomeVisualFeed";
+import CompanyDiscoveryPrototype from "@/components/company/CompanyDiscoveryPrototype";
+import FAQSection from "@/components/FAQSection";
 
-const COMPANY_KEYWORDS: readonly KeywordGroup[] = COMPANY_RECOMMENDATION_QUESTIONS.map((question) => ({
-  id: question.id,
-  label: question.id === "field" ? "분야" : question.id === "mood" ? "분위기" : question.id === "format" ? "작업 방식" : "주제",
-  options: question.options,
-}));
+const FEED_DENSITY_TARGET = 48;
 
-export default function CompanyDiscoveryClient({ companies }: { companies: Company[] }) {
-  const [draftIds, setDraftIds] = useState<string[]>([]);
-  const [appliedIds, setAppliedIds] = useState<string[]>([]);
-  const recommendations = useMemo(() => appliedIds.length ? recommendCompanies(companies, appliedIds, 3) : [],
-    [appliedIds, companies]);
-  const recommendedCompanies = recommendations.length ? recommendations.map((result) => result.company)
-    : appliedIds.length ? getFallbackCompanies(companies, 3) : [];
-  const toggle = (id: string) => setDraftIds((current) =>
-    current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+interface CompanyDiscoveryClientProps {
+  companies: Company[];
+  isLoggedIn: boolean;
+  myArtistSlug: string | null;
+}
+
+export default function CompanyDiscoveryClient({
+  companies,
+  isLoggedIn,
+}: CompanyDiscoveryClientProps) {
+  const router = useRouter();
+  const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
+
+  const handleUploadClick = () => {
+    const uploadPath = "/my-popok?upload=1";
+    router.push(isLoggedIn ? uploadPath : `/auth?redirect=${encodeURIComponent(uploadPath)}`);
+  };
+
+  const feedItems = useMemo(() => {
+    const publishedCompanies = companies.filter(
+      (c) => showDraft || c.status === "published" || !c.status
+    );
+    // Show only companies on the group explore page
+    const real = buildRealFeedItems([], publishedCompanies);
+    return padWithPlaceholders(real, FEED_DENSITY_TARGET);
+  }, [companies, showDraft]);
 
   return (
-    <DiscoveryLayout active="companies" eyebrow="POPOK COMPANY DISCOVERY" title="함께하고 싶은 단체를 발견하세요"
-      description="관심 분야와 작업 성향을 고르면 기존 POPOK 추천 로직이 공개 단체 정보에서 어울리는 팀을 찾아드려요.">
-      <KeywordSelector groups={COMPANY_KEYWORDS} selectedIds={draftIds} onToggle={toggle}
-        onExplore={() => setAppliedIds(draftIds)} actionLabel="나에게 맞는 단체 찾기" />
-
-      {appliedIds.length > 0 && <section className="discovery-results discovery-recommendations" aria-labelledby="company-recommendations-title">
-        <div className="discovery-section-heading">
-          <div><span className="mono">POPOK MATCH</span><h2 id="company-recommendations-title">
-            {recommendations.length ? "나와 잘맞는 추천 단체" : "POPOK 추천 단체"}</h2></div>
-          <button type="button" className="discovery-reset" onClick={() => { setDraftIds([]); setAppliedIds([]); }}>다시 선택하기</button>
+    <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
+      <div style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        {/* 아티스트 / 단체 토글 버튼 */}
+        <div className="discovery-toggle-container">
+          <Link href="/" className="discovery-toggle-btn">
+            아티스트
+          </Link>
+          <Link href="/companies" className="discovery-toggle-btn active">
+            단체
+          </Link>
         </div>
-        {!recommendations.length && <p className="discovery-fallback">정확히 일치하는 정보가 부족해 완성도 높은 공개 단체를 보여드려요.</p>}
-        <DiscoveryGrid ariaLabel="추천 단체">
-          {recommendedCompanies.map((company, index) => {
-            const recommendation = recommendations[index];
-            return <DiscoveryCard key={company.id}>
-              <div className="discovery-match-meta">
-                <strong>추천 {index + 1}위</strong>
-                {recommendation && <span>적합도 {recommendation.percentage}%</span>}
-                {recommendation?.reasons[0] && <p>{recommendation.reasons[0]}</p>}
-              </div>
-              <CompanyCard company={company} />
-            </DiscoveryCard>;
-          })}
-        </DiscoveryGrid>
-      </section>}
+        <CompanyDiscoveryPrototype companies={companies} />
+      </div>
 
-      <section className="discovery-results" aria-labelledby="all-companies-title">
-        <div className="discovery-section-heading">
-          <div><span className="mono">ALL COMPANIES</span><h2 id="all-companies-title">전체 단체</h2></div>
-          <p>{companies.length}개 단체</p>
-        </div>
-        {companies.length ? <DiscoveryGrid ariaLabel="전체 단체">
-          {companies.map((company) => <DiscoveryCard key={company.id}><CompanyCard company={company} /></DiscoveryCard>)}
-        </DiscoveryGrid> : <EmptyState message="공개된 단체가 아직 없습니다." />}
-      </section>
-    </DiscoveryLayout>
+      <HomeVisualFeed items={feedItems} />
+
+      {/* "작업 올리기" — floating button */}
+      <button
+        type="button"
+        onClick={handleUploadClick}
+        className="btn-lime"
+        style={{
+          position: "fixed", right: "20px", bottom: "20px", zIndex: 50,
+          padding: "14px 22px", borderRadius: "999px", border: "none",
+          fontSize: "0.88rem", fontWeight: 850, cursor: "pointer",
+          boxShadow: "0 8px 24px rgba(23,20,17,0.2)",
+        }}
+      >
+        📸 작업 올리기
+      </button>
+
+      <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
+        <FAQSection />
+      </div>
+    </div>
   );
 }

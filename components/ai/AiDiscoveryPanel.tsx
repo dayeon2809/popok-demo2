@@ -13,6 +13,40 @@ const MODE_TITLE: Record<DiscoveryMode, string> = {
   collaborator: "협업할 만한 사람 찾기",
 };
 
+interface KeywordOption {
+  id: string;
+  label: string;
+  terms: string[];
+}
+interface KeywordGroup {
+  id: string;
+  label: string;
+  options: KeywordOption[];
+}
+const ARTIST_KEYWORDS: KeywordGroup[] = [
+  { id: "mood", label: "분위기", options: [
+    { id: "experimental", label: "실험적", terms: ["실험", "experimental", "다원", "융복합"] },
+    { id: "minimal", label: "미니멀", terms: ["미니멀", "minimal", "절제", "고요"] },
+    { id: "powerful", label: "강렬한", terms: ["강렬", "에너지", "역동", "powerful"] },
+  ]},
+  { id: "method", label: "작업 방식", options: [
+    { id: "audience", label: "관객 참여", terms: ["관객 참여", "관객참여", "인터랙티브", "참여형"] },
+    { id: "body-centered", label: "신체 중심", terms: ["몸", "신체", "움직임", "안무"] },
+    { id: "technology", label: "기술 결합", terms: ["기술", "디지털", "미디어", "technology", "ai"] },
+  ]},
+  { id: "genre", label: "장르", options: [
+    { id: "contemporary", label: "현대무용", terms: ["현대무용", "현대 무용", "contemporary"] },
+    { id: "ballet", label: "발레", terms: ["발레", "ballet"] },
+    { id: "performance", label: "퍼포먼스", terms: ["퍼포먼스", "performance", "다원예술"] },
+  ]},
+  { id: "subject", label: "주제", options: [
+    { id: "body", label: "몸", terms: ["몸", "신체"] },
+    { id: "ai", label: "AI", terms: ["ai", "인공지능", "기술"] },
+    { id: "memory", label: "기억", terms: ["기억", "회상", "역사"] },
+    { id: "society", label: "사회", terms: ["사회", "공동체", "정치", "연대"] },
+  ]},
+];
+
 interface FetchState {
   loading: boolean;
   error: string | null;
@@ -145,6 +179,37 @@ export default function AiDiscoveryPanel({
   const [activeContextId, setActiveContextId] = useState<string | null>(contextArtistId);
   const [state, setState] = useState<FetchState>({ loading: false, error: null, response: null });
   const openedTracked = useRef(false);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+
+  // Initialize selected keywords if defaultQuery is loaded
+  useEffect(() => {
+    if (defaultQuery) {
+      const allLabels = ARTIST_KEYWORDS.flatMap((g) => g.options.map((o) => o.label));
+      const matched = allLabels.filter((label) => defaultQuery.includes(label));
+      setSelectedKeywords(matched);
+    }
+  }, [defaultQuery]);
+
+  const handleKeywordToggle = (label: string) => {
+    setSelectedKeywords((prev) => {
+      const exists = prev.includes(label);
+      let updated: string[];
+      if (exists) {
+        updated = prev.filter((k) => k !== label);
+      } else {
+        updated = [...prev, label];
+      }
+      setQuery(updated.join(", "));
+      return updated;
+    });
+  };
+
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    const allLabels = ARTIST_KEYWORDS.flatMap((g) => g.options.map((o) => o.label));
+    const matched = allLabels.filter((label) => val.includes(label));
+    setSelectedKeywords(matched);
+  };
 
   useEffect(() => {
     if (!openedTracked.current) {
@@ -234,7 +299,7 @@ export default function AiDiscoveryPanel({
         >
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             placeholder={placeholder}
             style={{
               flex: 1, border: "1.5px solid var(--border-dark)", borderRadius: "999px",
@@ -322,23 +387,35 @@ export default function AiDiscoveryPanel({
           )}
 
           {!state.loading && !state.error && !state.response && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", paddingTop: "4px" }}>
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => {
-                    setQuery(s);
-                    runSearch(s, activeContextId, activeMode);
-                  }}
-                  style={{
-                    fontSize: "0.78rem", fontWeight: 700, color: "var(--navy)", background: "#FAF9F5",
-                    border: "1px solid var(--border)", borderRadius: "999px", padding: "6px 14px", cursor: "pointer",
-                  }}
-                >
-                  {s}
-                </button>
-              ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px", paddingTop: "4px" }}>
+              <span style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                키워드로 탐색하기
+              </span>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {ARTIST_KEYWORDS.flatMap((group) => group.options).map((opt) => {
+                  const isSelected = selectedKeywords.includes(opt.label);
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => handleKeywordToggle(opt.label)}
+                      style={{
+                        fontSize: "0.78rem",
+                        fontWeight: 700,
+                        color: "var(--navy)",
+                        background: isSelected ? "var(--accent)" : "#FAF9F5",
+                        border: isSelected ? "1.5px solid var(--accent-dark)" : "1px solid var(--border)",
+                        borderRadius: "999px",
+                        padding: "6px 14px",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

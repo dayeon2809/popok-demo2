@@ -600,53 +600,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           )}
         </section>
 
-        {/* ──────────────── CONNECT — compact CTA right after the work
-            gallery, reusing the same ConnectCta gate/modal logic as the
-            hero button above. Replaces the old large bottom
-            "내 포퐄 보내기" section (SendPortfolioSection is still used
-            as-is on the company page, just not here). ──────────────── */}
-        <section style={SECTION_STYLE}>
-          <SectionHeader eyebrow="Connect" />
-          <p style={{ fontSize: "0.95rem", color: "var(--navy)", fontWeight: 700, margin: "0 0 4px" }}>
-            이 아티스트와 함께 작업하고 싶나요?
-          </p>
-          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "0 0 20px" }}>
-            내 포퐄과 간단한 제안을 보내보세요.
-          </p>
-          <ConnectCta
-            target={portfolioTarget}
-            viewerState={portfolioViewerState}
-            currentPath={pathname}
-            onToast={triggerToast}
-          />
-        </section>
-
-        {/* ──────────────── AI ARTIST DISCOVERY — real search against
-            /api/ai/discover-artists, scoped to this artist as context.
-            See components/ai/AiDiscoveryPanel.tsx. ──────────────── */}
-        <section style={SECTION_STYLE}>
-          <SectionHeader eyebrow="AI Discovery" description="이 아티스트를 기준으로 비슷한 작업이나 협업 대상을 찾아보세요." />
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-            <AiDiscoveryPrototype
-              variant="button"
-              label="이 아티스트와 비슷한 작업 찾기"
-              mode="similar"
-              contextArtistId={artist.recordId || artist.id}
-              contextArtistName={artist.name}
-              defaultQuery="이 아티스트와 비슷한 작업"
-              autoSearch
-            />
-            <AiDiscoveryPrototype variant="button" label="이런 스타일의 아티스트 찾기" mode="discover" />
-            <AiDiscoveryPrototype
-              variant="button"
-              label="협업할 만한 사람 찾기"
-              mode="collaborator"
-              contextArtistId={artist.recordId || artist.id}
-              contextArtistName={artist.name}
-              defaultQuery={`${artist.name}와(과) 협업할 아티스트`}
-            />
-          </div>
-        </section>
+        {/* Removed redundant Connect and moved AI Discovery section below */}
 
         {/* ──────────────── ABOUT — plain readable layout, no card ──────────────── */}
         <section style={SECTION_STYLE}>
@@ -802,6 +756,33 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               현재 연결된 단체가 없습니다.
             </p>
           )}
+        </section>
+
+        {/* ──────────────── AI ARTIST DISCOVERY — real search against
+            /api/ai/discover-artists, scoped to this artist as context.
+            See components/ai/AiDiscoveryPanel.tsx. ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <SectionHeader eyebrow="AI Discovery" description="이 아티스트를 기준으로 비슷한 작업이나 협업 대상을 찾아보세요." />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <AiDiscoveryPrototype
+              variant="button"
+              label="이 아티스트와 비슷한 작업 찾기"
+              mode="similar"
+              contextArtistId={artist.recordId || artist.id}
+              contextArtistName={artist.name}
+              defaultQuery="이 아티스트와 비슷한 작업"
+              autoSearch
+            />
+            <AiDiscoveryPrototype variant="button" label="이런 스타일의 아티스트 찾기" mode="discover" />
+            <AiDiscoveryPrototype
+              variant="button"
+              label="협업할 만한 사람 찾기"
+              mode="collaborator"
+              contextArtistId={artist.recordId || artist.id}
+              contextArtistName={artist.name}
+              defaultQuery={`${artist.name}와(과) 협업할 아티스트`}
+            />
+          </div>
         </section>
 
         {/* ──────────────── UPCOMING PERFORMANCE — reuses the company page's component, hidden entirely when empty ──────────────── */}

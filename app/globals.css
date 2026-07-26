@@ -831,3 +831,36 @@ input:focus, select:focus, textarea:focus {
 @media (hover: hover) and (pointer: fine) {
   .artist-work-gallery-tile:hover .artist-work-gallery-overlay { opacity: 1; }
 }
+
+/* ── Discovery Switch Toggle ── */
+.discovery-toggle-container {
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--bg-warm);
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.discovery-toggle-btn {
+  padding: 8px 24px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 850;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+.discovery-toggle-btn.active {
+  background-color: var(--navy);
+  color: #FFFFFF;
+}
+.discovery-toggle-btn:not(.active) {
+  color: var(--ink-muted);
+}
+.discovery-toggle-btn:not(.active):hover {
+  color: var(--navy);
+  background-color: rgba(23, 20, 17, 0.06);
+}

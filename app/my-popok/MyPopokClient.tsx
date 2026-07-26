@@ -34,6 +34,10 @@ import {
 import { normalizeWorkImages, normalizeWorks, cleanWorksForPayload } from "@/lib/works";
 import type { Company } from "@/types";
 import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
+import ProfileEditorNav, { type ProfileEditorSection } from "@/components/profile/ProfileEditorNav";
+import WorksCardEditor from "@/components/profile/WorksCardEditor";
+import { ArrayField, StringArrayField } from "@/components/admin/ArrayField";
+
 
 interface Work {
   id: string;
@@ -109,6 +113,7 @@ export default function MyPopokClient({
   const [ownedCompanies, setOwnedCompanies] = useState<Company[]>(initialOwnedCompanies);
   const [selectedContext, setSelectedContext] = useState<string>("artist"); // "artist" | "received-requests" | "sent-requests" | company.id
   const [claimModalOpen, setClaimModalOpen] = useState(false);
+  const [activeEditorSection, setActiveEditorSection] = useState<ProfileEditorSection>("basic");
   const isPremium = false; // Stripe payment connection toggle point
 
   // Deep-link support: /my-popok?tab=received-portfolios (used by the
@@ -351,6 +356,33 @@ export default function MyPopokClient({
   const handleRemoveRepresentativeImage = (slotIdx: number) => {
     const updated = profileImageUrls.filter((_, idx) => idx !== slotIdx);
     setProfileImageUrls(updated);
+  };
+
+  const handleCompanyLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, companyId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const url = await uploadImageFile(file, `company_logo_${companyId}`);
+    if (url) {
+      try {
+        const res = await fetch(`/api/companies/${companyId}/update`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profile_image_url: url }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setOwnedCompanies((prev) =>
+            prev.map((c) => (c.id === companyId ? { ...c, profile_image_url: url } : c))
+          );
+          alert("단체 로고가 성공적으로 업데이트되었습니다.");
+        } else {
+          alert(data.error || "단체 로고 저장에 실패했습니다.");
+        }
+      } catch {
+        alert("서버 통신 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   // Work Image Upload handler (up to 4 images per work)
@@ -859,128 +891,171 @@ export default function MyPopokClient({
           <SentPortfolioRequests onToast={(msg) => alert(msg)} />
         ) : (
           <>
-        {/* ──────────────── DASHBOARD HEADER — V2 (feature/home-feed-v2):
-            "나의 작업 공간", not "OO님의 POPOK" — friendly, and작업 업로드가
-            첫 행동이 되도록 프로필 완성도/Quick Actions 더미를 여기서 뺐다
-            (완성도는 "프로필 다듬기" 헤딩 옆으로, 나머지 액션은 ⋯ 메뉴로). ──────────────── */}
-        <section style={{ marginBottom: "24px", position: "relative" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", flexWrap: "wrap" }}>
-            <div style={{ minWidth: 0 }}>
+        {/* PREMIUM CMS DASHBOARD HERO PANEL */}
+        <section style={{
+          background: "#FFFFFF",
+          border: "1.5px solid var(--border)",
+          borderRadius: "24px",
+          padding: "32px",
+          boxShadow: "0 12px 36px rgba(23, 20, 17, 0.04)",
+          marginBottom: "32px",
+          display: "grid",
+          gridTemplateColumns: "1.4fr 0.8fr",
+          gap: "32px",
+          alignItems: "center"
+        }} className="dashboard-hero">
+          
+          {/* Left panel: Info & Link & Progress */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
               <span style={{
-                display: "inline-flex", padding: "4px 11px", borderRadius: "999px",
-                fontSize: "0.7rem", fontWeight: 900, marginBottom: "10px",
-                background: statusConfig.color, color: statusConfig.textColor, border: `1px solid ${statusConfig.borderColor}`,
+                display: "inline-flex",
+                padding: "5px 12px",
+                borderRadius: "999px",
+                fontSize: "0.78rem",
+                fontWeight: 900,
+                background: statusConfig.color,
+                color: statusConfig.textColor,
+                border: `1px solid ${statusConfig.borderColor}`
               }}>
                 {statusConfig.label}
               </span>
-              <h1 className="display" style={{ fontSize: "clamp(1.6rem, 4.5vw, 2.2rem)", color: "var(--navy)", fontWeight: 950, letterSpacing: "-0.03em", margin: "0 0 4px" }}>
-                나의 작업 공간
-              </h1>
-              <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", margin: 0 }}>
-                {name || "아티스트"}님의 작품과 활동을 한곳에 기록해보세요.
-              </p>
+              {profileType && PROFILE_TYPE_LABEL[profileType] && (
+                <span style={tagStyle}>{PROFILE_TYPE_LABEL[profileType]}</span>
+              )}
+              {genre && <span style={tagStyle}>{genre}</span>}
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-              <Link
-                href={`/artists/${artist.slug}`}
-                target="_blank"
-                className="btn-lime"
-                style={{
-                  textDecoration: "none", padding: "10px 18px", borderRadius: "999px",
-                  fontSize: "0.85rem", fontWeight: 800, whiteSpace: "nowrap",
-                }}
-              >
-                내 공개 페이지 보기
-              </Link>
+            <h1 className="display" style={{ fontSize: "clamp(1.8rem, 5vw, 2.6rem)", color: "var(--navy)", fontWeight: 950, letterSpacing: "-0.04em", margin: 0 }}>
+              {name || "아티스트"}님의 POPOK
+            </h1>
 
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                style={{
-                  padding: "10px 16px", borderRadius: "999px", border: "1.5px solid var(--border-dark)",
-                  background: "#FFFFFF", color: "var(--navy)", fontSize: "0.85rem", fontWeight: 800,
-                  cursor: "pointer", whiteSpace: "nowrap",
-                }}
-              >
-                {copied ? "✓ 복사됨" : "🔗 링크 복사"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShareModalOpen(true)}
-                style={{
-                  padding: "10px 16px", borderRadius: "999px", border: "1.5px solid var(--border-dark)",
-                  background: "#FFFFFF", color: "var(--navy)", fontSize: "0.85rem", fontWeight: 800,
-                  cursor: "pointer", whiteSpace: "nowrap",
-                }}
-              >
-                📤 디지털 명함 QR 다운로드
-              </button>
+            {/* Profile Completion Indicator */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: "0.84rem", fontWeight: 800, color: "var(--navy)" }}>프로필 완성도 (Profile Completion)</span>
+                <span style={{ fontSize: "1.1rem", fontWeight: 950, color: "var(--accent-dark)" }}>{completionPercentage}%</span>
+              </div>
+              <div style={{ width: "100%", height: "8px", background: "var(--border)", borderRadius: "99px", overflow: "hidden" }}>
+                <div style={{
+                  width: `${completionPercentage}%`,
+                  height: "100%",
+                  background: "var(--accent-dark)",
+                  borderRadius: "99px",
+                  transition: "width 0.6s cubic-bezier(0.16, 1, 0.3, 1)"
+                }} />
+              </div>
+              <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700 }}>
+                {completionPercentage < 100 
+                  ? "※ 이름, 프로필 사진, 소개, 영상, 대표작품, SNS를 모두 등록하면 100%가 완성됩니다."
+                  : "🎉 프로필이 완벽하게 정리되었습니다! 언제든 카드를 공유해보세요."}
+              </span>
             </div>
+
+            {/* Public Link Box */}
+            <div className="public-link-box" style={{
+              background: "var(--bg-warm)",
+              border: "1px solid var(--border)",
+              borderRadius: "14px",
+              padding: "16px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "12px"
+            }}>
+              <div style={{ minWidth: 0, flex: 1, maxWidth: "100%" }}>
+                <span style={{ display: "block", fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 800, marginBottom: "2px" }}>내 공개 링크</span>
+                <Link href={`/artists/${artist.slug}`} target="_blank" style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", textDecoration: "underline", wordBreak: "break-all" }}>
+                  {publicUrl}
+                </Link>
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  style={smallButtonStyle}
+                >
+                  {copied ? "✓ 복사됨" : "🔗 링크 복사"}
+                </button>
+                <Link
+                  href={`/artists/${artist.slug}`}
+                  target="_blank"
+                  style={{ ...smallButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+                >
+                  새창보기 ↗
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Right panel: Digital business card sharing only */}
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}>
+            <button
+              type="button"
+              onClick={() => setShareModalOpen(true)}
+              className="btn-lime"
+              style={{
+                width: "100%",
+                maxWidth: "280px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px",
+                padding: "16px 24px",
+                borderRadius: "14px",
+                fontWeight: 900,
+                fontSize: "0.98rem",
+                border: "none",
+                cursor: "pointer",
+                boxShadow: "0 8px 24px rgba(23, 20, 17, 0.08)",
+                transition: "all 0.15s ease"
+              }}
+            >
+              📤 명함 공유 및 다운로드
+            </button>
           </div>
         </section>
 
-        {/* ──────────────── QUICK UPLOAD — V2 (feature/home-feed-v2): "사진만
-            올리세요, 나머지 정리는 포퐄이." The dashboard's primary entry point,
-            above the detailed profile editor below. Each uploaded photo
-            becomes its own draft work (title optional — see
-            handleQuickUploadedFile above); reuses the existing
-            uploadImageFile()/works state/handleSave, no new API. ──────────────── */}
+        {/* ──────────────── QUICK UPLOAD — V2 ──────────────── */}
         <section ref={quickUploadRef} style={{
-          background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "24px",
-          padding: "32px", boxShadow: "0 12px 36px rgba(23, 20, 17, 0.04)", marginBottom: "24px",
+          background: "#FFFFFF", border: "1.5px solid var(--border)", borderRadius: "24px",
+          padding: "32px", boxShadow: "0 12px 36px rgba(23, 20, 17, 0.04)", marginBottom: "32px",
         }}>
-          <h2 style={{ fontSize: "1.3rem", fontWeight: 900, color: "var(--navy)", margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+          <h2 style={{ fontSize: "1.3rem", fontWeight: 950, color: "var(--navy)", margin: "0 0 6px", letterSpacing: "-0.02em" }}>
             새 작업을 올려볼까요?
           </h2>
-          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "0 0 20px" }}>
+          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "0 0 24px" }}>
             작품 사진과 이름만 입력하면 포퐄 AI가 연도, 역할, 설명을 정리해드려요.
           </p>
 
-          {/* Two cards, deliberately sized identically (width/min-height/
-              padding/border/radius/icon/text sizes — see the matching style
-              in QuickUploadPanel.tsx) — photo upload carries the lime accent
-              since it's the higher-priority action, resume stays neutral. */}
-          <div className="quick-upload-split">
-            <style dangerouslySetInnerHTML={{ __html: `
-              .quick-upload-split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-              @media (max-width: 760px) { .quick-upload-split { grid-template-columns: 1fr; } }
-            `}} />
-            <div>
-              <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "var(--ink-muted)", marginBottom: "10px" }}>
-                📸 사진을 올리세요
-              </span>
+          <div>
+            <span style={{ display: "block", fontSize: "0.85rem", fontWeight: 900, color: "var(--navy)", marginBottom: "12px" }}>
+              📸 사진 여러 장 업로드
+            </span>
+            <div
+              style={{
+                transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                boxShadow: "0 8px 24px rgba(23, 20, 17, 0.03)",
+                borderRadius: "16px",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow = "0 16px 36px rgba(23, 20, 17, 0.08)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(23, 20, 17, 0.03)";
+              }}
+            >
               <QuickUploadPanel
                 uploadFile={(file) => uploadImageFile(file, `quick_${Date.now()}`)}
                 onUploaded={handleQuickUploadedFile}
               />
-            </div>
-
-            <div>
-              <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "var(--ink-muted)", marginBottom: "10px" }}>
-                📄 이력서를 올려주세요
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setAiState("import");
-                  setAiModalOpen(true);
-                }}
-                style={{
-                  width: "100%", minHeight: "200px",
-                  border: "2px dashed var(--border-dark)", borderRadius: "16px",
-                  background: "#FAF9F5", cursor: "pointer",
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px",
-                  padding: "32px 20px", textAlign: "center",
-                }}
-              >
-                <span style={{ fontSize: "1.6rem", marginBottom: "4px" }}>✨</span>
-                <span style={{ fontSize: "0.9rem", fontWeight: 800, color: "var(--navy)", margin: "0 0 4px" }}>PDF·DOCX 이력서 올리기</span>
-                <span style={{ fontSize: "0.76rem", color: "var(--ink-muted)" }}>
-                  학력·작품·수상 등이 적힌 파일을 올리면 AI가 프로필을 정리해드려요
-                </span>
-              </button>
             </div>
           </div>
 
@@ -1147,6 +1222,496 @@ export default function MyPopokClient({
             </Link>
           </div>
         </section>
+
+        {/* ──────────────── AI Resume Upload & Manual Edit Notice ──────────────── */}
+        <section style={{
+          background: "#FFFFFF",
+          border: "1.5px dashed var(--accent-dark)",
+          borderRadius: "24px",
+          padding: "32px",
+          marginTop: "32px",
+          marginBottom: "24px",
+          boxShadow: "0 12px 36px rgba(23, 20, 17, 0.04)",
+          textAlign: "center"
+        }}>
+          <h2 style={{ fontSize: "1.2rem", fontWeight: 950, color: "var(--navy)", margin: "0 0 8px" }}>
+            📄 이력서 파일로 프로필 정보 한 번에 채우기
+          </h2>
+          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "0 0 20px" }}>
+            학력, 경력, 수상, 작품 이력이 적힌 PDF·DOCX 파일을 올리면 AI가 아래 모든 상세 항목들을 자동으로 입력해드려요.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setAiState("import");
+              setAiModalOpen(true);
+            }}
+            className="btn-outline"
+            style={{
+              padding: "12px 28px", borderRadius: "10px", fontWeight: 850, fontSize: "0.88rem",
+              border: "1.5px solid var(--navy)", cursor: "pointer", transition: "all 0.15s ease"
+            }}
+          >
+            ✨ AI 이력서 분석 및 자동 채우기
+          </button>
+        </section>
+
+        {/* 💡 Manual Edit Notice */}
+        <div style={{
+          background: "var(--bg-warm)",
+          border: "1px solid var(--border)",
+          borderRadius: "14px",
+          padding: "16px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          fontSize: "0.82rem",
+          fontWeight: 800,
+          color: "var(--navy)",
+          lineHeight: 1.5
+        }}>
+          <span>💡</span>
+          <span>
+            아래 각 탭(기본 정보, 소개·미디어, 작품·프로젝트 등)을 클릭하여 상세 정보를 직접 수동으로 입력하거나 수정하실 수 있습니다.<br />수정이 끝난 후에는 맨 아래의 <strong>[변경사항 저장하기]</strong> 버튼을 눌러주세요.
+          </span>
+        </div>
+
+        {/* ──────────────── 상세 정보 항목별 수정 (기존 플로우 복원) ──────────────── */}
+        <div style={{ marginTop: "32px", borderTop: "1px solid var(--border)", paddingTop: "32px" }}>
+          <ProfileEditorNav active={activeEditorSection} onChange={setActiveEditorSection} />
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1.2fr 0.8fr",
+            gap: "32px",
+            alignItems: "start",
+            marginTop: "24px"
+          }} className="editor-grid">
+            
+            {/* Main Edit Form */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+              
+              {/* Card 1: 기본 정보 & 프로필/대표 이미지 갤러리 */}
+              <div hidden={activeEditorSection !== "basic"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+                <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                  1. 기본 활동 정보 & 프로필 이미지
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
+                    <label style={labelStyle}>
+                      이름 (필수)
+                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="활동명" style={inputStyle} />
+                    </label>
+                    <label style={labelStyle}>
+                      영문 이름
+                      <input type="text" value={nameEn} onChange={(e) => setNameEn(e.target.value)} placeholder="English Name" style={inputStyle} />
+                    </label>
+                  </div>
+
+                  <label style={labelStyle}>
+                    내 POPOK 주소 슬러그
+                    <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+                      <span style={{ position: "absolute", left: "14px", color: "var(--ink-muted)", fontSize: "0.9rem", fontWeight: 700 }}>popok.kr/</span>
+                      <input
+                        type="text"
+                        value={slug}
+                        onChange={(e) => setSlug(e.target.value)}
+                        placeholder="address-slug"
+                        style={{ ...inputStyle, paddingLeft: "76px" }}
+                      />
+                    </div>
+                    {slugStatus.message && (
+                      <span style={{
+                        fontSize: "0.78rem",
+                        fontWeight: 700,
+                        color: slugStatus.valid ? "var(--verified)" : "var(--needs-review)",
+                        marginTop: "4px"
+                      }}>
+                        {slugStatus.message}
+                      </span>
+                    )}
+                  </label>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
+                    <label style={labelStyle}>
+                      주 활동 분야 (장르)
+                      <input type="text" value={genre} onChange={(e) => setGenre(e.target.value)} placeholder="예: 현대무용" style={inputStyle} />
+                    </label>
+                    <label style={labelStyle}>
+                      주 역할
+                      <input type="text" value={role} onChange={(e) => setRole(e.target.value)} placeholder="예: 안무가" style={inputStyle} />
+                    </label>
+                  </div>
+
+                  {/* 프로필 이미지 (프로필 썸네일·사진 1장) */}
+                  <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "16px" }}>
+                    <label style={{ ...labelStyle, fontSize: "0.85rem", color: "var(--navy)" }}>
+                      프로필 사진 (프로필 썸네일 1장)
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginTop: "8px" }}>
+                      <div style={{
+                        width: "90px", height: "90px", borderRadius: "50%", overflow: "hidden",
+                        border: "2px solid var(--border)", background: "#FAF9F5",
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                      }}>
+                        {profileImageUrl ? (
+                          <img src={profileImageUrl} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <span style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>사진 없음</span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", flexGrow: 1 }}>
+                        <input
+                          type="text"
+                          value={profileImageUrl}
+                          onChange={(e) => setProfileImageUrl(e.target.value)}
+                          placeholder="https://..."
+                          style={inputStyle}
+                        />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleProfileImageUpload}
+                          style={{ display: "none" }}
+                          id="profile-photo-file-input"
+                          disabled={uploadingImage || uploadingSlot === "profile"}
+                        />
+                        <label
+                          htmlFor="profile-photo-file-input"
+                          className="btn-outline"
+                          style={{
+                            padding: "8px 14px", borderRadius: "8px", fontSize: "0.78rem",
+                            fontWeight: 800, cursor: (uploadingImage || uploadingSlot === "profile") ? "not-allowed" : "pointer",
+                            display: "inline-flex", justifyContent: "center", alignItems: "center",
+                            border: "1.5px solid var(--navy)", width: "fit-content"
+                          }}
+                        >
+                          {uploadingSlot === "profile" ? "업로드 중..." : "📸 사진 업로드"}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 대표 이미지 갤러리 (공개 상세페이지 대표 갤러리 최대 3장) */}
+                  <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+                      <label style={{ ...labelStyle, fontSize: "0.85rem", color: "var(--navy)", margin: 0 }}>
+                        공개 상세페이지 대표 이미지 갤러리 (최대 3장)
+                      </label>
+                      <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700 }}>
+                        {profileImageUrls.length} / 3 장
+                      </span>
+                    </div>
+                    <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", display: "block", marginBottom: "12px" }}>
+                      공개 프로필 하단 갤러리 영역에 표출됩니다. (프로필 사진과 별개로 관리됩니다)
+                    </span>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+                      {[0, 1, 2].map((slotIdx) => {
+                        const imgUrl = profileImageUrls[slotIdx];
+                        const isUploadingThis = uploadingSlot === `rep_${slotIdx}`;
+                        return (
+                          <div
+                            key={slotIdx}
+                            style={{
+                              position: "relative",
+                              aspectRatio: "1.3 / 1",
+                              borderRadius: "10px",
+                              border: "1.5px dashed var(--border)",
+                              background: "#FAF9F5",
+                              overflow: "hidden",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "6px"
+                            }}
+                          >
+                            {imgUrl ? (
+                              <>
+                                <img src={imgUrl} alt={`대표 이미지 ${slotIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRepresentativeImage(slotIdx)}
+                                  style={{
+                                    position: "absolute", top: "6px", right: "6px",
+                                    width: "24px", height: "24px", borderRadius: "50%",
+                                    background: "rgba(23, 20, 17, 0.8)", color: "#FFFFFF",
+                                    border: "none", cursor: "pointer", fontSize: "0.9rem",
+                                    display: "flex", alignItems: "center", justifyContent: "center"
+                                  }}
+                                  title="슬롯 제거"
+                                >
+                                  ×
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleRepresentativeImageUpload(e, slotIdx)}
+                                  style={{ display: "none" }}
+                                  id={`rep-img-input-${slotIdx}`}
+                                  disabled={Boolean(uploadingSlot)}
+                                />
+                                <label
+                                  htmlFor={`rep-img-input-${slotIdx}`}
+                                  style={{
+                                    width: "100%", height: "100%", display: "flex",
+                                    flexDirection: "column", alignItems: "center", justifyContent: "center",
+                                    cursor: uploadingSlot ? "not-allowed" : "pointer", gap: "4px"
+                                  }}
+                                >
+                                  <span style={{ fontSize: "1.1rem" }}>{isUploadingThis ? "⏳" : "🖼️"}</span>
+                                  <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--navy)" }}>
+                                    {isUploadingThis ? "업로드 중..." : `대표 ${slotIdx + 1}`}
+                                  </span>
+                                </label>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Card 2: 프로필 미디어 및 소개 */}
+              <div hidden={activeEditorSection !== "intro"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+                <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                  2. 프로필 소개 및 비디오 URL
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                  <label style={labelStyle}>
+                    한 줄 소개 요약
+                    <textarea
+                      value={bioShort}
+                      onChange={(e) => setBioShort(e.target.value)}
+                      placeholder="검색 카드 또는 명함 상단에 노출될 짧은 소개글입니다."
+                      rows={2}
+                      style={textareaStyle}
+                    />
+                  </label>
+
+                  <label style={labelStyle}>
+                    상세 소개글 (바이오)
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="상세 페이지에서 아티스트를 소개하는 전체 소개글입니다."
+                      rows={5}
+                      style={textareaStyle}
+                    />
+                  </label>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
+                    <label style={labelStyle}>
+                      15초 모션 영상 URL
+                      <input
+                        type="text"
+                        value={motionVideoUrl}
+                        onChange={(e) => setMotionVideoUrl(e.target.value)}
+                        placeholder="https://... (MP4 / WebM)"
+                        style={inputStyle}
+                      />
+                    </label>
+                    <label style={labelStyle}>
+                      유튜브 소개/하이라이트 영상 URL
+                      <input
+                        type="text"
+                        value={youtubeUrl}
+                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                        placeholder="https://youtube.com/watch?v=..."
+                        style={inputStyle}
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div hidden={activeEditorSection !== "works"}>
+                {/* Card 3: 작품 목록 관리 (jsonb) */}
+                <WorksCardEditor
+                  works={works}
+                  canAdd
+                  countLabel={`${works.length}개`}
+                  uploadingSlot={uploadingSlot}
+                  onAdd={handleAddWork}
+                  onRemove={handleRemoveWork}
+                  onChange={handleWorkInputChange}
+                  onImageUpload={handleWorkImageUpload}
+                  onImageRemove={handleRemoveWorkImage}
+                  onReorder={handleReorderWorks}
+                />
+
+                {/* Premium 안내 카드 */}
+                <div style={{ padding: "20px", background: "var(--navy)", borderRadius: "14px", color: "#FFFFFF", textAlign: "center" }}>
+                  <strong>✨ POPOK Premium (Coming Soon)</strong>
+                  <p style={{ fontSize: "0.82rem", color: "#CBD5E1", margin: "8px 0 14px", lineHeight: 1.6 }}>
+                    현재는 오픈 기념으로 모든 기능을 무료로 이용하실 수 있습니다.<br />
+                    앞으로 AI 활동 관리, 자동 포트폴리오 업데이트, 공연 홍보 등 다양한 Premium 기능이 추가될 예정입니다.<br />
+                    감사합니다 💚
+                  </p>
+                  <button
+                    type="button"
+                    disabled
+                    style={{
+                      display: "inline-block",
+                      padding: "9px 18px",
+                      borderRadius: "8px",
+                      fontSize: "0.8rem",
+                      fontWeight: 900,
+                      background: "rgba(255,255,255,0.15)",
+                      color: "rgba(255,255,255,0.65)",
+                      border: "none",
+                      cursor: "not-allowed",
+                    }}
+                  >
+                    현재 모든 기능 무료 이용 중
+                  </button>
+                </div>
+              </div>
+
+              {/* Card 4: 활동 타임라인 (current_activity + affiliations) */}
+              <div hidden={activeEditorSection !== "activity"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+                <h2 style={{ fontSize: "1.25rem", fontWeight: 950, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                  4. 활동 타임라인
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  <StringArrayField
+                    label="현재 활동 (CURRENT)"
+                    variant="dashboard"
+                    items={currentActivity}
+                    onChange={setCurrentActivity}
+                    placeholder="예: OO컴퍼니 출강 중"
+                  />
+                  <ArrayField<ArtistAffiliation>
+                    label="소속 / 활동 이력 (AFFILIATION)"
+                    variant="dashboard"
+                    items={affiliations}
+                    onChange={setAffiliations}
+                    newItem={() => ({})}
+                    addLabel="+ 소속·활동 이력 추가"
+                    renderItem={(item, set) => (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
+                        <input style={inputStyle} placeholder="소속/프로젝트명" value={item.name || ""} onChange={(e) => set({ ...item, name: e.target.value })} />
+                        <input style={inputStyle} placeholder="역할/직책 (선택)" value={item.position || ""} onChange={(e) => set({ ...item, position: e.target.value })} />
+                        <input style={inputStyle} placeholder="연도 (선택)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Card 5: 학력 */}
+              <div hidden={activeEditorSection !== "education"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+                <h2 style={{ fontSize: "1.25rem", fontWeight: 950, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                  5. 학력
+                </h2>
+                <StringArrayField
+                  label="학력 (Education)"
+                  variant="dashboard"
+                  items={education}
+                  onChange={setEducation}
+                  placeholder="예: 한국예술종합학교 무용이론과 졸업"
+                />
+              </div>
+
+              {/* Card 6: 수상 및 선정 / 콩쿠르 및 진출 */}
+              <div hidden={activeEditorSection !== "awards"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+                <h2 style={{ fontSize: "1.25rem", fontWeight: 950, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                  6. 수상 및 선정
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  <ArrayField<ArtistAward>
+                    label="수상 및 선정 내역 (Awards)"
+                    variant="dashboard"
+                    items={awards}
+                    onChange={setAwards}
+                    newItem={() => ({})}
+                    addLabel="+ 수상 및 선정 내역 추가"
+                    renderItem={(item, set) => (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
+                        <input style={inputStyle} placeholder="연도 (예: 2026)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                        <input style={inputStyle} placeholder="수상·선정명" value={item.title || ""} onChange={(e) => set({ ...item, title: e.target.value })} />
+                        <input style={inputStyle} placeholder="주최 기관 (선택)" value={item.organization || ""} onChange={(e) => set({ ...item, organization: e.target.value })} />
+                        <input style={inputStyle} placeholder="결과 (선택, 예: 대상)" value={item.result || ""} onChange={(e) => set({ ...item, result: e.target.value })} />
+                      </div>
+                    )}
+                  />
+                  <ArrayField<ArtistAward>
+                    label="콩쿠르 및 진출 (Competitions)"
+                    variant="dashboard"
+                    items={competitions}
+                    onChange={setCompetitions}
+                    newItem={() => ({})}
+                    addLabel="+ 콩쿠르 및 진출 내역 추가"
+                    renderItem={(item, set) => (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
+                        <input style={inputStyle} placeholder="연도 (예: 2025)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                        <input style={inputStyle} placeholder="콩쿠르명" value={item.title || ""} onChange={(e) => set({ ...item, title: e.target.value })} />
+                        <input style={inputStyle} placeholder="주최 기관 (선택)" value={item.organization || ""} onChange={(e) => set({ ...item, organization: e.target.value })} />
+                        <input style={inputStyle} placeholder="결과 (선택, 예: 본선 진출)" value={item.result || ""} onChange={(e) => set({ ...item, result: e.target.value })} />
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Sticky Card Preview Sidebar */}
+            <div style={{ position: "sticky", top: "40px", display: "flex", flexDirection: "column", gap: "24px" }} className="editor-sidebar">
+              <div style={{
+                background: "#FFFFFF",
+                padding: "24px",
+                borderRadius: "18px",
+                border: "1px solid var(--border)",
+                boxShadow: "0 10px 30px rgba(23, 20, 17, 0.03)"
+              }}>
+                <h3 style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", marginBottom: "16px" }}>
+                  내 POPOK 실시간 카드 미리보기
+                </h3>
+                
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <PopokCard
+                    name={name || "이름 입력 전"}
+                    nameEn={nameEn || undefined}
+                    genre={genre || "장르 입력 전"}
+                    instagram={instagram || ""}
+                    id={artist.id}
+                    slug={slug || artist.id}
+                    profileImage={profileImageUrl || undefined}
+                  />
+                </div>
+                
+              </div>
+            </div>
+
+          </div>
+
+          {/* Centered Save Changes Button for detailed editor */}
+          <div style={{ marginTop: "32px", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="btn-lime"
+              style={{
+                width: "100%", maxWidth: "320px", padding: "16px 32px", borderRadius: "12px",
+                fontWeight: 900, fontSize: "1rem", border: "none", cursor: saving ? "not-allowed" : "pointer",
+                boxShadow: "0 8px 24px rgba(23, 20, 17, 0.08)", transition: "all 0.15s ease"
+              }}
+            >
+              {saving ? "저장 중..." : "💾 변경사항 저장하기"}
+            </button>
+            <p style={{ color: "var(--ink-muted)", fontSize: "0.78rem", margin: 0, textAlign: "center" }}>
+              ※ 저장하기를 클릭하면 변경된 정보가 적용되어 실시간으로 반영됩니다.
+            </p>
+          </div>
+        </div>
       </>
       )}
 
@@ -1367,15 +1932,54 @@ export default function MyPopokClient({
         />
       )}
 
-      {/* Visual responsive styles for the Quick Upload split */}
+      {/* Visual responsive styles for the Quick Upload split and editor layout */}
       <style>{`
         @media (max-width: 480px) {
           .quick-upload-split { gap: 14px !important; }
+        }
+        @media (max-width: 900px) {
+          .editor-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .editor-sidebar {
+            position: static !important;
+          }
+          .dashboard-hero {
+            grid-template-columns: 1fr !important;
+            padding: 24px !important;
+          }
         }
       `}</style>
     </div>
   );
 }
+
+const PROFILE_TYPE_LABEL: Record<string, string> = {
+  artist: "개인",
+  organization: "단체",
+};
+
+const tagStyle: React.CSSProperties = {
+  display: "inline-flex",
+  padding: "5px 12px",
+  borderRadius: "999px",
+  fontSize: "0.78rem",
+  fontWeight: 800,
+  background: "var(--tag-bg)",
+  color: "var(--navy)",
+};
+
+const smallButtonStyle: React.CSSProperties = {
+  background: "#FFFFFF",
+  border: "1px solid var(--border-dark)",
+  borderRadius: "8px",
+  padding: "6px 12px",
+  fontSize: "0.78rem",
+  fontWeight: 850,
+  color: "var(--navy)",
+  cursor: "pointer",
+  fontFamily: "inherit"
+};
 
 const labelStyle: React.CSSProperties = {
   display: "flex",
@@ -1413,3 +2017,4 @@ const textareaStyle: React.CSSProperties = {
   resize: "vertical",
   lineHeight: 1.5,
 };
+
