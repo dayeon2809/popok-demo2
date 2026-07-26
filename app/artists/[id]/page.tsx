@@ -446,7 +446,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh", paddingBottom: "100px" }}>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .artist-detail-container {
           max-width: 1040px;
           margin: 0 auto;
@@ -565,6 +566,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             roleLine={roleLine}
             currentActivityLine={currentActivityLine}
             profileImage={artist.profile_image_url || artist.profileImage || null}
+            contactCandidates={contactCandidates}
             actions={
               <>
                 <ConnectCta
@@ -850,21 +852,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             카드에 마우스를 올리거나 클릭하면 뒷면 QR 코드를 스캔할 수 있습니다.
           </p>
 
-          {contactCandidates.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "16px", marginBottom: "20px" }}>
-              {contactCandidates.map((c, idx) => (
-                <a
-                  key={idx}
-                  href={c.href}
-                  target={c.href.startsWith("mailto:") ? undefined : "_blank"}
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}
-                >
-                  {c.label} ↗
-                </a>
-              ))}
-            </div>
-          )}
+          {/* Contact links moved to top header area */}
 
           {/* Visual 3D Flippable Digital Business Card */}
           <div style={{ marginBottom: "28px", width: "100%", display: "flex", justifyContent: "center" }}>

@@ -21,6 +21,7 @@ export default function CompanyDiscoveryPrototype({
   return (
     <>
       <form
+        className="discovery-search-form"
         onSubmit={(e) => {
           e.preventDefault();
           openPanel();

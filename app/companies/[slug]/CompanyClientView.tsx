@@ -239,8 +239,7 @@ export default function CompanyClientView({
         
         <CompanyBrochureHeader company={adaptedCompany as any} artistCount={artists.length} />
 
-        {/* 2b. REPRESENTATIVE IMAGE GALLERY */}
-        <CompanyGallery images={adaptedCompany.representative_images} />
+        {/* Representative gallery is hidden per user request */}
 
         {/* 3. IDENTITY (Mission, Vision, Values) */}
         <CompanyIdentity company={adaptedCompany as any} />

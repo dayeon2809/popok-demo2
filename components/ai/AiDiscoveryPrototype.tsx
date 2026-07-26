@@ -69,6 +69,7 @@ export default function AiDiscoveryPrototype({
   return (
     <>
       <form
+        className="discovery-search-form"
         onSubmit={(e) => {
           e.preventDefault();
           openPanel();

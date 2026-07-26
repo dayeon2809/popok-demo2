@@ -48,8 +48,10 @@ function formatShortRole(role: string | null | undefined): string {
 
 export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
   const [activeWork, setActiveWork] = useState<any | null>(null);
+  const [showAll, setShowAll] = useState(false);
 
   const works = company.works || [];
+  const displayedWorks = showAll ? works : works.slice(0, 3);
 
   return (
     <section
@@ -123,8 +125,8 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
         }
         @media (max-width: 768px) {
           .portfolio-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 20px 12px !important;
+            grid-template-columns: 1fr !important;
+            gap: 28px !important;
           }
           .portfolio-image-wrapper {
             aspect-ratio: 1.5 !important;
@@ -164,47 +166,72 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
           등록된 대표 작품이 없습니다.
         </div>
       ) : (
-        <div className="portfolio-grid">
-          {works.map((work: any, idx: number) => {
-            const workImages = normalizeWorkImages(work);
-            const hasImage = workImages.length > 0;
-            const imageUrl = hasImage ? workImages[0] : "";
+        <>
+          <div className="portfolio-grid">
+            {displayedWorks.map((work: any, idx: number) => {
+              const workImages = normalizeWorkImages(work);
+              const hasImage = workImages.length > 0;
+              const imageUrl = hasImage ? workImages[0] : "";
 
-            return (
-              <div
-                key={work.id || idx}
-                onClick={() => setActiveWork(work)}
-                className="portfolio-tile"
-              >
-                {/* Image Wrapper */}
-                <div className="portfolio-image-wrapper">
-                  {hasImage ? (
-                    <img
-                      src={imageUrl}
-                      alt={work.title}
-                      className="portfolio-image"
-                    />
-                  ) : (
-                    <WorkImagePlaceholder company={company} />
-                  )}
-                </div>
-
-                {/* Text Caption underneath */}
-                <div className="portfolio-caption">
-                  <div className="caption-meta">
-                    <span className="genre-tag" style={{ color: company.brand_color || "var(--navy)" }}>
-                      {work.genre || work.category || "PERFORMANCE"}
-                    </span>
-                    <span className="dot">•</span>
-                    <span>{work.year || "n.d."}</span>
+              return (
+                <div
+                  key={work.id || idx}
+                  onClick={() => setActiveWork(work)}
+                  className="portfolio-tile"
+                >
+                  {/* Image Wrapper */}
+                  <div className="portfolio-image-wrapper">
+                    {hasImage ? (
+                      <img
+                        src={imageUrl}
+                        alt={work.title}
+                        className="portfolio-image"
+                      />
+                    ) : (
+                      <WorkImagePlaceholder company={company} />
+                    )}
                   </div>
-                  <h4 className="work-title">{work.title}</h4>
-                  <div className="work-role">{formatShortRole(work.role)}</div>
+
+                  {/* Text Caption underneath */}
+                  <div className="portfolio-caption">
+                    <div className="caption-meta">
+                      <span className="genre-tag" style={{ color: company.brand_color || "var(--navy)" }}>
+                        {work.genre || work.category || "PERFORMANCE"}
+                      </span>
+                      <span className="dot">•</span>
+                      <span>{work.year || "n.d."}</span>
+                    </div>
+                    <h4 className="work-title">{work.title}</h4>
+                    <div className="work-role">{formatShortRole(work.role)}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+
+          {works.length > 3 && !showAll && (
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "36px" }}>
+              <button
+                type="button"
+                onClick={() => setShowAll(true)}
+                className="btn-outline"
+                style={{
+                  padding: "12px 32px",
+                  borderRadius: "10px",
+                  fontSize: "0.85rem",
+                  fontWeight: 850,
+                  color: "var(--navy)",
+                  border: "1.5px solid var(--navy)",
+                  background: "#FFFFFF",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                더보기 ({works.length - 3}개 더보기)
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {activeWork && (

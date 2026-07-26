@@ -870,7 +870,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
         {[
           { key: "basic", label: "기본 정보 & 브랜딩" },
           { key: "identity", label: "소개 & 미션/비전" },
-          { key: "media", label: "대표 이미지" },
+          { key: "media", label: "로고 이미지" },
           { key: "artists", label: `소속 아티스트 (${connectedArtists.length})` },
           { key: "works", label: `대표작 & 크레딧 (${works.length})` },
           { key: "reviews", label: `기사 & 리뷰 (${reviewLinks.length})` },
@@ -1188,15 +1188,15 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
           </div>
         )}
 
-        {/* ── Tab 3: Simplified Media (Representative Image Only) ── */}
+        {/* ── Tab 3: Simplified Media (Logo Image Only) ── */}
         {activeTab === "media" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "600px" }}>
             <div style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "24px", background: "#FAF9F5" }}>
               <label style={{ display: "block", fontSize: "0.95rem", fontWeight: 900, color: "var(--navy)", marginBottom: "4px" }}>
-                단체 대표 이미지 (Representative Image)
+                단체 로고 이미지 (Logo Image)
               </label>
               <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", margin: "0 0 16px 0", lineHeight: 1.5 }}>
-                단체를 대표하는 메인 썸네일 이미지입니다. 검색 결과, 단체 카드, 프로필 페이지 상단 및 기본 히어로 이미지로 활용됩니다.
+                단체를 대표하는 로고 이미지입니다. 검색 결과, 단체 카드, 프로필 페이지 상단 및 기본 히어로 이미지로 활용됩니다.
               </p>
 
               <div style={{ display: "flex", gap: "24px", alignItems: "center", flexWrap: "wrap" }}>
@@ -1257,125 +1257,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
               </div>
             </div>
 
-            <div style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "24px", background: "#FAF9F5" }}>
-              <label style={{ display: "block", fontSize: "0.95rem", fontWeight: 900, color: "var(--navy)", marginBottom: "4px" }}>
-                대표 이미지
-              </label>
-              <p style={{ fontSize: "0.78rem", color: "var(--ink-muted)", margin: "0 0 16px 0", lineHeight: 1.5 }}>
-                단체를 잘 보여주는 대표 이미지를 최대 3장 등록해주세요. 단체 상세페이지 상단 갤러리에 노출됩니다. 첫 번째 이미지가 메인 이미지입니다.
-              </p>
-
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
-                {[0, 1, 2].map((slotIdx) => {
-                  const imgUrl = representativeImages[slotIdx];
-                  const canUpload = imgUrl || slotIdx === representativeImages.length;
-                  return (
-                    <div key={slotIdx} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      <div
-                        style={{
-                          position: "relative",
-                          width: "100%",
-                          aspectRatio: "1.1",
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          border: imgUrl ? "1.5px solid var(--border)" : "1.5px dashed var(--border)",
-                          background: "#FFFFFF",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {imgUrl ? (
-                          <>
-                            <img src={imgUrl} alt={`대표 이미지 ${slotIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                            {slotIdx === 0 && (
-                              <span
-                                className="mono"
-                                style={{
-                                  position: "absolute",
-                                  top: "6px",
-                                  left: "6px",
-                                  fontSize: "0.62rem",
-                                  fontWeight: 800,
-                                  color: "#FFFFFF",
-                                  background: "rgba(23, 20, 17, 0.75)",
-                                  padding: "3px 8px",
-                                  borderRadius: "10px",
-                                }}
-                              >
-                                메인 이미지
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>
-                            {uploadingRepImageSlot === slotIdx ? "업로드 중..." : "이미지 없음"}
-                          </span>
-                        )}
-                      </div>
-
-                      <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp"
-                          onChange={(e) => handleRepImageUpload(e, slotIdx)}
-                          disabled={!canUpload}
-                          style={{ display: "none" }}
-                          id={`rep-image-upload-${slotIdx}`}
-                        />
-                        <label
-                          htmlFor={`rep-image-upload-${slotIdx}`}
-                          style={{
-                            flex: 1,
-                            padding: "6px 8px",
-                            fontSize: "0.7rem",
-                            fontWeight: 800,
-                            color: canUpload ? "var(--navy)" : "var(--ink-faint)",
-                            border: "1px solid var(--border)",
-                            borderRadius: "4px",
-                            cursor: canUpload ? "pointer" : "not-allowed",
-                            textAlign: "center",
-                            background: "#FFFFFF",
-                          }}
-                        >
-                          {imgUrl ? "변경" : canUpload ? "업로드" : "-"}
-                        </label>
-                        {imgUrl && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleMoveRepImage(slotIdx, -1)}
-                              disabled={slotIdx === 0}
-                              title="왼쪽으로 이동"
-                              style={{ width: "24px", height: "24px", fontSize: "0.7rem", border: "1px solid var(--border)", borderRadius: "4px", background: "#FFFFFF", cursor: slotIdx === 0 ? "not-allowed" : "pointer", opacity: slotIdx === 0 ? 0.4 : 1 }}
-                            >
-                              ◀
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleMoveRepImage(slotIdx, 1)}
-                              disabled={slotIdx === representativeImages.length - 1}
-                              title="오른쪽으로 이동"
-                              style={{ width: "24px", height: "24px", fontSize: "0.7rem", border: "1px solid var(--border)", borderRadius: "4px", background: "#FFFFFF", cursor: slotIdx === representativeImages.length - 1 ? "not-allowed" : "pointer", opacity: slotIdx === representativeImages.length - 1 ? 0.4 : 1 }}
-                            >
-                              ▶
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveRepImage(slotIdx)}
-                              title="삭제"
-                              style={{ width: "24px", height: "24px", fontSize: "0.7rem", color: "#991B1B", border: "1px solid #FCA5A5", borderRadius: "4px", background: "#FFFFFF", cursor: "pointer" }}
-                            >
-                              ✕
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* Gallery Upload hidden per user request */}
           </div>
         )}
 

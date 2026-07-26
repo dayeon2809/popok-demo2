@@ -11,6 +11,7 @@ interface ArtistMinimalHeaderProps {
   profileImage?: string | null;
   /** Share/연결하기 buttons, rendered on the right (desktop) — see app/artists/[id]/page.tsx */
   actions?: ReactNode;
+  contactCandidates?: Array<{ label: string; href: string }>;
 }
 
 // V2 public artist page — a deliberately small header (feature/home-feed-v2):
@@ -26,6 +27,7 @@ export default function ArtistMinimalHeader({
   currentActivityLine,
   profileImage,
   actions,
+  contactCandidates,
 }: ArtistMinimalHeaderProps) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", paddingBottom: "20px" }}>
@@ -54,6 +56,36 @@ export default function ArtistMinimalHeader({
           )}
           {currentActivityLine && (
             <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", margin: "4px 0 0", maxWidth: "440px" }}>{currentActivityLine}</p>
+          )}
+
+          {contactCandidates && contactCandidates.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "14px", marginTop: "8px" }}>
+              {contactCandidates.map((c, idx) => (
+                <a
+                  key={idx}
+                  href={c.href}
+                  target={c.href.startsWith("mailto:") ? undefined : "_blank"}
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 750,
+                    color: "var(--navy)",
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "2px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = "underline";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = "none";
+                  }}
+                >
+                  {c.label} ↗
+                </a>
+              ))}
+            </div>
           )}
         </div>
       </div>
