@@ -39,7 +39,7 @@ export const PREMIUM_PLANS: PlanDef[] = [
     annualPrice: 39000,
     originalMonthlyPrice: 4900,
     originalAnnualPrice: 49000,
-    badge: "오픈 이벤트가 · 평생 유지",
+    badge: "오픈 이벤트가",
     features: [
       "포트폴리오 간편 제작",
       "활동 데이터 기본 이식",

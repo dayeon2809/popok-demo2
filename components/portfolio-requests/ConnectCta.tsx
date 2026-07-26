@@ -25,7 +25,7 @@ interface ConnectCtaProps {
 // shape and modal as the older SendPortfolioSection (still used as-is on the
 // company page), just inserts a confirm step before ever opening
 // SendPortfolioModal.
-export default function ConnectCta({ target, viewerState, currentPath, onToast, label = "연결하기", compact = false }: ConnectCtaProps) {
+export default function ConnectCta({ target, viewerState, currentPath, onToast, label = "포퐄 보내기", compact = false }: ConnectCtaProps) {
   const router = useRouter();
   const [gate, setGate] = useState<ConnectGateVariant | null>(null);
   const [sendModalOpen, setSendModalOpen] = useState(false);
@@ -38,11 +38,13 @@ export default function ConnectCta({ target, viewerState, currentPath, onToast, 
     setStatus(viewerState.existingRequestStatus);
   }, [viewerState.existingRequestStatus]);
 
-  if (viewerState.isSelf) return null;
-
   const alreadySent = status === "pending" || status === "viewed";
 
   const handleClick = () => {
+    if (viewerState.isSelf) {
+      onToast("자신의 프로필에는 포퐄을 보낼 수 없습니다.");
+      return;
+    }
     if (!viewerState.isLoggedIn) {
       setGate("login");
       return;

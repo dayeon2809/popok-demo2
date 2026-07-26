@@ -771,9 +771,7 @@ input:focus, select:focus, textarea:focus {
   font-weight: 800;
   flex-shrink: 0;
 }
-@media (hover: hover) and (pointer: fine) {
-  .visual-feed-card:hover .visual-feed-card-overlay { opacity: 1; }
-}
+.visual-feed-card:hover .visual-feed-card-overlay { opacity: 1; }
 
 /* ── Artist page V2 image feed (feature/home-feed-v2 prototype) ───────── */
 .artist-image-feed {
@@ -802,6 +800,7 @@ input:focus, select:focus, textarea:focus {
 @media (min-width: 1024px) {
   .artist-work-gallery { grid-template-columns: repeat(4, 1fr); gap: 12px; }
 }
+
 .artist-work-gallery-overlay {
   position: absolute;
   inset: 0;
@@ -828,9 +827,9 @@ input:focus, select:focus, textarea:focus {
   font-size: 0.68rem;
   font-weight: 700;
 }
-@media (hover: hover) and (pointer: fine) {
-  .artist-work-gallery-tile:hover .artist-work-gallery-overlay { opacity: 1; }
-}
+.artist-work-gallery-tile:hover .artist-work-gallery-overlay { opacity: 1; }
+
+
 
 /* ── Discovery Switch Toggle ── */
 .discovery-toggle-container {
@@ -865,12 +864,7 @@ input:focus, select:focus, textarea:focus {
   background-color: rgba(23, 20, 17, 0.06);
 }
 
-/* ── Mobile Responsive Overrides ── */
-@media (pointer: coarse) {
-  .visual-feed-card-overlay {
-    opacity: 1 !important;
-  }
-}
+
 
 @media (max-width: 480px) {
   .home-visual-feed {

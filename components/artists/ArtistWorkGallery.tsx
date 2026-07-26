@@ -37,9 +37,12 @@ interface ArtistWorkGalleryProps {
 // "더 보기" toggle) for the same reason.
 export default function ArtistWorkGallery({ works, onSelectWork }: ArtistWorkGalleryProps) {
   const [expanded, setExpanded] = useState(false);
-  const items: GalleryItem[] = works.flatMap((work) =>
-    (work.images.length > 0 ? work.images : []).map((src, idx) => ({ key: `${work.id}-${idx}`, src, work }))
-  );
+  const items: GalleryItem[] = works
+    .map((work) => {
+      const src = work.images[0] || "";
+      return { key: work.id, src, work };
+    })
+    .filter((item) => item.src !== "");
 
   if (items.length === 0) return null;
 
