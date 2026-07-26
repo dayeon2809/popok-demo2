@@ -1,0 +1,20 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="POPOK prototype placeholder — rehearsal room mood">
+  <title>mock placeholder — prototypeOnly</title>
+  <rect width="1600" height="900" fill="#EAE6DD"/>
+  <rect x="0" y="0" width="1600" height="620" fill="#F5F1E8"/>
+  <g stroke="#C5C2BD" stroke-width="2">
+    <line x1="0" y1="620" x2="1600" y2="620"/>
+    <line x1="200" y1="0" x2="200" y2="620"/>
+    <line x1="500" y1="0" x2="500" y2="620"/>
+    <line x1="800" y1="0" x2="800" y2="620"/>
+    <line x1="1100" y1="0" x2="1100" y2="620"/>
+    <line x1="1400" y1="0" x2="1400" y2="620"/>
+  </g>
+  <g fill="#171411" opacity="0.75">
+    <circle cx="520" cy="500" r="26"/>
+    <rect x="497" y="526" width="46" height="120" rx="18"/>
+    <circle cx="980" cy="470" r="26"/>
+    <rect x="957" y="496" width="46" height="150" rx="18"/>
+  </g>
+  <circle cx="1300" cy="120" r="60" fill="#C8EE52" opacity="0.4"/>
+</svg>

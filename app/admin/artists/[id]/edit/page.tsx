@@ -28,7 +28,7 @@ export default function AdminArtistEditPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const authHeader = () => ({ "x-admin-passcode": sessionStorage.getItem("admin_passcode") || "" });
+  const authHeader = () => ({});
 
   const fetchArtist = async () => {
     setLoading(true);

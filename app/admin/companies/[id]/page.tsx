@@ -224,7 +224,7 @@ function EditableSection({
           opacity: 1;
         }
       `}</style>
-      
+
       {/* Floating Edit Button */}
       <button
         type="button"
@@ -316,14 +316,14 @@ export default function AdminCompanyEditPage() {
   const [uploadingPoster, setUploadingPoster] = useState(false);
   const [uploadedPostersTrack, setUploadedPostersTrack] = useState<string[]>([]);
 
-  const authHeader = () => ({ "x-admin-passcode": sessionStorage.getItem("admin_passcode") || "" });
+  const authHeader = () => ({});
 
   const handleUploadSingleImage = async (field: "profile_image_url" | "hero_image_url", file: File) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("bucket", "artist-media");
     formData.append("path", `companies/${field}`);
-    
+
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -346,7 +346,7 @@ export default function AdminCompanyEditPage() {
     formData.append("file", file);
     formData.append("bucket", "artist-media");
     formData.append("path", `companies/slider`);
-    
+
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -562,7 +562,7 @@ export default function AdminCompanyEditPage() {
           review_links: company.review_links,
           links: company.links,
           works: company.works,
-          
+
           // branding columns
           founded_year: company.founded_year,
           brand_color: company.brand_color,
@@ -865,7 +865,7 @@ export default function AdminCompanyEditPage() {
 
   const togglePerfPublish = async (perf: any) => {
     const nextPublished = !perf.isPublished;
-    
+
     if (!perf.title || !perf.title.trim()) {
       alert("일정명이 비어 있어 공개할 수 없습니다.");
       return;
@@ -1397,7 +1397,7 @@ export default function AdminCompanyEditPage() {
 
   return (
     <div style={{ maxWidth: "1120px", margin: "0 auto", paddingBottom: "100px" }}>
-      
+
       {/* CMS TOP STICKY BAR */}
       <div style={{
         position: "sticky", top: 0, zIndex: 500,
@@ -1444,7 +1444,7 @@ export default function AdminCompanyEditPage() {
               ⚠️ 저장되지 않은 변경사항 있음
             </span>
           )}
-          
+
           <button
             type="button"
             onClick={handleRevert}
@@ -1453,7 +1453,7 @@ export default function AdminCompanyEditPage() {
           >
             되돌리기
           </button>
-          
+
           <button
             type="button"
             onClick={handleSave}
@@ -1514,7 +1514,7 @@ export default function AdminCompanyEditPage() {
       {activeTab === "preview" && (
         <div style={{ background: "var(--bg-warm)", minHeight: "100vh", padding: "20px", borderRadius: "16px", border: "1px solid var(--border)" }}>
           <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
-            
+
             <EditableSection title="디지털 카드" onEdit={() => handleJumpToEdit("basic")}>
               <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
                 {(() => {
@@ -1631,7 +1631,7 @@ export default function AdminCompanyEditPage() {
       {/* TAB 2: SOURCE MATERIALS & PROFILE INTEGRATED EDITOR */}
       {activeTab === "edit" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          
+
           {/* SECTION A: AI & SOURCE MATERIALS */}
           <section style={sectionStyle}>
             <h2 style={sectionTitleStyle}>SOURCE MATERIALS & AI AUTO INGEST (소스 자료 및 AI 구조화)</h2>
@@ -1704,7 +1704,7 @@ export default function AdminCompanyEditPage() {
                     </>
                   )}
                 </div>
-                
+
                 <div style={fieldRowStyle}>
                   <label style={labelStyle}>AI 분석 보충용 텍스트 자료</label>
                   <textarea
@@ -1745,7 +1745,7 @@ export default function AdminCompanyEditPage() {
                 {structuring || company.ai_draft_status === "processing" ? "AI 자료 분석 및 자동 매핑 진행 중..." : "⚡ AI로 이력서 분석 후 정보 자동 입력"}
               </button>
             </div>
-            
+
             {company.ai_draft_status === "failed" && company.ai_draft_error && (
               <div style={{ marginTop: "12px", padding: "10px 14px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FCA5A5", borderRadius: "8px", fontSize: "0.78rem" }}>
                 AI 실행 오류: {company.ai_draft_error}
@@ -1755,7 +1755,7 @@ export default function AdminCompanyEditPage() {
 
           {/* SECTION B: INTEGRATED CARD-BY-CARD FORM EDITOR */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            
+
             <h2 style={{ fontSize: "1.1rem", fontWeight: 900, color: "var(--navy)", margin: "8px 0 0" }}>
               단체 프로필 상세 편집 (Manual & AI Input Panel)
             </h2>
@@ -1798,7 +1798,7 @@ export default function AdminCompanyEditPage() {
                         <label style={labelStyle}>활동 지역</label>
                         <input style={inputStyle} value={company.city_or_region || ""} onChange={(e) => updateField("city_or_region", e.target.value)} />
                       </div>
-                      
+
                       {/* Logo image uploader */}
                       <div style={fieldRowStyle}>
                         <label style={labelStyle}>대표 이미지 (로고) 업로드</label>
@@ -1823,7 +1823,7 @@ export default function AdminCompanyEditPage() {
                         <input style={inputStyle} value={company.profile_image_url || ""} onChange={(e) => updateField("profile_image_url", e.target.value)} />
                       </div>
                     </div>
-                    
+
                     <div style={fieldRowStyle}>
                       <label style={labelStyle}>모션 프로필 비디오 URL (YouTube/Vimeo)</label>
                       <input style={inputStyle} value={company.motion_video_url || ""} onChange={(e) => updateField("motion_video_url", e.target.value)} />
@@ -1860,7 +1860,7 @@ export default function AdminCompanyEditPage() {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Hero Banner image uploader */}
                     <div style={fieldRowStyle}>
                       <label style={labelStyle}>히어로 배너 이미지 업로드</label>
@@ -1904,7 +1904,7 @@ export default function AdminCompanyEditPage() {
                                 삭제
                               </button>
                             </div>
-                            
+
                             <div style={{ display: "flex", gap: "10px", alignItems: "center", marginTop: "4px" }}>
                               <input
                                 type="file"
@@ -1919,7 +1919,7 @@ export default function AdminCompanyEditPage() {
                                 <img src={img} alt="" style={{ width: "60px", height: "40px", borderRadius: "6px", objectFit: "cover", border: "1px solid var(--border)" }} />
                               )}
                             </div>
-                            
+
                             <input
                               style={inputStyle}
                               placeholder="이미지 URL"
@@ -2025,7 +2025,7 @@ export default function AdminCompanyEditPage() {
                             작품 삭제
                           </button>
                         </div>
-                        
+
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }} className="admin-form-grid">
                           <div style={fieldRowStyle}>
                             <label style={labelStyle}>작품명 *</label>
@@ -2051,7 +2051,7 @@ export default function AdminCompanyEditPage() {
                               }}
                             />
                           </div>
-                          
+
                           {/* Image upload — admin manages only the representative image
                               (images[0]). Any images[1..3] set via the self-serve CMS
                               are preserved even though this screen can't show them. */}

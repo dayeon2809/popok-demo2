@@ -31,7 +31,7 @@ interface CompanyPreview {
 // Admin-only preview of a company's public card — NOT the real /companies/[slug]
 // detail page (that stays a placeholder). This exists purely so an admin can
 // see roughly what a draft will look like before publishing it, reusing the
-// existing sessionStorage admin-passcode gate (app/admin/layout.tsx) instead
+// server-side admin email gate (app/admin/layout.tsx) instead
 // of inventing a new auth mechanism for the public route.
 export default function AdminCompanyPreviewPage() {
   const params = useParams<{ id: string }>();
@@ -43,7 +43,7 @@ export default function AdminCompanyPreviewPage() {
   const [error, setError] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
 
-  const authHeader = () => ({ "x-admin-passcode": sessionStorage.getItem("admin_passcode") || "" });
+  const authHeader = () => ({});
 
   const fetchCompany = async () => {
     setLoading(true);

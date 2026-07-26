@@ -1,3 +1,4 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import {
@@ -15,19 +16,12 @@ export const runtime = "nodejs";
 
 const MIN_RESUME_TEXT_LENGTH = 30;
 
-function checkAuth(req: NextRequest): boolean {
-  const passcode = req.headers.get("x-admin-passcode") || "";
-  const adminPasscode = process.env.ADMIN_PASSCODE || "1234";
-  return passcode.trim() === adminPasscode.trim();
-}
-
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id } = await params;
   const supabase = getSupabaseServer();

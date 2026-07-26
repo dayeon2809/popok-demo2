@@ -1,21 +1,15 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { PERFORMANCE_POSTER_BUCKET, extractPerformancePosterPath } from "@/lib/performances";
 
 export const dynamic = "force-dynamic";
 
-function checkAuth(req: NextRequest): boolean {
-  const passcode = req.headers.get("x-admin-passcode") || "";
-  const adminPasscode = process.env.ADMIN_PASSCODE || "1234";
-  return passcode.trim() === adminPasscode.trim();
-}
-
 // POST (not DELETE) so a plain JSON array body is unambiguous across
 // runtimes/proxies — mirrors the list's "선택 삭제" bulk action only.
 export async function POST(req: NextRequest) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   try {
     const body = await req.json();

@@ -12,9 +12,14 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   // Wizard state
   // /onboarding is now individual-artist-only — organizations apply via
   // /organizations/apply instead (see app/auth/AuthClient.tsx).
+  // V2 (feature/home-feed-v2): merged into 4 screens instead of 6 — identity
+  // (name+address), genre+role, optional AI import, done — so a new user
+  // reaches the upload screen with as little form-filling as possible.
+  // 1=identity 2=genre&role 3=AI(optional) 4=complete
   const [step, setStep] = useState(1);
   const [displayName, setDisplayName] = useState(defaultDisplayName || "");
   const [username, setUsername] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [genre, setGenre] = useState("");
   const [role, setRole] = useState("");
 
@@ -32,9 +37,32 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // Auto-suggest a POPOK address from the display name so step 1 rarely
+  // requires the user to think about it — still fully editable, and the
+  // debounced availability check below runs on whatever ends up in the
+  // field either way. Only auto-fills until the user edits it themselves;
+  // Korean names (no latin/digit characters) fall back to a short random
+  // suggestion since there's no transliteration utility in this project to
+  // reuse and a made-up one would be misleading.
+  useEffect(() => {
+    if (step !== 1 || usernameTouched) return;
+    const slug = displayName
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+    if (slug.length >= 3) {
+      setUsername(slug);
+    } else if (displayName.trim()) {
+      setUsername((prev) => prev || `artist-${Math.random().toString(36).slice(2, 8)}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayName, step]);
+
   // Debounced username checking
   useEffect(() => {
-    if (step !== 2) return;
+    if (step !== 1) return;
 
     const cleanUsername = username.trim().toLowerCase();
     if (!cleanUsername) {
@@ -85,15 +113,15 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
       alert("활동명을 입력해 주세요.");
       return;
     }
-    if (step === 2 && !usernameStatus.valid) {
+    if (step === 1 && !usernameStatus.valid) {
       alert("올바르고 사용 가능한 주소를 입력해 주세요.");
       return;
     }
-    if (step === 3 && !genre.trim()) {
+    if (step === 2 && !genre.trim()) {
       alert("주 활동 분야를 선택하거나 입력해 주세요.");
       return;
     }
-    if (step === 4 && !role.trim()) {
+    if (step === 2 && !role.trim()) {
       alert("주 역할을 선택하거나 입력해 주세요.");
       return;
     }
@@ -103,7 +131,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   const handlePrev = () => {
     // Stepping back into the AI step should always land on the choose screen,
     // not the transitional "none" state left over from finishing/skipping it.
-    if (step === 6 && aiState === "none") {
+    if (step === 4 && aiState === "none") {
       setAiState("choose");
     }
     setStep(prev => prev - 1);
@@ -138,7 +166,9 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
         if (data.artistId) {
           analytics.portfolioCreated(data.artistId);
         }
-        router.push("/my-popok");
+        // V2 (feature/home-feed-v2): land straight in upload mode, not the
+        // plain dashboard — see MyPopokClient's `?upload=1` handling.
+        router.push("/my-popok?upload=1");
         router.refresh();
       } else {
         alert(data.error || "온보딩 저장 중 오류가 발생했습니다.");
@@ -162,7 +192,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
       padding: "24px"
     }}>
       <div className="card fade-up" style={{
-        maxWidth: step === 5 && aiState === "review" ? "720px" : "480px",
+        maxWidth: step === 3 && aiState === "review" ? "720px" : "480px",
         width: "100%",
         padding: "40px 32px",
         background: "#FFFFFF",
@@ -188,14 +218,14 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               position: "absolute",
               top: "50%",
               left: "0",
-              width: `${((step - 1) / 5) * 100}%`,
+              width: `${((step - 1) / 3) * 100}%`,
               height: "2px",
               background: "var(--navy)",
               zIndex: 1,
               transform: "translateY(-50%)",
               transition: "width 0.3s ease"
             }} />
-            {[1, 2, 3, 4, 5, 6].map((num) => (
+            {[1, 2, 3, 4].map((num) => (
               <div key={num} style={{
                 width: "24px",
                 height: "24px",
@@ -216,15 +246,18 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 1: display_name */}
+        {/* STEP 1: display_name + address, merged onto one screen (V2) */}
         {step === 1 && (
           <div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              활동명을 입력해 주세요.
+              내 작업 공간을 만들어볼까요?
             </h2>
-            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "24px" }}>
-              프로필에 기본으로 표시될 활동명을 적어주세요.
+            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "20px" }}>
+              활동명과 공개 주소만 정하면 바로 사진을 올릴 수 있어요.
             </p>
+            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
+              활동명
+            </label>
             <input
               type="text"
               value={displayName}
@@ -235,38 +268,31 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                 padding: "14px 16px",
                 border: "1.5px solid var(--border)",
                 borderRadius: "12px",
-                fontSize: "1rem"
+                fontSize: "1rem",
+                marginBottom: "20px"
               }}
               autoFocus
             />
-          </div>
-        )}
 
-        {/* STEP 2: username */}
-        {step === 2 && (
-          <div>
-            <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              내 POPOK 주소를 만들어주세요.
-            </h2>
-            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "24px" }}>
-              사람들이 당신의 카드를 찾을 고유 주소입니다. (popok.kr/주소)
-            </p>
-            <div style={{ position: "relative", marginBottom: "8px" }}>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="dayeon"
-                style={{
-                  width: "100%",
-                  padding: "14px 16px",
-                  border: "1.5px solid var(--border)",
-                  borderRadius: "12px",
-                  fontSize: "1rem"
-                }}
-                autoFocus
-              />
-            </div>
+            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
+              공개 주소 (popok.kr/주소) — 활동명으로 자동 채워드려요, 원하면 수정하세요.
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => {
+                setUsernameTouched(true);
+                setUsername(e.target.value);
+              }}
+              placeholder="dayeon"
+              style={{
+                width: "100%",
+                padding: "14px 16px",
+                border: "1.5px solid var(--border)",
+                borderRadius: "12px",
+                fontSize: "1rem"
+              }}
+            />
             {username.trim() && (
               <div style={{
                 fontSize: "0.8rem",
@@ -285,16 +311,20 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 3: genre */}
-        {step === 3 && (
+        {/* STEP 2: genre + role, merged onto one screen (V2) */}
+        {step === 2 && (
           <div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              주 활동 분야를 선택해주세요.
+              어떤 활동을 하시나요?
             </h2>
-            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "24px" }}>
-              가장 잘 나타내는 예술 장르를 정해주세요.
+            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "20px" }}>
+              한 번씩만 골라주세요. 나중에 언제든 바꿀 수 있어요.
             </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+
+            <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "8px" }}>
+              주 활동 분야
+            </span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
               {GENRE_OPTIONS.map(opt => (
                 <button
                   key={opt}
@@ -326,22 +356,15 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                 padding: "12px 16px",
                 border: "1.5px solid var(--border)",
                 borderRadius: "12px",
-                fontSize: "0.95rem"
+                fontSize: "0.95rem",
+                marginBottom: "20px"
               }}
             />
-          </div>
-        )}
 
-        {/* STEP 4: role */}
-        {step === 4 && (
-          <div>
-            <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              당신의 주 역할을 선택해주세요.
-            </h2>
-            <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "24px" }}>
-              주로 어떤 역할로 활동하시나요?
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
+            <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "8px" }}>
+              주 역할
+            </span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
               {ROLE_OPTIONS.map(opt => (
                 <button
                   key={opt}
@@ -379,8 +402,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {/* STEP 5: AI-assisted enrichment (optional, asked last) */}
-        {step === 5 && aiState === "choose" && (
+        {/* STEP 3: AI-assisted enrichment (optional, asked last) */}
+        {step === 3 && aiState === "choose" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <div>
               <h2 style={{ fontSize: "1.45rem", fontWeight: 950, color: "var(--navy)", margin: "0 0 8px", letterSpacing: "-0.03em" }}>
@@ -410,7 +433,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               <button
                 onClick={() => {
                   setAiState("none");
-                  setStep(6);
+                  setStep(4);
                 }}
                 className="btn-outline"
                 style={{
@@ -430,7 +453,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           </div>
         )}
 
-        {step === 5 && aiState === "import" && (
+        {step === 3 && aiState === "import" && (
           <AiProfileImporter
             onParsed={(data) => {
               setAiDraft(data);
@@ -440,13 +463,13 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           />
         )}
 
-        {step === 5 && aiState === "review" && aiDraft && (
+        {step === 3 && aiState === "review" && aiDraft && (
           <AiProfileReview
             initialDraft={aiDraft}
             onConfirm={(finalDraft) => {
               setAiProfileData(finalDraft);
               setAiState("none");
-              setStep(6);
+              setStep(4);
             }}
             onCancel={() => {
               setAiState("import");
@@ -454,8 +477,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           />
         )}
 
-        {/* STEP 6: complete */}
-        {step === 6 && (
+        {/* STEP 4: complete */}
+        {step === 4 && (
           <div style={{ textAlign: "center" }}>
             <div style={{
               fontSize: "3rem",
@@ -465,11 +488,11 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               🎉
             </div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              POPOK을 시작할 준비가 되었습니다!
+              내 작업 공간이 준비됐어요!
             </h2>
             <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "28px", lineHeight: 1.5 }}>
-              활동명 <strong>{displayName}</strong> 님으로<br />
-              나만의 디지털 명함 및 포트폴리오를 만들어 보세요.
+              <strong>{displayName}</strong> 님, 이제 사진만 올리면<br />
+              포퐄이 작업과 이력을 정리해드려요.
             </p>
             <div style={{
               background: "#FFFFFF",
@@ -489,7 +512,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
         )}
 
         {/* The AI import/review sub-screens (step 5) provide their own back/cancel navigation */}
-        {!(step === 5 && aiState !== "choose") && (
+        {!(step === 3 && aiState !== "choose") && (
           /* Navigation Buttons */
           <div style={{ display: "flex", gap: "12px", marginTop: "36px" }}>
             {step > 1 && (
@@ -509,7 +532,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                 이전
               </button>
             )}
-            {step === 5 ? null : step < 6 ? (
+            {step === 3 ? null : step < 4 ? (
               <button
                 onClick={handleNext}
                 className="btn-lime"
@@ -538,7 +561,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                   cursor: submitting ? "not-allowed" : "pointer"
                 }}
               >
-                {submitting ? "생성 중..." : "POPOK 시작하기"}
+                {submitting ? "생성 중..." : "사진 올리러 가기"}
               </button>
             )}
           </div>

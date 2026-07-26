@@ -1,3 +1,4 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { getOrganizationApplicationByCompanyId } from "@/lib/companies";
@@ -7,12 +8,6 @@ import { normalizeCompanyRepresentativeImages, cleanCompanyAwardsForPayload } fr
 export const dynamic = "force-dynamic";
 
 const SOURCE_TEXT_MAX = 30000;
-
-function checkAuth(req: NextRequest): boolean {
-  const passcode = req.headers.get("x-admin-passcode") || "";
-  const adminPasscode = process.env.ADMIN_PASSCODE || "1234";
-  return passcode.trim() === adminPasscode.trim();
-}
 
 // Fields an admin may edit directly. `status` is deliberately excluded —
 // publish/unpublish/archive each have their own validation and must go
@@ -32,9 +27,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id } = await params;
 
@@ -115,9 +109,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id } = await params;
 
@@ -179,9 +172,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id } = await params;
 

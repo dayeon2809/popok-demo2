@@ -1,19 +1,13 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSubmissions } from "@/lib/supabaseSubmissions";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
-function checkAuth(req: NextRequest): boolean {
-  const passcode = req.headers.get("x-admin-passcode") || "";
-  const adminPasscode = process.env.ADMIN_PASSCODE || "1234";
-  return passcode.trim() === adminPasscode.trim();
-}
-
 export async function GET(req: NextRequest) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   try {
     // 1. Get submissions statistics

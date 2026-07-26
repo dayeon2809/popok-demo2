@@ -718,3 +718,116 @@ input:focus, select:focus, textarea:focus {
   }
   .home-footer-cta h2 { font-size: 1.85rem !important; }
 }
+
+/* ── Home V2 visual feed (feature/home-feed-v2 prototype) ──────────────────
+   Pinterest-style masonry via CSS columns — each card's natural image
+   aspect ratio is preserved (VisualFeedCard renders width:100%/height:auto),
+   so column-count is the only thing that needs to respond to viewport width. */
+.home-visual-feed {
+  column-gap: 10px;
+  column-count: 2;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 12px 40px;
+}
+@media (min-width: 600px) {
+  .home-visual-feed { column-count: 3; padding: 0 16px 40px; }
+}
+@media (min-width: 900px) {
+  .home-visual-feed { column-count: 4; column-gap: 12px; padding: 0 20px 48px; }
+}
+@media (min-width: 1280px) {
+  .home-visual-feed { column-count: 5; }
+}
+@media (min-width: 1600px) {
+  .home-visual-feed { column-count: 6; }
+}
+
+.visual-feed-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(to top, rgba(23, 20, 17, 0.6) 0%, rgba(23, 20, 17, 0) 55%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.visual-feed-card-overlay-name {
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.visual-feed-card-overlay-arrow {
+  color: #FFFFFF;
+  font-size: 0.85rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .visual-feed-card:hover .visual-feed-card-overlay { opacity: 1; }
+}
+
+/* ── Artist page V2 image feed (feature/home-feed-v2 prototype) ───────── */
+.artist-image-feed {
+  column-gap: 10px;
+  column-count: 2;
+}
+@media (min-width: 640px) {
+  .artist-image-feed { column-count: 3; }
+}
+@media (min-width: 1024px) {
+  .artist-image-feed { column-count: 4; }
+}
+
+/* ── Artist public page V2 — work gallery (feature/home-feed-v2) ───────
+   A fixed-tile CSS grid (not the Home feed's masonry columns) so this reads
+   as one bounded dashboard panel — even rows, square tiles — rather than a
+   tall, uneven scroll. */
+.artist-work-gallery {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .artist-work-gallery { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+  .artist-work-gallery { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+}
+.artist-work-gallery-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 12px;
+  text-align: left;
+  background: linear-gradient(to top, rgba(23, 20, 17, 0.6) 0%, rgba(23, 20, 17, 0) 55%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.artist-work-gallery-overlay-title {
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.artist-work-gallery-overlay-meta {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+@media (hover: hover) and (pointer: fine) {
+  .artist-work-gallery-tile:hover .artist-work-gallery-overlay { opacity: 1; }
+}

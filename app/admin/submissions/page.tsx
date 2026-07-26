@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import Link from "next/link";
 import QRCode from "qrcode";
@@ -27,8 +26,6 @@ interface Submission {
 }
 
 export default function AdminSubmissionsPage() {
-  const router = useRouter();
-  const [passcode, setPasscode] = useState("");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,14 +56,8 @@ export default function AdminSubmissionsPage() {
   const [savingParsed, setSavingParsed] = useState(false);
 
   useEffect(() => {
-    const cached = sessionStorage.getItem("admin_passcode");
-    if (!cached) {
-      router.push("/admin");
-    } else {
-      setPasscode(cached);
-      fetchSubmissions(cached);
-    }
-  }, [router]);
+    fetchSubmissions();
+  }, []);
 
   useEffect(() => {
     if (selectedSub) {
@@ -79,22 +70,16 @@ export default function AdminSubmissionsPage() {
     }
   }, [selectedSub]);
 
-  const fetchSubmissions = async (code: string) => {
+  const fetchSubmissions = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/submissions", {
-        headers: { "x-admin-passcode": code },
-      });
+      const res = await fetch("/api/admin/submissions");
       const data = await res.json();
       if (res.ok && data.success) {
         setSubmissions(data.data);
       } else {
         setError(data.error || "등록 데이터를 불러오는 데 실패했습니다.");
-        if (res.status === 401) {
-          sessionStorage.removeItem("admin_passcode");
-          router.push("/admin");
-        }
       }
     } catch (err) {
       setError("네트워크 오류로 데이터를 가져올 수 없습니다.");
@@ -129,7 +114,7 @@ export default function AdminSubmissionsPage() {
     try {
       const res = await fetch(`/api/admin/submissions/${selectedSub.id}/parse`, {
         method: "POST",
-        headers: { "x-admin-passcode": passcode },
+        headers: {},
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -155,14 +140,14 @@ export default function AdminSubmissionsPage() {
     try {
       const res = await fetch(`/api/admin/submissions/${selectedSub.id}/parsed-profile`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": passcode },
+        headers: { "Content-Type": "application/json", },
         body: JSON.stringify({ parsed_profile: parsedProfile }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setParserStatus("reviewed");
         alert("정리 결과가 저장되었습니다. 이제 공개 승인을 진행할 수 있습니다.");
-        fetchSubmissions(passcode);
+        fetchSubmissions();
       } else {
         alert(data.error || "정리 결과 저장에 실패했습니다.");
       }
@@ -189,7 +174,7 @@ export default function AdminSubmissionsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-passcode": passcode,
+
         },
         body: JSON.stringify({
           action: "update",
@@ -211,7 +196,7 @@ export default function AdminSubmissionsPage() {
       if (res.ok && data.success) {
         alert("정보 수정이 완료되었습니다.");
         setSelectedSub(null);
-        fetchSubmissions(passcode);
+        fetchSubmissions();
       } else {
         alert(data.error || "수정 중 오류가 발생했습니다.");
       }
@@ -236,7 +221,7 @@ export default function AdminSubmissionsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-passcode": passcode,
+
         },
         body: JSON.stringify({ action: "publish" }),
       });
@@ -244,7 +229,7 @@ export default function AdminSubmissionsPage() {
       if (res.ok && data.success) {
         alert("아티스트 페이지 공개 완료! 주소: " + `/artists/${data.slug}`);
         setSelectedSub(null);
-        fetchSubmissions(passcode);
+        fetchSubmissions();
       } else {
         alert(data.error || "공개 중 오류가 발생했습니다.");
       }
@@ -264,7 +249,7 @@ export default function AdminSubmissionsPage() {
     try {
       const res = await fetch(`/api/admin/submissions/${id}`, {
         method: "DELETE",
-        headers: { "x-admin-passcode": passcode },
+        headers: {},
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -272,7 +257,7 @@ export default function AdminSubmissionsPage() {
         if (selectedSub?.id === id) {
           setSelectedSub(null);
         }
-        fetchSubmissions(passcode);
+        fetchSubmissions();
       } else {
         alert(data.error || "삭제 중 오류가 발생했습니다.");
       }
@@ -299,7 +284,7 @@ export default function AdminSubmissionsPage() {
 
   return (
     <div style={{ padding: "20px 0", maxWidth: "1200px", margin: "0 auto" }}>
-      
+
       {/* Page Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", borderBottom: "1.5px solid var(--border)", paddingBottom: "16px" }}>
         <div>
@@ -388,8 +373,8 @@ export default function AdminSubmissionsPage() {
             width: "min(600px, 94vw)", maxHeight: "90vh", overflowY: "auto", padding: "30px",
             boxShadow: "0 20px 50px rgba(0,0,0,0.15)", position: "relative"
           }}>
-            <button 
-              onClick={() => setSelectedSub(null)} 
+            <button
+              onClick={() => setSelectedSub(null)}
               style={{ position: "absolute", top: "20px", right: "20px", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", fontWeight: 900 }}
             >
               ✕
@@ -403,7 +388,7 @@ export default function AdminSubmissionsPage() {
             </h2>
 
             <form onSubmit={handleUpdateSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
                 <div>
                   <label style={labelStyle}>이름</label>
@@ -432,12 +417,12 @@ export default function AdminSubmissionsPage() {
 
               <div>
                 <label style={labelStyle}>업로드 이미지 리스트 (한 줄에 하나씩 입력)</label>
-                <textarea 
-                  rows={3} 
-                  value={editForm.profile_image_urls_raw} 
-                  onChange={e => setEditForm({ ...editForm, profile_image_urls_raw: e.target.value })} 
-                  placeholder="https://.../img1.jpg&#10;https://.../img2.jpg" 
-                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "0.75rem", resize: "vertical" }} 
+                <textarea
+                  rows={3}
+                  value={editForm.profile_image_urls_raw}
+                  onChange={e => setEditForm({ ...editForm, profile_image_urls_raw: e.target.value })}
+                  placeholder="https://.../img1.jpg&#10;https://.../img2.jpg"
+                  style={{ ...inputStyle, fontFamily: "monospace", fontSize: "0.75rem", resize: "vertical" }}
                 />
               </div>
 
@@ -673,23 +658,23 @@ export default function AdminSubmissionsPage() {
                 ) : (
                   <div style={{ width: "90px", height: "90px", background: "#FAF8F5", borderRadius: "6px" }} />
                 )}
-                
+
                 <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button 
-                      type="submit" 
-                      disabled={submittingAction} 
-                      className="btn-lime" 
+                    <button
+                      type="submit"
+                      disabled={submittingAction}
+                      className="btn-lime"
                       style={{ border: "none", flex: 1, padding: "12px", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 900, cursor: "pointer" }}
                     >
                       {submittingAction ? "저장 중..." : "정보 수정 완료"}
                     </button>
 
                     {selectedSub.status === "approved" ? (
-                      <Link 
+                      <Link
                         href={`/artists/${selectedSub.name.replace(/[^\w가-힣\s-]/g, '').trim().replace(/[\s\t]+/g, '-').toLowerCase()}-${selectedSub.id}`}
                         target="_blank"
-                        className="btn-outline" 
+                        className="btn-outline"
                         style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", textDecoration: "none", flex: 1, padding: "12px", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 900, cursor: "pointer", background: "none", border: "1px solid var(--border)", color: "var(--navy)" }}
                       >
                         아티스트 페이지 보기 👁️
@@ -711,13 +696,13 @@ export default function AdminSubmissionsPage() {
                       AI 정리 결과를 검수하고 &quot;정리 결과 저장&quot;을 눌러야 공개 승인이 가능합니다.
                     </p>
                   )}
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => {
                       const fullUrl = `${window.location.origin}/p/${selectedSub.id}`;
                       window.open(fullUrl, "_blank");
-                    }} 
-                    className="btn-outline" 
+                    }}
+                    className="btn-outline"
                     style={{ width: "100%", padding: "10px", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 800, cursor: "pointer", background: "none", border: "1px solid var(--border)" }}
                   >
                     새 창에서 포퐄 열기 👁️

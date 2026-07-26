@@ -1,14 +1,9 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { mergeCurrentActivity, mergeWorks, mergeAwards, mergeLinks } from "@/lib/mergeCompanyArrays";
 
 export const dynamic = "force-dynamic";
-
-function checkAuth(req: NextRequest): boolean {
-  const passcode = req.headers.get("x-admin-passcode") || "";
-  const adminPasscode = process.env.ADMIN_PASSCODE || "1234";
-  return passcode.trim() === adminPasscode.trim();
-}
 
 // Matches the "단일 필드" comparison list in the admin UI — deliberately
 // excludes `name` (the AI draft may suggest one, but it's not offered as an
@@ -28,9 +23,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id } = await params;
 

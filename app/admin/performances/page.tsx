@@ -162,7 +162,7 @@ export default function AdminPerformancesPage() {
   const [confirmDelete, setConfirmDelete] = useState<{ ids: string[]; label: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const authHeader = () => ({ "x-admin-passcode": sessionStorage.getItem("admin_passcode") || "" });
+  const authHeader = () => ({});
 
   const fetchPerformances = async () => {
     setLoading(true);

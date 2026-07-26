@@ -1,12 +1,10 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
-import { checkAdminAuth } from "@/lib/adminAuth";
 import { buildArtistUpdateFromPayload, normalizeArtistRepresentativeImages } from "@/lib/artist-profile";
 import { normalizeWorks } from "@/lib/works";
 
 export const dynamic = "force-dynamic";
-
-const checkAuth = checkAdminAuth;
 
 // GET: Full artist row for the admin profile editor (app/admin/artists/[id]/edit),
 // plus the owner's display_name/email (if any) so that screen can show
@@ -16,9 +14,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id: artistId } = await params;
   if (!artistId) {
@@ -63,9 +60,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   // artists.id는 uuid 문자열이다 — Number()로 변환하지 않고 그대로 다룬다.
   const { id: artistId } = await params;
@@ -115,9 +111,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { id: artistId } = await params;
   if (!artistId) {
@@ -178,9 +173,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   // artists.id는 uuid 문자열이다 — Number()로 변환하지 않고 그대로 다룬다.
   const { id: artistId } = await params;

@@ -1,0 +1,17 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="POPOK prototype placeholder — spotlight mood">
+  <title>mock placeholder — prototypeOnly</title>
+  <rect width="900" height="1200" fill="#171411"/>
+  <defs>
+    <radialGradient id="beam" cx="50%" cy="0%" r="85%">
+      <stop offset="0%" stop-color="#C8EE52" stop-opacity="0.55"/>
+      <stop offset="45%" stop-color="#8CAB1E" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#171411" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <polygon points="450,0 190,1200 710,1200" fill="url(#beam)"/>
+  <circle cx="450" cy="60" r="34" fill="#C8EE52" opacity="0.9"/>
+  <g opacity="0.35" stroke="#F2FAA6" stroke-width="2">
+    <line x1="120" y1="1200" x2="450" y2="60"/>
+    <line x1="780" y1="1200" x2="450" y2="60"/>
+  </g>
+</svg>

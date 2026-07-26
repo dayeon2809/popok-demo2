@@ -1,9 +1,12 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
   try {
     const supabase = getSupabaseServer();
 

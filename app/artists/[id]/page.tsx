@@ -1,17 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
 import { analytics } from "@/lib/analytics";
-import MotionProfile from "@/components/MotionProfile";
-import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
-import { isYouTubeUrl } from "@/lib/youtube";
-import { isSameVideoUrl, getYouTubeEmbedUrl, isDirectVideoUrl } from "@/lib/video";
-import { isVimeoUrl, getVimeoEmbedUrl } from "@/lib/videoLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import { toObjectArray, safeYear, getValidWorks } from "@/lib/normalize";
 import {
@@ -21,15 +16,17 @@ import {
   normalizeArtistAwards,
   normalizeArtistCompetitions,
 } from "@/lib/artist-profile";
-import SendPortfolioSection from "@/components/portfolio-requests/SendPortfolioSection";
+import ConnectCta from "@/components/portfolio-requests/ConnectCta";
 import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
 import { normalizeWorkImages } from "@/lib/works";
 import CompanyUpcomingPerformances from "@/components/company/CompanyUpcomingPerformances";
 import SectionHeader from "@/components/ui/SectionHeader";
-import RelatedArtists from "@/components/RelatedArtists";
 import { useAutoFlip } from "@/lib/useAutoFlip";
-import type { Performance, Artist } from "@/types";
+import type { Performance } from "@/types";
 import WorkDetailModal from "@/components/works/WorkDetailModal";
+import ArtistMinimalHeader from "@/components/artists/ArtistMinimalHeader";
+import ArtistWorkGallery from "@/components/artists/ArtistWorkGallery";
+import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -62,6 +59,7 @@ interface WorkItem {
   venue?: string;
   externalLink?: string;
   image: string;
+  images: string[];
   videoUrl: string;
   credits: string;
   previewStart?: number;
@@ -78,23 +76,6 @@ interface WorkItem {
   };
 }
 
-// Hero photo slider images — up to 3 representative photos (same field
-// RepresentativeGallery used to read), falling back to the single profile
-// image when none are set. Pulled out to module scope so both the
-// auto-advance effect (which runs before the component's loading/error
-// early-returns) and the render body can derive the same list without
-// duplicating the logic.
-function getHeroImages(artist: any): string[] {
-  if (!artist) return [];
-  const urls = (Array.isArray(artist.profile_image_urls) ? artist.profile_image_urls : [])
-    .map((u: any) => (typeof u === "string" ? u.trim() : ""))
-    .filter(Boolean)
-    .slice(0, 3);
-  if (urls.length > 0) return urls;
-  const fallback = artist.profile_image_url || artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`;
-  return [fallback];
-}
-
 export default function ArtistDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [id, setId] = useState("");
@@ -107,38 +88,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [toastMsg, setToastMsg] = useState("");
   const [portfolioViewerState, setPortfolioViewerState] = useState<PortfolioRequestViewerState>(DEFAULT_PORTFOLIO_VIEWER_STATE);
   const [upcomingPerformances, setUpcomingPerformances] = useState<Performance[]>([]);
-  const [relatedArtists, setRelatedArtists] = useState<Artist[]>([]);
-  const [heroImageIndex, setHeroImageIndex] = useState(0);
-  const [heroTouchStartX, setHeroTouchStartX] = useState<number | null>(null);
-  const heroAutoAdvancePausedRef = useRef(false);
-  const heroAutoAdvanceResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const heroCardFlip = useAutoFlip();
   const digitalCardFlip = useAutoFlip();
   const pathname = usePathname();
-
-  // Hero photo slider — auto-advance every 3s, pausing briefly whenever the
-  // viewer manually navigates (arrows/dots/swipe) so a manual pick doesn't
-  // get immediately overridden by the timer.
-  const pauseHeroAutoAdvance = (delay = 6000) => {
-    heroAutoAdvancePausedRef.current = true;
-    if (heroAutoAdvanceResumeTimerRef.current) clearTimeout(heroAutoAdvanceResumeTimerRef.current);
-    heroAutoAdvanceResumeTimerRef.current = setTimeout(() => {
-      heroAutoAdvancePausedRef.current = false;
-    }, delay);
-  };
-
-  useEffect(() => {
-    const images = getHeroImages(artist);
-    if (images.length <= 1) return;
-    const interval = setInterval(() => {
-      if (heroAutoAdvancePausedRef.current) return;
-      setHeroImageIndex((prev) => (prev + 1) % images.length);
-    }, 3000);
-    return () => {
-      clearInterval(interval);
-      if (heroAutoAdvanceResumeTimerRef.current) clearTimeout(heroAutoAdvanceResumeTimerRef.current);
-    };
-  }, [artist]);
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -185,20 +136,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       .then((r) => r.json())
       .then((res) => {
         if (Array.isArray(res?.data)) setUpcomingPerformances(res.data);
-      })
-      .catch(() => {
-        // Non-critical section — never break the detail page.
-      });
-  }, [artist?.recordId]);
-
-  // "더 탐색할 예술가들" section data — same client-fetch pattern as above.
-  useEffect(() => {
-    const recordId = artist?.recordId;
-    if (!recordId) return;
-    fetch(`/api/artists/${encodeURIComponent(recordId)}/related`)
-      .then((r) => r.json())
-      .then((res) => {
-        if (Array.isArray(res?.data)) setRelatedArtists(res.data);
       })
       .catch(() => {
         // Non-critical section — never break the detail page.
@@ -365,7 +302,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     const images = normalizeWorkImages(w);
     return {
       id: w.id || `work-${idx}`,
-      title: typeof w.title === "string" ? w.title.trim() : String(w.title),
+      // V2 (feature/home-feed-v2) quick-upload lets a work be published with
+      // only an image, no title — this is the display-only fallback for
+      // that case (never written back to the DB, just shown here).
+      title: (typeof w.title === "string" && w.title.trim()) || "제목 없는 작업",
       year: safeYear(w.year) || "연도미상",
       description: typeof w.description === "string" ? w.description.trim() : "",
       role: typeof w.role === "string" ? w.role.trim() : "",
@@ -481,21 +421,18 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     return deduped.slice(0, 3);
   })();
 
-  // Motion profile video comes ONLY from motion_video_url (1순위: artist.motion_video_url)
-  const representativeVideoUrl: string = artist.motion_video_url || "";
-
   const englishName = artist.name_en || (artist.name ? artist.name.toUpperCase() : "CREATIVE");
   const tags = Array.isArray(artist.tags) ? artist.tags : [artist.field, artist.genre].filter(Boolean);
 
-  const heroImages: string[] = getHeroImages(artist);
-  const heroImageAt = ((heroImageIndex % heroImages.length) + heroImages.length) % heroImages.length;
-  const goToHeroImage = (dir: "prev" | "next") => {
-    pauseHeroAutoAdvance();
-    setHeroImageIndex((prev) => {
-      const next = dir === "next" ? prev + 1 : prev - 1;
-      return ((next % heroImages.length) + heroImages.length) % heroImages.length;
-    });
+  const roleLine = [artist.role, artist.genre, artist.city_or_region].filter(Boolean).join(" · ");
+  const currentActivityLine = normalizeArtistCurrentActivity(artist.current_activity)[0] || null;
+
+  const openWorkDetail = (workId: string) => {
+    const work = displayWorks.find((w) => w.id === workId);
+    if (work) setActiveWork(work);
   };
+
+  const portfolioTarget = { type: "artist" as const, id: artist.recordId || artist.id, name: artist.name, imageUrl: artist.profile_image_url || artist.profileImage || null };
 
   const getCoordinates = () => {
     let hash = 0;
@@ -514,57 +451,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           max-width: 1040px;
           margin: 0 auto;
           padding: 40px 24px;
-        }
-        .works-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          column-gap: 24px;
-          row-gap: 36px;
-        }
-        .work-tile {
-          cursor: pointer;
-        }
-        .work-tile-image-wrapper {
-          position: relative;
-          aspect-ratio: 1.3;
-          border-radius: 4px;
-          overflow: hidden;
-          border: 1px solid var(--border);
-          background-color: #FAF8F5;
-        }
-        .work-tile-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .work-tile:hover .work-tile-image {
-          transform: scale(1.03);
-        }
-        .work-tile-hover-overlay {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: flex-end;
-          padding: 16px;
-          background: linear-gradient(to top, rgba(23,20,17,0.55) 0%, rgba(23,20,17,0) 45%);
-          opacity: 0;
-          transition: opacity 0.25s ease;
-        }
-        .work-tile:hover .work-tile-hover-overlay {
-          opacity: 1;
-        }
-        @media (max-width: 1024px) {
-          .works-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            column-gap: 20px !important;
-            row-gap: 28px !important;
-          }
-        }
-        @media (max-width: 640px) {
-          .works-grid {
-            grid-template-columns: 1fr !important;
-          }
         }
         .magazine-timeline-row {
           display: grid;
@@ -593,9 +479,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             grid-template-columns: 1fr !important;
             gap: 4px !important;
           }
-          .artist-hero-grid {
-            grid-template-columns: 1fr !important;
-            gap: 32px !important;
+          .connect-cta-btn {
+            width: 100%;
+            text-align: center;
           }
         }
         .connected-org-card:hover {
@@ -605,7 +491,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           text-decoration: underline !important;
         }
       ` }} />
-      
+
       {/* Toast Notification */}
       {toastMsg && (
         <div style={{
@@ -667,435 +553,99 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           ← 아티스트 둘러보기
         </button>
 
-        {/* ──────────────── HERO — brochure-style: image + identity left, small digital-portfolio preview right (matches CompanyBrochureHeader's grid) ──────────────── */}
-        <section style={{ ...SECTION_STYLE, paddingTop: 0 }}>
-          <div className="artist-hero-grid" style={{ display: "grid", gridTemplateColumns: "1.8fr 1fr", gap: "48px", alignItems: "start" }}>
-            {/* Left: image + identity */}
-            <div>
-              <div
-                style={{
-                  position: "relative", width: "100%", aspectRatio: "16 / 10", borderRadius: "4px", overflow: "hidden",
-                  border: "1px solid var(--border)", background: "#FAF9F5", marginBottom: "28px",
-                }}
-                onTouchStart={(e) => setHeroTouchStartX(e.touches[0].clientX)}
-                onTouchEnd={(e) => {
-                  if (heroTouchStartX === null || heroImages.length <= 1) return;
-                  const diffX = heroTouchStartX - e.changedTouches[0].clientX;
-                  if (Math.abs(diffX) > 35) goToHeroImage(diffX > 0 ? "next" : "prev");
-                  setHeroTouchStartX(null);
-                }}
-              >
-                {/* All slides stacked + opacity-crossfaded, instead of swapping
-                    a single <img>'s src (which cuts instantly with no
-                    transition) — smooth fade between photos. */}
-                {heroImages.map((src, idx) => (
-                  <img
-                    key={src + idx}
-                    src={src}
-                    alt={artist.name}
-                    style={{
-                      position: "absolute", inset: 0,
-                      width: "100%", height: "100%", objectFit: "cover",
-                      opacity: idx === heroImageAt ? 1 : 0,
-                      transition: "opacity 0.6s ease",
-                    }}
-                  />
-                ))}
-
-                {heroImages.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => goToHeroImage("prev")}
-                      aria-label="이전 사진"
-                      style={{
-                        position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)",
-                        width: "36px", height: "36px", borderRadius: "50%",
-                        backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
-                        border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 2,
-                      }}
-                    >
-                      ‹
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => goToHeroImage("next")}
-                      aria-label="다음 사진"
-                      style={{
-                        position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
-                        width: "36px", height: "36px", borderRadius: "50%",
-                        backgroundColor: "rgba(23, 20, 17, 0.75)", color: "#FFFFFF",
-                        border: "1px solid rgba(255, 255, 255, 0.25)", backdropFilter: "blur(4px)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        cursor: "pointer", fontSize: "1.3rem", lineHeight: 1, zIndex: 2,
-                      }}
-                    >
-                      ›
-                    </button>
-                    <div style={{ position: "absolute", bottom: "12px", left: "50%", transform: "translateX(-50%)", display: "flex", gap: "6px", zIndex: 2 }}>
-                      {heroImages.map((_, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => { pauseHeroAutoAdvance(); setHeroImageIndex(idx); }}
-                          aria-label={`${idx + 1}번째 사진으로 이동`}
-                          style={{
-                            width: "6px", height: "6px", borderRadius: "50%", padding: 0, border: "none", cursor: "pointer",
-                            background: idx === heroImageAt ? "#FFFFFF" : "rgba(255,255,255,0.45)",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "10px", marginBottom: "8px" }}>
-                <h1 style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.4rem)", fontWeight: 900, color: "var(--navy)", margin: 0, letterSpacing: "-0.03em" }}>
-                  {artist.name}
-                </h1>
-                {artist.name_en && (
-                  <span className="mono" style={{ fontSize: "0.85rem", color: "var(--ink-muted)" }}>{artist.name_en}</span>
-                )}
-                {artist.verified && (
-                  <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 7px", borderRadius: "8px" }}>
-                    POPOK VERIFIED
-                  </span>
-                )}
-              </div>
-
-              {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).length > 0 && (
-                <span className="mono" style={{ fontSize: "0.75rem", color: "var(--accent-dark)", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", display: "block", marginBottom: "16px" }}>
-                  {[artist.role, artist.genre, artist.category, artist.city_or_region].filter(Boolean).join(" · ")}
-                </span>
-              )}
-
-              {artist.bio_short && (
-                <p style={{ fontSize: "1rem", color: "var(--navy)", lineHeight: 1.6, margin: "0 0 24px", maxWidth: "560px" }}>
-                  {artist.bio_short}
-                </p>
-              )}
-
-              {/* Connected organization */}
-              <div style={{ marginBottom: "24px" }}>
-                <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-                  CONNECTED ORGANIZATION
-                </span>
-                {artist.connectedCompany ? (
-                  <Link
-                    href={getCompanyDetailHref(artist.connectedCompany.company.slug || artist.connectedCompany.company.id)}
-                    className="connected-org-card"
-                    style={{
-                      display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
-                      padding: "10px", borderRadius: "4px", border: "1px solid var(--border)",
-                      background: "#FAF9F5", transition: "background 0.15s ease", minWidth: 0, maxWidth: "420px",
-                    }}
-                  >
-                    <img
-                      src={artist.connectedCompany.company.profile_image_url || "/images/placeholders/cake-placeholder.png"}
-                      alt={artist.connectedCompany.company.name}
-                      style={{ width: "40px", height: "40px", borderRadius: "4px", objectFit: "cover", flexShrink: 0 }}
-                    />
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                        <span style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
-                          {artist.connectedCompany.company.name}
-                        </span>
-                        {artist.connectedCompany.company.verified && (
-                          <span style={{ fontSize: "0.56rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "7px", whiteSpace: "nowrap" }}>
-                            POPOK VERIFIED
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
-                        {[artist.connectedCompany.role, artist.connectedCompany.company.genre, artist.connectedCompany.company.city_or_region].filter(Boolean).join(" · ")}
-                      </div>
-                    </div>
-                  </Link>
-                ) : artist.company ? (
-                  <Link
-                    href={`/organizations/apply?orgName=${encodeURIComponent(artist.company)}`}
-                    className="connected-org-card"
-                    style={{
-                      display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
-                      padding: "10px", borderRadius: "4px", border: "1px dashed var(--border-dark)",
-                      background: "#FAF9F5", transition: "background 0.15s ease", minWidth: 0, maxWidth: "420px",
-                    }}
-                  >
-                    <div style={{
-                      width: "40px", height: "40px", borderRadius: "4px", background: "#FAF9F5",
-                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", flexShrink: 0,
-                    }}>
-                      🏢
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
-                        {artist.company}
-                      </div>
-                      <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
-                        아직 POPOK 등록 전
-                      </div>
-                    </div>
-                  </Link>
-                ) : (
-                  <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: 0 }}>
-                    현재 연결된 단체가 없습니다.
-                  </p>
-                )}
-              </div>
-
-              {/* SNS / Website / Portfolio / Share */}
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "16px" }}>
-                {contactCandidates.map((c, idx) => (
-                  <a
-                    key={idx}
-                    href={c.href}
-                    target={c.href.startsWith("mailto:") ? undefined : "_blank"}
-                    rel="noopener noreferrer"
-                    style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}
-                  >
-                    {c.label} ↗
-                  </a>
-                ))}
+        {/* ──────────────── V2 PUBLIC PAGE (feature/home-feed-v2) — a visual
+            work archive, not a profile-first brochure: minimal header, then
+            straight into the full work gallery (no large hero poster —
+            removed per feedback). Bio/history/career move further down. ──────────────── */}
+        <section style={{ ...SECTION_STYLE, paddingTop: 0, borderBottom: "none" }}>
+          <ArtistMinimalHeader
+            name={artist.name}
+            nameEn={artist.name_en}
+            verified={artist.verified}
+            roleLine={roleLine}
+            currentActivityLine={currentActivityLine}
+            profileImage={artist.profile_image_url || artist.profileImage || null}
+            actions={
+              <>
+                <ConnectCta
+                  target={portfolioTarget}
+                  viewerState={portfolioViewerState}
+                  currentPath={pathname}
+                  onToast={triggerToast}
+                  compact
+                />
                 <button
+                  type="button"
                   onClick={handleShareUrl}
                   style={{
                     background: "none", border: "1px solid var(--navy)", borderRadius: "999px",
-                    padding: "6px 16px", fontSize: "0.78rem", fontWeight: 800, color: "var(--navy)", cursor: "pointer",
+                    padding: "8px 16px", fontSize: "0.78rem", fontWeight: 800, color: "var(--navy)", cursor: "pointer",
                   }}
                 >
                   Share
                 </button>
-              </div>
-
-              <div style={{ marginTop: "20px" }}>
-                <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 700 }}>
-                  조회수 {(artist.view_count ?? 0).toLocaleString("ko-KR")}회
-                </span>
-              </div>
-            </div>
-
-            {/* Right: small Digital Portfolio Preview — the full flip card + QR/share actions live in the Digital Card section at the bottom of the page */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-              <span className="mono" style={{ fontSize: "0.62rem", color: "var(--ink-faint)", fontWeight: 700, letterSpacing: "0.1em" }}>
-                DIGITAL PORTFOLIO PREVIEW
-              </span>
-              {/* PopokCard is designed at up to 310px wide with fixed (non-relative)
-                  padding/font-sizes inside — squeezing it into a narrower maxWidth
-                  directly clips its footer row (barcode + portfolio URL). Render it
-                  at its natural width and scale the whole block down uniformly
-                  instead, same technique as the homepage hero's .hero-card-scale. */}
-              <div style={{ width: "220px", height: "370px", display: "flex", justifyContent: "center" }}>
-                <div style={{ width: "310px", flexShrink: 0, transform: "scale(0.7097)", transformOrigin: "top center" }}>
-                  <PopokCard
-                    name={artist.name}
-                    nameEn={artist.name_en || undefined}
-                    genre={artist.genre}
-                    instagram={artist.instagram}
-                    id={String(artist.recordId || artist.id || "")}
-                    slug={artist.slug || artist.id || id}
-                    profileImage={artist.profile_image_url || undefined}
-                    flipped={heroCardFlip.flipped}
-                    onFlipChange={heroCardFlip.onFlipChange}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+              </>
+            }
+          />
         </section>
 
-        {/* ──────────────── UPCOMING PERFORMANCE — reuses the company page's component, hidden entirely when empty ──────────────── */}
-        <CompanyUpcomingPerformances performances={upcomingPerformances} showEmptyState={false} />
-
-        {/* ──────────────── MOTION PROFILE (kept, widened/de-boxed so the video reads as the section's main content) ──────────────── */}
         <section style={SECTION_STYLE}>
-          <SectionHeader eyebrow="Motion Profile Preview" description="15초 모션 프로필 미리보기" />
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <MotionProfile
-              name={artist.name}
-              genre={artist.genre}
-              image={artist.profile_image_url || (Array.isArray(artist.profile_image_urls) && artist.profile_image_urls[0]) || artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
-              quote={artist.bio_short}
-              videoUrl={representativeVideoUrl}
-            />
-          </div>
-        </section>
-
-        {/* ── 2.5. VIDEO PROFILE (Additional Video Section) ── */}
-        {artist.youtube_url && (
-          <section style={{ ...SECTION_STYLE, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <div style={{ maxWidth: "600px", width: "100%", textAlign: "center", marginBottom: "24px" }}>
-              <span className="mono" style={{ fontSize: "0.72rem", color: "var(--accent-dark)", fontWeight: 850, letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                Video Profile
-              </span>
-              <h3 style={{ fontSize: "1.4rem", fontWeight: 900, color: "var(--navy)", marginTop: "4px", letterSpacing: "-0.02em" }}>
-                소개 및 하이라이트 영상
-              </h3>
-            </div>
-
-            <div style={{
-              width: "100%",
-              maxWidth: "720px",
-              aspectRatio: "16 / 9",
-              background: "#171411",
-              borderRadius: "20px",
-              border: "2px solid var(--navy)",
-              boxShadow: "0 20px 40px rgba(23, 20, 17, 0.15)",
-              overflow: "hidden",
-            }}>
-              {(() => {
-                const url = artist.youtube_url;
-                const isYt = isYouTubeUrl(url);
-                const isVim = isVimeoUrl(url);
-                const isDirect = isDirectVideoUrl(url);
-
-                if (isYt) {
-                  const ytEmbed = getYouTubeEmbedUrl(url);
-                  return (
-                    <iframe
-                      src={ytEmbed ? `${ytEmbed}?autoplay=0&controls=1&rel=0` : ""}
-                      style={{ width: "100%", height: "100%", border: 0 }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title="YouTube video player"
-                    />
-                  );
-                } else if (isVim) {
-                  const vimEmbed = getVimeoEmbedUrl(url, false);
-                  return (
-                    <iframe
-                      src={vimEmbed || ""}
-                      style={{ width: "100%", height: "100%", border: 0 }}
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
-                      title="Vimeo video player"
-                    />
-                  );
-                } else if (isDirect) {
-                  return (
-                    <video
-                      src={url}
-                      controls
-                      playsInline
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  );
-                }
-                return (
-                  <div style={{ display: "flex", alignItems: "center", justifyItems: "center", height: "100%", color: "#999", padding: "20px", textAlign: "center" }}>
-                    재생할 수 없는 영상 주소입니다.
-                  </div>
-                );
-              })()}
-            </div>
-          </section>
-        )}
-
-        {/* ──────────────── SELECTED WORKS — large-image project gallery, 2-col desktop / 1-col mobile ──────────────── */}
-        <section style={SECTION_STYLE}>
-          <SectionHeader eyebrow="Selected Works" meta={`${displayWorks.length} WORKS ARCHIVED`} />
-
+          <SectionHeader eyebrow="Works" meta={`${displayWorks.length} WORKS ARCHIVED`} />
           {displayWorks.length === 0 ? (
             <div style={{ padding: "50px 24px", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "4px", color: "var(--ink-muted)", fontSize: "0.82rem" }}>
               등록된 작품 포트폴리오가 없습니다.
             </div>
           ) : (
-            <div className="works-grid">
-              {displayWorks.map((work) => (
-                <div
-                  key={work.id}
-                  className="work-tile"
-                  onClick={() => setActiveWork(work)}
-                  style={{ display: "flex", flexDirection: "column", height: "100%" }}
-                >
-                  {/* Image — ~78% of the tile; hover reveals a zoom + arrow + "View Detail" overlay instead of a card lift */}
-                  <div className="work-tile-image-wrapper">
-                    {work.image && !work.image.includes("cake-placeholder") ? (
-                      <img
-                        src={work.image}
-                        alt={work.title}
-                        className="work-tile-image"
-                      />
-                    ) : (
-                      /* Same "no image" placeholder treatment as the Company Detail portfolio grid */
-                      <div style={{
-                        width: "100%", height: "100%", display: "flex", flexDirection: "column",
-                        alignItems: "center", justifyContent: "center", background: "#FAF8F5", gap: "8px",
-                      }}>
-                        <span style={{
-                          fontWeight: 950, fontSize: "1rem", color: "var(--navy)", letterSpacing: "-0.04em",
-                          display: "flex", alignItems: "center", gap: "2px"
-                        }}>
-                          POPOK
-                          <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
-                        </span>
-                        <span style={{ fontSize: "0.58rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                          준비중
-                        </span>
-                      </div>
-                    )}
-
-                    <span style={{
-                      position: "absolute", top: "10px", right: "10px", background: "var(--navy)",
-                      color: "#FFFFFF", padding: "3px 8px", borderRadius: "2px", fontSize: "0.62rem",
-                      fontWeight: 700, zIndex: 1
-                    }}>
-                      {work.year}
-                    </span>
-
-                    <div className="work-tile-hover-overlay">
-                      <span className="mono" style={{ fontSize: "0.75rem", fontWeight: 800, color: "#FFFFFF", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                        View Detail <span>→</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Caption */}
-                  <div style={{ paddingTop: "14px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
-                    <div className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", display: "flex", alignItems: "center", gap: "6px", textTransform: "uppercase" }}>
-                      {(work.role || work.genre) && (
-                        <span style={{ fontWeight: 700, color: "var(--accent-dark)" }}>
-                          {[work.role, work.genre].filter(Boolean).join(" · ")}
-                        </span>
-                      )}
-                      {work.venue && <span>· {work.venue}</span>}
-                    </div>
-                    <h4 style={{
-                      fontSize: "1.1rem", fontWeight: 800, color: "var(--navy)", margin: "6px 0 2px",
-                      letterSpacing: "-0.01em", lineHeight: 1.35,
-                      display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
-                    }}>
-                      {work.title}
-                    </h4>
-                    {work.description && (
-                      <p style={{
-                        fontSize: "0.85rem", color: "var(--ink-muted)", lineHeight: 1.5, margin: "4px 0 0",
-                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"
-                      }}>
-                        {work.description}
-                      </p>
-                    )}
-
-                    {work.externalLink && (
-                      <div style={{ marginTop: "auto", paddingTop: "10px" }}>
-                        <a
-                          href={work.externalLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", textDecoration: "none" }}
-                        >
-                          외부 링크 ↗
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ArtistWorkGallery works={displayWorks} onSelectWork={openWorkDetail} />
           )}
+        </section>
+
+        {/* ──────────────── CONNECT — compact CTA right after the work
+            gallery, reusing the same ConnectCta gate/modal logic as the
+            hero button above. Replaces the old large bottom
+            "내 포퐄 보내기" section (SendPortfolioSection is still used
+            as-is on the company page, just not here). ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <SectionHeader eyebrow="Connect" />
+          <p style={{ fontSize: "0.95rem", color: "var(--navy)", fontWeight: 700, margin: "0 0 4px" }}>
+            이 아티스트와 함께 작업하고 싶나요?
+          </p>
+          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "0 0 20px" }}>
+            내 포퐄과 간단한 제안을 보내보세요.
+          </p>
+          <ConnectCta
+            target={portfolioTarget}
+            viewerState={portfolioViewerState}
+            currentPath={pathname}
+            onToast={triggerToast}
+          />
+        </section>
+
+        {/* ──────────────── AI ARTIST DISCOVERY — real search against
+            /api/ai/discover-artists, scoped to this artist as context.
+            See components/ai/AiDiscoveryPanel.tsx. ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <SectionHeader eyebrow="AI Discovery" description="이 아티스트를 기준으로 비슷한 작업이나 협업 대상을 찾아보세요." />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <AiDiscoveryPrototype
+              variant="button"
+              label="이 아티스트와 비슷한 작업 찾기"
+              mode="similar"
+              contextArtistId={artist.recordId || artist.id}
+              contextArtistName={artist.name}
+              defaultQuery="이 아티스트와 비슷한 작업"
+              autoSearch
+            />
+            <AiDiscoveryPrototype variant="button" label="이런 스타일의 아티스트 찾기" mode="discover" />
+            <AiDiscoveryPrototype
+              variant="button"
+              label="협업할 만한 사람 찾기"
+              mode="collaborator"
+              contextArtistId={artist.recordId || artist.id}
+              contextArtistName={artist.name}
+              defaultQuery={`${artist.name}와(과) 협업할 아티스트`}
+            />
+          </div>
         </section>
 
         {/* ──────────────── ABOUT — plain readable layout, no card ──────────────── */}
@@ -1186,6 +736,77 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
+        {/* ──────────────── CONNECTED ORGANIZATION — eyebrow is "Affiliation"
+            rather than "Connect" so it doesn't collide with the portfolio-send
+            CONNECT section further up the page. ──────────────── */}
+        <section style={SECTION_STYLE}>
+          <SectionHeader eyebrow="Affiliation" description="소속 및 연결 단체" />
+          {artist.connectedCompany ? (
+            <Link
+              href={getCompanyDetailHref(artist.connectedCompany.company.slug || artist.connectedCompany.company.id)}
+              className="connected-org-card"
+              style={{
+                display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
+                padding: "10px", borderRadius: "4px", border: "1px solid var(--border)",
+                background: "#FAF9F5", transition: "background 0.15s ease", minWidth: 0, maxWidth: "420px",
+              }}
+            >
+              <img
+                src={artist.connectedCompany.company.profile_image_url || "/images/placeholders/cake-placeholder.png"}
+                alt={artist.connectedCompany.company.name}
+                style={{ width: "40px", height: "40px", borderRadius: "4px", objectFit: "cover", flexShrink: 0 }}
+              />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                  <span style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                    {artist.connectedCompany.company.name}
+                  </span>
+                  {artist.connectedCompany.company.verified && (
+                    <span style={{ fontSize: "0.56rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "7px", whiteSpace: "nowrap" }}>
+                      POPOK VERIFIED
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
+                  {[artist.connectedCompany.role, artist.connectedCompany.company.genre, artist.connectedCompany.company.city_or_region].filter(Boolean).join(" · ")}
+                </div>
+              </div>
+            </Link>
+          ) : artist.company ? (
+            <Link
+              href={`/organizations/apply?orgName=${encodeURIComponent(artist.company)}`}
+              className="connected-org-card"
+              style={{
+                display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
+                padding: "10px", borderRadius: "4px", border: "1px dashed var(--border-dark)",
+                background: "#FAF9F5", transition: "background 0.15s ease", minWidth: 0, maxWidth: "420px",
+              }}
+            >
+              <div style={{
+                width: "40px", height: "40px", borderRadius: "4px", background: "#FAF9F5",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", flexShrink: 0,
+              }}>
+                🏢
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                  {artist.company}
+                </div>
+                <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
+                  아직 POPOK 등록 전
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: 0 }}>
+              현재 연결된 단체가 없습니다.
+            </p>
+          )}
+        </section>
+
+        {/* ──────────────── UPCOMING PERFORMANCE — reuses the company page's component, hidden entirely when empty ──────────────── */}
+        <CompanyUpcomingPerformances performances={upcomingPerformances} showEmptyState={false} />
+
         {/* ──────────────── REVIEWS & ARTICLES — magazine style: quote / publisher / date / link, no cards ──────────────── */}
         {reviewItems.length > 0 && (
           <section style={SECTION_STYLE}>
@@ -1236,17 +857,33 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
-        {/* ──────────────── 9. DIGITAL CARD & SHARE ──────────────── */}
+        {/* ──────────────── DIGITAL CARD & SHARE ──────────────── */}
         <section style={{ ...SECTION_STYLE, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
             DIGITAL CARD & QR
           </span>
           <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", margin: 0, marginBottom: "6px" }}>
-            {artist.name} 작가의 명함을 공유해보세요
+            작업이 마음에 들었다면, {artist.name}와(과) POPOK으로 연결해보세요
           </h3>
-          <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", marginTop: 0, marginBottom: "28px" }}>
+          <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", marginTop: 0, marginBottom: "16px" }}>
             카드에 마우스를 올리거나 클릭하면 뒷면 QR 코드를 스캔할 수 있습니다.
           </p>
+
+          {contactCandidates.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "16px", marginBottom: "20px" }}>
+              {contactCandidates.map((c, idx) => (
+                <a
+                  key={idx}
+                  href={c.href}
+                  target={c.href.startsWith("mailto:") ? undefined : "_blank"}
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", textDecoration: "none" }}
+                >
+                  {c.label} ↗
+                </a>
+              ))}
+            </div>
+          )}
 
           {/* Visual 3D Flippable Digital Business Card */}
           <div style={{ marginBottom: "28px", width: "100%", display: "flex", justifyContent: "center" }}>
@@ -1287,10 +924,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </section>
 
-        {/* ──────────────── 더 탐색할 예술가들 — mirrors the company page's "You may also like" ──────────────── */}
-        <RelatedArtists artists={relatedArtists} />
-
-        {/* ──────────────── 10. FOOTER METRICS ──────────────── */}
+        {/* ──────────────── FOOTER METRICS ──────────────── */}
         <footer style={{
           display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "20px",
           padding: "24px 0",
@@ -1318,33 +952,6 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           onClose={() => setActiveWork(null)}
         />
       )}
-
-      {/* 포퐄 보내기 CTA — was previously nested inside the
-          `{activeWork && (...)}` work-detail bottom
-          sheet fragment above, which only renders after a viewer clicks
-          into a specific work. That meant this section never mounted
-          during normal browsing at all (true for every viewer state,
-          including logged-out), regardless of the viewer-state fetch or
-          isSelf logic. It now sits at the top level of the page so it
-          always mounts once the artist record has loaded. `artist.status`
-          is not gated further here — /api/artists/[id] (via
-          getArtistById/getArtistBySlug in lib/artists.ts) does not filter
-          by status at all, so a viewer already looking at this page has
-          already been served the artist regardless of status; the DB
-          default is also `status || "published"`. The viewer's own
-          profile is hidden via isSelf inside SendPortfolioSection, not
-          here. portfolioViewerState always has a value (defaults to the
-          logged-out shape) — never gated on it being "loaded" first, so a
-          slow/failed fetch can no longer hide this entire section.
-          Rendered directly (no wrapping container div) so it lays out
-          exactly like on the company page — SendPortfolioSection already
-          centers its own content at 1040px internally. */}
-      <SendPortfolioSection
-        target={{ type: "artist", id: artist.recordId || artist.id, name: artist.name, imageUrl: artist.profile_image_url || artist.profileImage || null }}
-        viewerState={portfolioViewerState}
-        currentPath={pathname}
-        onToast={triggerToast}
-      />
 
     </div>
   );

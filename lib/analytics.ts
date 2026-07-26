@@ -48,4 +48,13 @@ export const analytics = {
     trackEvent("search", { search_term: limited });
   },
   premiumClick: (location: string) => trackEvent("premium_click", { location }),
+  aiDiscoveryOpened: (location: string) => trackEvent("ai_discovery_opened", { location }),
+  aiDiscoverySearched: (mode: string, query: string) =>
+    trackEvent("ai_discovery_searched", { mode, query_length: query.trim().length }),
+  aiDiscoveryResultClicked: (artistId: string, position: number) =>
+    trackEvent("ai_discovery_result_clicked", { artist_id: artistId, position }),
+  aiSimilarArtistClicked: (contextArtistId: string) =>
+    trackEvent("ai_similar_artist_clicked", { context_artist_id: contextArtistId }),
+  aiDiscoveryNoResults: (mode: string) => trackEvent("ai_discovery_no_results", { mode }),
+  aiDiscoveryFailed: (mode: string, code?: string) => trackEvent("ai_discovery_failed", { mode, code }),
 };

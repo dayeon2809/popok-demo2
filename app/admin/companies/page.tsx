@@ -55,7 +55,7 @@ export default function AdminCompaniesPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
 
-  const authHeader = () => ({ "x-admin-passcode": sessionStorage.getItem("admin_passcode") || "" });
+  const authHeader = () => ({});
 
   const fetchCompanies = async (filter: FilterKey = activeFilter, search: string = searchQuery) => {
     setLoading(true);

@@ -47,15 +47,13 @@ export default function AdminOrganizationsPage() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const getPasscode = () => sessionStorage.getItem("admin_passcode") || "";
-
   const fetchApplications = async () => {
     setLoading(true);
     setError(null);
     try {
       const [appsRes, companiesRes] = await Promise.all([
-        fetch("/api/admin/organization-applications", { headers: { "x-admin-passcode": getPasscode() } }),
-        fetch("/api/admin/companies", { headers: { "x-admin-passcode": getPasscode() } }),
+        fetch("/api/admin/organization-applications", { headers: { } }),
+        fetch("/api/admin/companies", { headers: { } }),
       ]);
       const appsData = await appsRes.json();
       const companiesData = await companiesRes.json();
@@ -87,7 +85,7 @@ export default function AdminOrganizationsPage() {
     try {
       const res = await fetch(`/api/admin/organization-applications/${id}/approve`, {
         method: "POST",
-        headers: { "x-admin-passcode": getPasscode() },
+        headers: { },
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -107,7 +105,7 @@ export default function AdminOrganizationsPage() {
     try {
       const res = await fetch(`/api/admin/organization-applications/${id}/reject`, {
         method: "POST",
-        headers: { "x-admin-passcode": getPasscode() },
+        headers: { },
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -127,7 +125,7 @@ export default function AdminOrganizationsPage() {
     try {
       const res = await fetch(`/api/admin/organization-applications/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-passcode": getPasscode() },
+        headers: { "Content-Type": "application/json", },
         body: JSON.stringify({ status: "pending" }),
       });
       const data = await res.json();
@@ -147,7 +145,7 @@ export default function AdminOrganizationsPage() {
     setDownloadingId(id);
     try {
       const res = await fetch(`/api/admin/organization-applications/${id}/resume`, {
-        headers: { "x-admin-passcode": getPasscode() },
+        headers: { },
       });
       const data = await res.json();
       if (res.ok && data.success) {

@@ -1,3 +1,4 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
@@ -6,20 +7,13 @@ import { getPerformanceLifecycleStatus, isPerformanceDeletionPending } from "@/l
 
 export const dynamic = "force-dynamic";
 
-function checkAuth(req: NextRequest): boolean {
-  const passcode = req.headers.get("x-admin-passcode") || "";
-  const adminPasscode = process.env.ADMIN_PASSCODE || "1234";
-  return passcode.trim() === adminPasscode.trim();
-}
-
 const URL_PATTERN = /^https?:\/\/.+/i;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 // GET — the admin list. Support optional companyId query parameter.
 export async function GET(req: NextRequest) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   const { searchParams } = new URL(req.url);
   const companyId = searchParams.get("companyId");
@@ -79,9 +73,8 @@ export async function GET(req: NextRequest) {
 // (see [id]/route.ts) — kept in sync manually since this is a small,
 // single-purpose CMS with no shared validation module yet.
 export async function POST(req: NextRequest) {
-  if (!checkAuth(req)) {
-    return NextResponse.json({ success: false, error: "인증되지 않은 요청입니다." }, { status: 401 });
-  }
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
 
   try {
     const body = await req.json();

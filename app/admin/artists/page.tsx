@@ -1,7 +1,6 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 
@@ -127,11 +126,8 @@ const badgeStyle = (bg: string, color: string): React.CSSProperties => ({
 });
 
 export default function AdminArtistsPage() {
-  const router = useRouter();
-
   const showClaimCodes = false;
 
-  const [passcode, setPasscode] = useState("");
   const [artists, setArtists] = useState<AdminArtistRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -154,25 +150,15 @@ export default function AdminArtistsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const cached = sessionStorage.getItem("admin_passcode");
-    if (!cached) {
-      router.push("/admin");
-    } else {
-      setPasscode(cached);
-      fetchArtists(cached);
-    }
+    fetchArtists();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, []);
 
-  const fetchArtists = async (authCode?: string, sortOverride?: SortKey) => {
+  const fetchArtists = async (_authCode?: string, sortOverride?: SortKey) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/artists?sort=${sortOverride || sortOption}`, {
-        headers: {
-          "x-admin-passcode": authCode || passcode || sessionStorage.getItem("admin_passcode") || "",
-        },
-      });
+      const res = await fetch(`/api/admin/artists?sort=${sortOverride || sortOption}`);
       const json = await res.json();
       if (res.ok && json.data) {
         setArtists(json.data);
@@ -186,7 +172,7 @@ export default function AdminArtistsPage() {
     }
   };
 
-  const authHeader = () => ({ "x-admin-passcode": passcode || sessionStorage.getItem("admin_passcode") || "" });
+  const authHeader = () => ({});
 
   const duplicateIds = useMemo(() => computeDuplicateIds(artists), [artists]);
 

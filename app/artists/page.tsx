@@ -1,13 +1,10 @@
-import { Suspense } from "react";
-import ArtistsClient from "./ArtistsClient";
-import { LoadingSpinner } from "@/components/ui/States";
+import ArtistDiscoveryClient from "./ArtistDiscoveryClient";
+import { getPublishedArtists } from "@/lib/artists";
 
-export const metadata = { title: "아티스트 — POPOK" };
+export const dynamic = "force-dynamic";
+export const metadata = { title: "아티스트 탐색 — POPOK" };
 
-export default function ArtistsPage() {
-  return (
-    <Suspense fallback={<LoadingSpinner message="아티스트 목록을 불러오는 중..." />}>
-      <ArtistsClient />
-    </Suspense>
-  );
+export default async function ArtistsPage() {
+  const artists = await getPublishedArtists();
+  return <ArtistDiscoveryClient artists={artists} />;
 }

@@ -1,0 +1,6 @@
+<svg width="800" height="1200" viewBox="0 0 800 1200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="POPOK prototype placeholder — movement silhouette mood">
+  <title>mock placeholder — prototypeOnly</title>
+  <rect width="800" height="1200" fill="#F5F1E8"/>
+  <path d="M400,180 C440,180 470,210 470,255 C470,300 440,330 400,330 C450,360 480,460 460,560 C520,620 560,760 540,900 C620,960 660,1080 630,1200 L170,1200 C140,1080 180,960 260,900 C240,760 280,620 340,560 C320,460 350,360 400,330 C360,330 330,300 330,255 C330,210 360,180 400,180 Z" fill="#171411" opacity="0.88"/>
+  <circle cx="400" cy="255" r="45" fill="#171411" opacity="0.88"/>
+</svg>

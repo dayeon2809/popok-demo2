@@ -385,8 +385,8 @@ export default function ArtistsClient() {
         }
         .gallery-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 28px 24px;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 24px;
         }
         .gallery-card-wrapper {
           aspect-ratio: 0.68;

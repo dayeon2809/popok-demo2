@@ -140,7 +140,7 @@ export default function AdminCompanyClaimRequestsPage() {
 
       {!loading && !error && (
         <div style={{ display: "flex", flexDirection: "column", gap: "36px" }}>
-          
+
           {/* Section 1: Pending Claims */}
           <div>
             <h2 style={{ fontSize: "1.1rem", fontWeight: 850, color: "var(--navy)", marginBottom: "14px", display: "flex", alignItems: "center", gap: "8px" }}>

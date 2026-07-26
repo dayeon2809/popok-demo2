@@ -1,3 +1,4 @@
+import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 
@@ -7,6 +8,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
   try {
     const { id: requestId } = await params;
     const supabase = getSupabaseServer();

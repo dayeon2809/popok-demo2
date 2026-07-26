@@ -7,8 +7,11 @@ import AuthNav from "@/components/AuthNav";
 import { useLanguage, type Language } from "@/lib/useLanguage";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import { analytics } from "@/lib/analytics";
+import { SHOW_PREMIUM_UI } from "@/lib/featureFlags";
 
-const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (pathname: string) => boolean }> = [
+type NavItem = { href: string; label: Record<Language, string>; match: (pathname: string) => boolean };
+
+const ALL_NAV_ITEMS: NavItem[] = [
   {
     href: "/about",
     label: { ko: "소개", en: "About" },
@@ -25,6 +28,11 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
     match: (pathname) => pathname === "/companies" || pathname.startsWith("/companies/"),
   },
   {
+    href: "/calendar",
+    label: { ko: "공연", en: "Performances" },
+    match: (pathname) => pathname === "/calendar",
+  },
+  {
     href: "/premium",
     label: { ko: "Premium", en: "Premium" },
     match: (pathname) => pathname === "/premium",
@@ -35,6 +43,11 @@ const NAV_ITEMS: Array<{ href: string; label: Record<Language, string>; match: (
     match: () => false,
   },
 ];
+
+// NAV_ITEMS is what the header actually renders — ALL_NAV_ITEMS keeps the
+// literal array's contextual typing (the `.filter()` below would otherwise
+// break inference on each item's `match` parameter).
+const NAV_ITEMS: NavItem[] = ALL_NAV_ITEMS.filter((item) => SHOW_PREMIUM_UI || item.href !== "/premium");
 
 export default function Header() {
   const pathname = usePathname();
