@@ -225,6 +225,7 @@ export default function CompanyDiscoveryPanel({
             e.preventDefault();
             runSearch(query);
           }}
+          className="discovery-search-form"
           style={{ display: "flex", gap: "8px", padding: "16px 20px" }}
         >
           <input

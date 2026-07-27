@@ -27,6 +27,7 @@ import WorkDetailModal from "@/components/works/WorkDetailModal";
 import ArtistMinimalHeader from "@/components/artists/ArtistMinimalHeader";
 import ArtistWorkGallery from "@/components/artists/ArtistWorkGallery";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
+import RelatedArtists from "@/components/RelatedArtists";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -88,6 +89,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [toastMsg, setToastMsg] = useState("");
   const [portfolioViewerState, setPortfolioViewerState] = useState<PortfolioRequestViewerState>(DEFAULT_PORTFOLIO_VIEWER_STATE);
   const [upcomingPerformances, setUpcomingPerformances] = useState<Performance[]>([]);
+  const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
   const digitalCardFlip = useAutoFlip();
   const pathname = usePathname();
 
@@ -139,6 +141,22 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       })
       .catch(() => {
         // Non-critical section — never break the detail page.
+      });
+  }, [artist?.recordId]);
+  // Fetch related artists
+  useEffect(() => {
+    const recordId = artist?.recordId;
+    if (!recordId) return;
+    fetch(`/api/artists/${encodeURIComponent(recordId)}/related`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.debug("[artist related] response", { recordId, res });
+        }
+        if (Array.isArray(res?.data)) setRelatedArtists(res.data);
+      })
+      .catch((err) => {
+        console.error("[artist related] fetch failed", err);
       });
   }, [artist?.recordId]);
 
@@ -892,6 +910,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             </button>
           </div>
         </section>
+
+        {/* ──────────────── 더 탐색할 예술가들 — mirrors the company page's "You may also like" ──────────────── */}
+        <RelatedArtists artists={relatedArtists} />
 
         {/* ──────────────── FOOTER METRICS ──────────────── */}
         <footer style={{

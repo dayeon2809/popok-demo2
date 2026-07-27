@@ -295,6 +295,7 @@ export default function AiDiscoveryPanel({
             e.preventDefault();
             runSearch(query, activeContextId, activeMode);
           }}
+          className="discovery-search-form"
           style={{ display: "flex", gap: "8px", padding: "16px 20px" }}
         >
           <input
