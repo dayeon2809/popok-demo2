@@ -594,6 +594,25 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           ← 아티스트 둘러보기
         </button>
 
+        {/* ──────────────── DIGITAL CARD — shown first, mirroring the company
+            detail page's card-stack-up-top layout (see
+            app/companies/[slug]/CompanyClientView.tsx), before Works. Just
+            the card itself — no heading/QR/share here, see the Send POPOK
+            CTA near the bottom for those. ──────────────── */}
+        <section style={{ ...SECTION_STYLE, paddingTop: 0, borderBottom: "none", display: "flex", justifyContent: "center" }}>
+          <PopokCard
+            name={artist.name}
+            nameEn={artist.name_en || undefined}
+            genre={artist.genre}
+            instagram={artist.instagram}
+            id={String(artist.recordId || artist.id || "")}
+            slug={artist.slug || artist.id || id}
+            profileImage={artist.profile_image_url || undefined}
+            flipped={digitalCardFlip.flipped}
+            onFlipChange={digitalCardFlip.onFlipChange}
+          />
+        </section>
+
         {/* ──────────────── V2 PUBLIC PAGE (feature/home-feed-v2) — a visual
             work archive, not a profile-first brochure: minimal header, then
             straight into the full work gallery (no large hero poster —
@@ -947,36 +966,15 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
-        {/* ──────────────── DIGITAL CARD & SHARE ──────────────── */}
+        {/* ──────────────── SEND POPOK CTA — mirrors the company page's
+            bottom-of-page send section (SendPortfolioSection); the digital
+            card itself now lives up top, this just has the share/QR actions
+            and the send action. ──────────────── */}
         <section style={{ ...SECTION_STYLE, textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink-faint)", fontWeight: 800, letterSpacing: "0.1em", display: "block", marginBottom: "8px" }}>
-            DIGITAL CARD & QR
-          </span>
-          <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", margin: 0, marginBottom: "6px" }}>
+          <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", margin: 0, marginBottom: "16px" }}>
             작업이 마음에 들었다면, {artist.name}와(과) POPOK으로 연결해보세요
           </h3>
-          <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", marginTop: 0, marginBottom: "16px" }}>
-            카드에 마우스를 올리거나 클릭하면 뒷면 QR 코드를 스캔할 수 있습니다.
-          </p>
-
-          {/* Contact links moved to top header area */}
-
-          {/* Visual 3D Flippable Digital Business Card */}
-          <div style={{ marginBottom: "28px", width: "100%", display: "flex", justifyContent: "center" }}>
-            <PopokCard
-              name={artist.name}
-              nameEn={artist.name_en || undefined}
-              genre={artist.genre}
-              instagram={artist.instagram}
-              id={String(artist.recordId || artist.id || "")}
-              slug={artist.slug || artist.id || id}
-              profileImage={artist.profile_image_url || undefined}
-              flipped={digitalCardFlip.flipped}
-              onFlipChange={digitalCardFlip.onFlipChange}
-            />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginBottom: "20px" }}>
             <button
               onClick={handleShareUrl}
               style={{
@@ -998,16 +996,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               Save QR
             </button>
           </div>
-
-          <div style={{ marginTop: "16px" }}>
-            <ConnectCta
-              target={portfolioTarget}
-              viewerState={portfolioViewerState}
-              currentPath={pathname}
-              onToast={triggerToast}
-              label="내 포퐄 보내기"
-            />
-          </div>
+          <ConnectCta
+            target={portfolioTarget}
+            viewerState={portfolioViewerState}
+            currentPath={pathname}
+            onToast={triggerToast}
+            label="내 포퐄 보내기"
+            compact
+          />
         </section>
 
         {/* ──────────────── 더 탐색할 예술가들 — mirrors the company page's "You may also like" ──────────────── */}
