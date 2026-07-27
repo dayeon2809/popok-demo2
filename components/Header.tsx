@@ -33,9 +33,9 @@ const ALL_NAV_ITEMS: NavItem[] = [
     match: (pathname) => pathname === "/calendar",
   },
   {
-    href: "/premium",
-    label: { ko: "Premium", en: "Premium" },
-    match: (pathname) => pathname === "/premium",
+    href: "/popok-artist",
+    label: { ko: "POPOK Artist", en: "POPOK Artist" },
+    match: (pathname) => pathname === "/popok-artist",
   },
   {
     href: "/#faq",
@@ -47,7 +47,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
 // NAV_ITEMS is what the header actually renders — ALL_NAV_ITEMS keeps the
 // literal array's contextual typing (the `.filter()` below would otherwise
 // break inference on each item's `match` parameter).
-const NAV_ITEMS: NavItem[] = ALL_NAV_ITEMS.filter((item) => SHOW_PREMIUM_UI || item.href !== "/premium");
+const NAV_ITEMS: NavItem[] = ALL_NAV_ITEMS.filter((item) => SHOW_PREMIUM_UI || item.href !== "/popok-artist");
 
 export default function Header() {
   const pathname = usePathname();
@@ -148,7 +148,7 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => {
-                  if (item.href === "/premium") {
+                  if (item.href === "/popok-artist") {
                     analytics.premiumClick("header");
                   }
                 }}
@@ -272,7 +272,7 @@ export default function Header() {
                 href={item.href}
                 onClick={() => {
                   setMenuOpen(false);
-                  if (item.href === "/premium") {
+                  if (item.href === "/popok-artist") {
                     analytics.premiumClick("header");
                   }
                 }}

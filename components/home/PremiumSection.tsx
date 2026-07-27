@@ -27,7 +27,7 @@ export default function PremiumSection() {
             background: "var(--accent)", padding: "4px 10px", borderRadius: "20px",
             letterSpacing: "0.03em", marginBottom: "20px",
           }}>
-            POPOK Premium
+            POPOK Artist
           </span>
 
           <h2 className="display" style={{
@@ -48,7 +48,7 @@ export default function PremiumSection() {
           </p>
 
           <Link
-            href="/premium"
+            href="/popok-artist"
             onClick={() => analytics.premiumClick("home_premium_section")}
             className="btn-lime"
             style={{
@@ -62,7 +62,7 @@ export default function PremiumSection() {
               gap: "8px",
             }}
           >
-            Premium 알아보기 <span style={{ fontSize: "1.05rem" }}>→</span>
+            POPOK Artist 알아보기 <span style={{ fontSize: "1.05rem" }}>→</span>
           </Link>
         </div>
 
@@ -73,7 +73,7 @@ export default function PremiumSection() {
           padding: "28px 24px",
         }}>
           <span className="mono" style={{ display: "block", marginBottom: "16px", color: "rgba(255,255,255,0.55)" }}>
-            PREMIUM이 관리하는 것들
+            POPOK Artist가 관리하는 것들
           </span>
           <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
             {PREMIUM_PLAN.features.map((feature) => (

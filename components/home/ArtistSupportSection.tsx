@@ -92,7 +92,7 @@ export default function ArtistSupportSection() {
                     background: "var(--accent)", padding: "2px 7px", borderRadius: "6px",
                     letterSpacing: "0.02em",
                   }}>
-                    Premium
+                    POPOK Artist
                   </span>
                 )}
               </div>

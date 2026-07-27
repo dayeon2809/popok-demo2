@@ -228,7 +228,7 @@ export default function MyPopokClient({
   // Dynamic Status Badge mapping
   const statusConfig = useMemo(() => {
     if (artist.verified) {
-      return { label: "🔵 Premium 관리중", color: "#EFF6FF", textColor: "#1D4ED8", borderColor: "#BFDBFE" };
+      return { label: "🔵 POPOK Artist 관리중", color: "#EFF6FF", textColor: "#1D4ED8", borderColor: "#BFDBFE" };
     }
     if (artist.status === "published") {
       return { label: "🟢 공개중", color: "#ECFDF5", textColor: "#047857", borderColor: "#A7F3D0" };
@@ -1550,10 +1550,10 @@ export default function MyPopokClient({
 
                 {/* Premium 안내 카드 */}
                 <div style={{ padding: "20px", background: "var(--navy)", borderRadius: "14px", color: "#FFFFFF", textAlign: "center" }}>
-                  <strong>✨ POPOK Premium (Coming Soon)</strong>
+                  <strong>✨ POPOK Artist (Coming Soon)</strong>
                   <p style={{ fontSize: "0.82rem", color: "#CBD5E1", margin: "8px 0 14px", lineHeight: 1.6 }}>
                     현재는 오픈 기념으로 모든 기능을 무료로 이용하실 수 있습니다.<br />
-                    앞으로 AI 활동 관리, 자동 포트폴리오 업데이트, 공연 홍보 등 다양한 Premium 기능이 추가될 예정입니다.<br />
+                    앞으로 AI 활동 관리, 자동 포트폴리오 업데이트, 공연 홍보 등 다양한 POPOK Artist 기능이 추가될 예정입니다.<br />
                     감사합니다 💚
                   </p>
                   <button

@@ -43,7 +43,7 @@ export default function AboutArtistSupportSection() {
         </h2>
         <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", fontWeight: 600, lineHeight: 1.65, margin: 0 }}>
           기본 등록만으로도 활동을 기록하고 공유할 수 있어요.
-          Premium은 그 관리를 POPOK 팀이 함께합니다.
+          POPOK Artist는 그 관리를 POPOK 팀이 함께합니다.
         </p>
       </div>
 
@@ -90,7 +90,7 @@ export default function AboutArtistSupportSection() {
           flexDirection: "column",
         }}>
           <span className="mono" style={{ display: "block", marginBottom: "16px", color: "var(--accent)" }}>
-            Premium
+            POPOK Artist
           </span>
           <div style={{ display: "flex", flexDirection: "column", gap: "12px", flexGrow: 1 }}>
             {PREMIUM_ITEMS.map((item) => (
@@ -107,7 +107,7 @@ export default function AboutArtistSupportSection() {
               </div>
             ))}
           </div>
-          <Link href="/premium" style={{
+          <Link href="/popok-artist" style={{
             marginTop: "22px",
             textDecoration: "none",
             alignSelf: "flex-start",
@@ -117,7 +117,7 @@ export default function AboutArtistSupportSection() {
             borderBottom: "1.5px solid var(--accent)",
             paddingBottom: "2px",
           }}>
-            Premium 알아보기 →
+            POPOK Artist 알아보기 →
           </Link>
         </div>
       </div>

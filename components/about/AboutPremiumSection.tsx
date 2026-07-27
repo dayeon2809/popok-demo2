@@ -29,7 +29,7 @@ export default function AboutPremiumSection() {
           transition={{ duration: 0.6 }}
         >
           <span className="mono" style={{ display: "block", marginBottom: "12px", color: "var(--ink-muted)", fontWeight: 700 }}>
-            POPOK PREMIUM
+            POPOK ARTIST
           </span>
           <h2 className="display" style={{
             fontSize: "clamp(1.6rem, 3.6vw, 2.3rem)",
@@ -43,13 +43,13 @@ export default function AboutPremiumSection() {
             <span className="seen-highlight" style={{ paddingBottom: "2px" }}>처음부터 다시 정리</span>하지 않아도 되도록
           </h2>
           <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", lineHeight: 1.8, marginBottom: "32px", maxWidth: "480px", fontWeight: 500 }}>
-            POPOK Premium은 기능을 더 많이 제공하는 요금제에 그치지 않고,
+            POPOK Artist는 기능을 더 많이 제공하는 요금제에 그치지 않고,
             예술가의 포트폴리오가 계속 이어질 수 있도록
             정리와 업데이트의 부담을 줄여주는 서비스입니다.
           </p>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ display: "inline-block" }}>
             <Link
-              href="/premium"
+              href="/popok-artist"
               onClick={() => analytics.premiumClick("about_premium_section")}
               className="btn-lime premium-cta-btn"
               style={{
@@ -64,7 +64,7 @@ export default function AboutPremiumSection() {
                 boxShadow: "0 4px 14px rgba(200,238,82,0.3)"
               }}
             >
-              Premium 알아보기 
+              POPOK Artist 알아보기 
               <span className="arrow" style={{ fontSize: "1.05rem", transition: "transform 0.2s" }}>→</span>
             </Link>
           </motion.div>
