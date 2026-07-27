@@ -519,6 +519,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             width: 100%;
             text-align: center;
           }
+          .works-list-row {
+            grid-template-columns: 44px 1fr auto !important;
+            gap: 10px !important;
+          }
         }
         .connected-org-card:hover {
           background: #F0EDE4 !important;
@@ -756,25 +760,26 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   key={work.id}
                   type="button"
                   onClick={() => openWorkDetail(work.id)}
+                  className="works-list-row"
                   style={{
-                    display: "grid", gridTemplateColumns: "80px 1fr auto", gap: "16px", alignItems: "center",
+                    display: "grid", gridTemplateColumns: "56px 1fr auto", gap: "14px", alignItems: "center",
                     padding: "14px 0", border: "none", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
                     background: "none", width: "100%", textAlign: "left", cursor: "pointer",
                     font: "inherit", color: "inherit",
                   }}
                 >
-                  <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
-                    {work.year}
-                  </span>
+                  <img
+                    src={work.image}
+                    alt=""
+                    style={{ width: "56px", height: "56px", borderRadius: "6px", objectFit: "cover", flexShrink: 0, background: "#EAE6DD" }}
+                  />
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", margin: 0, overflowWrap: "break-word", wordBreak: "keep-all" }}>
                       {work.title}
                     </p>
-                    {(work.genre || work.role || work.venue) && (
-                      <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", margin: "4px 0 0" }}>
-                        {[work.genre, work.role, work.venue].filter(Boolean).join(" · ")}
-                      </p>
-                    )}
+                    <p className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-muted)", margin: "4px 0 0" }}>
+                      {[work.year, work.genre, work.role, work.venue].filter(Boolean).join(" · ")}
+                    </p>
                   </div>
                   <span style={{ fontSize: "0.72rem", color: "var(--navy)", fontWeight: 800, whiteSpace: "nowrap" }}>
                     보기 →

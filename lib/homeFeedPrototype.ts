@@ -66,6 +66,7 @@ function artistFeedItems(artists: Artist[], seen: Set<string>): FeedItem[] {
   for (const artist of artists) {
     const href = `/artists/${encodeURIComponent(artist.slug || artist.id)}`;
     const works = normalizeWorks(artist.works);
+    const itemCountBeforeThisArtist = items.length;
     for (const work of works) {
       for (const img of work.images) {
         pushUnique(items, seen, {
@@ -85,6 +86,23 @@ function artistFeedItems(artists: Artist[], seen: Set<string>): FeedItem[] {
       pushUnique(items, seen, {
         id: `artist-profile-${artist.id}-${img}`,
         src: img,
+        href,
+        name: artist.name,
+        kind: "artist-profile",
+        source: "real",
+      });
+    }
+
+    // An artist with no work images and no profile photo would otherwise be
+    // completely invisible in the feed — give them a deterministic generated
+    // avatar (same dicebear convention used by RelatedArtists/ArtistsClient)
+    // instead of just dropping them. Pushed directly (not via pushUnique/
+    // seen) since two same-named photo-less artists would otherwise generate
+    // the same seed and the second one would get silently skipped.
+    if (items.length === itemCountBeforeThisArtist) {
+      items.push({
+        id: `artist-fallback-${artist.id}`,
+        src: `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name || artist.id)}`,
         href,
         name: artist.name,
         kind: "artist-profile",
@@ -114,6 +132,7 @@ function companyFeedItems(companies: Company[], seen: Set<string>): FeedItem[] {
   for (const company of companies) {
     const href = getCompanyDetailHref(company.slug || company.id);
     const works = normalizeWorks(company.works);
+    const itemCountBeforeThisCompany = items.length;
     for (const work of works) {
       for (const img of work.images) {
         pushUnique(items, seen, {
@@ -136,6 +155,19 @@ function companyFeedItems(companies: Company[], seen: Set<string>): FeedItem[] {
       pushUnique(items, seen, {
         id: `company-image-${company.id}-${img}`,
         src: img,
+        href,
+        name: company.name,
+        kind: "company-image",
+        source: "real",
+      });
+    }
+
+    // Same fallback as artistFeedItems above — a company with no work images
+    // and no representative/profile photo would otherwise never appear.
+    if (items.length === itemCountBeforeThisCompany) {
+      items.push({
+        id: `company-fallback-${company.id}`,
+        src: `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(company.name || company.id)}`,
         href,
         name: company.name,
         kind: "company-image",
