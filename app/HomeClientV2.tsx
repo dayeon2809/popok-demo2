@@ -26,13 +26,16 @@ import FAQSection from "@/components/FAQSection";
 // placeholder graphics are appended (see lib/homeFeedPrototype.ts).
 const FEED_DENSITY_TARGET = 48;
 
-function humanizeGenre(genre: string): string {
-  return genre
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
+// Top-level field categories — matches the original /artists directory's
+// CATEGORIES (ALL/DANCE/MUSIC/VISUAL). artist.field is already normalized to
+// one of these three by lib/artists.ts's mapArtistRowToArtist, so this is a
+// plain field match rather than the finer-grained (and much noisier)
+// per-artist genre string.
+const FIELD_OPTIONS = [
+  { key: "dance", label: "DANCE" },
+  { key: "music", label: "MUSIC" },
+  { key: "visual", label: "VISUAL" },
+];
 
 interface HomeClientV2Props {
   initialArtists: Artist[];
@@ -50,7 +53,7 @@ export default function HomeClientV2({
 }: HomeClientV2Props) {
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
-  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedField, setSelectedField] = useState("all");
 
   // "작업 올리기" — checks login before anything else (section 3 of the
   // upload-first brief). Logged out: through /auth's existing safe-redirect
@@ -67,23 +70,14 @@ export default function HomeClientV2({
     [initialArtists, showDraft]
   );
 
-  // Distinct genres present in the current published artists, for the genre
-  // filter pills below — derived from data rather than a fixed enum since
-  // artist.genre is a free-ish slug (see lib/artists.ts mapArtistRowToArtist).
-  const genreOptions = useMemo(() => {
-    const genres = new Set<string>();
-    publishedArtists.forEach((artist) => { if (artist.genre) genres.add(artist.genre); });
-    return Array.from(genres).sort();
-  }, [publishedArtists]);
-
   const feedItems = useMemo(() => {
-    const genreFiltered = selectedGenre === "all"
+    const fieldFiltered = selectedField === "all"
       ? publishedArtists
-      : publishedArtists.filter((artist) => artist.genre === selectedGenre);
+      : publishedArtists.filter((artist) => (artist.field || "dance") === selectedField);
     // Show only artists on the artist explore page
-    const real = buildRealFeedItems(genreFiltered, []);
+    const real = buildRealFeedItems(fieldFiltered, []);
     return padWithPlaceholders(real, FEED_DENSITY_TARGET);
-  }, [publishedArtists, selectedGenre]);
+  }, [publishedArtists, selectedField]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
@@ -99,37 +93,35 @@ export default function HomeClientV2({
         </div>
         <AiDiscoveryPrototype variant="bar" />
 
-        {genreOptions.length > 0 && (
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
+          <button
+            type="button"
+            onClick={() => setSelectedField("all")}
+            style={{
+              padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+              border: selectedField === "all" ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+              background: selectedField === "all" ? "var(--navy)" : "#FFFFFF",
+              color: selectedField === "all" ? "#FFFFFF" : "var(--ink-muted)",
+            }}
+          >
+            ALL
+          </button>
+          {FIELD_OPTIONS.map((opt) => (
             <button
+              key={opt.key}
               type="button"
-              onClick={() => setSelectedGenre("all")}
+              onClick={() => setSelectedField(opt.key)}
               style={{
                 padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
-                border: selectedGenre === "all" ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
-                background: selectedGenre === "all" ? "var(--navy)" : "#FFFFFF",
-                color: selectedGenre === "all" ? "#FFFFFF" : "var(--ink-muted)",
+                border: selectedField === opt.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                background: selectedField === opt.key ? "var(--navy)" : "#FFFFFF",
+                color: selectedField === opt.key ? "#FFFFFF" : "var(--ink-muted)",
               }}
             >
-              전체
+              {opt.label}
             </button>
-            {genreOptions.map((genre) => (
-              <button
-                key={genre}
-                type="button"
-                onClick={() => setSelectedGenre(genre)}
-                style={{
-                  padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
-                  border: selectedGenre === genre ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
-                  background: selectedGenre === genre ? "var(--navy)" : "#FFFFFF",
-                  color: selectedGenre === genre ? "#FFFFFF" : "var(--ink-muted)",
-                }}
-              >
-                {humanizeGenre(genre)}
-              </button>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
 
       <HomeVisualFeed items={feedItems} />

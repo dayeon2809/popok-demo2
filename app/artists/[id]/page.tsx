@@ -743,6 +743,48 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           </section>
         )}
 
+        {/* ──────────────── WORKS LIST — a plain text listing of every work
+            (title/year/role), below Career, so a visitor can scan and jump
+            straight to a specific piece instead of hunting through the photo
+            gallery above. Reuses the same click-to-open modal as the gallery. ──────────────── */}
+        {displayWorks.length > 0 && (
+          <section style={SECTION_STYLE}>
+            <SectionHeader eyebrow="Works List" description="작품별로 정리된 목록입니다. 클릭하면 상세 정보를 볼 수 있습니다." meta={`${displayWorks.length} WORKS`} />
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {displayWorks.map((work, idx) => (
+                <button
+                  key={work.id}
+                  type="button"
+                  onClick={() => openWorkDetail(work.id)}
+                  style={{
+                    display: "grid", gridTemplateColumns: "80px 1fr auto", gap: "16px", alignItems: "center",
+                    padding: "14px 0", border: "none", borderTop: idx > 0 ? "1px solid var(--border-light)" : "none",
+                    background: "none", width: "100%", textAlign: "left", cursor: "pointer",
+                    font: "inherit", color: "inherit",
+                  }}
+                >
+                  <span className="mono" style={{ fontSize: "0.72rem", color: "var(--ink-faint)", fontWeight: 700 }}>
+                    {work.year}
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)", margin: 0, overflowWrap: "break-word", wordBreak: "keep-all" }}>
+                      {work.title}
+                    </p>
+                    {(work.genre || work.role || work.venue) && (
+                      <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", margin: "4px 0 0" }}>
+                        {[work.genre, work.role, work.venue].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                  <span style={{ fontSize: "0.72rem", color: "var(--navy)", fontWeight: 800, whiteSpace: "nowrap" }}>
+                    보기 →
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ──────────────── CONNECTED ORGANIZATION — eyebrow is "Affiliation"
             rather than "Connect" so it doesn't collide with the portfolio-send
             CONNECT section further up the page. ──────────────── */}

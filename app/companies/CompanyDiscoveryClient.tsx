@@ -11,12 +11,23 @@ import FAQSection from "@/components/FAQSection";
 
 const FEED_DENSITY_TARGET = 48;
 
-function humanizeGenre(genre: string): string {
-  return genre
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+// Same top-level field categories as the Artists tab (app/HomeClientV2.tsx) —
+// ALL/DANCE/MUSIC/VISUAL. Company has no normalized `field` column the way
+// Artist does (see lib/artists.ts mapArtistRowToArtist), so classify from the
+// free-text genre/category fields via keyword match instead.
+const FIELD_OPTIONS = [
+  { key: "dance", label: "DANCE" },
+  { key: "music", label: "MUSIC" },
+  { key: "visual", label: "VISUAL" },
+];
+
+function classifyCompanyField(company: Company): string | null {
+  const text = `${company.genre || ""} ${company.category || ""}`.toLowerCase();
+  if (!text.trim()) return null;
+  if (/무용|발레|ballet|dance|안무/.test(text)) return "dance";
+  if (/음악|합주|오케스트라|orchestra|밴드|band|music|연주/.test(text)) return "music";
+  if (/미술|시각|설치|사진|media|visual|art|photo/.test(text)) return "visual";
+  return null;
 }
 
 interface CompanyDiscoveryClientProps {
@@ -31,7 +42,7 @@ export default function CompanyDiscoveryClient({
 }: CompanyDiscoveryClientProps) {
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
-  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedField, setSelectedField] = useState("all");
 
   const handleUploadClick = () => {
     const uploadPath = "/my-popok?upload=1";
@@ -43,23 +54,14 @@ export default function CompanyDiscoveryClient({
     [companies, showDraft]
   );
 
-  // Distinct genres present in the current published companies, for the
-  // genre filter pills below — derived from data rather than a fixed enum
-  // since company.genre is a free-text field (see lib/companies.ts).
-  const genreOptions = useMemo(() => {
-    const genres = new Set<string>();
-    publishedCompanies.forEach((c) => { if (c.genre) genres.add(c.genre); });
-    return Array.from(genres).sort();
-  }, [publishedCompanies]);
-
   const feedItems = useMemo(() => {
-    const genreFiltered = selectedGenre === "all"
+    const fieldFiltered = selectedField === "all"
       ? publishedCompanies
-      : publishedCompanies.filter((c) => c.genre === selectedGenre);
+      : publishedCompanies.filter((c) => classifyCompanyField(c) === selectedField);
     // Show only companies on the group explore page
-    const real = buildRealFeedItems([], genreFiltered);
+    const real = buildRealFeedItems([], fieldFiltered);
     return padWithPlaceholders(real, FEED_DENSITY_TARGET);
-  }, [publishedCompanies, selectedGenre]);
+  }, [publishedCompanies, selectedField]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
@@ -75,37 +77,35 @@ export default function CompanyDiscoveryClient({
         </div>
         <CompanyDiscoveryPrototype companies={companies} />
 
-        {genreOptions.length > 0 && (
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
+          <button
+            type="button"
+            onClick={() => setSelectedField("all")}
+            style={{
+              padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+              border: selectedField === "all" ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+              background: selectedField === "all" ? "var(--navy)" : "#FFFFFF",
+              color: selectedField === "all" ? "#FFFFFF" : "var(--ink-muted)",
+            }}
+          >
+            ALL
+          </button>
+          {FIELD_OPTIONS.map((opt) => (
             <button
+              key={opt.key}
               type="button"
-              onClick={() => setSelectedGenre("all")}
+              onClick={() => setSelectedField(opt.key)}
               style={{
                 padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
-                border: selectedGenre === "all" ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
-                background: selectedGenre === "all" ? "var(--navy)" : "#FFFFFF",
-                color: selectedGenre === "all" ? "#FFFFFF" : "var(--ink-muted)",
+                border: selectedField === opt.key ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                background: selectedField === opt.key ? "var(--navy)" : "#FFFFFF",
+                color: selectedField === opt.key ? "#FFFFFF" : "var(--ink-muted)",
               }}
             >
-              전체
+              {opt.label}
             </button>
-            {genreOptions.map((genre) => (
-              <button
-                key={genre}
-                type="button"
-                onClick={() => setSelectedGenre(genre)}
-                style={{
-                  padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
-                  border: selectedGenre === genre ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
-                  background: selectedGenre === genre ? "var(--navy)" : "#FFFFFF",
-                  color: selectedGenre === genre ? "#FFFFFF" : "var(--ink-muted)",
-                }}
-              >
-                {humanizeGenre(genre)}
-              </button>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
 
       <HomeVisualFeed items={feedItems} />

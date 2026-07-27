@@ -37,12 +37,13 @@ interface ArtistWorkGalleryProps {
 // "더 보기" toggle) for the same reason.
 export default function ArtistWorkGallery({ works, onSelectWork }: ArtistWorkGalleryProps) {
   const [expanded, setExpanded] = useState(false);
-  const items: GalleryItem[] = works
-    .map((work) => {
-      const src = work.images[0] || "";
-      return { key: work.id, src, work };
-    })
-    .filter((item) => item.src !== "");
+  // Every uploaded photo gets its own tile (not just one thumbnail per
+  // work) — each tile still links back to its parent work's detail modal.
+  const items: GalleryItem[] = works.flatMap((work) =>
+    work.images
+      .filter((src) => src !== "")
+      .map((src, idx) => ({ key: `${work.id}-${idx}`, src, work }))
+  );
 
   if (items.length === 0) return null;
 
