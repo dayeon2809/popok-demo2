@@ -11,7 +11,8 @@ interface ArtistMinimalHeaderProps {
   profileImage?: string | null;
   /** Share/연결하기 buttons, rendered on the right (desktop) — see app/artists/[id]/page.tsx */
   actions?: ReactNode;
-  contactCandidates?: Array<{ label: string; href: string }>;
+  contactCandidates?: Array<{ label: string; href: string; channel: string }>;
+  onContactClick?: (channel: string) => void;
 }
 
 // V2 public artist page — a deliberately small header (feature/home-feed-v2):
@@ -28,6 +29,7 @@ export default function ArtistMinimalHeader({
   profileImage,
   actions,
   contactCandidates,
+  onContactClick,
 }: ArtistMinimalHeaderProps) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", paddingBottom: "20px" }}>
@@ -66,6 +68,7 @@ export default function ArtistMinimalHeader({
                   href={c.href}
                   target={c.href.startsWith("mailto:") ? undefined : "_blank"}
                   rel="noopener noreferrer"
+                  onClick={() => onContactClick?.(c.channel)}
                   style={{
                     fontSize: "0.75rem",
                     fontWeight: 750,

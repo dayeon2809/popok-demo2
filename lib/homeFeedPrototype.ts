@@ -27,8 +27,10 @@ import { getCompanyDetailHref } from "@/lib/companyRoute";
 export type FeedItemKind =
   | "artist-work"
   | "artist-profile"
+  | "artist-video"
   | "company-work"
   | "company-image"
+  | "company-video"
   | "placeholder";
 
 export interface FeedItem {
@@ -40,6 +42,16 @@ export interface FeedItem {
   name: string | null;
   kind: FeedItemKind;
   source: "real" | "placeholder";
+  /** Present only for "artist-video"/"company-video" — `src` is the poster image for those. */
+  videoUrl?: string;
+}
+
+/** Motion-profile video for an artist/company, in priority order — same field my-popok's motion video editor writes to. */
+function getMotionVideoUrl(entity: { motion_video_url?: string | null; motionProfile?: { type: string; src: string } | null; youtube_url?: string | null }): string | null {
+  if (entity.motion_video_url) return entity.motion_video_url;
+  if (entity.motionProfile?.type === "video" && entity.motionProfile.src) return entity.motionProfile.src;
+  if (entity.youtube_url) return entity.youtube_url;
+  return null;
 }
 
 function pushUnique(list: FeedItem[], seen: Set<string>, item: FeedItem) {
@@ -79,6 +91,19 @@ function artistFeedItems(artists: Artist[], seen: Set<string>): FeedItem[] {
         source: "real",
       });
     }
+
+    const videoUrl = getMotionVideoUrl(artist);
+    if (videoUrl) {
+      items.push({
+        id: `artist-video-${artist.id}`,
+        src: profileImages[0] || "",
+        videoUrl,
+        href,
+        name: artist.name,
+        kind: "artist-video",
+        source: "real",
+      });
+    }
   }
   return items;
 }
@@ -114,6 +139,19 @@ function companyFeedItems(companies: Company[], seen: Set<string>): FeedItem[] {
         href,
         name: company.name,
         kind: "company-image",
+        source: "real",
+      });
+    }
+
+    const videoUrl = getMotionVideoUrl(company);
+    if (videoUrl) {
+      items.push({
+        id: `company-video-${company.id}`,
+        src: images[0] || "",
+        videoUrl,
+        href,
+        name: company.name,
+        kind: "company-video",
         source: "real",
       });
     }

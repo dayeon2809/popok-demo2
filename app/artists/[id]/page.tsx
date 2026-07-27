@@ -28,6 +28,8 @@ import ArtistMinimalHeader from "@/components/artists/ArtistMinimalHeader";
 import ArtistWorkGallery from "@/components/artists/ArtistWorkGallery";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import RelatedArtists from "@/components/RelatedArtists";
+import VideoEmbed from "@/components/VideoEmbed";
+import { useFireOnceInView } from "@/hooks/useFireOnceInView";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -92,6 +94,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
   const digitalCardFlip = useAutoFlip();
   const pathname = usePathname();
+  const worksSectionRef = useFireOnceInView<HTMLElement>(() => {
+    const key = artist?.recordId || artist?.id;
+    if (key) analytics.workGalleryScroll(key);
+  });
 
   const triggerToast = (msg: string) => {
     setToastMsg(msg);
@@ -263,6 +269,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       navigator.clipboard.writeText(window.location.href);
       triggerToast("포트폴리오 주소가 복사되었습니다.");
       analytics.profileShared("copy", "artist", artist?.slug || artist?.id || id);
+      analytics.artistShareClicked(artist?.recordId || artist?.id || id);
     }
   };
 
@@ -281,6 +288,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
       triggerToast("QR 코드 이미지가 저장되었습니다.");
+      analytics.artistQrSaved(artist?.recordId || artist?.id || id);
     } catch (error) {
       console.error("QR Download failed", error);
       window.open(qrUrl, "_blank");
@@ -298,6 +306,12 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       <ErrorMessage message={error ?? "아티스트를 찾을 수 없습니다."} />
     </div>
   );
+
+  const artistKey: string = artist.recordId || artist.id;
+  // youtube_url is the artist's own "유튜브 소개/하이라이트 영상 URL" (my-popok's
+  // dedicated intro/highlight field) — distinct from motion_video_url, which
+  // is the separate 15-second motion-profile loop used elsewhere.
+  const mainVideoUrl: string | null = artist.youtube_url || null;
 
   const cleanInstagramHandle = (url: string | null) => {
     if (!url) return "@username";
@@ -405,7 +419,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   }
 
   // ── Contact Info — priority-ordered, deduped, capped at 3.
-  interface ContactCandidate { label: string; href: string; }
+  interface ContactCandidate { label: string; href: string; channel: string; }
   function normalizeHref(raw: string): string {
     const trimmed = raw.trim();
     if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("mailto:")) return trimmed;
@@ -417,14 +431,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   }
   const contactCandidates: ContactCandidate[] = (() => {
     const list: ContactCandidate[] = [];
-    if (artist.instagram) list.push({ label: cleanInstagramHandle(artist.instagram), href: normalizeHref(artist.instagram) });
-    if (artist.website) list.push({ label: artist.website.replace(/^https?:\/\//, ""), href: normalizeHref(artist.website) });
-    if (artist.portfolio_url) list.push({ label: "Portfolio", href: normalizeHref(artist.portfolio_url) });
-    if (artist.email) list.push({ label: artist.email, href: `mailto:${artist.email}` });
-    if (artist.youtube_url) list.push({ label: "YouTube", href: normalizeHref(artist.youtube_url) });
+    if (artist.instagram) list.push({ label: cleanInstagramHandle(artist.instagram), href: normalizeHref(artist.instagram), channel: "instagram" });
+    if (artist.website) list.push({ label: artist.website.replace(/^https?:\/\//, ""), href: normalizeHref(artist.website), channel: "website" });
+    if (artist.portfolio_url) list.push({ label: "Portfolio", href: normalizeHref(artist.portfolio_url), channel: "link" });
+    if (artist.email) list.push({ label: artist.email, href: `mailto:${artist.email}`, channel: "email" });
+    if (artist.youtube_url) list.push({ label: "YouTube", href: normalizeHref(artist.youtube_url), channel: "link" });
     toObjectArray<{ url?: string; label?: string }>(artist.links).forEach((link) => {
       if (typeof link.url === "string" && link.url.trim()) {
-        list.push({ label: link.label || getReviewDomain(link.url), href: normalizeHref(link.url) });
+        list.push({ label: link.label || getReviewDomain(link.url), href: normalizeHref(link.url), channel: "link" });
       }
     });
 
@@ -447,7 +461,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
 
   const openWorkDetail = (workId: string) => {
     const work = displayWorks.find((w) => w.id === workId);
-    if (work) setActiveWork(work);
+    if (work) {
+      setActiveWork(work);
+      analytics.artistWorkOpened(artistKey, workId);
+    }
   };
 
   const portfolioTarget = { type: "artist" as const, id: artist.recordId || artist.id, name: artist.name, imageUrl: artist.profile_image_url || artist.profileImage || null };
@@ -557,6 +574,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         {/* Back Link — returns to whichever /artists filter view the user came from */}
         <button
           onClick={() => {
+            analytics.artistsBackClicked(artistKey);
             if (typeof window !== "undefined" && window.history.length > 1) {
               router.back();
             } else {
@@ -585,6 +603,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             currentActivityLine={currentActivityLine}
             profileImage={artist.profile_image_url || artist.profileImage || null}
             contactCandidates={contactCandidates}
+            onContactClick={(channel) => analytics.artistContactClicked(artistKey, channel)}
             actions={
               <>
                 <ConnectCta
@@ -609,7 +628,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           />
         </section>
 
-        <section style={SECTION_STYLE}>
+        <section ref={worksSectionRef} style={SECTION_STYLE}>
           <SectionHeader eyebrow="Works" meta={`${displayWorks.length} WORKS ARCHIVED`} />
           {displayWorks.length === 0 ? (
             <div style={{ padding: "50px 24px", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "4px", color: "var(--ink-muted)", fontSize: "0.82rem" }}>
@@ -617,6 +636,20 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             </div>
           ) : (
             <ArtistWorkGallery works={displayWorks} onSelectWork={openWorkDetail} />
+          )}
+
+          {/* Intro video — the artist's own introduction video, played in
+              full with normal controls (not a silent motion-profile-style
+              loop), shown right below the work gallery. */}
+          {mainVideoUrl && (
+            <div style={{ marginTop: "28px", maxWidth: "560px" }}>
+              <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "10px", letterSpacing: "0.08em" }}>
+                소개 영상
+              </span>
+              <div style={{ aspectRatio: "16 / 9", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--border)", background: "#171411" }}>
+                <VideoEmbed videoUrl={mainVideoUrl} title={`${artist.name} 소개 영상`} />
+              </div>
+            </div>
           )}
         </section>
 
@@ -718,6 +751,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           {artist.connectedCompany ? (
             <Link
               href={getCompanyDetailHref(artist.connectedCompany.company.slug || artist.connectedCompany.company.id)}
+              onClick={() => analytics.artistCompanyClicked(artistKey, artist.connectedCompany.company.id)}
               className="connected-org-card"
               style={{
                 display: "flex", gap: "10px", alignItems: "center", textDecoration: "none",
@@ -792,8 +826,14 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               contextArtistName={artist.name}
               defaultQuery="이 아티스트와 비슷한 작업"
               autoSearch
+              onButtonClick={() => analytics.artistAiDiscoveryClicked(artistKey)}
             />
-            <AiDiscoveryPrototype variant="button" label="이런 스타일의 아티스트 찾기" mode="discover" />
+            <AiDiscoveryPrototype
+              variant="button"
+              label="이런 스타일의 아티스트 찾기"
+              mode="discover"
+              onButtonClick={() => analytics.artistAiDiscoveryClicked(artistKey)}
+            />
             <AiDiscoveryPrototype
               variant="button"
               label="협업할 만한 사람 찾기"
@@ -801,6 +841,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               contextArtistId={artist.recordId || artist.id}
               contextArtistName={artist.name}
               defaultQuery={`${artist.name}와(과) 협업할 아티스트`}
+              onButtonClick={() => analytics.artistAiDiscoveryClicked(artistKey)}
             />
           </div>
         </section>
@@ -845,6 +886,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => analytics.artistMediaClicked(artistKey)}
                     className="press-link"
                     style={{ textDecoration: "none", color: "inherit" }}
                   >
@@ -909,6 +951,16 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               Save QR
             </button>
           </div>
+
+          <div style={{ marginTop: "16px" }}>
+            <ConnectCta
+              target={portfolioTarget}
+              viewerState={portfolioViewerState}
+              currentPath={pathname}
+              onToast={triggerToast}
+              label="내 포퐄 보내기"
+            />
+          </div>
         </section>
 
         {/* ──────────────── 더 탐색할 예술가들 — mirrors the company page's "You may also like" ──────────────── */}
@@ -939,7 +991,13 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         <WorkDetailModal
           work={activeWork}
           accentColor="var(--accent-dark)"
-          onClose={() => setActiveWork(null)}
+          onClose={() => {
+            analytics.artistWorkClosed(artistKey, activeWork.id);
+            setActiveWork(null);
+          }}
+          onExternalLinkClick={() => analytics.artistWorkExternalClicked(artistKey, activeWork.id)}
+          onVideoPlay={() => analytics.workVideoPlayed(artistKey, activeWork.id)}
+          onImageChanged={() => analytics.workImageChanged(artistKey, activeWork.id)}
         />
       )}
 

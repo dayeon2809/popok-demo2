@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Company } from "@/types";
@@ -10,6 +10,14 @@ import CompanyDiscoveryPrototype from "@/components/company/CompanyDiscoveryProt
 import FAQSection from "@/components/FAQSection";
 
 const FEED_DENSITY_TARGET = 48;
+
+function humanizeGenre(genre: string): string {
+  return genre
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 
 interface CompanyDiscoveryClientProps {
   companies: Company[];
@@ -23,20 +31,35 @@ export default function CompanyDiscoveryClient({
 }: CompanyDiscoveryClientProps) {
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
+  const [selectedGenre, setSelectedGenre] = useState("all");
 
   const handleUploadClick = () => {
     const uploadPath = "/my-popok?upload=1";
     router.push(isLoggedIn ? uploadPath : `/auth?redirect=${encodeURIComponent(uploadPath)}`);
   };
 
+  const publishedCompanies = useMemo(
+    () => companies.filter((c) => showDraft || c.status === "published" || !c.status),
+    [companies, showDraft]
+  );
+
+  // Distinct genres present in the current published companies, for the
+  // genre filter pills below — derived from data rather than a fixed enum
+  // since company.genre is a free-text field (see lib/companies.ts).
+  const genreOptions = useMemo(() => {
+    const genres = new Set<string>();
+    publishedCompanies.forEach((c) => { if (c.genre) genres.add(c.genre); });
+    return Array.from(genres).sort();
+  }, [publishedCompanies]);
+
   const feedItems = useMemo(() => {
-    const publishedCompanies = companies.filter(
-      (c) => showDraft || c.status === "published" || !c.status
-    );
+    const genreFiltered = selectedGenre === "all"
+      ? publishedCompanies
+      : publishedCompanies.filter((c) => c.genre === selectedGenre);
     // Show only companies on the group explore page
-    const real = buildRealFeedItems([], publishedCompanies);
+    const real = buildRealFeedItems([], genreFiltered);
     return padWithPlaceholders(real, FEED_DENSITY_TARGET);
-  }, [companies, showDraft]);
+  }, [publishedCompanies, selectedGenre]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
@@ -51,6 +74,38 @@ export default function CompanyDiscoveryClient({
           </Link>
         </div>
         <CompanyDiscoveryPrototype companies={companies} />
+
+        {genreOptions.length > 0 && (
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
+            <button
+              type="button"
+              onClick={() => setSelectedGenre("all")}
+              style={{
+                padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+                border: selectedGenre === "all" ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                background: selectedGenre === "all" ? "var(--navy)" : "#FFFFFF",
+                color: selectedGenre === "all" ? "#FFFFFF" : "var(--ink-muted)",
+              }}
+            >
+              전체
+            </button>
+            {genreOptions.map((genre) => (
+              <button
+                key={genre}
+                type="button"
+                onClick={() => setSelectedGenre(genre)}
+                style={{
+                  padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+                  border: selectedGenre === genre ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                  background: selectedGenre === genre ? "var(--navy)" : "#FFFFFF",
+                  color: selectedGenre === genre ? "#FFFFFF" : "var(--ink-muted)",
+                }}
+              >
+                {humanizeGenre(genre)}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <HomeVisualFeed items={feedItems} />

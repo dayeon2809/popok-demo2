@@ -57,4 +57,35 @@ export const analytics = {
     trackEvent("ai_similar_artist_clicked", { context_artist_id: contextArtistId }),
   aiDiscoveryNoResults: (mode: string) => trackEvent("ai_discovery_no_results", { mode }),
   aiDiscoveryFailed: (mode: string, code?: string) => trackEvent("ai_discovery_failed", { mode, code }),
+
+  // ── Artist Detail ──────────────────────────────────────────────────────
+  artistShareClicked: (artistId: string) => trackEvent("artist_share_clicked", { artist_id: artistId }),
+  artistConnectClicked: (artistId: string) => trackEvent("artist_connect_clicked", { artist_id: artistId }),
+  artistContactClicked: (artistId: string, channel: string) =>
+    trackEvent("artist_contact_clicked", { artist_id: artistId, channel }),
+  artistCardFlipped: (artistId: string) => trackEvent("artist_card_flipped", { artist_id: artistId }),
+  artistQrSaved: (artistId: string) => trackEvent("artist_qr_saved", { artist_id: artistId }),
+  artistWorkOpened: (artistId: string, workId: string) =>
+    trackEvent("artist_work_opened", { artist_id: artistId, work_id: workId }),
+  artistWorkClosed: (artistId: string, workId: string) =>
+    trackEvent("artist_work_closed", { artist_id: artistId, work_id: workId }),
+  artistWorkExternalClicked: (artistId: string, workId: string) =>
+    trackEvent("artist_work_external_clicked", { artist_id: artistId, work_id: workId }),
+  artistMediaClicked: (artistId: string) => trackEvent("artist_media_clicked", { artist_id: artistId }),
+  artistCompanyClicked: (artistId: string, companyId: string) =>
+    trackEvent("artist_company_clicked", { artist_id: artistId, company_id: companyId }),
+  artistAiDiscoveryClicked: (artistId: string) => trackEvent("artist_ai_discovery_clicked", { artist_id: artistId }),
+  artistRelatedArtistClicked: (artistId: string) =>
+    trackEvent("artist_related_artist_clicked", { artist_id: artistId }),
+
+  // ── Works ──────────────────────────────────────────────────────────────
+  workGalleryScroll: (artistId: string) => trackEvent("work_gallery_scroll", { artist_id: artistId }),
+  workImageChanged: (artistId: string, workId: string) =>
+    trackEvent("work_image_changed", { artist_id: artistId, work_id: workId }),
+  workVideoPlayed: (artistId: string, workId: string) =>
+    trackEvent("work_video_played", { artist_id: artistId, work_id: workId }),
+
+  // ── Navigation ─────────────────────────────────────────────────────────
+  artistsBackClicked: (artistId: string) => trackEvent("artists_back_clicked", { artist_id: artistId }),
+  footerPopokClicked: () => trackEvent("footer_popok_clicked"),
 };

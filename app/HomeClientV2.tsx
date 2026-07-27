@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Artist, Performance, Company } from "@/types";
@@ -26,6 +26,14 @@ import FAQSection from "@/components/FAQSection";
 // placeholder graphics are appended (see lib/homeFeedPrototype.ts).
 const FEED_DENSITY_TARGET = 48;
 
+function humanizeGenre(genre: string): string {
+  return genre
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 interface HomeClientV2Props {
   initialArtists: Artist[];
   initialPerformances: Performance[];
@@ -42,6 +50,7 @@ export default function HomeClientV2({
 }: HomeClientV2Props) {
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
+  const [selectedGenre, setSelectedGenre] = useState("all");
 
   // "작업 올리기" — checks login before anything else (section 3 of the
   // upload-first brief). Logged out: through /auth's existing safe-redirect
@@ -53,14 +62,28 @@ export default function HomeClientV2({
     router.push(isLoggedIn ? uploadPath : `/auth?redirect=${encodeURIComponent(uploadPath)}`);
   };
 
+  const publishedArtists = useMemo(
+    () => initialArtists.filter((artist) => showDraft || artist.status === "published" || !artist.status),
+    [initialArtists, showDraft]
+  );
+
+  // Distinct genres present in the current published artists, for the genre
+  // filter pills below — derived from data rather than a fixed enum since
+  // artist.genre is a free-ish slug (see lib/artists.ts mapArtistRowToArtist).
+  const genreOptions = useMemo(() => {
+    const genres = new Set<string>();
+    publishedArtists.forEach((artist) => { if (artist.genre) genres.add(artist.genre); });
+    return Array.from(genres).sort();
+  }, [publishedArtists]);
+
   const feedItems = useMemo(() => {
-    const publishedArtists = initialArtists.filter(
-      (artist) => showDraft || artist.status === "published" || !artist.status
-    );
+    const genreFiltered = selectedGenre === "all"
+      ? publishedArtists
+      : publishedArtists.filter((artist) => artist.genre === selectedGenre);
     // Show only artists on the artist explore page
-    const real = buildRealFeedItems(publishedArtists, []);
+    const real = buildRealFeedItems(genreFiltered, []);
     return padWithPlaceholders(real, FEED_DENSITY_TARGET);
-  }, [initialArtists, showDraft]);
+  }, [publishedArtists, selectedGenre]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
@@ -75,6 +98,38 @@ export default function HomeClientV2({
           </Link>
         </div>
         <AiDiscoveryPrototype variant="bar" />
+
+        {genreOptions.length > 0 && (
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
+            <button
+              type="button"
+              onClick={() => setSelectedGenre("all")}
+              style={{
+                padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+                border: selectedGenre === "all" ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                background: selectedGenre === "all" ? "var(--navy)" : "#FFFFFF",
+                color: selectedGenre === "all" ? "#FFFFFF" : "var(--ink-muted)",
+              }}
+            >
+              전체
+            </button>
+            {genreOptions.map((genre) => (
+              <button
+                key={genre}
+                type="button"
+                onClick={() => setSelectedGenre(genre)}
+                style={{
+                  padding: "7px 14px", borderRadius: "999px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer",
+                  border: selectedGenre === genre ? "1.5px solid var(--navy)" : "1.5px solid var(--border)",
+                  background: selectedGenre === genre ? "var(--navy)" : "#FFFFFF",
+                  color: selectedGenre === genre ? "#FFFFFF" : "var(--ink-muted)",
+                }}
+              >
+                {humanizeGenre(genre)}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <HomeVisualFeed items={feedItems} />

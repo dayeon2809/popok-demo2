@@ -6,6 +6,7 @@ import SendPortfolioModal from "./SendPortfolioModal";
 import ConnectGateModal, { type ConnectGateVariant } from "./ConnectGateModal";
 import type { PortfolioRequestTarget } from "@/lib/portfolioRequests";
 import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
+import { analytics } from "@/lib/analytics";
 
 interface ConnectCtaProps {
   target: PortfolioRequestTarget;
@@ -41,6 +42,7 @@ export default function ConnectCta({ target, viewerState, currentPath, onToast, 
   const alreadySent = status === "pending" || status === "viewed";
 
   const handleClick = () => {
+    if (target.type === "artist") analytics.artistConnectClicked(target.id);
     if (viewerState.isSelf) {
       onToast("자신의 프로필에는 포퐄을 보낼 수 없습니다.");
       return;

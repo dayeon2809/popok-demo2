@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import type { Artist } from "@/types";
+import { analytics } from "@/lib/analytics";
 
 interface RelatedArtistsProps {
   artists: Artist[];
@@ -79,7 +80,12 @@ export default function RelatedArtists({ artists = [] }: RelatedArtistsProps) {
           const image = artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`;
 
           return (
-            <Link key={artist.recordId || artist.id} href={href} className="related-artist-card">
+            <Link
+              key={artist.recordId || artist.id}
+              href={href}
+              className="related-artist-card"
+              onClick={() => analytics.artistRelatedArtistClicked(artist.recordId || artist.id)}
+            >
               <div className="related-artist-thumb" style={{ width: "100%", aspectRatio: "1.7", overflow: "hidden", background: "#FAF9F5" }}>
                 <img src={image} alt={artist.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>

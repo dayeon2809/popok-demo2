@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { FeedItem } from "@/lib/homeFeedPrototype";
+import FeedVideoTile from "@/components/FeedVideoTile";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
@@ -19,8 +20,11 @@ export default function VisualFeedCard({ item }: VisualFeedCardProps) {
   const [failed, setFailed] = useState(false);
   const isReal = item.source === "real";
   const clickable = isReal && Boolean(item.href);
+  const isVideo = item.kind === "artist-video" || item.kind === "company-video";
 
-  const image = (
+  const image = isVideo && item.videoUrl ? (
+    <FeedVideoTile videoUrl={item.videoUrl} poster={item.src} title={item.name} />
+  ) : (
     <img
       src={failed ? FALLBACK_IMAGE : item.src}
       alt={isReal && item.name ? item.name : ""}

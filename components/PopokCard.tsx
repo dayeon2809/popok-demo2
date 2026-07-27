@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { analytics } from "@/lib/analytics";
 
 interface PopokCardProps {
   name: string;
@@ -38,11 +39,16 @@ export default function PopokCard({
   const flipped = isControlled ? flippedProp : internalFlipped;
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  const hasTrackedFlip = useRef(false);
 
   const toggleFlip = () => {
     const next = !flipped;
     if (!isControlled) setInternalFlipped(next);
     onFlipChange?.(next);
+    if (!hasTrackedFlip.current) {
+      hasTrackedFlip.current = true;
+      analytics.artistCardFlipped(id);
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {

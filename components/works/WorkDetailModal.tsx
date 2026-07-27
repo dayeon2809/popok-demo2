@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { normalizeWorkImages, normalizeWorkCredits } from "@/lib/works";
 import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
@@ -12,6 +12,11 @@ interface WorkDetailModalProps {
    *  contexts (like the individual artist page) with no per-entity color. */
   accentColor?: string;
   onClose: () => void;
+  /** Analytics hooks — all optional/no-ops when omitted, so callers that
+   *  don't need tracking (e.g. the company page) are unaffected. */
+  onExternalLinkClick?: () => void;
+  onVideoPlay?: () => void;
+  onImageChanged?: () => void;
 }
 
 const WorkImagePlaceholder = ({ accentColor }: { accentColor: string }) => (
@@ -48,8 +53,9 @@ const WorkImagePlaceholder = ({ accentColor }: { accentColor: string }) => (
 // every section is purely data-driven (rendered only when the relevant
 // field exists on `work`), so the same component works for both entities'
 // slightly different work shapes without any per-context branching.
-export default function WorkDetailModal({ work, accentColor = "#171411", onClose }: WorkDetailModalProps) {
+export default function WorkDetailModal({ work, accentColor = "#171411", onClose, onExternalLinkClick, onVideoPlay, onImageChanged }: WorkDetailModalProps) {
   useMobileBodyScrollLock();
+  const hasTrackedVideoPlay = useRef(false);
 
   // Collect and deduplicate up to 4 images — same contract the CMS and
   // admin editors save to, so what's saved is exactly what's shown here.
@@ -106,6 +112,11 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
           src={videoUrl}
           controls
           playsInline
+          onPlay={() => {
+            if (hasTrackedVideoPlay.current) return;
+            hasTrackedVideoPlay.current = true;
+            onVideoPlay?.();
+          }}
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
       );
@@ -313,6 +324,7 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.12 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
+                    onViewportEnter={idx > 0 ? () => onImageChanged?.() : undefined}
                   >
                     <img
                       className="work-archive-image"
@@ -370,7 +382,14 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
               <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
                 Video Archive
               </span>
-              <div style={{ width: "100%", aspectRatio: "16 / 9", borderRadius: "6px", overflow: "hidden", background: "#171411", border: "1px solid var(--border)" }}>
+              <div
+                onClick={() => {
+                  if (hasTrackedVideoPlay.current) return;
+                  hasTrackedVideoPlay.current = true;
+                  onVideoPlay?.();
+                }}
+                style={{ width: "100%", aspectRatio: "16 / 9", borderRadius: "6px", overflow: "hidden", background: "#171411", border: "1px solid var(--border)" }}
+              >
                 {renderVideo()}
               </div>
             </div>
@@ -487,6 +506,7 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
                       href={lnk.url || lnk}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => onExternalLinkClick?.()}
                       style={{
                         fontSize: "0.82rem",
                         color: accentColor,
@@ -502,6 +522,7 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
                     href={referenceLink}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => onExternalLinkClick?.()}
                     style={{
                       fontSize: "0.82rem",
                       color: accentColor,

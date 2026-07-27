@@ -21,6 +21,8 @@ interface AiDiscoveryPrototypeProps {
   defaultQuery?: string;
   /** Skip the input step and search immediately with defaultQuery (used by "비슷한 작업 찾기" style buttons). */
   autoSearch?: boolean;
+  /** Fired when a variant="button" trigger is clicked, before the panel opens — analytics hook, purely additive. */
+  onButtonClick?: () => void;
 }
 
 export default function AiDiscoveryPrototype({
@@ -32,6 +34,7 @@ export default function AiDiscoveryPrototype({
   contextArtistName,
   defaultQuery = "",
   autoSearch = false,
+  onButtonClick,
 }: AiDiscoveryPrototypeProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -43,7 +46,10 @@ export default function AiDiscoveryPrototype({
       <>
         <button
           type="button"
-          onClick={openPanel}
+          onClick={() => {
+            onButtonClick?.();
+            openPanel();
+          }}
           style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
             padding: "9px 16px", borderRadius: "999px", border: "1.5px solid var(--border-dark)",
