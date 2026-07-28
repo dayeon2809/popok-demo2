@@ -21,7 +21,7 @@ export default function ResultComparisonSection({ ctaHref, isLoggedIn, previewAr
   const displaySlug = previewArtist?.slug || previewArtist?.id || "your-name";
 
   return (
-    <section className="home-section" style={{
+    <section className="home-section result-comparison-section" style={{
       maxWidth: "1120px",
       margin: "0 auto",
       padding: "64px 24px",
@@ -86,7 +86,7 @@ export default function ResultComparisonSection({ ctaHref, isLoggedIn, previewAr
             완성된 POPOK 아티스트 페이지
           </p>
 
-          <div className="comparison-card-scale" style={{ width: "230px", pointerEvents: "none" }}>
+          <div className="comparison-card-scale" style={{ width: "min(230px, 100%)" }}>
             <PopokCard
               name={previewArtist?.name || "아티스트 이름"}
               nameEn={previewArtist?.name_en || undefined}

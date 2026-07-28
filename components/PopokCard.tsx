@@ -104,6 +104,16 @@ export default function PopokCard({
       <div
         ref={cardRef}
         onClick={toggleFlip}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleFlip();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-pressed={flipped}
+        aria-label={`${name} POPOK 카드 ${flipped ? "앞면 보기" : "뒷면 보기"}`}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className={`flip-card-container ${flipped ? "flipped" : ""}`}
@@ -114,6 +124,8 @@ export default function PopokCard({
           transform: `rotateY(${tilt.x}deg) rotateX(${tilt.y}deg)`,
           transformStyle: "preserve-3d",
           transition: "transform 0.1s ease",
+          cursor: "pointer",
+          touchAction: "manipulation",
         }}
       >
         <div className="flip-card-inner">

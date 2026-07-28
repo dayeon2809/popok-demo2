@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { analytics } from "@/lib/analytics";
+import type { Artist } from "@/types";
+import FlippingArtistCard from "@/components/home/FlippingArtistCard";
 
 interface HomeHeroV2Props {
   ctaHref: string;
   isLoggedIn: boolean;
   onSecondaryClick: () => void;
+  heroArtist: Artist | null;
 }
 
 // New conversion-focused Hero for the V2 home feed — reuses the visual
@@ -16,17 +19,18 @@ interface HomeHeroV2Props {
 // here is deliberately different: fixed marketing copy instead of
 // multi-language strings, and a secondary CTA that scrolls to the feed
 // instead of linking to /about.
-export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick }: HomeHeroV2Props) {
+export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, heroArtist }: HomeHeroV2Props) {
+  const heroImage = heroArtist?.profile_image_url || heroArtist?.profileImage || heroArtist?.profile_image_urls?.[0] || "";
   return (
     <section className="home-section home-hero-section" style={{
       maxWidth: "1120px",
       margin: "0 auto",
-      padding: "56px 24px 64px",
+      padding: "72px 32px 96px",
     }}>
       <div className="responsive-stack-320" style={{
         display: "grid",
         gridTemplateColumns: "1.1fr 0.9fr",
-        gap: "40px",
+        gap: "48px",
         alignItems: "center",
       }}>
         {/* Left: copy */}
@@ -39,7 +43,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick }: Ho
             border: "1px solid var(--border)",
             borderRadius: "20px",
             padding: "6px 14px",
-            marginBottom: "20px",
+            marginBottom: "24px",
           }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-dark)", display: "inline-block" }} />
             <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.02em" }}>
@@ -48,14 +52,15 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick }: Ho
           </div>
 
           <h1 className="display" style={{
-            fontSize: "clamp(1.9rem, 5vw, 3rem)",
+            fontSize: "clamp(2.2rem, 5vw, 3.4rem)",
             color: "var(--navy)",
-            lineHeight: 1.22,
-            marginBottom: "18px",
+            lineHeight: 1.18,
+            marginBottom: "24px",
             fontWeight: 900,
             letterSpacing: "-0.04em",
           }}>
-            흩어진 예술 활동을<br />하나의 포트폴리오로.
+            창작은 당신이.<br />
+            <span className="seen-highlight">나머지는 POPOK이.</span>
           </h1>
 
           <p style={{
@@ -111,57 +116,33 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick }: Ho
           </p>
         </div>
 
-        {/* Right: decorative floating cards — same visual language as the
-            V1 Hero's no-artist fallback (components/home/HeroSection.tsx). */}
+        {/* Right: POPOK identity card visual */}
         <div className="hero-visual-stage" style={{
-          position: "relative",
-          height: "400px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          position: "relative", height: "480px", display: "flex",
+          alignItems: "center", justifyContent: "center",
         }}>
-          <div style={{
-            position: "absolute", width: "230px", height: "330px",
-            background: "var(--accent)", border: "1.5px solid var(--navy)", borderRadius: "18px",
-            padding: "22px", boxShadow: "0 8px 32px rgba(23, 20, 17, 0.08)",
-            display: "flex", flexDirection: "column", justifyContent: "space-between",
-            zIndex: 1, transform: "rotate(6deg) translateX(36px)",
-          }}>
-            <div style={{ fontWeight: 950, fontSize: "1.1rem", color: "var(--navy)", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
-              POPOK
-              <span style={{ width: "5px", height: "5px", borderRadius: "50%", backgroundColor: "var(--navy)" }} />
-            </div>
-            <p style={{ fontSize: "1.35rem", fontWeight: 900, color: "var(--navy)", lineHeight: 1.25, letterSpacing: "-0.03em" }}>
-              당신의 활동이<br />기록됩니다.
-            </p>
-            <div style={{ fontFamily: "monospace", fontSize: "0.8rem", color: "var(--navy)", fontWeight: 700 }}>
-              popok.kr
-            </div>
-          </div>
-
-          <div style={{
-            position: "absolute", width: "230px", height: "330px",
-            background: "#FFFFFF", border: "1.5px solid var(--border)", borderRadius: "18px",
-            padding: "16px", boxShadow: "0 16px 40px rgba(23, 20, 17, 0.08)",
-            display: "flex", flexDirection: "column", zIndex: 2, transform: "rotate(-3deg) translateX(-36px)",
-          }}>
-            <div style={{ width: "100%", height: "180px", borderRadius: "12px", overflow: "hidden", marginBottom: "14px", background: "#EAE6DD" }} />
-            <div style={{ display: "flex", flexDirection: "column", flexGrow: 1, justifyContent: "space-between" }}>
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
-                  <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--navy)", letterSpacing: "-0.02em" }}>POPOK ARTIST</h3>
-                  <span className="mono" style={{ fontSize: "0.6rem", color: "var(--accent-dark)", fontWeight: 700 }}>CREATIVE</span>
-                </div>
-                <p style={{ fontSize: "0.75rem", color: "var(--ink-muted)", lineHeight: 1.4 }}>
-                  작품, 공연, 이력이 하나의 포트폴리오로 정리됩니다.
-                </p>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "8px", borderTop: "1px solid var(--border)", fontSize: "0.72rem", fontWeight: 700, color: "var(--navy)" }}>
-                <span>포트폴리오 보기</span>
-                <span>→</span>
+          <svg aria-hidden="true" style={{ position: "absolute", width: "100%", height: "100%", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+            <circle cx="50%" cy="50%" r="180" fill="none" stroke="rgba(200, 238, 82, 0.4)" strokeWidth="1" />
+            <line x1="10%" y1="20%" x2="90%" y2="80%" stroke="rgba(200, 238, 82, 0.3)" strokeWidth="1" strokeDasharray="4 4" />
+            <line x1="90%" y1="20%" x2="10%" y2="80%" stroke="rgba(200, 238, 82, 0.3)" strokeWidth="1" strokeDasharray="4 4" />
+          </svg>
+          {heroArtist ? (
+            <div className="float-card-1 hero-artist-card" style={{ width: "270px", zIndex: 2 }}>
+              <div className="hero-card-scale">
+                <FlippingArtistCard
+                  name={heroArtist.name}
+                  nameEn={heroArtist.name_en || undefined}
+                  genre={heroArtist.genre || "CREATIVE"}
+                  instagram={heroArtist.instagram || ""}
+                  id={heroArtist.id}
+                  slug={heroArtist.slug || heroArtist.id}
+                  profileImage={heroImage || undefined}
+                />
               </div>
             </div>
-          </div>
+          ) : (
+            <div style={{ width: "270px", aspectRatio: "0.68", borderRadius: "18px", border: "1.5px solid var(--navy)", background: "var(--accent)", boxShadow: "0 24px 50px -12px rgba(23,20,17,.15)", transform: "rotate(-3deg)", display: "grid", placeItems: "center", zIndex: 2, fontWeight: 950, fontSize: "1.5rem" }}>POPOK.</div>
+          )}
         </div>
       </div>
     </section>

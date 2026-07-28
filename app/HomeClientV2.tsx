@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import CompanyDiscoveryPrototype from "@/components/company/CompanyDiscoveryPrototype";
 import { useRouter } from "next/navigation";
 import type { Artist, Performance, Company } from "@/types";
 import type { InstagramStory } from "@/lib/instagram";
@@ -62,6 +62,7 @@ export default function HomeClientV2({
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
   const [selectedField, setSelectedField] = useState("all");
+  const [exploreMode, setExploreMode] = useState<"artists" | "companies">("artists");
 
   // Single source of truth for "where does the primary create-a-POPOK CTA
   // go" — logged out -> /auth, logged in without a profile -> /onboarding,
@@ -92,38 +93,51 @@ export default function HomeClientV2({
   // Real, published artist shown in the "완성된 POPOK 아티스트 페이지" preview
   // (ResultComparisonSection) — the actual PopokCard component with real
   // data, not a mockup. Falls back to a placeholder card if none has a photo yet.
+  const heroArtist = useMemo(() => {
+    const withImage = publishedArtists.filter((artist) => artist.profile_image_url || artist.profileImage || artist.profile_image_urls?.[0]);
+    return withImage.find((artist) => artist.name.replace(/\s/g, "") === "최지안") || withImage[0] || null;
+  }, [publishedArtists]);
+
   const previewArtist = useMemo(
-    () => publishedArtists.find((artist) => artist.profileImage || artist.profile_image_url) || publishedArtists[0] || null,
+    () => publishedArtists.find((artist) => artist.name.replace(/\s/g, "") === "이다연")
+      || publishedArtists.find((artist) => artist.profileImage || artist.profile_image_url || artist.profile_image_urls?.[0])
+      || publishedArtists[0]
+      || null,
     [publishedArtists]
   );
 
+  const publishedCompanies = useMemo(
+    () => initialCompanies.filter((company) => showDraft || company.status === "published" || !company.status),
+    [initialCompanies, showDraft]
+  );
+
   const feedItems = useMemo(() => {
-    const fieldFiltered = selectedField === "all"
-      ? publishedArtists
-      : publishedArtists.filter((artist) => (artist.field || "dance") === selectedField);
-    // Show only artists on the artist explore page
-    const real = buildRealFeedItems(fieldFiltered, []);
-    const padded = padWithPlaceholders(real, FEED_DENSITY_TARGET);
-    return insertFeedCta(padded, 5);
-  }, [publishedArtists, selectedField]);
+    if (exploreMode === "companies") {
+      const filtered = selectedField === "all" ? publishedCompanies : publishedCompanies.filter((company) => {
+        const text = `${company.genre || ""} ${company.category || ""}`.toLowerCase();
+        if (selectedField === "dance") return /무용|발레|ballet|dance|안무/.test(text);
+        if (selectedField === "music") return /음악|연주|오케스트라|orchestra|밴드|band|music/.test(text);
+        return /미술|시각|설치|사진|media|visual|art|photo/.test(text);
+      });
+      return insertFeedCta(padWithPlaceholders(buildRealFeedItems([], filtered), FEED_DENSITY_TARGET), 5);
+    }
+    const filtered = selectedField === "all" ? publishedArtists : publishedArtists.filter((artist) => (artist.field || "dance") === selectedField);
+    return insertFeedCta(padWithPlaceholders(buildRealFeedItems(filtered, []), FEED_DENSITY_TARGET), 5);
+  }, [exploreMode, publishedArtists, publishedCompanies, selectedField]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
-      <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} />
+      <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} heroArtist={heroArtist} />
 
       <ResultComparisonSection ctaHref={heroCta.href} isLoggedIn={isLoggedIn} previewArtist={previewArtist} />
 
       <div id="home-explore" style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* 아티스트 / 단체 토글 버튼 */}
-        <div className="discovery-toggle-container">
-          <Link href="/" className="discovery-toggle-btn active">
-            아티스트
-          </Link>
-          <Link href="/companies" className="discovery-toggle-btn">
-            단체
-          </Link>
+        <div className="discovery-toggle-container" role="tablist" aria-label="탐색 대상">
+          <button type="button" role="tab" aria-selected={exploreMode === "artists"} className={`discovery-toggle-btn ${exploreMode === "artists" ? "active" : ""}`} onClick={() => { setExploreMode("artists"); setSelectedField("all"); }}>아티스트</button>
+          <button type="button" role="tab" aria-selected={exploreMode === "companies"} className={`discovery-toggle-btn ${exploreMode === "companies" ? "active" : ""}`} onClick={() => { setExploreMode("companies"); setSelectedField("all"); }}>단체</button>
         </div>
-        <AiDiscoveryPrototype variant="bar" />
+        {exploreMode === "artists" ? <AiDiscoveryPrototype variant="bar" placeholder="어떤 작업이나 아티스트를 찾고 있나요?" /> : <CompanyDiscoveryPrototype companies={publishedCompanies} placeholder="어떤 작업이나 단체를 찾고 있나요?" />}
 
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
           <button
@@ -176,7 +190,7 @@ export default function HomeClientV2({
           boxShadow: "0 8px 24px rgba(23,20,17,0.2)",
         }}
       >
-        📸 작업 올리기
+        내 포퐄 만들기
       </button>
 
       <HomeStepsSection ctaHref={heroCta.href} isLoggedIn={isLoggedIn} />

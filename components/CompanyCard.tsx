@@ -109,7 +109,7 @@ export default function CompanyCard({ company }: CompanyCardProps) {
                 <span style={{ width: "4px", height: "4px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
               </span>
               <span style={{ fontSize: "0.58rem", fontWeight: 700, color: "var(--ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                준비중
+                IMAGE COMING SOON
               </span>
             </div>
           )}

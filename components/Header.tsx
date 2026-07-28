@@ -18,9 +18,9 @@ const ALL_NAV_ITEMS: NavItem[] = [
     match: (pathname) => pathname === "/about",
   },
   {
-    href: "/",
+    href: "/artists",
     label: { ko: "아티스트", en: "Artists" },
-    match: (pathname) => pathname === "/" || pathname.startsWith("/artists/"),
+    match: (pathname) => pathname === "/artists" || pathname.startsWith("/artists/"),
   },
   {
     href: "/companies",
