@@ -22,7 +22,8 @@ export default function AdminCompanyOwnerPanel({ companyId, entityId, entityType
     const response = await fetch("/api/admin/" + (entityType === "company" ? "companies/" : "artists/") + targetId, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ owner_id: nextOwnerId }) });
     const data = await response.json(); setBusy(false);
     if (!response.ok || !data.success) return setMessage(data.error || "대표자 변경에 실패했습니다.");
-    onChanged(nextOwnerId); setResults([]); setQuery(""); setMessage(nextOwnerId ? "대표자를 연결했습니다." : "대표자 연결을 해제했습니다.");
+    onChanged(nextOwnerId); setResults([]); setQuery("");
+    setMessage(data.representativeSync?.warning || (nextOwnerId ? "\uB300\uD45C\uC790\uC640 \uACF5\uAC1C \uB300\uD45C \uD504\uB85C\uD544\uC744 \uC5F0\uACB0\uD588\uC2B5\uB2C8\uB2E4." : "\uB300\uD45C\uC790 \uC5F0\uACB0\uC744 \uD574\uC81C\uD588\uC2B5\uB2C8\uB2E4."));
   };
   return <section style={{ border: "1px solid var(--border)", background: "#fff", padding: 20, marginBottom: 20 }}>
     <p style={{ margin: 0, color: "#8AAE22", fontSize: 11, fontWeight: 900, letterSpacing: ".12em" }}>ADMIN ONLY</p>
