@@ -17,6 +17,9 @@ import CompanyPortfolio from "@/components/company/CompanyPortfolio";
 import CompanyHistory from "@/components/company/CompanyHistory";
 import CompanyArtists from "@/components/company/CompanyArtists";
 import CompanyContact from "@/components/company/CompanyContact";
+import CompanyCmsEditor from "@/components/company/CompanyCmsEditor";
+import AdminCompanyOwnerPanel from "@/components/admin/AdminCompanyOwnerPanel";
+import type { Company } from "@/types";
 
 interface AwardItem { year?: string | number; title?: string; result?: string; organization?: string; }
 interface ReviewItem { title?: string; publication?: string; source?: string; year?: string | number; url?: string; }
@@ -289,7 +292,7 @@ export default function AdminCompanyEditPage() {
   const [saving, setSaving] = useState(false);
   const [statusActionLoading, setStatusActionLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<"preview" | "edit">("edit");
+  const [activeTab, setActiveTab] = useState<"manage" | "preview" | "edit">("manage");
   const [expandedPanels, setExpandedPanels] = useState<Record<string, boolean>>({
     basic: true, hero: true, identity: true, works: true, history: true, artists: true, contact: true, awards: true, links: true, schedules: true
   });
@@ -1485,7 +1488,18 @@ export default function AdminCompanyEditPage() {
       </div>
 
       {/* TABS SELECTOR */}
-      <div style={{ display: "flex", borderBottom: "1.5px solid var(--border)", marginBottom: "24px", gap: "4px" }}>
+      <div style={{ display: "flex", borderBottom: "1.5px solid var(--border)", marginBottom: "24px", gap: "4px", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab("manage")}
+          style={{
+            padding: "10px 20px", border: "none", background: "none", fontSize: "0.88rem", fontWeight: activeTab === "manage" ? 800 : 500,
+            borderBottom: activeTab === "manage" ? "2.5px solid var(--navy)" : "none", color: activeTab === "manage" ? "var(--navy)" : "var(--ink-muted)",
+            cursor: "pointer", marginBottom: "-1.5px"
+          }}
+        >
+          단체 정보 관리
+        </button>
         <button
           type="button"
           onClick={() => setActiveTab("edit")}
@@ -1509,6 +1523,17 @@ export default function AdminCompanyEditPage() {
           실시간 공개 미리보기 (Live Preview)
         </button>
       </div>
+
+      {activeTab === "manage" && (
+        <>
+          <AdminCompanyOwnerPanel companyId={company.id} ownerId={company.owner_id} onChanged={(owner_id) => setCompany((current) => current ? { ...current, owner_id } : current)} />
+          <CompanyCmsEditor
+            company={company as unknown as Company}
+            accessMode="admin"
+            onSaveSuccess={(updated) => setCompany((current) => current ? ({ ...current, ...updated } as CompanyDetail) : current)}
+          />
+        </>
+      )}
 
       {/* TAB 1: READ-ONLY LIVE PREVIEW WITH CLICK-TO-EDIT OVERLAYS */}
       {activeTab === "preview" && (

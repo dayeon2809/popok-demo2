@@ -566,7 +566,7 @@ export default function MyPopokClient({
   };
 
   // Download a complete 900 × 1260 digital business card instead of a standalone QR.
-  const handleDownloadQR = async () => {
+  const handleDownloadCard = async () => {
     const canvas = document.createElement("canvas");
     canvas.width = 900;
     canvas.height = 1260;
@@ -989,36 +989,31 @@ export default function MyPopokClient({
             </div>
           </div>
 
-          {/* Right panel: Digital business card sharing only */}
-          <div style={{
+          {/* Right panel: Quick actions */}
+          <aside style={{
+            background: "var(--bg-warm)",
+            border: "1px solid var(--border)",
+            borderRadius: "20px",
+            padding: "24px",
             display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
+            flexDirection: "column",
+            gap: "12px",
+            alignSelf: "stretch",
+            justifyContent: "center"
           }}>
-            <button
-              type="button"
-              onClick={() => setShareModalOpen(true)}
-              className="btn-lime"
-              style={{
-                width: "100%",
-                maxWidth: "280px",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "8px",
-                padding: "16px 24px",
-                borderRadius: "14px",
-                fontWeight: 900,
-                fontSize: "0.98rem",
-                border: "none",
-                cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(23, 20, 17, 0.08)",
-                transition: "all 0.15s ease"
-              }}
-            >
-              📤 명함 공유 및 다운로드
+            <h2 style={{ fontSize: "0.92rem", fontWeight: 950, color: "var(--navy)", margin: "0 0 4px" }}>
+              퀵 메뉴 (Quick Actions)
+            </h2>
+            <button type="button" onClick={() => setAiModalOpen(true)} style={{ ...quickActionButtonStyle, background: "var(--navy)", color: "var(--accent)", borderColor: "var(--navy)" }}>
+              ✨ AI로 프로필 업데이트
             </button>
-          </div>
+            <button type="button" onClick={() => setShareModalOpen(true)} style={quickActionButtonStyle}>
+              📤 명함 공유 / 다운로드
+            </button>
+            <button type="button" onClick={handleSave} disabled={saving} style={{ ...quickActionButtonStyle, background: "var(--accent)", borderColor: "var(--accent)", cursor: saving ? "wait" : "pointer" }}>
+              {saving ? "저장 중..." : "💾 변경사항 저장하기"}
+            </button>
+          </aside>
         </section>
 
         {/* ──────────────── QUICK UPLOAD — V2 ──────────────── */}
@@ -1116,56 +1111,6 @@ export default function MyPopokClient({
             </div>
           )}
         </section>
-
-        {/* ──────────────── RECENT WORKS — V2 (feature/home-feed-v2):
-            Instagram-profile-style image grid of everything already saved,
-            image-first (no info clutter under each tile). Click scrolls down
-            to the WORK 미리보기 section below, which opens the actual detail
-            drawer. ──────────────── */}
-        {(() => {
-          const worksWithImages = works
-            .map((w, idx) => ({ w, idx, image: normalizeWorkImages(w)[0] || w.image_url || "" }))
-            .filter((entry) => entry.image)
-            .reverse(); // most-recently-added first — new works are appended to the end of `works`
-
-          if (worksWithImages.length === 0) return null;
-
-          return (
-            <section style={{ marginBottom: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "12px" }}>
-                <h2 style={{ fontSize: "1rem", fontWeight: 900, color: "var(--navy)", margin: 0 }}>최근 등록한 작품</h2>
-                <button type="button" onClick={() => scrollToWorkPreview()} style={{ background: "none", border: "none", color: "var(--ink-muted)", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer" }}>
-                  전체 보기 →
-                </button>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(96px, 1fr))", gap: "10px" }}>
-                {worksWithImages.map(({ w, image }) => (
-                  <button
-                    key={w.id}
-                    type="button"
-                    onClick={() => scrollToWorkPreview()}
-                    title={w.title.trim() || "제목 없는 작업"}
-                    style={{
-                      position: "relative", aspectRatio: "1", borderRadius: "10px", overflow: "hidden",
-                      border: "none", padding: 0, cursor: "pointer", background: "#EAE6DD",
-                    }}
-                  >
-                    <img src={image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    {!w.title.trim() && (
-                      <span style={{
-                        position: "absolute", bottom: "6px", left: "6px",
-                        fontSize: "0.6rem", fontWeight: 800, color: "#FFFFFF",
-                        background: "rgba(23,20,17,0.65)", padding: "2px 6px", borderRadius: "999px",
-                      }}>
-                        정리 필요
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </section>
-          );
-        })()}
 
         {saveSuccess && (
           <div className="fade-up" style={{
@@ -1757,11 +1702,11 @@ export default function MyPopokClient({
               />
               <button
                 type="button"
-                onClick={handleDownloadQR}
+                onClick={handleDownloadCard}
                 className="btn-outline"
                 style={{ fontSize: "0.78rem", fontWeight: 800, padding: "8px 16px", borderRadius: "8px", border: "1.5px solid var(--navy)" }}
               >
-                📥 명함 이미지 다운로드
+                📥 디지털 명함 뒷면 다운로드
               </button>
             </div>
 
@@ -1967,6 +1912,21 @@ const tagStyle: React.CSSProperties = {
   fontWeight: 800,
   background: "var(--tag-bg)",
   color: "var(--navy)",
+};
+
+const quickActionButtonStyle: React.CSSProperties = {
+  width: "100%",
+  minHeight: "54px",
+  padding: "13px 16px",
+  border: "1.5px solid var(--navy)",
+  borderRadius: "12px",
+  background: "#FFFFFF",
+  color: "var(--navy)",
+  fontFamily: "inherit",
+  fontSize: "0.9rem",
+  fontWeight: 900,
+  textAlign: "center",
+  cursor: "pointer",
 };
 
 const smallButtonStyle: React.CSSProperties = {

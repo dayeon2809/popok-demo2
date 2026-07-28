@@ -15,7 +15,10 @@ interface AdminCompanyRow {
   genre: string | null;
   category: string | null;
   city_or_region: string | null;
+  profile_image_url?: string | null;
   owner_id?: string | null;
+  worksCount?: number;
+  upcomingPerformancesCount?: number;
   hasPrimaryArtist?: boolean;
   connectedArtistsCount: number;
   fromApplication: boolean;
@@ -51,6 +54,9 @@ export default function AdminCompaniesPage() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [ownerFilter, setOwnerFilter] = useState("all");
+  const [genreFilter, setGenreFilter] = useState("");
+  const [sort, setSort] = useState("newest");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
@@ -64,6 +70,9 @@ export default function AdminCompaniesPage() {
       const params = new URLSearchParams();
       if (filter !== "all") params.set("status", filter);
       if (search.trim()) params.set("search", search.trim());
+      if (ownerFilter !== "all") params.set("owner", ownerFilter);
+      if (genreFilter) params.set("genre", genreFilter);
+      params.set("sort", sort);
       const res = await fetch(`/api/admin/companies?${params.toString()}`, { headers: authHeader() });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -88,7 +97,7 @@ export default function AdminCompaniesPage() {
     const timer = setTimeout(() => fetchCompanies(activeFilter, searchQuery), 250);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, ownerFilter, genreFilter, sort]);
 
   const handleUnlinkOwner = async (company: AdminCompanyRow) => {
     if (!confirm(`'${company.name}' 단체의 대표 및 관리 권한을 해제하시겠습니까?`)) return;
@@ -142,11 +151,16 @@ export default function AdminCompaniesPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "16px" }}>
-        <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)" }}>단체 관리 (Companies)</h1>
-        <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>
-          단체 공개 프로필과 개인 아티스트 연결 관계를 관리합니다.
-        </p>
+      <style jsx>{`
+        .admin-company-controls { display: grid; grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(130px, auto)); gap: 10px; margin-bottom: 20px; }
+        @media (max-width: 760px) { .admin-company-controls { grid-template-columns: 1fr; } }
+      `}</style>
+      <div style={{ marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "16px", flexWrap: "wrap" }}>
+        <div>
+          <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)" }}>단체 관리 (Companies)</h1>
+          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>단체 공개 프로필과 개인 아티스트 연결 관계를 관리합니다.</p>
+        </div>
+        <Link href="/admin/companies/new" style={{ padding: "10px 16px", background: "var(--accent)", color: "var(--navy)", fontWeight: 800, textDecoration: "none", border: "1px solid var(--accent)" }}>새 단체 만들기</Link>
       </div>
 
       {summary && (
@@ -182,14 +196,11 @@ export default function AdminCompaniesPage() {
         ))}
       </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="단체명, 영문명, slug로 검색..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ width: "100%", padding: "12px 16px", border: "1.5px solid var(--border)", borderRadius: "10px", fontSize: "0.9rem", outline: "none" }}
-        />
+      <div className="admin-company-controls">
+        <input type="search" placeholder="단체명, 영문명, slug로 검색..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={controlStyle} />
+        <select value={ownerFilter} onChange={(e) => setOwnerFilter(e.target.value)} style={controlStyle}><option value="all">대표자 전체</option><option value="connected">대표자 연결</option><option value="unconnected">대표자 미연결</option></select>
+        <input value={genreFilter} onChange={(e) => setGenreFilter(e.target.value)} placeholder="장르 정확히 입력" style={controlStyle} />
+        <select value={sort} onChange={(e) => setSort(e.target.value)} style={controlStyle}><option value="newest">최신 생성순</option><option value="name">이름순</option></select>
       </div>
 
       <div style={{ background: "#fff", border: "1.5px solid var(--border)", borderRadius: "14px", overflow: "hidden" }}>
@@ -200,7 +211,7 @@ export default function AdminCompaniesPage() {
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>slug</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>상태</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>장르/지역</th>
-              <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>연결 아티스트</th>
+              <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>콘텐츠</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>신청 출처</th>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)", textAlign: "right" }}>작업</th>
             </tr>
@@ -218,8 +229,14 @@ export default function AdminCompaniesPage() {
                 return (
                   <tr key={c.id} style={{ borderBottom: "1px solid var(--border)" }}>
                     <td style={{ padding: "12px 14px" }}>
-                      <div style={{ fontWeight: 800, color: "var(--navy)" }}>{c.name}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ width: 42, height: 42, flex: "0 0 42px", border: "1px solid var(--border)", background: "#eef4d5", overflow: "hidden" }}>
+                          {c.profile_image_url ? <img src={c.profile_image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ display: "grid", placeItems: "center", height: "100%", fontWeight: 900 }}>P</span>}
+                        </div>
+                        <div><div style={{ fontWeight: 800, color: "var(--navy)" }}>{c.name}</div>
                       {c.name_en && <div style={{ fontSize: "0.72rem", color: "var(--ink-muted)" }}>{c.name_en}</div>}
+                        </div>
+                      </div>
                       <div style={{ display: "flex", gap: "4px", marginTop: "4px", flexWrap: "wrap" }}>
                         {c.verified && (
                           <span style={{ fontSize: "0.6rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "6px" }}>
@@ -244,8 +261,9 @@ export default function AdminCompaniesPage() {
                     <td style={{ padding: "12px 14px", color: "var(--ink-muted)" }}>
                       {[c.genre, c.city_or_region].filter(Boolean).join(" · ") || "-"}
                     </td>
-                    <td style={{ padding: "12px 14px", color: "var(--navy)", fontWeight: 700 }}>
-                      {c.connectedArtistsCount}
+                    <td style={{ padding: "12px 14px", color: "var(--navy)", fontWeight: 700, whiteSpace: "nowrap" }}>
+                      아티스트 {c.connectedArtistsCount}<br />
+                      <span style={{ color: "var(--ink-muted)", fontSize: 12 }}>작품 {c.worksCount || 0} · 예정 공연 {c.upcomingPerformancesCount || 0}</span>
                     </td>
                     <td style={{ padding: "12px 14px", color: "var(--ink-muted)" }}>
                       {c.fromApplication ? "신청" : "-"}
@@ -263,8 +281,8 @@ export default function AdminCompaniesPage() {
                           </button>
                         )}
                         {c.slug && (
-                          <Link href={`/admin/companies/${c.id}/preview`} style={{ ...actionBtnStyle, textDecoration: "none", display: "inline-block" }}>
-                            미리보기
+                          <Link href={`/companies/${c.slug}`} target="_blank" rel="noreferrer" style={{ ...actionBtnStyle, textDecoration: "none", display: "inline-block" }}>
+                            공개 페이지
                           </Link>
                         )}
                         <Link href={`/admin/companies/${c.id}`} style={{ ...actionBtnStyle, textDecoration: "none", display: "inline-block" }}>
@@ -297,6 +315,8 @@ export default function AdminCompaniesPage() {
     </div>
   );
 }
+
+const controlStyle: React.CSSProperties = { padding: "11px 13px", border: "1px solid var(--border-dark)", background: "#fff", font: "inherit", minWidth: 0 };
 
 const actionBtnStyle: React.CSSProperties = {
   padding: "5px 10px",

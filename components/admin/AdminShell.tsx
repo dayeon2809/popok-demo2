@@ -4,20 +4,23 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-const menuItems = [
-  { name: "Dashboard", path: "/admin" },
-  { name: "Submissions", path: "/admin/submissions" },
-  { name: "Artists", path: "/admin/artists" },
-  { name: "이번 주 공연 관리", path: "/admin/performances" },
-  { name: "Organizations", path: "/admin/organizations" },
-  { name: "Companies", path: "/admin/companies" },
-  { name: "대표 권한 신청", path: "/admin/company-claim-requests" },
+const menuGroups = [
+  { label: "Overview", items: [{ name: "대시보드", path: "/admin" }] },
+  { label: "Content", items: [
+    { name: "제출 자료", path: "/admin/submissions" },
+    { name: "아티스트", path: "/admin/artists" },
+    { name: "공연", path: "/admin/performances" },
+  ] },
+  { label: "Companies", items: [
+    { name: "단체", path: "/admin/companies" },
+    { name: "단체 등록 신청", path: "/admin/organizations" },
+    { name: "대표 권한 신청", path: "/admin/company-claim-requests" },
+  ] },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
@@ -25,30 +28,39 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div style={{ minHeight: "80vh", background: "#f8f9fa", display: "flex", flexDirection: "column" }}>
-      <header style={{ height: "54px", background: "var(--navy)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontWeight: 800, fontSize: "0.95rem", letterSpacing: "-0.01em" }}>POPOK Admin</span>
-          <span style={{ fontSize: "0.72rem", background: "rgba(255,255,255,0.15)", padding: "2px 8px", borderRadius: "12px", fontWeight: 600 }}>MVP</span>
-        </div>
-        <button onClick={handleLogout} style={{ padding: "6px 12px", background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-          로그아웃
-        </button>
+    <div className="admin-shell">
+      <header className="admin-topbar">
+        <Link href="/admin" className="admin-brand">POPOK <span>ADMIN</span></Link>
+        <button onClick={handleLogout} className="admin-logout">로그아웃</button>
       </header>
-
-      <div style={{ display: "flex", flex: 1, minHeight: "calc(80vh - 54px)" }}>
-        <aside style={{ width: "220px", background: "#fff", borderRight: "1.5px solid var(--border)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: "8px" }}>
-          {menuItems.map((item) => {
-            const isActive = pathname === item.path || (item.path !== "/admin" && pathname.startsWith(`${item.path}/`));
-            return (
-              <Link key={item.path} href={item.path} style={{ display: "block", padding: "10px 16px", borderRadius: "8px", fontSize: "0.85rem", fontWeight: 700, textDecoration: "none", color: isActive ? "var(--navy)" : "var(--ink-muted)", background: isActive ? "#f1f3f5" : "transparent", transition: "all 0.15s" }}>
-                {item.name}
-              </Link>
-            );
-          })}
+      <div className="admin-frame">
+        <aside className="admin-sidebar" aria-label="관리자 메뉴">
+          {menuGroups.map((group) => (
+            <section key={group.label} className="admin-nav-group">
+              <p>{group.label}</p>
+              <div>
+                {group.items.map((item) => {
+                  const active = pathname === item.path || (item.path !== "/admin" && pathname.startsWith(item.path + "/"));
+                  return <Link key={item.path} href={item.path} aria-current={active ? "page" : undefined} className={active ? "active" : ""}>{item.name}</Link>;
+                })}
+              </div>
+            </section>
+          ))}
         </aside>
-        <main style={{ flex: 1, padding: "32px", minWidth: 0 }}>{children}</main>
+        <main className="admin-content">{children}</main>
       </div>
+      <style jsx global>{`
+        .admin-shell{min-height:80vh;background:#f8f9fa;color:var(--navy)}
+        .admin-topbar{height:58px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+        .admin-brand{color:#fff;text-decoration:none;font-weight:900;letter-spacing:-.02em}.admin-brand span{color:var(--accent);font-size:11px;margin-left:7px;letter-spacing:.12em}
+        .admin-logout{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:7px 12px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+        .admin-frame{display:grid;grid-template-columns:224px minmax(0,1fr);min-height:calc(80vh - 58px)}
+        .admin-sidebar{background:#fff;border-right:1px solid var(--border);padding:24px 15px}
+        .admin-nav-group{margin-bottom:24px}.admin-nav-group>p{margin:0 10px 7px;color:#98a0aa;font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}
+        .admin-nav-group>div{display:grid;gap:3px}.admin-nav-group a{padding:9px 11px;text-decoration:none;color:var(--ink-muted);font-size:13px;font-weight:750;border-left:3px solid transparent}.admin-nav-group a:hover{background:#f5f6f7;color:var(--navy)}.admin-nav-group a.active{color:var(--navy);background:#f2f5e9;border-left-color:var(--accent)}
+        .admin-content{padding:32px;min-width:0}
+        @media(max-width:760px){.admin-topbar{padding:0 16px}.admin-frame{display:block}.admin-sidebar{position:sticky;top:0;z-index:20;display:flex;gap:20px;overflow-x:auto;padding:10px 14px;border-right:0;border-bottom:1px solid var(--border)}.admin-nav-group{margin:0;flex:none}.admin-nav-group>p{display:none}.admin-nav-group>div{display:flex}.admin-nav-group a{white-space:nowrap;border-left:0;border-bottom:2px solid transparent;padding:8px 10px}.admin-nav-group a.active{border-bottom-color:var(--accent)}.admin-content{padding:22px 14px}}
+      `}</style>
     </div>
   );
 }

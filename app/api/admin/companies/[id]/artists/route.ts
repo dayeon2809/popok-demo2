@@ -5,6 +5,27 @@ import { findConflictingPrimaryCompany, clearPrimaryFlagForArtist } from "@/lib/
 
 export const dynamic = "force-dynamic";
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
+
+  const { id: companyId } = await params;
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("artist_companies" as any)
+    .select("id, artist_id, role, start_year, end_year, is_current, is_primary, created_at, artists(id, name, name_en, slug, profile_image_url, role, genre)")
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ success: false, error: "소속 아티스트를 불러오지 못했습니다." }, { status: 500 });
+  }
+  return NextResponse.json({ success: true, artists: data || [] });
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

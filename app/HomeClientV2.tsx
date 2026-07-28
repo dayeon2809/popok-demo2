@@ -14,7 +14,6 @@ import HomeVisualFeed from "@/components/home/HomeVisualFeed";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import FAQSection from "@/components/FAQSection";
 import HomeHeroV2 from "@/components/home/HomeHeroV2";
-import ResultComparisonSection from "@/components/home/ResultComparisonSection";
 import HomeStepsSection from "@/components/home/HomeStepsSection";
 import HomeUseCasesSection from "@/components/home/HomeUseCasesSection";
 import FooterCTA from "@/components/home/FooterCTA";
@@ -90,21 +89,11 @@ export default function HomeClientV2({
     [initialArtists, showDraft]
   );
 
-  // Real, published artist shown in the "완성된 POPOK 아티스트 페이지" preview
-  // (ResultComparisonSection) — the actual PopokCard component with real
-  // data, not a mockup. Falls back to a placeholder card if none has a photo yet.
+  // Real, published artist used by the homepage hero card.
   const heroArtist = useMemo(() => {
     const withImage = publishedArtists.filter((artist) => artist.profile_image_url || artist.profileImage || artist.profile_image_urls?.[0]);
     return withImage.find((artist) => artist.name.replace(/\s/g, "") === "최지안") || withImage[0] || null;
   }, [publishedArtists]);
-
-  const previewArtist = useMemo(
-    () => publishedArtists.find((artist) => artist.name.replace(/\s/g, "") === "이다연")
-      || publishedArtists.find((artist) => artist.profileImage || artist.profile_image_url || artist.profile_image_urls?.[0])
-      || publishedArtists[0]
-      || null,
-    [publishedArtists]
-  );
 
   const publishedCompanies = useMemo(
     () => initialCompanies.filter((company) => showDraft || company.status === "published" || !company.status),
@@ -128,8 +117,6 @@ export default function HomeClientV2({
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
       <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} heroArtist={heroArtist} />
-
-      <ResultComparisonSection ctaHref={heroCta.href} isLoggedIn={isLoggedIn} previewArtist={previewArtist} />
 
       <div id="home-explore" style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* 아티스트 / 단체 토글 버튼 */}

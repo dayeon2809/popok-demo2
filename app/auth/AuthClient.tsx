@@ -78,11 +78,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
             lineHeight: 1.5,
             fontWeight: 500
           }}>
-            {returnPath ? (
-              <>작업을 올리려면 로그인이 필요해요.<br />사진만 올리면, 포퐄이 작업과 이력을 정리해드려요.</>
-            ) : (
-              <>사진만 올리세요, 나머지 정리는 포퐄이.<br />내 작업 공간을 만들고 바로 시작해보세요. (현재 모든 기능 무료)</>
-            )}
+            <>당신의 포트폴리오를, 더 가볍게.<br />하나의 링크로 예술적 작업을 연결하세요.</>
           </p>
         </div>
 

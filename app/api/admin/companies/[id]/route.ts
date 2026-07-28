@@ -15,7 +15,7 @@ const SOURCE_TEXT_MAX = 30000;
 // `source_file_*` are deliberately excluded too — those are only ever
 // written by app/api/admin/companies/[id]/source-file, never this generic PATCH.
 const EDITABLE_FIELDS = [
-  "name", "name_en", "slug", "verified", "genre", "category", "city_or_region",
+  "name", "name_en", "slug", "verified", "owner_id", "genre", "category", "city_or_region",
   "bio_short", "bio", "profile_image_url", "motion_video_url", "email",
   "instagram", "website", "portfolio_url",
   "profile_image_urls", "representative_images", "current_activity", "works", "awards", "review_links", "links",

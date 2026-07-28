@@ -6,9 +6,15 @@ import { normalizeWorkImages, cleanWorksForPayload } from "@/lib/company-works";
 import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards, cleanCompanyAwardsForPayload, type CompanyAward } from "@/lib/company";
 import { ArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 
+export type CompanyEditorPermissions = {
+  editBasicInfo: boolean; editWorks: boolean; editPerformances: boolean; editArtists: boolean; editReviews: boolean; changeOwner: boolean; changePublishStatus: boolean; deleteCompany: boolean;
+};
+
 interface CompanyCmsEditorProps {
   company: Company;
   onSaveSuccess?: (updatedCompany: Company) => void;
+  accessMode?: "owner" | "admin";
+  permissions?: Partial<CompanyEditorPermissions>;
 }
 
 interface CreditRow {
@@ -238,7 +244,15 @@ const isEqualValue = (a: any, b: any): boolean => {
   return na === nb;
 };
 
-export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsEditorProps) {
+export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = "owner", permissions: permissionOverrides }: CompanyCmsEditorProps) {
+  const isAdmin = accessMode === "admin";
+  const permissions: CompanyEditorPermissions = {
+    editBasicInfo: true, editWorks: true, editPerformances: isAdmin, editArtists: true, editReviews: true,
+    changeOwner: isAdmin, changePublishStatus: isAdmin, deleteCompany: isAdmin, ...permissionOverrides,
+  };
+  const companyApiBase = isAdmin ? `/api/admin/companies/${company.id}` : `/api/companies/${company.id}`;
+  const artistsApiBase = `${companyApiBase}/artists`;
+  const schedulesApiUrl = isAdmin ? `/api/admin/performances?companyId=${encodeURIComponent(company.id)}` : `/api/companies/${company.id}/performances`;
   // Basic states
   const [name, setName] = useState(company.name || "");
   const [nameEn, setNameEn] = useState(company.name_en || "");
@@ -311,7 +325,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
   const fetchConnectedArtists = useCallback(async () => {
     setLoadingArtists(true);
     try {
-      const res = await fetch(`/api/companies/${company.id}/artists`);
+      const res = await fetch(artistsApiBase);
       const data = await res.json();
       if (data.success) {
         setConnectedArtists(data.artists || []);
@@ -321,7 +335,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     } finally {
       setLoadingArtists(false);
     }
-  }, [company.id]);
+  }, [artistsApiBase]);
 
   useEffect(() => {
     if (activeTab === "artists") {
@@ -334,7 +348,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     const loadSchedules = async () => {
       setLoadingSchedules(true);
       try {
-        const res = await fetch(`/api/companies/${company.id}/performances`);
+        const res = await fetch(schedulesApiUrl);
         const data = await res.json();
         if (data.success) {
           setCompanySchedules(data.data || []);
@@ -346,7 +360,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
       }
     };
     loadSchedules();
-  }, [company.id, activeTab]);
+  }, [company.id, activeTab, schedulesApiUrl]);
 
   // Artist search handler
   useEffect(() => {
@@ -584,8 +598,8 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     setSaving(true);
 
     try {
-      const res = await fetch(`/api/companies/${company.id}/update`, {
-        method: "PUT",
+      const res = await fetch(isAdmin ? companyApiBase : `${companyApiBase}/update`, {
+        method: isAdmin ? "PATCH" : "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(diffPayload),
       });
@@ -601,8 +615,8 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
       // The fields we just wrote are now the confirmed baseline — merge rather than
       // waiting on a parent re-render (which may not happen, or may not swap `company`).
       originalSnapshotRef.current = { ...original, ...diffPayload };
-      if (onSaveSuccess && data.company) {
-        onSaveSuccess(data.company);
+      if (onSaveSuccess) {
+        onSaveSuccess(data.company || ({ ...company, ...diffPayload } as Company));
       }
     } catch {
       triggerToast("서버 통신 오류가 발생했습니다.");
@@ -614,7 +628,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
   // Affiliated Artists Helpers
   const handleAddArtistConnection = async (artist: any) => {
     try {
-      const res = await fetch(`/api/companies/${company.id}/artists`, {
+      const res = await fetch(artistsApiBase, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -642,8 +656,8 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
 
   const handleUpdateArtistConnection = async (relation: ConnectedArtist) => {
     try {
-      const res = await fetch(`/api/companies/${company.id}/artists/${relation.id}`, {
-        method: "PUT",
+      const res = await fetch(`${artistsApiBase}/${relation.id}`, {
+        method: isAdmin ? "PATCH" : "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           role: relation.role,
@@ -669,7 +683,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
     if (!confirm(`'${artistName}' 아티스트를 단체 소속에서 해제하시겠습니까?`)) return;
 
     try {
-      const res = await fetch(`/api/companies/${company.id}/artists/${relationId}`, {
+      const res = await fetch(`${artistsApiBase}/${relationId}`, {
         method: "DELETE",
       });
 
@@ -2041,7 +2055,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
           </div>
         )}
 
-        {/* ── Tab 9: Schedules (Read-Only) ── */}
+        {/* ── Tab 9: Schedules ── */}
         {activeTab === "schedules" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "24px", maxWidth: "800px" }}>
             <div>
@@ -2051,6 +2065,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess }: CompanyCmsE
               <p style={{ fontSize: "0.82rem", color: "var(--accent-dark)", margin: "6px 0 0", fontWeight: 700 }}>
                 POPOK가 확인한 단체의 새로운 공연과 활동 일정입니다.
               </p>
+              {permissions.editPerformances && <a href={`/admin/performances?companyId=${company.id}`} style={{ display: "inline-block", marginTop: 12, color: "var(--navy)", fontWeight: 800 }}>공연 추가·수정하기 →</a>}
             </div>
 
             <div style={{
