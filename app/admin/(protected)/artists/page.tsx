@@ -311,9 +311,10 @@ export default function AdminArtistsPage() {
           <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)" }}>아티스트 관리 (Artists CMS)</h1>
           <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>데이터베이스에 등록된 아티스트 레코드를 모니터링하고 관리합니다.</p>
         </div>
-        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--ink-faint)" }}>
-          총 {filteredArtists.length}개 아티스트
-        </span>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--ink-faint)" }}>총 {filteredArtists.length}개 아티스트</span>
+          <Link href="/admin/artists/new" style={{ padding: "10px 16px", background: "var(--accent)", color: "var(--navy)", fontWeight: 850, textDecoration: "none", border: "1px solid var(--accent)" }}>+ 신규 아티스트 생성</Link>
+        </div>
       </div>
 
       {/* Filters */}
@@ -427,6 +428,7 @@ export default function AdminArtistsPage() {
 
                       <td style={{ padding: "12px 14px" }}>
                         <div style={{ fontWeight: 800, color: "var(--navy)" }}>{a.name}</div>
+                        <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>{a.slug ? `/${a.slug}` : "slug 없음"} · {a.genre ? (FIELD_LABELS[a.genre] ?? a.genre) : "장르 미정"}</div>
                         {a.name_en && <div style={{ fontSize: "0.72rem", color: "var(--ink-muted)", marginTop: "2px" }}>{a.name_en}</div>}
                         {isDupe && (
                           <div style={{ marginTop: "4px" }}>
@@ -484,6 +486,7 @@ export default function AdminArtistsPage() {
                       {/* 최근 수정일 */}
                       <td style={{ padding: "12px 14px", color: "var(--ink-muted)" }}>
                         {formatRelativeTime(a.updatedAt) || "-"}
+                        <div style={{ fontSize: "0.68rem", color: "var(--ink-faint)", marginTop: "3px" }}>생성 {formatRelativeTime(a.createdAt) || "-"}</div>
                       </td>
 
                       {/* 상태 */}

@@ -452,6 +452,13 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     }
     return deduped.slice(0, 3);
   })();
+  const externalLinkItems = toObjectArray<{ url?: string; label?: string }>(artist.links)
+    .filter((link) => typeof link.url === "string" && link.url.trim())
+    .map((link) => ({
+      label: link.label?.trim() || getReviewDomain(link.url || ""),
+      href: normalizeHref(link.url || ""),
+    }));
+
 
   const englishName = artist.name_en || (artist.name ? artist.name.toUpperCase() : "CREATIVE");
   const tags = Array.isArray(artist.tags) ? artist.tags : [artist.field, artist.genre].filter(Boolean);
@@ -962,6 +969,20 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   <div key={idx}>{row}</div>
                 );
               })}
+            </div>
+          </section>
+        )}
+
+
+        {externalLinkItems.length > 0 && (
+          <section style={SECTION_STYLE}>
+            <SectionHeader eyebrow="Links" description="아티스트의 작업과 활동을 더 자세히 살펴보세요." meta={`${externalLinkItems.length} LINKS`} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
+              {externalLinkItems.map((link, idx) => (
+                <a key={`${link.href}-${idx}`} href={link.href} target="_blank" rel="noopener noreferrer" onClick={() => analytics.artistMediaClicked(artistKey)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "16px 0", borderTop: "1px solid var(--border-light)", color: "var(--navy)", textDecoration: "none", fontSize: "0.88rem", fontWeight: 800 }}>
+                  <span>{link.label}</span><span aria-hidden="true">↗</span>
+                </a>
+              ))}
             </div>
           </section>
         )}

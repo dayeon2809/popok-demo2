@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 type UserResult = { id: string; email: string; name: string };
-export default function AdminCompanyOwnerPanel({ companyId, ownerId, onChanged }: { companyId: string; ownerId?: string | null; onChanged: (ownerId: string | null) => void }) {
+export default function AdminCompanyOwnerPanel({ companyId, entityId, entityType = "company", ownerId, onChanged }: { companyId?: string; entityId?: string; entityType?: "company" | "artist"; ownerId?: string | null; onChanged: (ownerId: string | null) => void }) {
+  const targetId = entityId || companyId || "";
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UserResult[]>([]);
   const [busy, setBusy] = useState(false);
@@ -18,7 +19,7 @@ export default function AdminCompanyOwnerPanel({ companyId, ownerId, onChanged }
   const changeOwner = async (nextOwnerId: string | null) => {
     if (ownerId && nextOwnerId && ownerId !== nextOwnerId && !confirm("기존 대표자를 새 사용자로 변경할까요?")) return;
     setBusy(true); setMessage("");
-    const response = await fetch("/api/admin/companies/" + companyId, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ owner_id: nextOwnerId }) });
+    const response = await fetch("/api/admin/" + (entityType === "company" ? "companies/" : "artists/") + targetId, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ owner_id: nextOwnerId }) });
     const data = await response.json(); setBusy(false);
     if (!response.ok || !data.success) return setMessage(data.error || "대표자 변경에 실패했습니다.");
     onChanged(nextOwnerId); setResults([]); setQuery(""); setMessage(nextOwnerId ? "대표자를 연결했습니다." : "대표자 연결을 해제했습니다.");

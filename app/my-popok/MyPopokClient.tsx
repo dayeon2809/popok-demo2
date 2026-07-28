@@ -13,6 +13,7 @@ import ReceivedPortfolioRequests from "@/components/portfolio-requests/ReceivedP
 import SentPortfolioRequests from "@/components/portfolio-requests/SentPortfolioRequests";
 import { SHOW_PREMIUM_UI } from "@/lib/featureFlags";
 import QuickUploadPanel from "@/components/my-popok/QuickUploadPanel";
+import AiOrganizeWorkButton from "@/components/my-popok/AiOrganizeWorkButton";
 import ArtistWorkGallery from "@/components/artists/ArtistWorkGallery";
 import WorkDetailModal from "@/components/works/WorkDetailModal";
 import {
@@ -38,6 +39,14 @@ import ProfileEditorNav, { type ProfileEditorSection } from "@/components/profil
 import WorksCardEditor from "@/components/profile/WorksCardEditor";
 import { ArrayField, StringArrayField } from "@/components/admin/ArrayField";
 
+
+type PendingWorkImage = {
+  id: string;
+  url: string;
+  fileName?: string;
+  selected: boolean;
+  uploadedAt?: string;
+};
 
 interface Work {
   id: string;
@@ -75,6 +84,7 @@ interface Artist {
   awards?: ArtistAward[];
   competitions?: ArtistAward[];
   links?: any[];
+  review_links?: any[];
 }
 
 
@@ -134,7 +144,9 @@ export default function MyPopokClient({
   // the whole dashboard. Same window.location read pattern as ?tab= above.
   const quickUploadRef = useRef<HTMLDivElement>(null);
   const workPreviewRef = useRef<HTMLDivElement>(null);
-  const [quickUploadedWorkIds, setQuickUploadedWorkIds] = useState<string[]>([]);
+  const [pendingWorkImages, setPendingWorkImages] = useState<PendingWorkImage[]>([]);
+  const [pendingWorkTitle, setPendingWorkTitle] = useState("");
+  const [groupedWorkDraft, setGroupedWorkDraft] = useState<Work | null>(null);
   const [previewWork, setPreviewWork] = useState<Work | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -188,6 +200,7 @@ export default function MyPopokClient({
   const [awards, setAwards] = useState<ArtistAward[]>(() => normalizeArtistAwards(artist.awards));
   const [competitions, setCompetitions] = useState<ArtistAward[]>(() => normalizeArtistCompetitions(artist.competitions));
   const [links, setLinks] = useState<any[]>(artist.links || []);
+  const [reviewLinks, setReviewLinks] = useState<any[]>(Array.isArray(artist.review_links) ? artist.review_links : []);
 
   // AI Update modal states
   const [aiModalOpen, setAiModalOpen] = useState(false);
@@ -385,7 +398,7 @@ export default function MyPopokClient({
     }
   };
 
-  // Work Image Upload handler (up to 4 images per work)
+  // Work Image Upload handler (up to 8 images per work)
   const handleWorkImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, workIdx: number, imgIdx?: number) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -398,7 +411,7 @@ export default function MyPopokClient({
 
       if (imgIdx !== undefined && imgIdx < currentImages.length) {
         currentImages[imgIdx] = url;
-      } else if (currentImages.length < 4) {
+      } else if (currentImages.length < 8) {
         currentImages.push(url);
       }
 
@@ -437,27 +450,62 @@ export default function MyPopokClient({
     return newWork.id;
   };
 
-  // V2 (feature/home-feed-v2) Quick Upload: each dropped/selected photo
-  // becomes its own draft work — title-less is fine (lib/works.ts's
-  // cleanWorkForPayload already keeps a work with only an image, no backend
-  // change needed). Tracked separately in quickUploadedWorkIds so the Quick
-  // Upload panel's preview strip only shows this session's uploads, not the
-  // artist's whole existing works list.
+  // Uploaded files stay in a temporary client-side inbox. They do not become
+  // works until the artist explicitly groups and reviews them. Storage uploads
+  // survive the form interaction, while no placeholder work rows are written.
   const handleQuickUploadedFile = (url: string, file: File) => {
-    const newWork: Work = {
+    setPendingWorkImages((prev) => [...prev, {
+      id: `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      url,
+      fileName: file.name,
+      selected: true,
+      uploadedAt: new Date().toISOString(),
+    }]);
+  };
+
+  const togglePendingWorkImage = (id: string) => {
+    setPendingWorkImages((prev) => {
+      const target = prev.find((image) => image.id === id);
+      if (!target) return prev;
+      const selectedCount = prev.filter((image) => image.selected).length;
+      if (!target.selected && selectedCount >= 8) {
+        alert("한 작품에는 사진을 최대 8장까지 묶을 수 있어요.");
+        return prev;
+      }
+      return prev.map((image) => image.id === id ? { ...image, selected: !image.selected } : image);
+    });
+  };
+
+  const prepareGroupedWork = () => {
+    const selected = pendingWorkImages.filter((image) => image.selected).slice(0, 8);
+    if (selected.length === 0) {
+      alert("같은 작품으로 묶을 사진을 선택해 주세요.");
+      return;
+    }
+    if (!pendingWorkTitle.trim()) {
+      alert("작품명을 입력해 주세요.");
+      return;
+    }
+    setGroupedWorkDraft({
       id: `new-work-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      title: "",
+      title: pendingWorkTitle.trim(),
       year: new Date().getFullYear(),
       role: "",
       description: "",
-      image_url: url,
-      images: [url],
+      image_url: selected[0].url,
+      images: selected.map((image) => image.url),
       video_url: "",
-    };
-    setWorks(current => [...current, newWork]);
-    setQuickUploadedWorkIds(prev => [...prev, newWork.id]);
+    });
+  };
+
+  const finalizeGroupedWork = () => {
+    if (!groupedWorkDraft) return;
+    const selectedIds = new Set(pendingWorkImages.filter((image) => image.selected).map((image) => image.id));
+    setWorks((current) => [...current, groupedWorkDraft]);
+    setPendingWorkImages((prev) => prev.filter((image) => !selectedIds.has(image.id)));
+    setPendingWorkTitle("");
+    setGroupedWorkDraft(null);
     analytics.workCreated(1);
-    void file; // kept in the signature for callers that want the filename (AI organize uses it separately)
   };
 
   // Remove work item
@@ -526,7 +574,8 @@ export default function MyPopokClient({
           education: cleanArtistEducationForPayload(education),
           awards: cleanArtistAwardsForPayload(awards),
           competitions: cleanArtistCompetitionsForPayload(competitions),
-          links
+          links,
+          review_links: reviewLinks
         })
       });
 
@@ -1050,64 +1099,56 @@ export default function MyPopokClient({
               <QuickUploadPanel
                 uploadFile={(file) => uploadImageFile(file, `quick_${Date.now()}`)}
                 onUploaded={handleQuickUploadedFile}
+                disabled={pendingWorkImages.length >= 24}
               />
             </div>
           </div>
 
-          {quickUploadedWorkIds.length > 0 && (
-            <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "14px" }}>
-              <div>
-                <span style={{ display: "block", fontSize: "0.78rem", fontWeight: 800, color: "var(--ink-muted)" }}>
-                  이번에 올린 작업 ({quickUploadedWorkIds.length})
-                </span>
-                <span style={{ display: "block", fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: "2px" }}>
-                  제목은 나중에 정해도 괜찮아요.
-                </span>
+          {pendingWorkImages.length > 0 && (
+            <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "end", flexWrap: "wrap" }}>
+                <div>
+                  <strong style={{ display: "block", fontSize: "0.9rem", color: "var(--navy)" }}>임시 사진 보관함</strong>
+                  <span style={{ fontSize: "0.76rem", color: "var(--ink-muted)" }}>같은 작품의 사진을 최대 8장까지 선택하세요. 아직 작품은 생성되지 않았습니다.</span>
+                </div>
+                <span style={{ fontSize: "0.76rem", fontWeight: 850, color: "var(--accent-dark)" }}>{pendingWorkImages.filter((image) => image.selected).length}장 선택</span>
               </div>
-              {quickUploadedWorkIds.map((workId) => {
-                const workIndex = works.findIndex((w) => w.id === workId);
-                if (workIndex === -1) return null;
-                const work = works[workIndex];
-                return (
-                  <div key={workId} style={{ display: "flex", gap: "12px", padding: "12px", border: "1px solid var(--border)", borderRadius: "12px", alignItems: "flex-start" }}>
-                    <div style={{ width: "56px", height: "56px", borderRadius: "8px", overflow: "hidden", background: "#EAE6DD", flexShrink: 0 }}>
-                      {work.image_url && <img src={work.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <input
-                        type="text"
-                        value={work.title}
-                        onChange={(e) => handleWorkInputChange(workIndex, "title", e.target.value)}
-                        placeholder="제목 없는 작업 (나중에 정해도 돼요)"
-                        style={{ width: "100%", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px 10px", fontSize: "0.85rem", fontWeight: 700, color: "var(--navy)" }}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleRemoveWork(workIndex);
-                        setQuickUploadedWorkIds((prev) => prev.filter((id) => id !== workId));
-                      }}
-                      aria-label="제거"
-                      style={{ background: "none", border: "none", color: "var(--ink-faint)", cursor: "pointer", fontSize: "0.9rem", flexShrink: 0 }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                );
-              })}
 
-              <div>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="btn-lime"
-                  style={{ padding: "12px 24px", borderRadius: "999px", fontSize: "0.88rem", fontWeight: 800, border: "none", cursor: saving ? "not-allowed" : "pointer" }}
-                >
-                  {saving ? "저장 중..." : "공개하기"}
-                </button>
+              <div className="pending-work-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(112px, 1fr))", gap: "10px" }}>
+                {pendingWorkImages.map((image) => (
+                  <div key={image.id} style={{ position: "relative" }}>
+                    <button type="button" onClick={() => togglePendingWorkImage(image.id)} aria-pressed={image.selected} style={{ width: "100%", aspectRatio: "1", display: "block", padding: 0, overflow: "hidden", borderRadius: "12px", border: image.selected ? "3px solid var(--accent-dark)" : "1px solid var(--border)", background: "#EAE6DD", cursor: "pointer" }}>
+                      <img src={image.url} alt={image.fileName || "업로드한 작품 사진"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <span style={{ position: "absolute", top: "7px", left: "7px", width: "24px", height: "24px", display: "grid", placeItems: "center", borderRadius: "50%", background: image.selected ? "var(--accent)" : "rgba(23,20,17,.62)", color: image.selected ? "var(--navy)" : "#fff", fontSize: "0.72rem", fontWeight: 950 }}>{image.selected ? "✓" : ""}</span>
+                    </button>
+                    <button type="button" onClick={() => setPendingWorkImages((prev) => prev.filter((item) => item.id !== image.id))} aria-label="임시 사진 제거" style={{ position: "absolute", top: "7px", right: "7px", width: "24px", height: "24px", border: 0, borderRadius: "50%", background: "rgba(23,20,17,.7)", color: "#fff", cursor: "pointer" }}>×</button>
+                    <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "5px", fontSize: "0.66rem", color: "var(--ink-muted)" }}>{image.fileName || "사진"}</span>
+                  </div>
+                ))}
               </div>
+
+              {!groupedWorkDraft ? (
+                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "10px" }} className="group-work-controls">
+                  <input type="text" value={pendingWorkTitle} onChange={(event) => setPendingWorkTitle(event.target.value)} placeholder="작품명 (예: Re:Choreograph 다시 쓰는 몸)" style={{ ...inputStyle, minWidth: 0 }} />
+                  <button type="button" onClick={prepareGroupedWork} className="btn-lime" style={{ padding: "12px 20px", border: 0, borderRadius: "10px", fontWeight: 900, cursor: "pointer" }}>하나의 작품으로 묶기</button>
+                </div>
+              ) : (
+                <div style={{ padding: "20px", border: "1px solid var(--border)", borderRadius: "14px", background: "#FAF9F5", display: "flex", flexDirection: "column", gap: "14px" }}>
+                  <div><strong style={{ color: "var(--navy)" }}>작품 초안 검토</strong><p style={{ margin: "4px 0 0", color: "var(--ink-muted)", fontSize: "0.75rem" }}>{normalizeWorkImages(groupedWorkDraft).length}장의 사진이 하나의 작품에 포함됩니다.</p></div>
+                  <div className="group-work-fields" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <input style={inputStyle} value={groupedWorkDraft.title} onChange={(event) => setGroupedWorkDraft({ ...groupedWorkDraft, title: event.target.value })} placeholder="작품명" />
+                    <input style={inputStyle} value={groupedWorkDraft.year || ""} onChange={(event) => setGroupedWorkDraft({ ...groupedWorkDraft, year: event.target.value })} placeholder="연도" />
+                    <input style={inputStyle} value={groupedWorkDraft.role || ""} onChange={(event) => setGroupedWorkDraft({ ...groupedWorkDraft, role: event.target.value })} placeholder="역할" />
+                    <textarea style={{ ...inputStyle, minHeight: "90px", resize: "vertical", gridColumn: "1 / -1" }} value={groupedWorkDraft.description || ""} onChange={(event) => setGroupedWorkDraft({ ...groupedWorkDraft, description: event.target.value })} placeholder="작품 설명" />
+                  </div>
+                  <AiOrganizeWorkButton input={{ title: groupedWorkDraft.title, year: String(groupedWorkDraft.year || ""), role: groupedWorkDraft.role, description: groupedWorkDraft.description, fileName: pendingWorkImages.filter((image) => image.selected).map((image) => image.fileName).filter(Boolean).join(", "), artistGenre: genre, artistBioShort: bioShort }} onApply={(suggestion) => setGroupedWorkDraft((current) => current ? { ...current, ...suggestion } : current)} />
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <button type="button" onClick={finalizeGroupedWork} className="btn-lime" style={{ padding: "11px 18px", border: 0, borderRadius: "999px", fontWeight: 900, cursor: "pointer" }}>작품 목록에 추가</button>
+                    <button type="button" onClick={() => setGroupedWorkDraft(null)} style={{ padding: "11px 18px", border: "1px solid var(--border-dark)", borderRadius: "999px", background: "#fff", fontWeight: 800, cursor: "pointer" }}>다시 선택</button>
+                  </div>
+                  <p style={{ margin: 0, color: "var(--ink-muted)", fontSize: "0.72rem" }}>추가 후 상단의 ‘변경사항 저장하기’를 누르면 공개 프로필에 반영됩니다.</p>
+                </div>
+              )}
             </div>
           )}
         </section>
@@ -1606,6 +1647,45 @@ export default function MyPopokClient({
                   />
                 </div>
               </div>
+
+
+              <div hidden={activeEditorSection !== "media"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
+                <h2 style={{ fontSize: "1.25rem", fontWeight: 950, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
+                  7. 인터뷰 · 기사 · 외부 링크
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
+                  <ArrayField<any>
+                    label="인터뷰 및 기사"
+                    variant="dashboard"
+                    items={reviewLinks}
+                    onChange={setReviewLinks}
+                    newItem={() => ({ title: "", publication: "", year: "", url: "" })}
+                    addLabel="+ 인터뷰 또는 기사 추가"
+                    renderItem={(item, set) => (
+                      <div style={{ display: "grid", gap: "8px", width: "100%" }}>
+                        <input style={inputStyle} placeholder="제목" value={item.title || ""} onChange={(e) => set({ ...item, title: e.target.value })} />
+                        <input style={inputStyle} placeholder="매체명" value={item.publication || ""} onChange={(e) => set({ ...item, publication: e.target.value })} />
+                        <input style={inputStyle} placeholder="연도 또는 날짜" value={item.year || item.date || ""} onChange={(e) => set({ ...item, year: e.target.value, date: undefined })} />
+                        <input style={inputStyle} type="url" placeholder="https://..." value={item.url || ""} onChange={(e) => set({ ...item, url: e.target.value })} />
+                      </div>
+                    )}
+                  />
+                  <ArrayField<any>
+                    label="외부 링크"
+                    variant="dashboard"
+                    items={links}
+                    onChange={setLinks}
+                    newItem={() => ({ label: "", url: "" })}
+                    addLabel="+ 외부 링크 추가"
+                    renderItem={(item, set) => (
+                      <div style={{ display: "grid", gap: "8px", width: "100%" }}>
+                        <input style={inputStyle} placeholder="링크 이름 (예: 개인 홈페이지)" value={item.label || ""} onChange={(e) => set({ ...item, label: e.target.value })} />
+                        <input style={inputStyle} type="url" placeholder="https://..." value={item.url || ""} onChange={(e) => set({ ...item, url: e.target.value })} />
+                      </div>
+                    )}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Sticky Card Preview Sidebar */}
@@ -1881,6 +1961,8 @@ export default function MyPopokClient({
       <style>{`
         @media (max-width: 480px) {
           .quick-upload-split { gap: 14px !important; }
+          .pending-work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          .group-work-controls, .group-work-fields { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 900px) {
           .editor-grid {

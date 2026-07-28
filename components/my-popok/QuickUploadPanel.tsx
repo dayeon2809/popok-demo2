@@ -16,7 +16,7 @@ interface QuickUploadItem {
 interface QuickUploadPanelProps {
   /** Uploads one file to Supabase Storage (reuses MyPopokClient's existing uploadImageFile) and returns its public URL, or null on failure. */
   uploadFile: (file: File) => Promise<string | null>;
-  /** Called once per successfully uploaded file — the caller turns this into a new draft work. */
+  /** Called once per successfully uploaded file. The caller stores it in a temporary image inbox, not as a work. */
   onUploaded: (url: string, file: File) => void;
   disabled?: boolean;
 }
@@ -37,8 +37,9 @@ export default function QuickUploadPanel({ uploadFile, onUploaded, disabled }: Q
     setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "uploading", error: undefined } : i)));
     const url = await uploadFile(item.file);
     if (url) {
-      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "done" } : i)));
       onUploaded(url, item.file);
+      URL.revokeObjectURL(item.previewUrl);
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
     } else {
       setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "error", error: "업로드 실패" } : i)));
     }

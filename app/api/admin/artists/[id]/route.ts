@@ -95,8 +95,8 @@ export async function DELETE(
 // Whitelisted, real-column-only partial edit. Admin-override write path for
 // artists.owner_id — deliberately does NOT filter by owner_id (unlike POST
 // /api/artists/me), since an admin may edit any artist including ones with
-// no owner. owner_id itself is never part of the whitelist below, so an
-// admin edit can never reassign or clear an existing connection.
+// no owner. Profile fields use the shared builder; owner_id and status are
+// handled separately below as explicit admin-only moderation fields.
 //
 // Two callers share this handler:
 //  - The quick inline edit on /admin/artists (name/name_en/genre/role/
@@ -144,6 +144,18 @@ export async function PATCH(
       updateData.status = body.status;
     }
 
+    if (Object.prototype.hasOwnProperty.call(body, "owner_id")) {
+      const nextOwnerId = typeof body.owner_id === "string" ? body.owner_id.trim() || null : null;
+      if (nextOwnerId) {
+        const supabaseForOwner = getSupabaseServer();
+        const { data: ownerUser, error: ownerError } = await supabaseForOwner.auth.admin.getUserById(nextOwnerId);
+        if (ownerError || !ownerUser.user) {
+          return NextResponse.json({ success: false, error: "연결할 사용자를 찾을 수 없습니다." }, { status: 400 });
+        }
+      }
+      updateData.owner_id = nextOwnerId;
+    }
+
     // updateData always carries updated_at (set by buildArtistUpdateFromPayload)
     // — anything beyond that one key means a real field was actually submitted.
     if (Object.keys(updateData).length <= 1) {
@@ -159,7 +171,7 @@ export async function PATCH(
 
     if (updateErr) {
       console.error("[PATCH /api/admin/artists/[id]] Update error:", updateErr);
-      return NextResponse.json({ success: false, error: `수정 실패: ${updateErr.message}` }, { status: 500 });
+      return NextResponse.json({ success: false, error: updateErr.code === "23505" ? "이미 사용 중인 slug이거나 다른 아티스트에 연결된 사용자입니다." : `수정 실패: ${updateErr.message}` }, { status: updateErr.code === "23505" ? 409 : 500 });
     }
 
     return NextResponse.json({ success: true, data: updated });

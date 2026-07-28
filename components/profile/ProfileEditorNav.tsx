@@ -2,7 +2,7 @@
 
 import styles from "./ProfileEditorNav.module.css";
 
-export type ProfileEditorSection = "basic" | "intro" | "works" | "activity" | "education" | "awards";
+export type ProfileEditorSection = "basic" | "intro" | "works" | "activity" | "education" | "awards" | "media";
 
 const sections: Array<{ key: ProfileEditorSection; number: string; label: string }> = [
   { key: "basic", number: "1", label: "기본 정보" },
@@ -11,6 +11,7 @@ const sections: Array<{ key: ProfileEditorSection; number: string; label: string
   { key: "activity", number: "4", label: "활동 이력" },
   { key: "education", number: "5", label: "학력" },
   { key: "awards", number: "6", label: "수상 · 선정" },
+  { key: "media", number: "7", label: "인터뷰 · 링크" },
 ];
 
 export default function ProfileEditorNav({ active, onChange }: { active: ProfileEditorSection; onChange: (section: ProfileEditorSection) => void }) {

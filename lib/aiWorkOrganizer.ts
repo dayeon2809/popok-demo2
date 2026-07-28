@@ -25,6 +25,7 @@ const organizedWorkSchema = z.object({
   title: z.string().default(""),
   shortDescription: z.string().default(""),
   role: z.string().default(""),
+  year: z.string().default(""),
   genre: z.string().default(""),
   keywords: z.array(z.string()).default([]),
   caption: z.string().default(""),
@@ -55,6 +56,7 @@ JSON 스키마:
   "title": "작품 제목 제안 (정보가 부족하면 빈 문자열)",
   "shortDescription": "작품 소개 한 문장",
   "role": "역할 정리 (예: 안무 및 출연)",
+  "year": "제작 또는 발표 연도 (근거가 없으면 빈 문자열)",
   "genre": "장르 또는 작업 성격 한 단어/구",
   "keywords": ["키워드"],
   "caption": "공개 페이지용 짧은 캡션 한 문장"

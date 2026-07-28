@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
-import MyPopokClient from "@/app/my-popok/MyPopokClient";
+import ArtistEditor from "@/components/artist/ArtistEditor";
+import AdminArtistControls from "@/components/admin/AdminArtistControls";
 
 interface OwnerProfile {
   display_name: string | null;
@@ -16,8 +17,8 @@ interface OwnerProfile {
 // /my-popok) in adminMode — see that component's adminMode prop doc for why
 // this isn't a separate duplicated form. Saves go to PATCH
 // /api/admin/artists/[id] (service-role write, no owner_id filter — an
-// admin edit never touches owner_id, see lib/artist-profile.ts
-// buildArtistUpdateFromPayload) instead of the self-serve POST /api/artists/me.
+// profile editing uses the shared builder; owner/status changes are isolated in
+// AdminArtistControls and never exposed by the owner editor.
 export default function AdminArtistEditPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -70,9 +71,11 @@ export default function AdminArtistEditPage() {
         </Link>
       </div>
 
-      <MyPopokClient
+      <AdminArtistControls artist={artist} onUpdated={(patch) => setArtist((current: any) => ({ ...current, ...patch }))} />
+
+      <ArtistEditor
         initialArtist={artist}
-        adminMode
+        accessMode="admin"
         saveEndpoint={`/api/admin/artists/${artistId}`}
         saveMethod="PATCH"
         saveHeaders={authHeader()}

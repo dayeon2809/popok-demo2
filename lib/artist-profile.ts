@@ -198,6 +198,7 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
     awards,
     competitions,
     links,
+    review_links,
     slug,
   } = input || {};
 
@@ -224,6 +225,7 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
   if (awards !== undefined) updateData.awards = cleanArtistAwardsForPayload(awards);
   if (competitions !== undefined) updateData.competitions = cleanArtistCompetitionsForPayload(competitions);
   if (links !== undefined) updateData.links = links;
+  if (review_links !== undefined) updateData.review_links = review_links;
 
   if (slug !== undefined) {
     const cleanSlug = String(slug).trim().toLowerCase();

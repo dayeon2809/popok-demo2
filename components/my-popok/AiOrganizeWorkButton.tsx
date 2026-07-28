@@ -6,6 +6,7 @@ interface OrganizedWork {
   title: string;
   shortDescription: string;
   role: string;
+  year: string;
   genre: string;
   keywords: string[];
   caption: string;
@@ -24,7 +25,7 @@ export interface AiOrganizeWorkInput {
 interface AiOrganizeWorkButtonProps {
   input: AiOrganizeWorkInput;
   /** Applies the suggestion's title/description/role onto the work — review-first, never automatic. */
-  onApply: (suggestion: { title: string; description: string; role: string }) => void;
+  onApply: (suggestion: { title: string; description: string; role: string; year: string }) => void;
 }
 
 // "AI로 정리하기" — feature/home-feed-v2's upload-first dashboard. Calls
@@ -108,6 +109,7 @@ export default function AiOrganizeWorkButton({ input, onApply }: AiOrganizeWorkB
             {suggestion.title && <div><strong>제목:</strong> {suggestion.title}</div>}
             {suggestion.shortDescription && <div><strong>소개:</strong> {suggestion.shortDescription}</div>}
             {suggestion.role && <div><strong>역할:</strong> {suggestion.role}</div>}
+            {suggestion.year && <div><strong>연도:</strong> {suggestion.year}</div>}
             {suggestion.keywords.length > 0 && (
               <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
                 {suggestion.keywords.map((kw) => (
@@ -126,6 +128,7 @@ export default function AiOrganizeWorkButton({ input, onApply }: AiOrganizeWorkB
                   title: suggestion.title,
                   description: suggestion.shortDescription,
                   role: suggestion.role,
+                  year: suggestion.year,
                 });
                 setOpen(false);
               }}

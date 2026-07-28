@@ -22,7 +22,7 @@ export interface NormalizedWork {
 /**
  * Resolves a work's images regardless of which editor last touched it:
  * `images[]` (canonical) first, then legacy `image_url`/`image` wrapped into
- * an array. Dedupes, drops empty strings, caps at 4 (the max UI supports).
+ * an array. Dedupes, drops empty strings, caps at 8 (the max UI supports).
  */
 export function normalizeWorkImages(work: any): string[] {
   let raw: any[] = [];
@@ -46,7 +46,7 @@ export function normalizeWorkImages(work: any): string[] {
     .map((img: any) => (typeof img === "string" ? img.trim() : (img?.url || img?.src || "").trim()))
     .filter(Boolean);
 
-  return Array.from(new Set(cleaned)).slice(0, 4);
+  return Array.from(new Set(cleaned)).slice(0, 8);
 }
 
 /**

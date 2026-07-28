@@ -1,6 +1,7 @@
 import { requireAdminApi } from "@/lib/admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { randomBytes, randomUUID } from "node:crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -104,5 +105,49 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     console.error("[GET /api/admin/artists] Server error:", err);
     return NextResponse.json({ success: false, error: "서버 오류가 발생했습니다." }, { status: 500 });
+  }
+}
+
+
+export async function POST(req: NextRequest) {
+  const adminError = await requireAdminApi();
+  if (adminError) return adminError;
+
+  try {
+    const body = await req.json();
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const slug = typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
+    if (!name) return NextResponse.json({ success: false, error: "이름은 필수입니다." }, { status: 400 });
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3) {
+      return NextResponse.json({ success: false, error: "slug는 3자 이상의 영문 소문자, 숫자, 하이픈만 사용할 수 있습니다." }, { status: 400 });
+    }
+
+    const supabase = getSupabaseServer();
+    const { data: duplicate, error: duplicateError } = await (supabase.from("artists") as any).select("id").eq("slug", slug).maybeSingle();
+    if (duplicateError) return NextResponse.json({ success: false, error: "slug 중복 확인에 실패했습니다." }, { status: 500 });
+    if (duplicate) return NextResponse.json({ success: false, error: "이미 사용 중인 slug입니다." }, { status: 409 });
+
+    const row = {
+      id: randomUUID(), owner_id: null, name, slug, status: "draft", verified: false,
+      name_en: typeof body.name_en === "string" ? body.name_en.trim() || null : null,
+      genre: typeof body.genre === "string" ? body.genre.trim() || null : null,
+      bio_short: typeof body.bio_short === "string" ? body.bio_short.trim() || null : null,
+      profile_image_url: typeof body.profile_image_url === "string" ? body.profile_image_url.trim() || null : null,
+      email: typeof body.email === "string" ? body.email.trim() || null : null,
+      instagram: typeof body.instagram === "string" ? body.instagram.trim() || null : null,
+      website: typeof body.website === "string" ? body.website.trim() || null : null,
+      claim_code: "poc_" + randomBytes(4).toString("hex"),
+      works: [], profile_image_urls: [], affiliations: [], current_activity: [], awards: [], competitions: [], education: [], links: [], review_links: [],
+      created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    };
+    const { data, error } = await (supabase.from("artists") as any).insert(row).select("*").single();
+    if (error) {
+      const duplicateSlug = error.code === "23505";
+      return NextResponse.json({ success: false, error: duplicateSlug ? "이미 사용 중인 slug입니다." : "아티스트 생성에 실패했습니다." }, { status: duplicateSlug ? 409 : 500 });
+    }
+    return NextResponse.json({ success: true, data }, { status: 201 });
+  } catch (error) {
+    console.error("[POST /api/admin/artists]", error);
+    return NextResponse.json({ success: false, error: "아티스트 생성 중 오류가 발생했습니다." }, { status: 500 });
   }
 }

@@ -91,8 +91,8 @@ export default function WorksCardEditor({ works, canAdd, countLabel, uploadingSl
             <label>작품 영상 URL<input type="text" value={selectedWork.video_url || ""} onChange={(event) => onChange(selectedIndex, "video_url", event.target.value)} placeholder="https://..." /></label>
           </div>
           <label className={styles.description}>작품 소개 요약 (Description)<textarea value={selectedWork.description || ""} onChange={(event) => onChange(selectedIndex, "description", event.target.value)} placeholder="작품에 대한 간단한 설명을 입력해 주세요." rows={4} /></label>
-          <div className={styles.imagesHeader}><strong>작품 이미지</strong><span>{normalizeWorkImages(selectedWork).length} / 4장 · 첫 이미지가 대표 썸네일로 표시됩니다.</span></div>
-          <div className={styles.imageGrid}>{[0,1,2,3].map((imageIndex) => {
+          <div className={styles.imagesHeader}><strong>작품 이미지</strong><span>{normalizeWorkImages(selectedWork).length} / 8장 · 첫 이미지가 대표 썸네일로 표시됩니다.</span></div>
+          <div className={styles.imageGrid}>{Array.from({ length: 8 }, (_, imageIndex) => imageIndex).map((imageIndex) => {
             const imageUrl = normalizeWorkImages(selectedWork)[imageIndex];
             const uploading = uploadingSlot === `work_${selectedIndex}_${imageIndex}`;
             return <div className={styles.imageSlot} key={imageIndex}>{imageUrl ? <><img src={imageUrl} alt={`${selectedWork.title || "작품"} 이미지 ${imageIndex + 1}`} /><button type="button" onClick={() => onImageRemove(selectedIndex, imageIndex)} aria-label={`${imageIndex + 1}번 이미지 삭제`}>×</button></> : <><input id={`work-card-image-${selectedWork.id}-${imageIndex}`} type="file" accept="image/*" disabled={Boolean(uploadingSlot)} onChange={(event) => onImageUpload(event, selectedIndex, imageIndex)} /><label htmlFor={`work-card-image-${selectedWork.id}-${imageIndex}`}><span>{uploading ? "⏳" : "＋"}</span>{uploading ? "업로드 중" : `이미지 ${imageIndex + 1}`}</label></>}</div>;
