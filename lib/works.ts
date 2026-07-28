@@ -18,6 +18,7 @@ export interface NormalizedWork {
   video_url: string;
   credits: WorkCredit[];
   dashboard_image_order?: string[];
+  sort_order?: number;
 }
 
 /**
@@ -147,6 +148,7 @@ export function normalizeWork(work: any): NormalizedWork {
     image_url: imageUrl,
     credits: normalizeWorkCredits(work),
     dashboard_image_order: Array.isArray(work?.dashboard_image_order) ? work.dashboard_image_order.filter((url: unknown): url is string => typeof url === "string" && Boolean(url.trim())) : undefined,
+    sort_order: Number.isFinite(Number(work?.sort_order)) ? Number(work.sort_order) : undefined,
   };
 }
 
@@ -169,6 +171,7 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
   const images = normalizeWorkImages(work);
   const credits = normalizeWorkCredits(work);
   const dashboard_image_order = Array.isArray(work?.dashboard_image_order) ? work.dashboard_image_order.filter((url: unknown): url is string => typeof url === "string" && Boolean(url.trim())) : undefined;
+  const sort_order = Number.isFinite(Number(work?.sort_order)) ? Number(work.sort_order) : undefined;
 
   const hasContent = Boolean(title) || Boolean(description) || Boolean(role) || Boolean(video_url) || images.length > 0 || credits.length > 0;
   if (!hasContent) return null;
@@ -187,7 +190,32 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
     image_url,
     credits,
     dashboard_image_order,
+    sort_order,
   };
+}
+
+/** Uses an explicit saved order when present; otherwise defaults to newest year first. */
+export function sortWorksForDisplay<T extends { year?: unknown; sort_order?: unknown }>(works: T[]): T[] {
+  const list = [...works];
+  const hasSavedOrder = list.some((work) => Number.isFinite(Number(work?.sort_order)));
+  return list
+    .map((work, index) => ({ work, index }))
+    .sort((a, b) => {
+      if (hasSavedOrder) {
+        const aOrder = Number.isFinite(Number(a.work.sort_order)) ? Number(a.work.sort_order) : Number.MAX_SAFE_INTEGER;
+        const bOrder = Number.isFinite(Number(b.work.sort_order)) ? Number(b.work.sort_order) : Number.MAX_SAFE_INTEGER;
+        return aOrder - bOrder || a.index - b.index;
+      }
+      const aYear = Number.parseInt(String(a.work.year || ""), 10);
+      const bYear = Number.parseInt(String(b.work.year || ""), 10);
+      return (Number.isFinite(bYear) ? bYear : -Infinity) - (Number.isFinite(aYear) ? aYear : -Infinity) || a.index - b.index;
+    })
+    .map(({ work }) => work);
+}
+
+/** Persists the current drag-and-drop order directly on each work item. */
+export function applyWorkSortOrder<T extends object>(works: T[]): Array<T & { sort_order: number }> {
+  return works.map((work, index) => ({ ...work, sort_order: index }));
 }
 
 export function cleanWorksForPayload(works: any): NormalizedWork[] {

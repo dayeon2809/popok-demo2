@@ -112,7 +112,6 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseServer();
 
-    let isCompanyEvent = false;
     if (companyId) {
       // 1. Verify company exists
       const { data: companyExists, error: companyCheckError } = await supabase
@@ -124,17 +123,13 @@ export async function POST(req: NextRequest) {
       if (companyCheckError) {
         console.error("[POST /api/admin/performances] Company check error:", companyCheckError);
       }
-      if (companyExists) {
-        isCompanyEvent = true;
-      } else {
+      if (!companyExists) {
         return NextResponse.json({ success: false, error: "존재하지 않는 단체 ID입니다." }, { status: 400 });
       }
     }
 
-    if ((isPublished || isFeatured) && !externalUrl) {
-      if (isFeatured || !isCompanyEvent) {
-        return NextResponse.json({ success: false, error: "공개 또는 메인 노출을 하려면 외부 링크가 필요합니다." }, { status: 400 });
-      }
+    if (isFeatured && !externalUrl) {
+      return NextResponse.json({ success: false, error: "메인 노출을 하려면 외부 링크가 필요합니다. 공연 공개는 링크 없이도 가능합니다." }, { status: 400 });
     }
 
     if (isFeatured && !isPublished) {

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { Company } from "@/types";
-import { normalizeWorkImages, cleanWorksForPayload } from "@/lib/company-works";
-import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards, cleanCompanyAwardsForPayload, type CompanyAward } from "@/lib/company";
+import { normalizeWorkImages, cleanWorksForPayload, creditsToDisplayString, sortWorksForDisplay, applyWorkSortOrder } from "@/lib/company-works";
+import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards, cleanCompanyAwardsForPayload, normalizeCompanyHistory, type CompanyAward } from "@/lib/company";
 import { ArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 
 export type CompanyEditorPermissions = {
@@ -34,6 +34,7 @@ interface WorkItem {
   credits?: string;
   credits_list?: CreditRow[];
   links?: any[];
+  sort_order?: number;
 }
 
 interface ReviewItem {
@@ -111,7 +112,7 @@ const parseWorkCredits = (w: any): CreditRow[] => {
 };
 
 const deriveWorksFromRaw = (rawWorks: any): WorkItem[] => {
-  const arr = Array.isArray(rawWorks) ? rawWorks : [];
+  const arr = sortWorksForDisplay(Array.isArray(rawWorks) ? rawWorks : []);
   return arr.map((w: any, idx: number) => ({
     id: w.id || `work_${idx}`,
     title: w.title || "",
@@ -124,6 +125,7 @@ const deriveWorksFromRaw = (rawWorks: any): WorkItem[] => {
     credits: w.credits || "",
     credits_list: parseWorkCredits(w),
     links: Array.isArray(w.links) ? w.links : [],
+    sort_order: Number.isFinite(Number(w.sort_order)) ? Number(w.sort_order) : undefined,
   }));
 };
 
@@ -190,7 +192,7 @@ const buildPayload = (f: PayloadFields) => ({
   portfolio_url: f.portfolioUrl.trim(),
   works: cleanWorksForPayload(f.works),
   current_activity: f.currentActivity,
-  history: f.history,
+  history: normalizeCompanyHistory(f.history),
   review_links: f.reviewLinks,
   links: f.links,
   awards: cleanCompanyAwardsForPayload(f.awards),
@@ -220,7 +222,7 @@ const snapshotFromCompany = (c: any) =>
     portfolioUrl: c.portfolio_url || "",
     works: deriveWorksFromRaw(c.works),
     currentActivity: Array.isArray(c.current_activity) ? c.current_activity : [],
-    history: Array.isArray(c.history) ? c.history : [],
+    history: normalizeCompanyHistory(c.history),
     reviewLinks: deriveReviewsFromRaw(c.review_links),
     links: Array.isArray(c.links) ? c.links : [],
     awards: normalizeCompanyAwards(c.awards),
@@ -291,7 +293,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
   const [currentActivity, setCurrentActivity] = useState<any[]>(Array.isArray(company.current_activity) ? company.current_activity : []);
 
   // History state
-  const [history, setHistory] = useState<any[]>(Array.isArray(company.history) ? company.history : []);
+  const [history, setHistory] = useState<any[]>(() => normalizeCompanyHistory(company.history));
 
   // Reviews & Press state (Requirement 2)
   const [reviewLinks, setReviewLinks] = useState<ReviewItem[]>(() => deriveReviewsFromRaw(company.review_links));
@@ -406,7 +408,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
     setPortfolioUrl(company.portfolio_url || "");
     setWorks(deriveWorksFromRaw(company.works));
     setCurrentActivity(Array.isArray(company.current_activity) ? company.current_activity : []);
-    setHistory(Array.isArray(company.history) ? company.history : []);
+    setHistory(normalizeCompanyHistory(company.history));
     setReviewLinks(deriveReviewsFromRaw(company.review_links));
     setLinks(Array.isArray(company.links) ? company.links : []);
     setAwards(normalizeCompanyAwards(company.awards));
@@ -714,7 +716,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
         image_url: "",
         images: [],
         credits: "",
-        credits_list: [{ role: "안무", name: "" }],
+        credits_list: [],
         links: [],
       },
     ]);
@@ -730,42 +732,6 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
 
   const handleRemoveWork = (index: number) => {
     setWorks((prev) => prev.filter((_, idx) => idx !== index));
-  };
-
-  // Credits Row Editors
-  const handleAddCreditRow = (workIndex: number) => {
-    setWorks((prev) => {
-      const updated = [...prev];
-      const workItem = { ...updated[workIndex] };
-      const creditsList = [...(workItem.credits_list || [])];
-      creditsList.push({ role: "역할", name: "" });
-      workItem.credits_list = creditsList;
-      updated[workIndex] = workItem;
-      return updated;
-    });
-  };
-
-  const handleUpdateCreditRow = (workIndex: number, creditIndex: number, field: "role" | "name", val: string) => {
-    setWorks((prev) => {
-      const updated = [...prev];
-      const workItem = { ...updated[workIndex] };
-      const creditsList = [...(workItem.credits_list || [])];
-      creditsList[creditIndex] = { ...creditsList[creditIndex], [field]: val };
-      workItem.credits_list = creditsList;
-      updated[workIndex] = workItem;
-      return updated;
-    });
-  };
-
-  const handleRemoveCreditRow = (workIndex: number, creditIndex: number) => {
-    setWorks((prev) => {
-      const updated = [...prev];
-      const workItem = { ...updated[workIndex] };
-      const creditsList = [...(workItem.credits_list || [])].filter((_, cidx) => cidx !== creditIndex);
-      workItem.credits_list = creditsList;
-      updated[workIndex] = workItem;
-      return updated;
-    });
   };
 
   // Reviews Helpers
@@ -1538,18 +1504,51 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
               </div>
             ) : (
               works.map((work, widx) => (
-                <div key={work.id || widx} style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "24px", background: "#FAF9F5" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "10px" }}>
+                <div
+                  key={work.id || widx}
+                  style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "24px", background: "#FAF9F5" }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "10px" }}>
                     <span className="mono" style={{ fontSize: "0.75rem", fontWeight: 850, color: "var(--navy)" }}>
                       WORK #{widx + 1}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveWork(widx)}
-                      style={{ fontSize: "0.78rem", fontWeight: 800, color: "#991B1B", background: "none", border: "none", cursor: "pointer" }}
-                    >
-                      작품 삭제
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <button
+                        type="button"
+                        aria-label="작품을 위로 이동"
+                        disabled={widx === 0}
+                        onClick={() => setWorks((current) => {
+                          if (widx === 0) return current;
+                          const reordered = [...current];
+                          [reordered[widx - 1], reordered[widx]] = [reordered[widx], reordered[widx - 1]];
+                          return applyWorkSortOrder(reordered);
+                        })}
+                        style={{ padding: "5px 10px", fontSize: "0.82rem", fontWeight: 900, border: "1px solid var(--border)", borderRadius: "4px", background: "#FFFFFF", cursor: widx === 0 ? "default" : "pointer", opacity: widx === 0 ? 0.35 : 1 }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="작품을 아래로 이동"
+                        disabled={widx === works.length - 1}
+                        onClick={() => setWorks((current) => {
+                          if (widx === current.length - 1) return current;
+                          const reordered = [...current];
+                          [reordered[widx], reordered[widx + 1]] = [reordered[widx + 1], reordered[widx]];
+                          return applyWorkSortOrder(reordered);
+                        })}
+                        style={{ padding: "5px 10px", fontSize: "0.82rem", fontWeight: 900, border: "1px solid var(--border)", borderRadius: "4px", background: "#FFFFFF", cursor: widx === works.length - 1 ? "default" : "pointer", opacity: widx === works.length - 1 ? 0.35 : 1 }}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveWork(widx)}
+                        style={{ fontSize: "0.78rem", fontWeight: 800, color: "#991B1B", background: "none", border: "none", cursor: "pointer" }}
+                      >
+                        작품 삭제
+                      </button>
+                    </div>
                   </div>
 
                   {/* Basic Work Fields */}
@@ -1710,64 +1709,27 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
                     </div>
                   </div>
 
-                  {/* Multi-Row Credits Editor */}
+                  {/* Free-form credits editor — normalized on save by lib/works. */}
                   <div style={{ border: "1px solid var(--border)", padding: "16px", borderRadius: "6px", background: "#FFFFFF" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                      <label style={{ fontSize: "0.82rem", fontWeight: 850, color: "var(--navy)" }}>
-                        👥 크레딧 항목 관리 (무제한 항목 추가)
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => handleAddCreditRow(widx)}
-                        style={{
-                          padding: "5px 12px",
-                          fontSize: "0.75rem",
-                          fontWeight: 800,
-                          color: "var(--navy)",
-                          background: "#FAF9F5",
-                          border: "1px solid var(--navy)",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        + 크레딧 항목 추가
-                      </button>
-                    </div>
-
-                    {(work.credits_list || []).length === 0 ? (
-                      <div style={{ fontSize: "0.78rem", color: "var(--ink-muted)", textAlign: "center", padding: "12px", background: "#FAF9F5", borderRadius: "4px" }}>
-                        크레딧 항목이 없습니다. '+ 크레딧 항목 추가' 버튼을 눌러 안무가, 무용수, 스태프 등을 추가해보세요.
-                      </div>
-                    ) : (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                        {(work.credits_list || []).map((credit, cidx) => (
-                          <div key={cidx} style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                            <input
-                              type="text"
-                              value={credit.role}
-                              onChange={(e) => handleUpdateCreditRow(widx, cidx, "role", e.target.value)}
-                              placeholder="역할 (예: 안무, 무용, 조명)"
-                              style={{ width: "130px", padding: "6px 10px", fontSize: "0.82rem", borderRadius: "4px", border: "1px solid var(--border)" }}
-                            />
-                            <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--ink-muted)" }}>:</span>
-                            <input
-                              type="text"
-                              value={credit.name}
-                              onChange={(e) => handleUpdateCreditRow(widx, cidx, "name", e.target.value)}
-                              placeholder="이름 (예: 이다연, 노예슬)"
-                              style={{ flex: 1, padding: "6px 10px", fontSize: "0.82rem", borderRadius: "4px", border: "1px solid var(--border)" }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveCreditRow(widx, cidx)}
-                              style={{ fontSize: "0.78rem", color: "#991B1B", background: "none", border: "none", cursor: "pointer", padding: "4px" }}
-                            >
-                              삭제
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 850, color: "var(--navy)", marginBottom: "10px" }}>
+                      작품 크레딧 (Credits)
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={typeof work.credits === "string" ? work.credits : creditsToDisplayString(work)}
+                      placeholder={"자유롭게 입력해 주세요.\n예) 공동창작 및 출연 김예술, 이포퐄 / 인터뷰 홍길동"}
+                      onChange={(event) =>
+                        setWorks((current) => current.map((item, index) =>
+                          index === widx
+                            ? { ...item, credits: event.target.value, credits_list: [] }
+                            : item
+                        ))
+                      }
+                      style={{ ...inputStyle, width: "100%", resize: "vertical", lineHeight: 1.6 }}
+                    />
+                    <span style={{ display: "block", marginTop: "8px", fontSize: "0.75rem", color: "var(--ink-muted)", lineHeight: 1.5 }}>
+                      문장이나 메모처럼 자유롭게 입력해도 저장할 때 역할별 크레딧으로 정리됩니다.
+                    </span>
                   </div>
 
                 </div>

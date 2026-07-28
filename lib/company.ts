@@ -113,3 +113,36 @@ export function formatCompanyAward(award: CompanyAward): string {
   const withOrg = award.organization ? `${withYear}${withYear ? " - " : ""}${award.organization}` : withYear;
   return withOrg.trim();
 }
+
+
+export interface CompanyHistoryItem {
+  year: string;
+  event: string;
+}
+
+/** Groups duplicate years into one timeline row while preserving every event. */
+export function normalizeCompanyHistory(value: unknown): CompanyHistoryItem[] {
+  const raw = Array.isArray(value) ? value : [];
+  const grouped = new Map<string, string[]>();
+  const undated: CompanyHistoryItem[] = [];
+
+  raw.forEach((item: any) => {
+    const year = item?.year !== undefined && item?.year !== null ? String(item.year).trim() : "";
+    const event = typeof item?.event === "string" ? item.event.trim() : "";
+    if (!year && !event) return;
+    if (!year) {
+      undated.push({ year: "", event });
+      return;
+    }
+    const events = grouped.get(year) || [];
+    event.split(/\n+/).map((line: string) => line.trim()).filter(Boolean).forEach((line: string) => {
+      if (!events.includes(line)) events.push(line);
+    });
+    grouped.set(year, events);
+  });
+
+  const dated = Array.from(grouped.entries())
+    .map(([year, events]) => ({ year, event: events.join("\n") }))
+    .sort((a, b) => Number.parseInt(b.year, 10) - Number.parseInt(a.year, 10));
+  return [...dated, ...undated];
+}

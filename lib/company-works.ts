@@ -9,6 +9,8 @@ export {
   normalizeWorks,
   cleanWorkForPayload,
   cleanWorksForPayload,
+  sortWorksForDisplay,
+  applyWorkSortOrder,
   type WorkCredit,
   type NormalizedWork,
 } from "./works";

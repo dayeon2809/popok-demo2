@@ -390,9 +390,9 @@ export default function MyPopokClient({
 
     const currentImages = normalizeWorkImages(works[workIdx]);
     const isReplacing = imgIdx !== undefined && imgIdx < currentImages.length;
-    const availableSlots = Math.max(0, 8 - currentImages.length + (isReplacing ? 1 : 0));
+    const availableSlots = Math.max(0, 4 - currentImages.length + (isReplacing ? 1 : 0));
     const files = selectedFiles.slice(0, availableSlots);
-    if (selectedFiles.length > files.length) alert(`한 작품에는 사진을 최대 8장까지 올릴 수 있어요. 선택한 사진 중 ${files.length}장만 추가합니다.`);
+    if (selectedFiles.length > files.length) alert(`한 작품에는 사진을 최대 4장까지 올릴 수 있어요. 선택한 사진 중 ${files.length}장만 추가합니다.`);
 
     const uploadedUrls: string[] = [];
     for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
@@ -408,7 +408,7 @@ export default function MyPopokClient({
         const nextImages = normalizeWorkImages(targetWork);
         if (isReplacing && imgIdx !== undefined) nextImages[imgIdx] = uploadedUrls.shift()!;
         nextImages.push(...uploadedUrls);
-        targetWork.images = nextImages.slice(0, 8);
+        targetWork.images = currentImages.length > 4 ? nextImages : nextImages.slice(0, 4);
         targetWork.image_url = targetWork.images[0] || "";
         updatedWorks[workIdx] = targetWork;
         return updatedWorks;
@@ -463,8 +463,8 @@ export default function MyPopokClient({
       const target = prev.find((image) => image.id === id);
       if (!target) return prev;
       const selectedCount = prev.filter((image) => image.selected).length;
-      if (!target.selected && selectedCount >= 8) {
-        alert("한 작품에는 사진을 최대 8장까지 묶을 수 있어요.");
+      if (!target.selected && selectedCount >= 4) {
+        alert("한 작품에는 사진을 최대 4장까지 묶을 수 있어요.");
         return prev;
       }
       return prev.map((image) => image.id === id ? { ...image, selected: !image.selected } : image);
@@ -472,7 +472,7 @@ export default function MyPopokClient({
   };
 
   const prepareGroupedWork = () => {
-    const selected = pendingWorkImages.filter((image) => image.selected).slice(0, 8);
+    const selected = pendingWorkImages.filter((image) => image.selected).slice(0, 4);
     if (selected.length === 0) {
       alert("같은 작품으로 묶을 사진을 선택해 주세요.");
       return;
@@ -510,9 +510,9 @@ export default function MyPopokClient({
       return;
     }
     const currentImages = normalizeWorkImages(works[workIndex]);
-    const capacity = 8 - currentImages.length;
+    const capacity = 4 - currentImages.length;
     if (capacity <= 0) {
-      alert("선택한 작품에는 이미 사진이 8장 등록되어 있어요.");
+      alert("선택한 작품에는 이미 사진이 4장 등록되어 있어요.");
       return;
     }
     const selected = pendingWorkImages.filter((image) => image.selected);
@@ -524,7 +524,7 @@ export default function MyPopokClient({
     const addedIds = new Set(imagesToAdd.map((image) => image.id));
     setWorks((current) => current.map((work, index) => {
       if (index !== workIndex) return work;
-      const images = [...normalizeWorkImages(work), ...imagesToAdd.map((image) => image.url)].slice(0, 8);
+      const images = [...normalizeWorkImages(work), ...imagesToAdd.map((image) => image.url)].slice(0, 4);
       return { ...work, images, image_url: images[0] || "" };
     }));
     setPendingWorkImages((current) => current.filter((image) => !addedIds.has(image.id)));
@@ -1041,7 +1041,7 @@ export default function MyPopokClient({
               <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "end", flexWrap: "wrap" }}>
                 <div>
                   <strong style={{ display: "block", fontSize: "0.9rem", color: "var(--navy)" }}>임시 사진 보관함</strong>
-                  <span style={{ fontSize: "0.76rem", color: "var(--ink-muted)" }}>같은 작품의 사진을 최대 8장까지 선택하세요. 아직 작품은 생성되지 않았습니다.</span>
+                  <span style={{ fontSize: "0.76rem", color: "var(--ink-muted)" }}>같은 작품의 사진을 최대 4장까지 선택하세요. 아직 작품은 생성되지 않았습니다.</span>
                 </div>
                 <span style={{ fontSize: "0.76rem", fontWeight: 850, color: "var(--accent-dark)" }}>{pendingWorkImages.filter((image) => image.selected).length}장 선택</span>
               </div>
@@ -1073,7 +1073,7 @@ export default function MyPopokClient({
                         <option value="">사진을 추가할 작품 선택</option>
                         {works.map((work) => {
                           const imageCount = normalizeWorkImages(work).length;
-                          return <option key={work.id} value={work.id} disabled={imageCount >= 8}>{work.title || "제목 없는 작품"} ({imageCount}/8장)</option>;
+                          return <option key={work.id} value={work.id} disabled={imageCount >= 4}>{work.title || "제목 없는 작품"} ({imageCount}/4장)</option>;
                         })}
                       </select>
                       <button type="button" onClick={addPendingImagesToExistingWork} className="btn-lime" style={{ padding: "12px 20px", border: 0, borderRadius: "10px", fontWeight: 900, cursor: "pointer" }}>선택한 작품에 추가</button>

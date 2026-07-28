@@ -6,7 +6,7 @@ import Link from "next/link";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import { ArrayField, StringArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
-import { normalizeWorkImages, creditsToDisplayString } from "@/lib/company-works";
+import { normalizeWorkImages, creditsToDisplayString, sortWorksForDisplay, applyWorkSortOrder } from "@/lib/company-works";
 
 // Public Preview Components — kept in lockstep with app/companies/[slug]/CompanyClientView.tsx
 // so the admin Live Preview never drifts from the real public page structure.
@@ -20,6 +20,7 @@ import CompanyContact from "@/components/company/CompanyContact";
 import CompanyCmsEditor from "@/components/company/CompanyCmsEditor";
 import AdminCompanyOwnerPanel from "@/components/admin/AdminCompanyOwnerPanel";
 import type { Company } from "@/types";
+import { normalizeCompanyHistory } from "@/lib/company";
 
 interface AwardItem { year?: string | number; title?: string; result?: string; organization?: string; }
 interface ReviewItem { title?: string; publication?: string; source?: string; year?: string | number; url?: string; }
@@ -444,12 +445,12 @@ export default function AdminCompanyEditPage() {
         const mapped: CompanyDetail = {
           ...data.data,
           current_activity: Array.isArray(data.data.current_activity) ? data.data.current_activity : [],
-          works: Array.isArray(data.data.works) ? data.data.works : [],
+          works: sortWorksForDisplay(Array.isArray(data.data.works) ? data.data.works : []),
           awards: Array.isArray(data.data.awards) ? data.data.awards : [],
           review_links: Array.isArray(data.data.review_links) ? data.data.review_links : [],
           links: Array.isArray(data.data.links) ? data.data.links : [],
           core_values: Array.isArray(data.data.core_values) ? data.data.core_values : [],
-          history: Array.isArray(data.data.history) ? data.data.history : [],
+          history: normalizeCompanyHistory(data.data.history),
           ai_draft: data.data.ai_draft || null,
           ai_draft_status: data.data.ai_draft_status || "not_started",
           ai_draft_error: data.data.ai_draft_error || null,
@@ -2036,19 +2037,52 @@ export default function AdminCompanyEditPage() {
                 <div style={{ padding: "20px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {(company.works || []).map((work: any, idx: number) => (
-                      <div key={idx} style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "16px", background: "#FAF8F5" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <div
+                        key={work.id || idx}
+                        style={{ border: "1.5px solid var(--border)", borderRadius: "10px", padding: "16px", background: "#FAF8F5" }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
                           <span style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--ink-faint)" }}>대표 작품 #{idx + 1}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newWorks = company.works.filter((_, i) => i !== idx);
-                              updateField("works", newWorks);
-                            }}
-                            style={{ ...dangerBtnStyle, padding: "4px 8px", fontSize: "0.72rem" }}
-                          >
-                            작품 삭제
-                          </button>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <button
+                              type="button"
+                              aria-label="작품을 위로 이동"
+                              disabled={idx === 0}
+                              onClick={() => {
+                                if (idx === 0) return;
+                                const reordered = [...company.works];
+                                [reordered[idx - 1], reordered[idx]] = [reordered[idx], reordered[idx - 1]];
+                                updateField("works", applyWorkSortOrder(reordered));
+                              }}
+                              style={{ ...secondaryBtnStyle, padding: "4px 9px", fontSize: "0.8rem", opacity: idx === 0 ? 0.35 : 1 }}
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="작품을 아래로 이동"
+                              disabled={idx === company.works.length - 1}
+                              onClick={() => {
+                                if (idx === company.works.length - 1) return;
+                                const reordered = [...company.works];
+                                [reordered[idx], reordered[idx + 1]] = [reordered[idx + 1], reordered[idx]];
+                                updateField("works", applyWorkSortOrder(reordered));
+                              }}
+                              style={{ ...secondaryBtnStyle, padding: "4px 9px", fontSize: "0.8rem", opacity: idx === company.works.length - 1 ? 0.35 : 1 }}
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newWorks = company.works.filter((_, i) => i !== idx);
+                                updateField("works", applyWorkSortOrder(newWorks));
+                              }}
+                              style={{ ...dangerBtnStyle, padding: "4px 8px", fontSize: "0.72rem" }}
+                            >
+                              작품 삭제
+                            </button>
+                          </div>
                         </div>
 
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }} className="admin-form-grid">
@@ -2151,20 +2185,25 @@ export default function AdminCompanyEditPage() {
                         </div>
 
                         <div style={fieldRowStyle}>
-                          <label style={labelStyle}>크레딧 (참여 예술가 및 연출 등) — 줄마다 &quot;역할: 이름, 이름2&quot;</label>
+                          <label style={labelStyle}>작품 크레딧 (Credits)</label>
                           <textarea
-                            rows={2}
+                            rows={4}
                             style={{ ...inputStyle, resize: "vertical" }}
-                            value={creditsToDisplayString(work)}
+                            value={typeof work.credits === "string" ? work.credits : creditsToDisplayString(work)}
+                            placeholder={"자유롭게 입력해 주세요.\n예) 공동창작 및 출연 김예술, 이포퐄 / 인터뷰 홍길동"}
                             onChange={(e) => {
                               const newWorks = [...company.works];
-                              // Stored as a plain string here for editing only — the save
-                              // routes (both CMS and admin) normalize this into the
-                              // canonical structured credits[] via lib/company-works.
-                              newWorks[idx] = { ...work, credits: e.target.value };
+                              newWorks[idx] = {
+                                ...work,
+                                credits: e.target.value,
+                                credits_list: [],
+                              };
                               updateField("works", newWorks);
                             }}
                           />
+                          <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", lineHeight: 1.5 }}>
+                            문장이나 메모처럼 자유롭게 입력해도 저장할 때 역할별 크레딧으로 정리됩니다.
+                          </span>
                         </div>
                       </div>
                     ))}

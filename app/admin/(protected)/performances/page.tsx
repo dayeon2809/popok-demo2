@@ -308,8 +308,8 @@ export default function AdminPerformancesPage() {
     if (url && !/^https?:\/\/.+/i.test(url)) {
       return "외부 링크는 http:// 또는 https://로 시작해야 합니다.";
     }
-    if ((form.isPublished || form.isFeatured) && !url) {
-      return "공개 또는 메인 노출을 하려면 외부 링크가 필요합니다.";
+    if (form.isFeatured && !url) {
+      return "메인 노출을 하려면 외부 링크가 필요합니다. 공연 공개는 링크 없이도 가능합니다.";
     }
     if (form.isFeatured && !form.isPublished) {
       return "메인 노출은 공개 상태에서만 설정할 수 있습니다.";

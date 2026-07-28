@@ -2,15 +2,14 @@
 
 import React from "react";
 import type { Company } from "@/types";
+import { normalizeCompanyHistory } from "@/lib/company";
 
 interface CompanyHistoryProps {
   company: Company;
 }
 
 export default function CompanyHistory({ company }: CompanyHistoryProps) {
-  const brandAccent = company.brand_color || "#171411";
-
-  const historyList = Array.isArray(company.history) ? company.history : [];
+  const historyList = normalizeCompanyHistory(company.history);
   if (historyList.length === 0) return null;
 
   return (
@@ -70,7 +69,7 @@ export default function CompanyHistory({ company }: CompanyHistoryProps) {
                   style={{
                     fontSize: "1.2rem",
                     fontWeight: 900,
-                    color: brandAccent,
+                    color: "#171411",
                     letterSpacing: "-0.01em"
                   }}
                 >

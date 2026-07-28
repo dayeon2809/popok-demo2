@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import type { Company } from "@/types";
-import { normalizeWorkImages } from "@/lib/company-works";
+import { normalizeWorkImages, sortWorksForDisplay } from "@/lib/company-works";
 import WorkDetailModal from "@/components/works/WorkDetailModal";
 
 interface CompanyPortfolioProps {
@@ -50,7 +50,7 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
   const [activeWork, setActiveWork] = useState<any | null>(null);
   const [showAll, setShowAll] = useState(false);
 
-  const works = company.works || [];
+  const works = sortWorksForDisplay(company.works || []);
   const displayedWorks = showAll ? works : works.slice(0, 3);
 
   return (
