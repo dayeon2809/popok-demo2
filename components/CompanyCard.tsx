@@ -123,8 +123,7 @@ export default function CompanyCard({ company }: CompanyCardProps) {
             }}>
               {company.name}
             </h4>
-            {company.verified && (
-              <span style={{
+            <span style={{
                 display: "inline-block", marginTop: "4px",
                 fontSize: "0.6rem", fontWeight: 800,
                 color: company.brand_color ? getContrastTextColor(company.brand_color) : "var(--navy)",
@@ -133,7 +132,6 @@ export default function CompanyCard({ company }: CompanyCardProps) {
               }}>
                 POPOK VERIFIED
               </span>
-            )}
           </div>
           {/* name_en/genre rows always reserve their line height (visibility toggle,
               not conditional unmount) so every card's info block is the same total

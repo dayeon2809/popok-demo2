@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
+import ArtistStoryShareModal from "@/components/artist/ArtistStoryShareModal";
 import { analytics } from "@/lib/analytics";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import { toObjectArray, safeYear, getValidWorks } from "@/lib/normalize";
@@ -64,7 +65,7 @@ interface WorkItem {
   image: string;
   images: string[];
   videoUrl: string;
-  credits: string;
+  credits: unknown;
   previewStart?: number;
   previewEnd?: number;
   previewAspectRatio?: "16 / 9" | "9 / 16";
@@ -89,6 +90,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [activeWork, setActiveWork] = useState<WorkItem | null>(null);
   const [timeStr, setTimeStr] = useState("");
   const [toastMsg, setToastMsg] = useState("");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [portfolioViewerState, setPortfolioViewerState] = useState<PortfolioRequestViewerState>(DEFAULT_PORTFOLIO_VIEWER_STATE);
   const [upcomingPerformances, setUpcomingPerformances] = useState<Performance[]>([]);
   const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
@@ -264,36 +266,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleShareUrl = () => {
-    if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href);
-      triggerToast("포트폴리오 주소가 복사되었습니다.");
-      analytics.profileShared("copy", "artist", artist?.slug || artist?.id || id);
-      analytics.artistShareClicked(artist?.recordId || artist?.id || id);
-    }
-  };
+  const handleShareUrl = () => setShareModalOpen(true);
 
-  const handleDownloadQr = async () => {
-    if (typeof window === "undefined") return;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.href)}`;
-    try {
-      const response = await fetch(qrUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${artist?.name || "artist"}_POPOK_QR.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-      triggerToast("QR 코드 이미지가 저장되었습니다.");
-      analytics.artistQrSaved(artist?.recordId || artist?.id || id);
-    } catch (error) {
-      console.error("QR Download failed", error);
-      window.open(qrUrl, "_blank");
-    }
-  };
 
   if (loading) return (
     <div style={{ maxWidth: "800px", margin: "80px auto", textAlign: "center" }}>
@@ -347,7 +321,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
       image: images[0] || w.image_url || "/images/placeholders/cake-placeholder.png",
       images,
       videoUrl: w.video_url || w.video || w.videoUrl || "",
-      credits: typeof w.credits === "string" ? w.credits.trim() : (w.role || ""),
+      credits: w.credits ?? w.credits_list ?? (w.role || ""),
       previewStart: Number.isFinite(Number(w.previewStart ?? w.preview_start)) ? Number(w.previewStart ?? w.preview_start) : 0,
       previewEnd: Number.isFinite(Number(w.previewEnd ?? w.preview_end)) ? Number(w.previewEnd ?? w.preview_end) : 15,
       previewAspectRatio: w.previewAspectRatio || w.preview_aspect_ratio || w.aspectRatio || w.aspect_ratio,
@@ -842,11 +816,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   <span style={{ fontWeight: 800, fontSize: "0.88rem", color: "var(--navy)", overflowWrap: "break-word", wordBreak: "keep-all" }}>
                     {artist.connectedCompany.company.name}
                   </span>
-                  {artist.connectedCompany.company.verified && (
-                    <span style={{ fontSize: "0.56rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "7px", whiteSpace: "nowrap" }}>
+                  <span style={{ fontSize: "0.56rem", fontWeight: 800, color: "var(--navy)", background: "var(--accent)", padding: "2px 6px", borderRadius: "7px", whiteSpace: "nowrap" }}>
                       POPOK VERIFIED
                     </span>
-                  )}
                 </div>
                 <div style={{ fontSize: "0.7rem", color: "var(--ink-muted)", marginTop: "2px" }}>
                   {[artist.connectedCompany.role, artist.connectedCompany.company.genre, artist.connectedCompany.company.city_or_region].filter(Boolean).join(" · ")}
@@ -1004,17 +976,17 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                 textTransform: "uppercase", letterSpacing: "0.03em", cursor: "pointer",
               }}
             >
-              Copy URL
+              Share Card
             </button>
             <button
-              onClick={handleDownloadQr}
+              onClick={() => setShareModalOpen(true)}
               style={{
                 padding: "11px 22px", borderRadius: "4px", border: "1px solid var(--navy)",
                 background: "transparent", color: "var(--navy)", fontSize: "0.78rem", fontWeight: 800,
                 textTransform: "uppercase", letterSpacing: "0.03em", cursor: "pointer",
               }}
             >
-              Save QR
+              Story Image
             </button>
           </div>
           <ConnectCta
@@ -1047,6 +1019,23 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         </footer>
 
       </div>
+
+      <ArtistStoryShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        onToast={triggerToast}
+        artist={{
+          id: String(artist.recordId || artist.id || id),
+          slug: artist.slug || artist.id || id,
+          name: artist.name,
+          nameEn: artist.name_en,
+          genre: artist.genre,
+          role: artist.role,
+          instagram: artist.instagram,
+          profileImage: artist.profile_image_url || artist.profileImage || null,
+          profileUrl: typeof window !== "undefined" ? window.location.href : `https://popok.kr/artists/${artist.slug || artist.id || id}`,
+        }}
+      />
 
       {/* ──────────────── 8. WORK DETAIL MODAL — shared with the company
           page's work modal (components/works/WorkDetailModal.tsx) so both

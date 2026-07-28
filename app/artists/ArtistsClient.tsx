@@ -15,6 +15,7 @@ const CATEGORIES = [
   { key: "dance", label: "DANCE" },
   { key: "music", label: "MUSIC" },
   { key: "visual", label: "VISUAL" },
+  { key: "actor", label: "ACTOR" },
 ];
 
 const DANCE_SUB_FIELDS = [
@@ -94,26 +95,27 @@ export default function ArtistsClient() {
   const danceSliderRef = useRef<HTMLDivElement>(null);
   const musicSliderRef = useRef<HTMLDivElement>(null);
   const visualSliderRef = useRef<HTMLDivElement>(null);
-  const pausedRowsRef = useRef<Record<string, boolean>>({ dance: false, music: false, visual: false });
-  const resumeTimersRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>({ dance: null, music: null, visual: null });
+  const actorSliderRef = useRef<HTMLDivElement>(null);
+  const pausedRowsRef = useRef<Record<string, boolean>>({ dance: false, music: false, visual: false, actor: false });
+  const resumeTimersRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>({ dance: null, music: null, visual: null, actor: null });
 
-  const pauseRowTemporarily = (row: "dance" | "music" | "visual", delay = 8000) => {
+  const pauseRowTemporarily = (row: "dance" | "music" | "visual" | "actor", delay = 8000) => {
     pausedRowsRef.current[row] = true;
     const t = resumeTimersRef.current[row];
     if (t) clearTimeout(t);
     resumeTimersRef.current[row] = setTimeout(() => { pausedRowsRef.current[row] = false; }, delay);
   };
 
-  const setRowPaused = (row: "dance" | "music" | "visual", paused: boolean) => {
+  const setRowPaused = (row: "dance" | "music" | "visual" | "actor", paused: boolean) => {
     pausedRowsRef.current[row] = paused;
     const t = resumeTimersRef.current[row];
     if (t) clearTimeout(t);
     resumeTimersRef.current[row] = null;
   };
 
-  const scrollSlider = (row: "dance" | "music" | "visual", dir: "left" | "right") => {
+  const scrollSlider = (row: "dance" | "music" | "visual" | "actor", dir: "left" | "right") => {
     pauseRowTemporarily(row);
-    const ref = row === "dance" ? danceSliderRef : row === "music" ? musicSliderRef : visualSliderRef;
+    const ref = row === "dance" ? danceSliderRef : row === "music" ? musicSliderRef : row === "visual" ? visualSliderRef : actorSliderRef;
     if (ref.current) ref.current.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
   };
 
@@ -122,7 +124,7 @@ export default function ArtistsClient() {
     if (selectedField === "dance" && selectedSubField !== "all") {
       return selectedSubField;
     }
-    return selectedField;
+    return selectedField === "actor" ? "all" : selectedField;
   };
 
   const filter: ArtistFilter = {
@@ -142,6 +144,7 @@ export default function ArtistsClient() {
       { key: "dance" as const, ref: danceSliderRef, speed: 28 },
       { key: "music" as const, ref: musicSliderRef, speed: 22 },
       { key: "visual" as const, ref: visualSliderRef, speed: 25 },
+      { key: "actor" as const, ref: actorSliderRef, speed: 24 },
     ].filter((row) => selectedField === "all" || selectedField === row.key);
 
     let lastTs: number | null = null;
@@ -216,18 +219,21 @@ export default function ArtistsClient() {
   }
   const musicArtists = allFetched.filter((a) => a.field === "music");
   const visualArtists = allFetched.filter((a) => a.field === "visual");
+  const actorArtists = allFetched.filter((a) => /배우|연기|연극|뮤지컬|actor|acting|theatre|theater/i.test(`${a.field || ""} ${a.genre || ""} ${a.role || ""}`));
 
   const totalResultsCount = selectedField === "all"
-    ? (danceArtists.length + musicArtists.length + visualArtists.length)
+    ? (danceArtists.length + musicArtists.length + visualArtists.length + actorArtists.length)
     : selectedField === "dance"
       ? danceArtists.length
       : selectedField === "music"
         ? musicArtists.length
-        : visualArtists.length;
+        : selectedField === "visual"
+          ? visualArtists.length
+          : actorArtists.length;
 
   const renderSliderRow = (
     title: string,
-    key: "dance" | "music" | "visual",
+    key: "dance" | "music" | "visual" | "actor",
     artistsList: Artist[],
     sliderRef: React.RefObject<HTMLDivElement | null>
   ) => {
@@ -565,13 +571,16 @@ export default function ArtistsClient() {
               {renderSliderRow("DANCE", "dance", danceArtists, danceSliderRef)}
               {renderSliderRow("MUSIC", "music", musicArtists, musicSliderRef)}
               {renderSliderRow("VISUAL", "visual", visualArtists, visualSliderRef)}
+              {renderSliderRow("ACTOR", "actor", actorArtists, actorSliderRef)}
             </>
           ) : selectedField === "dance" ? (
             renderGallery("DANCE", danceArtists)
           ) : selectedField === "music" ? (
             renderGallery("MUSIC", musicArtists)
-          ) : (
+          ) : selectedField === "visual" ? (
             renderGallery("VISUAL", visualArtists)
+          ) : (
+            renderGallery("ACTOR", actorArtists)
           )}
         </div>
       )}

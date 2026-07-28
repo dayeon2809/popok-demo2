@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
-import QRCode from "qrcode";
 import PopokCard from "@/components/PopokCard";
+import ArtistStoryShareModal from "@/components/artist/ArtistStoryShareModal";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import AiProfileCompare from "@/components/profile/AiProfileCompare";
 import { analytics } from "@/lib/analytics";
@@ -13,8 +13,6 @@ import ReceivedPortfolioRequests from "@/components/portfolio-requests/ReceivedP
 import SentPortfolioRequests from "@/components/portfolio-requests/SentPortfolioRequests";
 import { SHOW_PREMIUM_UI } from "@/lib/featureFlags";
 import QuickUploadPanel from "@/components/my-popok/QuickUploadPanel";
-import AiOrganizeWorkButton from "@/components/my-popok/AiOrganizeWorkButton";
-import ArtistWorkGallery from "@/components/artists/ArtistWorkGallery";
 import WorkDetailModal from "@/components/works/WorkDetailModal";
 import {
   normalizeArtistEducation,
@@ -58,6 +56,7 @@ interface Work {
   images?: string[];
   video_url?: string;
   credits?: any;
+  dashboard_image_order?: string[];
 }
 
 interface Artist {
@@ -146,8 +145,11 @@ export default function MyPopokClient({
   const workPreviewRef = useRef<HTMLDivElement>(null);
   const [pendingWorkImages, setPendingWorkImages] = useState<PendingWorkImage[]>([]);
   const [pendingWorkTitle, setPendingWorkTitle] = useState("");
+  const [pendingWorkMode, setPendingWorkMode] = useState<"new" | "existing">("new");
+  const [existingWorkId, setExistingWorkId] = useState("");
   const [groupedWorkDraft, setGroupedWorkDraft] = useState<Work | null>(null);
   const [previewWork, setPreviewWork] = useState<Work | null>(null);
+  const [draggedDashboardImageIndex, setDraggedDashboardImageIndex] = useState<number | null>(null);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (new URLSearchParams(window.location.search).get("upload") === "1") {
@@ -353,24 +355,6 @@ export default function MyPopokClient({
     setUploadingImage(false);
   };
 
-  // Representative Image Upload handler (up to 3 images)
-  const handleRepresentativeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, slotIdx: number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await uploadImageFile(file, `rep_${slotIdx}`);
-    if (url) {
-      const updated = [...profileImageUrls];
-      updated[slotIdx] = url;
-      setProfileImageUrls(cleanArtistRepresentativeImagesForPayload(updated));
-    }
-  };
-
-  // Representative Image Remove handler (slot removal from state only)
-  const handleRemoveRepresentativeImage = (slotIdx: number) => {
-    const updated = profileImageUrls.filter((_, idx) => idx !== slotIdx);
-    setProfileImageUrls(updated);
-  };
-
   const handleCompanyLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, companyId: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -398,28 +382,39 @@ export default function MyPopokClient({
     }
   };
 
-  // Work Image Upload handler (up to 8 images per work)
+  // Work Image Upload handler (multiple selection, up to 8 images per work)
   const handleWorkImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, workIdx: number, imgIdx?: number) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const slotKey = `work_${workIdx}_${imgIdx ?? "new"}`;
-    const url = await uploadImageFile(file, slotKey);
-    if (url) {
-      const updatedWorks = [...works];
-      const targetWork = { ...updatedWorks[workIdx] };
-      const currentImages = normalizeWorkImages(targetWork);
+    const input = e.currentTarget;
+    const selectedFiles = Array.from(input.files || []);
+    if (selectedFiles.length === 0) return;
 
-      if (imgIdx !== undefined && imgIdx < currentImages.length) {
-        currentImages[imgIdx] = url;
-      } else if (currentImages.length < 8) {
-        currentImages.push(url);
-      }
+    const currentImages = normalizeWorkImages(works[workIdx]);
+    const isReplacing = imgIdx !== undefined && imgIdx < currentImages.length;
+    const availableSlots = Math.max(0, 8 - currentImages.length + (isReplacing ? 1 : 0));
+    const files = selectedFiles.slice(0, availableSlots);
+    if (selectedFiles.length > files.length) alert(`한 작품에는 사진을 최대 8장까지 올릴 수 있어요. 선택한 사진 중 ${files.length}장만 추가합니다.`);
 
-      targetWork.images = currentImages;
-      targetWork.image_url = currentImages[0] || "";
-      updatedWorks[workIdx] = targetWork;
-      setWorks(updatedWorks);
+    const uploadedUrls: string[] = [];
+    for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      const slotIndex = isReplacing && fileIndex === 0 ? imgIdx! : currentImages.length + uploadedUrls.length;
+      const url = await uploadImageFile(files[fileIndex], `work_${workIdx}_${slotIndex}`);
+      if (url) uploadedUrls.push(url);
     }
+
+    if (uploadedUrls.length > 0) {
+      setWorks((current) => {
+        const updatedWorks = [...current];
+        const targetWork = { ...updatedWorks[workIdx] };
+        const nextImages = normalizeWorkImages(targetWork);
+        if (isReplacing && imgIdx !== undefined) nextImages[imgIdx] = uploadedUrls.shift()!;
+        nextImages.push(...uploadedUrls);
+        targetWork.images = nextImages.slice(0, 8);
+        targetWork.image_url = targetWork.images[0] || "";
+        updatedWorks[workIdx] = targetWork;
+        return updatedWorks;
+      });
+    }
+    input.value = "";
   };
 
   // Work Image Remove handler
@@ -506,6 +501,35 @@ export default function MyPopokClient({
     setPendingWorkTitle("");
     setGroupedWorkDraft(null);
     analytics.workCreated(1);
+  };
+
+  const addPendingImagesToExistingWork = () => {
+    const workIndex = works.findIndex((work) => work.id === existingWorkId);
+    if (workIndex < 0) {
+      alert("사진을 추가할 기존 작품을 선택해 주세요.");
+      return;
+    }
+    const currentImages = normalizeWorkImages(works[workIndex]);
+    const capacity = 8 - currentImages.length;
+    if (capacity <= 0) {
+      alert("선택한 작품에는 이미 사진이 8장 등록되어 있어요.");
+      return;
+    }
+    const selected = pendingWorkImages.filter((image) => image.selected);
+    if (selected.length === 0) {
+      alert("기존 작품에 추가할 사진을 선택해 주세요.");
+      return;
+    }
+    const imagesToAdd = selected.slice(0, capacity);
+    const addedIds = new Set(imagesToAdd.map((image) => image.id));
+    setWorks((current) => current.map((work, index) => {
+      if (index !== workIndex) return work;
+      const images = [...normalizeWorkImages(work), ...imagesToAdd.map((image) => image.url)].slice(0, 8);
+      return { ...work, images, image_url: images[0] || "" };
+    }));
+    setPendingWorkImages((current) => current.filter((image) => !addedIds.has(image.id)));
+    if (selected.length > imagesToAdd.length) alert(`남은 공간만큼 ${imagesToAdd.length}장만 추가했어요. 나머지 사진은 임시 보관함에 남겨두었습니다.`);
+    setExistingWorkId("");
   };
 
   // Remove work item
@@ -614,104 +638,6 @@ export default function MyPopokClient({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Download a complete 900 × 1260 digital business card instead of a standalone QR.
-  const handleDownloadCard = async () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 900;
-    canvas.height = 1260;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const roundRect = (x: number, y: number, width: number, height: number, radius: number) => {
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.arcTo(x + width, y, x + width, y + height, radius);
-      ctx.arcTo(x + width, y + height, x, y + height, radius);
-      ctx.arcTo(x, y + height, x, y, radius);
-      ctx.arcTo(x, y, x + width, y, radius);
-      ctx.closePath();
-    };
-
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    roundRect(28, 24, 844, 1212, 45);
-    ctx.fillStyle = "#C7F34A";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#171411";
-    ctx.stroke();
-
-    ctx.fillStyle = "#171411";
-    ctx.font = "900 52px Arial, sans-serif";
-    ctx.fillText("POPOK·", 92, 130);
-
-    const passCode = Array.from(slug || artist.id).reduce((value, char) => ((value * 31) + char.charCodeAt(0)) >>> 0, 0).toString(16).toUpperCase().slice(-4).padStart(4, "0");
-    roundRect(570, 84, 222, 58, 10);
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    ctx.font = "800 24px Arial, sans-serif";
-    ctx.fillText(`PASS CODE: ${passCode}`, 590, 122);
-
-    ctx.font = "900 68px Arial, sans-serif";
-    ctx.fillText("Your work,", 94, 380);
-    ctx.fillText("connected.", 94, 458);
-
-    ctx.save();
-    ctx.globalAlpha = 0.13;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(450, 630, 310, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([8, 10]);
-    ctx.beginPath();
-    ctx.arc(450, 630, 205, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
-
-    const qrDataUrl = await QRCode.toDataURL(publicUrl, { width: 330, margin: 1, errorCorrectionLevel: "H", color: { dark: "#171411", light: "#FFFFFF" } });
-    const qrImage = new Image();
-    await new Promise<void>((resolve, reject) => {
-      qrImage.onload = () => resolve();
-      qrImage.onerror = () => reject(new Error("QR 이미지를 생성하지 못했습니다."));
-      qrImage.src = qrDataUrl;
-    });
-    roundRect(284, 580, 332, 332, 28);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fill();
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#171411";
-    ctx.stroke();
-    ctx.drawImage(qrImage, 305, 601, 290, 290);
-
-    ctx.fillStyle = "#171411";
-    ctx.font = "500 16px Arial, sans-serif";
-    ctx.fillText("SCAN TO EXPLORE", 92, 1090);
-    ctx.font = "700 30px Arial, sans-serif";
-    const displayUrl = `popok.kr/${slug || artist.id}`;
-    ctx.fillText(displayUrl, 92, 1144);
-    const urlWidth = ctx.measureText(displayUrl).width;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(92, 1151);
-    ctx.lineTo(92 + urlWidth, 1151);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(785, 1118, 38, 0, Math.PI * 2);
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    ctx.font = "30px Arial, sans-serif";
-    ctx.fillText("↗", 770, 1129);
-
-    const a = document.createElement("a");
-    a.href = canvas.toDataURL("image/png");
-    a.download = `popok-card-${slug || artist.id}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    analytics.profileShared("download", "portfolio", slug || artist.id);
-  };
-
   // Find all work images to list them as representative options
   const workImages = useMemo(() => {
     return works
@@ -734,17 +660,23 @@ export default function MyPopokClient({
   // artist page (components/artists/ArtistWorkGallery.tsx), built from this
   // dashboard's own `works` state so it's always in sync with what's about
   // to be saved.
-  const worksForPreview = useMemo(() => {
-    return works
-      .map((w) => ({
-        id: w.id,
-        title: w.title?.trim() || "제목 없는 작업",
-        year: String(w.year || ""),
-        role: w.role || "",
-        images: normalizeWorkImages(w),
-      }))
-      .filter((w) => w.images.length > 0);
+  const dashboardWorkImages = useMemo(() => {
+    const images = works.flatMap((work, workIndex) => normalizeWorkImages(work).map((url, imageIndex) => ({
+      id: `${work.id}-${imageIndex}`, url, workId: work.id, workIndex, imageIndex,
+      title: work.title?.trim() || "제목 없는 작업",
+    })));
+    const savedOrder: string[] = works[0]?.dashboard_image_order || [];
+    const rank = new Map<string, number>(savedOrder.map((url: string, index: number) => [url, index]));
+    return [...images].sort((a, b) => (rank.get(a.url) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.url) ?? Number.MAX_SAFE_INTEGER));
   }, [works]);
+
+  const handleMoveDashboardImage = (fromFlatIndex: number, toFlatIndex: number) => {
+    if (toFlatIndex < 0 || toFlatIndex >= dashboardWorkImages.length || works.length === 0) return;
+    const orderedUrls = dashboardWorkImages.map((image) => image.url);
+    const [moved] = orderedUrls.splice(fromFlatIndex, 1);
+    orderedUrls.splice(toFlatIndex, 0, moved);
+    setWorks((current) => current.map((work, index) => index === 0 ? { ...work, dashboard_image_order: orderedUrls } : work));
+  };
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh", padding: "40px 16px 120px" }}>
@@ -1074,7 +1006,7 @@ export default function MyPopokClient({
             새 작업을 올려볼까요?
           </h2>
           <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", margin: "0 0 24px" }}>
-            작품 사진과 이름만 입력하면 포퐄 AI가 연도, 역할, 설명을 정리해드려요.
+            작품 사진을 올리고 새 작품으로 묶거나 기존 작품에 추가할 수 있어요.
           </p>
 
           <div>
@@ -1128,9 +1060,30 @@ export default function MyPopokClient({
               </div>
 
               {!groupedWorkDraft ? (
-                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "10px" }} className="group-work-controls">
-                  <input type="text" value={pendingWorkTitle} onChange={(event) => setPendingWorkTitle(event.target.value)} placeholder="작품명 (예: Re:Choreograph 다시 쓰는 몸)" style={{ ...inputStyle, minWidth: 0 }} />
-                  <button type="button" onClick={prepareGroupedWork} className="btn-lime" style={{ padding: "12px 20px", border: 0, borderRadius: "10px", fontWeight: 900, cursor: "pointer" }}>하나의 작품으로 묶기</button>
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  {works.length > 0 && (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", padding: "4px", borderRadius: "12px", background: "#F1EEE7" }}>
+                      <button type="button" onClick={() => setPendingWorkMode("new")} style={{ padding: "11px 10px", border: pendingWorkMode === "new" ? "1.5px solid var(--navy)" : "1px solid transparent", borderRadius: "9px", background: pendingWorkMode === "new" ? "#fff" : "transparent", color: "var(--navy)", fontWeight: 900, cursor: "pointer" }}>새 작품으로 묶기</button>
+                      <button type="button" onClick={() => setPendingWorkMode("existing")} style={{ padding: "11px 10px", border: pendingWorkMode === "existing" ? "1.5px solid var(--navy)" : "1px solid transparent", borderRadius: "9px", background: pendingWorkMode === "existing" ? "#fff" : "transparent", color: "var(--navy)", fontWeight: 900, cursor: "pointer" }}>기존 작품에 추가</button>
+                    </div>
+                  )}
+                  {pendingWorkMode === "existing" && works.length > 0 ? (
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "10px" }} className="group-work-controls">
+                      <select value={existingWorkId} onChange={(event) => setExistingWorkId(event.target.value)} style={{ ...inputStyle, minWidth: 0 }}>
+                        <option value="">사진을 추가할 작품 선택</option>
+                        {works.map((work) => {
+                          const imageCount = normalizeWorkImages(work).length;
+                          return <option key={work.id} value={work.id} disabled={imageCount >= 8}>{work.title || "제목 없는 작품"} ({imageCount}/8장)</option>;
+                        })}
+                      </select>
+                      <button type="button" onClick={addPendingImagesToExistingWork} className="btn-lime" style={{ padding: "12px 20px", border: 0, borderRadius: "10px", fontWeight: 900, cursor: "pointer" }}>선택한 작품에 추가</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "10px" }} className="group-work-controls">
+                      <input type="text" value={pendingWorkTitle} onChange={(event) => setPendingWorkTitle(event.target.value)} placeholder="작품명 (예: Re:Choreograph 다시 쓰는 몸)" style={{ ...inputStyle, minWidth: 0 }} />
+                      <button type="button" onClick={prepareGroupedWork} className="btn-lime" style={{ padding: "12px 20px", border: 0, borderRadius: "10px", fontWeight: 900, cursor: "pointer" }}>하나의 작품으로 묶기</button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div style={{ padding: "20px", border: "1px solid var(--border)", borderRadius: "14px", background: "#FAF9F5", display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -1141,7 +1094,6 @@ export default function MyPopokClient({
                     <input style={inputStyle} value={groupedWorkDraft.role || ""} onChange={(event) => setGroupedWorkDraft({ ...groupedWorkDraft, role: event.target.value })} placeholder="역할" />
                     <textarea style={{ ...inputStyle, minHeight: "90px", resize: "vertical", gridColumn: "1 / -1" }} value={groupedWorkDraft.description || ""} onChange={(event) => setGroupedWorkDraft({ ...groupedWorkDraft, description: event.target.value })} placeholder="작품 설명" />
                   </div>
-                  <AiOrganizeWorkButton input={{ title: groupedWorkDraft.title, year: String(groupedWorkDraft.year || ""), role: groupedWorkDraft.role, description: groupedWorkDraft.description, fileName: pendingWorkImages.filter((image) => image.selected).map((image) => image.fileName).filter(Boolean).join(", "), artistGenre: genre, artistBioShort: bioShort }} onApply={(suggestion) => setGroupedWorkDraft((current) => current ? { ...current, ...suggestion } : current)} />
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                     <button type="button" onClick={finalizeGroupedWork} className="btn-lime" style={{ padding: "11px 18px", border: 0, borderRadius: "999px", fontWeight: 900, cursor: "pointer" }}>작품 목록에 추가</button>
                     <button type="button" onClick={() => setGroupedWorkDraft(null)} style={{ padding: "11px 18px", border: "1px solid var(--border-dark)", borderRadius: "999px", background: "#fff", fontWeight: 800, cursor: "pointer" }}>다시 선택</button>
@@ -1179,19 +1131,61 @@ export default function MyPopokClient({
         <section ref={workPreviewRef} style={{ marginBottom: "24px" }}>
           <div style={{ marginBottom: "12px" }}>
             <h2 style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--navy)", margin: "0 0 4px" }}>
-              WORK 미리보기
+              업로드한 사진
             </h2>
             <p style={{ fontSize: "0.8rem", color: "var(--ink-muted)", margin: 0 }}>
-              공개 페이지와 동일한 모습으로 보여드려요.
+              사진을 드래그해 순서를 바꿀 수 있어요. 작품별 정보는 아래 WORKS에서 관리하세요.
             </p>
           </div>
 
-          {worksForPreview.length === 0 ? (
+          {dashboardWorkImages.length === 0 ? (
             <div style={{ padding: "50px 24px", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "12px", color: "var(--ink-muted)", fontSize: "0.85rem" }}>
-              아직 올린 작품이 없어요. 위에서 사진을 올려보세요.
+              아직 올린 사진이 없어요. 위에서 사진을 올려보세요.
             </div>
           ) : (
-            <ArtistWorkGallery works={worksForPreview} onSelectWork={openWorkPreviewDetail} />
+            <div className="dashboard-photo-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" }}>
+              {dashboardWorkImages.map((image, flatIndex) => (
+                <div
+                  key={image.id}
+                  data-dashboard-image-index={flatIndex}
+                  draggable
+                  onDragStart={(event) => {
+                    setDraggedDashboardImageIndex(flatIndex);
+                    event.dataTransfer.effectAllowed = "move";
+                    event.dataTransfer.setData("text/plain", String(flatIndex));
+                  }}
+                  onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const fromIndex = Number(event.dataTransfer.getData("text/plain"));
+                    if (Number.isInteger(fromIndex) && fromIndex !== flatIndex) handleMoveDashboardImage(fromIndex, flatIndex);
+                    setDraggedDashboardImageIndex(null);
+                  }}
+                  onDragEnd={() => setDraggedDashboardImageIndex(null)}
+                  onPointerDown={(event) => {
+                    if (event.pointerType === "touch") {
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                      setDraggedDashboardImageIndex(flatIndex);
+                    }
+                  }}
+                  onPointerMove={(event) => {
+                    if (event.pointerType !== "touch" || draggedDashboardImageIndex === null) return;
+                    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-dashboard-image-index]");
+                    const targetIndex = Number(target?.dataset.dashboardImageIndex);
+                    if (Number.isInteger(targetIndex) && targetIndex !== draggedDashboardImageIndex) {
+                      handleMoveDashboardImage(draggedDashboardImageIndex, targetIndex);
+                      setDraggedDashboardImageIndex(targetIndex);
+                    }
+                  }}
+                  onPointerUp={() => setDraggedDashboardImageIndex(null)}
+                  onPointerCancel={() => setDraggedDashboardImageIndex(null)}
+                  style={{ position: "relative", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: "12px", background: "#EEEAE2", cursor: "grab", touchAction: "pan-y", opacity: draggedDashboardImageIndex === flatIndex ? .62 : 1, transform: draggedDashboardImageIndex === flatIndex ? "scale(.97)" : "none", transition: "transform .15s ease, opacity .15s ease" }}
+                >
+                  <img src={image.url} alt={image.title} draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }} />
+                  <span style={{ position: "absolute", top: "8px", left: "8px", padding: "4px 7px", borderRadius: "999px", background: "rgba(23,20,17,.72)", color: "#fff", fontSize: ".65rem", fontWeight: 900, pointerEvents: "none" }}>{flatIndex + 1}</span>
+                  <span aria-hidden="true" style={{ position: "absolute", right: "8px", bottom: "8px", padding: "5px 8px", borderRadius: "999px", background: "rgba(23,20,17,.72)", color: "#fff", fontSize: ".7rem", fontWeight: 900, pointerEvents: "none" }}>⋮⋮</span>
+                </div>
+              ))}           </div>
           )}
 
           <div style={{ marginTop: "20px", textAlign: "center" }}>
@@ -1278,7 +1272,7 @@ export default function MyPopokClient({
             {/* Main Edit Form */}
             <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
               
-              {/* Card 1: 기본 정보 & 프로필/대표 이미지 갤러리 */}
+              {/* Card 1: 기본 정보 & 프로필 이미지 */}
               <div hidden={activeEditorSection !== "basic"} className="editor-card" style={{ background: "#FFFFFF", padding: "32px", borderRadius: "18px", border: "1px solid var(--border)" }}>
                 <h2 style={{ fontSize: "1.25rem", fontWeight: 900, color: "var(--navy)", marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "10px" }}>
                   1. 기본 활동 정보 & 프로필 이미지
@@ -1376,90 +1370,6 @@ export default function MyPopokClient({
                           {uploadingSlot === "profile" ? "업로드 중..." : "📸 사진 업로드"}
                         </label>
                       </div>
-                    </div>
-                  </div>
-
-                  {/* 대표 이미지 갤러리 (공개 상세페이지 대표 갤러리 최대 3장) */}
-                  <div style={{ borderTop: "1px dashed var(--border)", paddingTop: "16px" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
-                      <label style={{ ...labelStyle, fontSize: "0.85rem", color: "var(--navy)", margin: 0 }}>
-                        공개 상세페이지 대표 이미지 갤러리 (최대 3장)
-                      </label>
-                      <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 700 }}>
-                        {profileImageUrls.length} / 3 장
-                      </span>
-                    </div>
-                    <span style={{ fontSize: "0.75rem", color: "var(--ink-muted)", display: "block", marginBottom: "12px" }}>
-                      공개 프로필 하단 갤러리 영역에 표출됩니다. (프로필 사진과 별개로 관리됩니다)
-                    </span>
-
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
-                      {[0, 1, 2].map((slotIdx) => {
-                        const imgUrl = profileImageUrls[slotIdx];
-                        const isUploadingThis = uploadingSlot === `rep_${slotIdx}`;
-                        return (
-                          <div
-                            key={slotIdx}
-                            style={{
-                              position: "relative",
-                              aspectRatio: "1.3 / 1",
-                              borderRadius: "10px",
-                              border: "1.5px dashed var(--border)",
-                              background: "#FAF9F5",
-                              overflow: "hidden",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              padding: "6px"
-                            }}
-                          >
-                            {imgUrl ? (
-                              <>
-                                <img src={imgUrl} alt={`대표 이미지 ${slotIdx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveRepresentativeImage(slotIdx)}
-                                  style={{
-                                    position: "absolute", top: "6px", right: "6px",
-                                    width: "24px", height: "24px", borderRadius: "50%",
-                                    background: "rgba(23, 20, 17, 0.8)", color: "#FFFFFF",
-                                    border: "none", cursor: "pointer", fontSize: "0.9rem",
-                                    display: "flex", alignItems: "center", justifyContent: "center"
-                                  }}
-                                  title="슬롯 제거"
-                                >
-                                  ×
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleRepresentativeImageUpload(e, slotIdx)}
-                                  style={{ display: "none" }}
-                                  id={`rep-img-input-${slotIdx}`}
-                                  disabled={Boolean(uploadingSlot)}
-                                />
-                                <label
-                                  htmlFor={`rep-img-input-${slotIdx}`}
-                                  style={{
-                                    width: "100%", height: "100%", display: "flex",
-                                    flexDirection: "column", alignItems: "center", justifyContent: "center",
-                                    cursor: uploadingSlot ? "not-allowed" : "pointer", gap: "4px"
-                                  }}
-                                >
-                                  <span style={{ fontSize: "1.1rem" }}>{isUploadingThis ? "⏳" : "🖼️"}</span>
-                                  <span style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--navy)" }}>
-                                    {isUploadingThis ? "업로드 중..." : `대표 ${slotIdx + 1}`}
-                                  </span>
-                                </label>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
                     </div>
                   </div>
 
@@ -1740,98 +1650,21 @@ export default function MyPopokClient({
       </>
       )}
 
-      {/* SHARE AND QR GENERATION MODAL DIALOG */}
-      {shareModalOpen && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(23, 20, 17, 0.5)", zIndex: 1000, overscrollBehavior: "contain",
-          display: "flex", alignItems: "center", justifyContent: "center", padding: "16px"
-        }}>
-          <div style={{
-            background: "#FFFFFF", borderRadius: "20px", border: "1px solid var(--border)",
-            width: "100%", maxWidth: "420px", padding: "32px", position: "relative",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
-            animation: "dimFadeIn 0.3s ease"
-          }}>
-            <button
-              onClick={() => setShareModalOpen(false)}
-              style={{
-                position: "absolute", top: "18px", right: "18px", border: 0, background: "transparent",
-                fontSize: "1.2rem", fontWeight: 900, cursor: "pointer", color: "var(--ink-muted)"
-              }}
-            >
-              ✕
-            </button>
-
-            <h3 style={{ fontSize: "1.3rem", fontWeight: 950, color: "var(--navy)", marginBottom: "8px", textAlign: "center" }}>
-              내 디지털 명함 공유하기
-            </h3>
-            <p style={{ fontSize: "0.82rem", color: "var(--ink-muted)", textAlign: "center", marginBottom: "24px", lineHeight: 1.5 }}>
-              QR 코드를 스캔하거나 SNS를 통해 하나의 링크로 예술 세계를 연결하세요.
-            </p>
-
-            {/* QR Code Frame */}
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",
-              padding: "20px", background: "#FFFFFF", borderRadius: "14px",
-              border: "1px solid var(--border)", marginBottom: "24px"
-            }}>
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicUrl)}`}
-                alt="POPOK QR Code"
-                style={{ width: "180px", height: "180px", background: "#FFFFFF", padding: "6px", borderRadius: "8px", border: "1px solid var(--border)" }}
-              />
-              <button
-                type="button"
-                onClick={handleDownloadCard}
-                className="btn-outline"
-                style={{ fontSize: "0.78rem", fontWeight: 800, padding: "8px 16px", borderRadius: "8px", border: "1.5px solid var(--navy)" }}
-              >
-                📥 디지털 명함 뒷면 다운로드
-              </button>
-            </div>
-
-            {/* SNS Sharing Links */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <span style={{ fontSize: "0.78rem", fontWeight: 850, color: "var(--navy)" }}>SNS로 공유</span>
-              <div style={{ display: "flex", gap: "8px" }}>
-                <a
-                  href={`https://twitter.com/intent/tweet?text=POPOK에서 저의 포트폴리오 디지털 명함을 만나보세요!&url=${encodeURIComponent(publicUrl)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "6px",
-                    textDecoration: "none", background: "#1D9BF0", color: "#FFFFFF", padding: "10px",
-                    borderRadius: "10px", fontSize: "0.82rem", fontWeight: 900
-                  }}
-                >
-                  X (Twitter)
-                </a>
-                <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(publicUrl)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: "6px",
-                    textDecoration: "none", background: "#1877F2", color: "#FFFFFF", padding: "10px",
-                    borderRadius: "10px", fontSize: "0.82rem", fontWeight: 900
-                  }}
-                >
-                  Facebook
-                </a>
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyLink}
-                className="btn-lime"
-                style={{ width: "100%", padding: "12px", borderRadius: "10px", fontSize: "0.85rem", fontWeight: 900, border: "none" }}
-              >
-                {copied ? "✓ 주소 복사 완료!" : "🔗 포트폴리오 링크 복사"}
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
+      <ArtistStoryShareModal
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        artist={{
+          id: String(artist.id),
+          slug: slug || artist.slug || artist.id,
+          name: name || artist.name,
+          nameEn: nameEn || artist.name_en,
+          genre: genre || artist.genre,
+          role: role || artist.role,
+          instagram: instagram || artist.instagram,
+          profileImage: profileImageUrl || artist.profile_image_url || null,
+          profileUrl: publicUrl,
+        }}
+      />
       
       {/* AI Import Modal Overlay */}
       {aiModalOpen && (
@@ -1961,7 +1794,7 @@ export default function MyPopokClient({
       <style>{`
         @media (max-width: 480px) {
           .quick-upload-split { gap: 14px !important; }
-          .pending-work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          .pending-work-grid, .dashboard-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
           .group-work-controls, .group-work-fields { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 900px) {

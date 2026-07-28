@@ -70,6 +70,10 @@ export const analytics = {
     trackEvent("artist_contact_clicked", { artist_id: artistId, channel }),
   artistCardFlipped: (artistId: string) => trackEvent("artist_card_flipped", { artist_id: artistId }),
   artistQrSaved: (artistId: string) => trackEvent("artist_qr_saved", { artist_id: artistId }),
+  artistCardShareOpen: (artistId: string) => trackEvent("artist_card_share_open", { artist_id: artistId }),
+  artistCardStoryDownload: (artistId: string) => trackEvent("artist_card_story_download", { artist_id: artistId }),
+  artistCardNativeShare: (artistId: string) => trackEvent("artist_card_native_share", { artist_id: artistId }),
+  artistProfileLinkCopy: (artistId: string) => trackEvent("artist_profile_link_copy", { artist_id: artistId }),
   artistWorkOpened: (artistId: string, workId: string) =>
     trackEvent("artist_work_opened", { artist_id: artistId, work_id: workId }),
   artistWorkClosed: (artistId: string, workId: string) =>

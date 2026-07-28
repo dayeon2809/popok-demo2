@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
-import { motion } from "framer-motion";
+import React, { useMemo, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { normalizeWorkImages, normalizeWorkCredits } from "@/lib/works";
 import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 
@@ -45,6 +45,23 @@ const WorkImagePlaceholder = ({ accentColor }: { accentColor: string }) => (
   </div>
 );
 
+const AnimatedArchiveImage = ({ src, alt, eager }: { src: string; alt: string; eager: boolean }) => {
+  const [loaded, setLoaded] = useState(false);
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.img
+      className="work-archive-image"
+      src={src}
+      alt={alt}
+      loading={eager ? "eager" : "lazy"}
+      onLoad={() => setLoaded(true)}
+      initial={reduceMotion ? false : { opacity: 0, scale: 1.025, filter: "blur(10px)" }}
+      animate={loaded ? { opacity: 1, scale: 1, filter: "blur(0px)" } : { opacity: 0, scale: 1.025, filter: "blur(10px)" }}
+      transition={{ duration: reduceMotion ? 0 : 0.55, ease: [0.22, 1, 0.36, 1] }}
+    />
+  );
+};
+
 // Shared work-detail modal — used by both the company page
 // (components/company/CompanyPortfolio.tsx) and the individual artist page
 // (app/artists/[id]/page.tsx) so the two never visually drift apart again.
@@ -56,6 +73,7 @@ const WorkImagePlaceholder = ({ accentColor }: { accentColor: string }) => (
 export default function WorkDetailModal({ work, accentColor = "#171411", onClose, onExternalLinkClick, onVideoPlay, onImageChanged }: WorkDetailModalProps) {
   useMobileBodyScrollLock();
   const hasTrackedVideoPlay = useRef(false);
+  const reduceMotion = useReducedMotion();
 
   // Collect and deduplicate up to 4 images — same contract the CMS and
   // admin editors save to, so what's saved is exactly what's shown here.
@@ -205,6 +223,9 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
+        @media (prefers-reduced-motion: reduce) {
+          .work-archive-item, .work-archive-image { transition: none !important; animation: none !important; }
+        }
         @media (max-width: 768px) {
           .work-modal-backdrop {
             padding: 0 !important;
@@ -310,7 +331,18 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
         {/* Drawer Content */}
         <div style={{ padding: "24px" }}>
 
-          {/* 1. Vertical image archive (Max 4 images) */}
+          {/* 1. Description ("About this project") */}
+          <div style={{ marginBottom: "28px" }}>
+            <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
+              About this project
+            </span>
+            <p style={{ fontSize: "0.88rem", color: "var(--navy)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line", wordBreak: "keep-all" }}>
+              {work.description || "작품에 대한 상세 설명이 등록되어 있지 않습니다."}
+            </p>
+          </div>
+
+
+          {/* 2. Vertical image archive (Max 4 images) */}
           <div style={{ marginBottom: "28px" }}>
             {images.length === 0 ? (
               <WorkImagePlaceholder accentColor={accentColor} />
@@ -320,17 +352,16 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
                   <motion.figure
                     key={imgUrl}
                     className="work-archive-item"
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.12 }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    initial={reduceMotion ? false : { opacity: 0, y: 36, scale: 0.985 }}
+                    whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, amount: 0.08, margin: "0px 0px -6% 0px" }}
+                    transition={{ duration: reduceMotion ? 0 : 0.58, delay: reduceMotion ? 0 : Math.min(idx * 0.07, 0.28), ease: [0.22, 1, 0.36, 1] }}
                     onViewportEnter={idx > 0 ? () => onImageChanged?.() : undefined}
                   >
-                    <img
-                      className="work-archive-image"
+                    <AnimatedArchiveImage
                       src={imgUrl}
                       alt={`${work.title} 작품 기록 이미지 ${idx + 1}`}
-                      loading={idx === 0 ? "eager" : "lazy"}
+                      eager={idx === 0}
                     />
                     <figcaption className="work-archive-caption mono">
                       <span>Archive {String(idx + 1).padStart(2, "0")}</span>
@@ -341,16 +372,6 @@ export default function WorkDetailModal({ work, accentColor = "#171411", onClose
               </div>
             )}
           </div>
-          {/* 2. Description ("About this project") */}
-          <div style={{ marginBottom: "28px" }}>
-            <span className="mono" style={{ display: "block", fontSize: "0.68rem", fontWeight: 800, color: "var(--ink-faint)", textTransform: "uppercase", marginBottom: "8px", letterSpacing: "0.08em" }}>
-              About this project
-            </span>
-            <p style={{ fontSize: "0.88rem", color: "var(--navy)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line", wordBreak: "keep-all" }}>
-              {work.description || "작품에 대한 상세 설명이 등록되어 있지 않습니다."}
-            </p>
-          </div>
-
           {/* 3. Performance Information */}
           {(work.venue || work.festival || work.year || work.role) && (
             <div style={{ marginBottom: "28px" }}>

@@ -123,6 +123,12 @@ function artistFeedItems(artists: Artist[], seen: Set<string>): FeedItem[] {
         source: "real",
       });
     }
+
+    // Keep the home feed curated so one prolific artist cannot dominate it.
+    const artistItemCount = items.length - itemCountBeforeThisArtist;
+    if (artistItemCount > 6) {
+      items.splice(itemCountBeforeThisArtist + 6, artistItemCount - 6);
+    }
   }
   return items;
 }

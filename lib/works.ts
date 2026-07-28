@@ -17,6 +17,7 @@ export interface NormalizedWork {
   images: string[];
   video_url: string;
   credits: WorkCredit[];
+  dashboard_image_order?: string[];
 }
 
 /**
@@ -80,23 +81,40 @@ export function normalizeWorkCredits(work: any): WorkCredit[] {
       }
     });
   } else if (typeof work?.credits === "string" && work.credits.trim()) {
-    work.credits.split("\n").forEach((line: string) => {
-      const parts = line.split(":");
-      if (parts.length >= 2) {
-        const role = parts[0];
-        parts.slice(1).join(":").split(/[,;&]/).forEach((n) => addPerson(role, n));
-      } else if (line.includes(",")) {
-        line.split(",").forEach((segment) => {
-          const segParts = segment.split(":");
-          if (segParts.length >= 2) {
-            addPerson(segParts[0], segParts.slice(1).join(":"));
-          } else if (segment.trim()) {
-            addPerson("크레딧", segment);
-          }
-        });
-      } else if (line.trim()) {
-        addPerson("크레딧", line);
+    const rawCredits = work.credits
+      .replace(/[•*·]/g, "\n")
+      .replace(/\r/g, "")
+      .trim();
+    const lines = rawCredits.split(/\n+/).map((line: string) => line.trim()).filter(Boolean);
+    const knownRoles = [
+      "공동창작 및 출연", "공동창작", "출연", "인터뷰", "연출", "안무", "기획", "제작",
+      "음악", "작곡", "연주", "무대", "조명", "의상", "영상", "사진", "디자인", "드라마투르그",
+      "director", "choreography", "performer", "cast", "interview", "music", "lighting", "costume", "photo"
+    ];
+    const rolePattern = new RegExp("(" + knownRoles.join("|") + ")\\s*(?:[:：=-]\\s*)?", "gi");
+
+    lines.forEach((line: string) => {
+      const explicit = line.match(/^([^:：]{1,40})[:：]\s*(.+)$/);
+      if (explicit) {
+        explicit[2].split(/[,;&/]|\s+및\s+/).forEach((name) => addPerson(explicit[1], name));
+        return;
       }
+
+      const matches = Array.from(line.matchAll(rolePattern));
+      if (matches.length > 0) {
+        matches.forEach((match, index) => {
+          const role = match[1];
+          const contentStart = (match.index || 0) + match[0].length;
+          const contentEnd = index + 1 < matches.length ? matches[index + 1].index : line.length;
+          const names = line.slice(contentStart, contentEnd).replace(/^[,;·.\s-]+|[,;·.\s-]+$/g, "");
+          if (names) names.split(/[,;&/]|\s+및\s+/).forEach((name) => addPerson(role, name));
+        });
+        const prefix = line.slice(0, matches[0].index || 0).trim();
+        if (prefix) addPerson("크레딧", prefix);
+        return;
+      }
+
+      addPerson("크레딧", line);
     });
   } else if (work?.role) {
     addPerson("안무/역할", work.role);
@@ -128,6 +146,7 @@ export function normalizeWork(work: any): NormalizedWork {
     images,
     image_url: imageUrl,
     credits: normalizeWorkCredits(work),
+    dashboard_image_order: Array.isArray(work?.dashboard_image_order) ? work.dashboard_image_order.filter((url: unknown): url is string => typeof url === "string" && Boolean(url.trim())) : undefined,
   };
 }
 
@@ -149,6 +168,7 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
   const video_url = work?.video_url ? String(work.video_url).trim() : (work?.videoUrl || work?.video || "").trim();
   const images = normalizeWorkImages(work);
   const credits = normalizeWorkCredits(work);
+  const dashboard_image_order = Array.isArray(work?.dashboard_image_order) ? work.dashboard_image_order.filter((url: unknown): url is string => typeof url === "string" && Boolean(url.trim())) : undefined;
 
   const hasContent = Boolean(title) || Boolean(description) || Boolean(role) || Boolean(video_url) || images.length > 0 || credits.length > 0;
   if (!hasContent) return null;
@@ -166,6 +186,7 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
     images,
     image_url,
     credits,
+    dashboard_image_order,
   };
 }
 

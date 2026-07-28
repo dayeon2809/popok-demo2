@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CompanyDiscoveryPrototype from "@/components/company/CompanyDiscoveryPrototype";
 import { useRouter } from "next/navigation";
 import type { Artist, Performance, Company } from "@/types";
@@ -40,6 +40,7 @@ const FIELD_OPTIONS = [
   { key: "dance", label: "DANCE" },
   { key: "music", label: "MUSIC" },
   { key: "visual", label: "VISUAL" },
+  { key: "actor", label: "ACTOR" },
 ];
 
 interface HomeClientV2Props {
@@ -60,6 +61,11 @@ export default function HomeClientV2({
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
   const [selectedField, setSelectedField] = useState("all");
+  const [feedSeed, setFeedSeed] = useState(0);
+
+  useEffect(() => {
+    setFeedSeed(Date.now() + Math.floor(Math.random() * 100000));
+  }, []);
   const [exploreMode, setExploreMode] = useState<"artists" | "companies">("artists");
 
   // Single source of truth for "where does the primary create-a-POPOK CTA
@@ -105,13 +111,29 @@ export default function HomeClientV2({
         const text = `${company.genre || ""} ${company.category || ""}`.toLowerCase();
         if (selectedField === "dance") return /무용|발레|ballet|dance|안무/.test(text);
         if (selectedField === "music") return /음악|연주|오케스트라|orchestra|밴드|band|music/.test(text);
+        if (selectedField === "actor") return /배우|연기|연극|뮤지컬|극단|actor|acting|theatre|theater|musical/.test(text);
         return /미술|시각|설치|사진|media|visual|art|photo/.test(text);
       });
       return insertFeedCta(padWithPlaceholders(buildRealFeedItems([], filtered), FEED_DENSITY_TARGET), 5);
     }
-    const filtered = selectedField === "all" ? publishedArtists : publishedArtists.filter((artist) => (artist.field || "dance") === selectedField);
-    return insertFeedCta(padWithPlaceholders(buildRealFeedItems(filtered, []), FEED_DENSITY_TARGET), 5);
-  }, [exploreMode, publishedArtists, publishedCompanies, selectedField]);
+    const isActor = (artist: Artist) => /배우|연기|연극|뮤지컬|actor|acting|theatre|theater/i.test(
+      `${artist.field || ""} ${artist.genre || ""} ${artist.role || ""}`
+    );
+    const filtered = selectedField === "all"
+      ? publishedArtists
+      : publishedArtists.filter((artist) => selectedField === "actor"
+        ? isActor(artist)
+        : (artist.field || "dance") === selectedField);
+    const randomized = feedSeed === 0 ? filtered : [...filtered].sort((a, b) => {
+      const score = (value: string) => {
+        let hash = feedSeed;
+        for (let i = 0; i < value.length; i += 1) hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
+        return hash >>> 0;
+      };
+      return score(String(a.id)) - score(String(b.id));
+    });
+    return insertFeedCta(padWithPlaceholders(buildRealFeedItems(randomized, []), FEED_DENSITY_TARGET), 5);
+  }, [exploreMode, publishedArtists, publishedCompanies, selectedField, feedSeed]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>

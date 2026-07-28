@@ -68,8 +68,7 @@ export default function CompanyBigCard({ company }: CompanyBigCardProps) {
           ) : (
             <img src={FALLBACK_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }} />
           )}
-          {company.verified && (
-            <span style={{
+          <span style={{
               position: "absolute", top: "14px", right: "14px",
               fontSize: "0.65rem", fontWeight: 850,
               color: "var(--navy)", background: "var(--accent)",
@@ -77,7 +76,6 @@ export default function CompanyBigCard({ company }: CompanyBigCardProps) {
             }}>
               POPOK VERIFIED
             </span>
-          )}
         </div>
 
         <div style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: "8px", flex: 1 }}>

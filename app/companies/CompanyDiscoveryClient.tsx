@@ -19,11 +19,13 @@ const FIELD_OPTIONS = [
   { key: "dance", label: "DANCE" },
   { key: "music", label: "MUSIC" },
   { key: "visual", label: "VISUAL" },
+  { key: "actor", label: "ACTOR" },
 ];
 
 function classifyCompanyField(company: Company): string | null {
   const text = `${company.genre || ""} ${company.category || ""}`.toLowerCase();
   if (!text.trim()) return null;
+  if (/배우|연기|연극|뮤지컬|극단|actor|acting|theatre|theater|musical/.test(text)) return "actor";
   if (/무용|발레|ballet|dance|안무/.test(text)) return "dance";
   if (/음악|합주|오케스트라|orchestra|밴드|band|music|연주/.test(text)) return "music";
   if (/미술|시각|설치|사진|media|visual|art|photo/.test(text)) return "visual";
