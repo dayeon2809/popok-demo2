@@ -14,7 +14,6 @@ import HomeVisualFeed from "@/components/home/HomeVisualFeed";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import FAQSection from "@/components/FAQSection";
 import HomeHeroV2 from "@/components/home/HomeHeroV2";
-import HomeStepsSection from "@/components/home/HomeStepsSection";
 import HomeUseCasesSection from "@/components/home/HomeUseCasesSection";
 import FooterCTA from "@/components/home/FooterCTA";
 import { getHeroCta } from "@/lib/heroCta";
@@ -179,8 +178,6 @@ export default function HomeClientV2({
       >
         내 포퐄 만들기
       </button>
-
-      <HomeStepsSection ctaHref={heroCta.href} isLoggedIn={isLoggedIn} />
 
       <HomeUseCasesSection />
 
