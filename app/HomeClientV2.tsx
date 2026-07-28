@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Artist, Performance, Company } from "@/types";
 import type { InstagramStory } from "@/lib/instagram";
-import { buildRealFeedItems, padWithPlaceholders } from "@/lib/homeFeedPrototype";
+import { buildRealFeedItems, padWithPlaceholders, insertFeedCta } from "@/lib/homeFeedPrototype";
 // Performance posters and Instagram/홈노출 posts are intentionally not fed
 // into the feed builder below — see the note in lib/homeFeedPrototype.ts.
 // initialPerformances/initialWeeklyStories are kept in the prop type (app/page.tsx
@@ -13,6 +13,13 @@ import { buildRealFeedItems, padWithPlaceholders } from "@/lib/homeFeedPrototype
 import HomeVisualFeed from "@/components/home/HomeVisualFeed";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import FAQSection from "@/components/FAQSection";
+import HomeHeroV2 from "@/components/home/HomeHeroV2";
+import ResultComparisonSection from "@/components/home/ResultComparisonSection";
+import HomeStepsSection from "@/components/home/HomeStepsSection";
+import HomeUseCasesSection from "@/components/home/HomeUseCasesSection";
+import FooterCTA from "@/components/home/FooterCTA";
+import { getHeroCta } from "@/lib/heroCta";
+import { analytics } from "@/lib/analytics";
 
 // V2 Home — PROTOTYPE (feature/home-feed-v2 only). Replaces the sectioned
 // landing page (Hero / service intro / artist carousel / company carousel /
@@ -50,10 +57,18 @@ export default function HomeClientV2({
   initialArtists,
   initialCompanies,
   isLoggedIn,
+  myArtistSlug,
 }: HomeClientV2Props) {
   const router = useRouter();
   const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
   const [selectedField, setSelectedField] = useState("all");
+
+  // Single source of truth for "where does the primary create-a-POPOK CTA
+  // go" — logged out -> /auth, logged in without a profile -> /onboarding,
+  // logged in with one -> /my-popok. Same helper the V1 landing page and
+  // About page Hero use (lib/heroCta.ts), just with the conversion-focused
+  // copy below overriding the label.
+  const heroCta = getHeroCta(isLoggedIn, myArtistSlug);
 
   // "작업 올리기" — checks login before anything else (section 3 of the
   // upload-first brief). Logged out: through /auth's existing safe-redirect
@@ -65,9 +80,21 @@ export default function HomeClientV2({
     router.push(isLoggedIn ? uploadPath : `/auth?redirect=${encodeURIComponent(uploadPath)}`);
   };
 
+  const handleScrollToFeed = () => {
+    document.getElementById("home-explore")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const publishedArtists = useMemo(
     () => initialArtists.filter((artist) => showDraft || artist.status === "published" || !artist.status),
     [initialArtists, showDraft]
+  );
+
+  // Real, published artist shown in the "완성된 POPOK 아티스트 페이지" preview
+  // (ResultComparisonSection) — the actual PopokCard component with real
+  // data, not a mockup. Falls back to a placeholder card if none has a photo yet.
+  const previewArtist = useMemo(
+    () => publishedArtists.find((artist) => artist.profileImage || artist.profile_image_url) || publishedArtists[0] || null,
+    [publishedArtists]
   );
 
   const feedItems = useMemo(() => {
@@ -76,12 +103,17 @@ export default function HomeClientV2({
       : publishedArtists.filter((artist) => (artist.field || "dance") === selectedField);
     // Show only artists on the artist explore page
     const real = buildRealFeedItems(fieldFiltered, []);
-    return padWithPlaceholders(real, FEED_DENSITY_TARGET);
+    const padded = padWithPlaceholders(real, FEED_DENSITY_TARGET);
+    return insertFeedCta(padded, 5);
   }, [publishedArtists, selectedField]);
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
-      <div style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} />
+
+      <ResultComparisonSection ctaHref={heroCta.href} isLoggedIn={isLoggedIn} previewArtist={previewArtist} />
+
+      <div id="home-explore" style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* 아티스트 / 단체 토글 버튼 */}
         <div className="discovery-toggle-container">
           <Link href="/" className="discovery-toggle-btn active">
@@ -124,7 +156,11 @@ export default function HomeClientV2({
         </div>
       </div>
 
-      <HomeVisualFeed items={feedItems} />
+      <HomeVisualFeed
+        items={feedItems}
+        ctaHref={heroCta.href}
+        onCtaClick={() => analytics.homeCreatePopokClicked("feed_inline", isLoggedIn)}
+      />
 
       {/* "작업 올리기" — floating, doesn't sit inside the feed grid so it never
           disturbs the masonry layout. See handleUploadClick for the
@@ -142,6 +178,20 @@ export default function HomeClientV2({
       >
         📸 작업 올리기
       </button>
+
+      <HomeStepsSection ctaHref={heroCta.href} isLoggedIn={isLoggedIn} />
+
+      <HomeUseCasesSection />
+
+      <FooterCTA
+        freeBadge="현재 작품 등록, AI 이력 정리, 포트폴리오 공유까지 모든 기능을 무료로 사용할 수 있어요."
+        title={<>흩어진 예술 활동을<br />하나의 포트폴리오로.</>}
+        description="이력서만 올리면 AI가 활동 이력을 정리하고, 나만의 POPOK 페이지를 만들어드려요."
+        primaryLabel="무료로 내 POPOK 만들기"
+        primaryHref={heroCta.href}
+        onPrimaryClick={() => analytics.homeCreatePopokClicked("final_cta", isLoggedIn)}
+        secondaryLabel="아티스트 둘러보기"
+      />
 
       <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
         <FAQSection />

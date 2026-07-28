@@ -4,11 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import type { FeedItem } from "@/lib/homeFeedPrototype";
 import FeedVideoTile from "@/components/FeedVideoTile";
+import FeedCtaCard from "./FeedCtaCard";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
 interface VisualFeedCardProps {
   item: FeedItem;
+  /** Only used for kind:"cta" items — see FeedCtaCard. */
+  onCtaClick?: () => void;
+  ctaHref?: string;
 }
 
 // Image-only masonry card — no caption at rest (per the V2 prototype spec:
@@ -16,8 +20,12 @@ interface VisualFeedCardProps {
 // overlay for real items only; placeholder/prototype filler is never
 // clickable and never shows an overlay, so it can't be mistaken for real
 // artist/company content.
-export default function VisualFeedCard({ item }: VisualFeedCardProps) {
+export default function VisualFeedCard({ item, onCtaClick, ctaHref }: VisualFeedCardProps) {
   const [failed, setFailed] = useState(false);
+
+  if (item.kind === "cta") {
+    return <FeedCtaCard href={ctaHref || "/auth"} onClick={onCtaClick} />;
+  }
   const isReal = item.source === "real";
   const clickable = isReal && Boolean(item.href);
   const isVideo = item.kind === "artist-video" || item.kind === "company-video";

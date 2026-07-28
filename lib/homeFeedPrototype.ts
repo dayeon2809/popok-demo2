@@ -31,7 +31,8 @@ export type FeedItemKind =
   | "company-work"
   | "company-image"
   | "company-video"
-  | "placeholder";
+  | "placeholder"
+  | "cta";
 
 export interface FeedItem {
   id: string;
@@ -248,4 +249,24 @@ export function padWithPlaceholders(real: FeedItem[], targetCount: number): (Fee
     if ((padded.length - real.length) % PLACEHOLDER_FEED_ITEMS.length === 0) cycle++;
   }
   return padded;
+}
+
+/**
+ * Splices a single "create your POPOK" CTA card into the feed at `atIndex`
+ * (after 5 real items by default — inside the "4~6개 이후" mobile / "첫 번째
+ * 또는 두 번째 행 이후" desktop placement asked for). Rendered by
+ * VisualFeedCard as FeedCtaCard, not a plain image — see components/home/FeedCtaCard.tsx.
+ */
+export function insertFeedCta<T extends FeedItem>(items: T[], atIndex = 5): (T | FeedItem)[] {
+  const ctaItem: FeedItem = {
+    id: "home-feed-cta",
+    src: "",
+    href: null,
+    name: null,
+    kind: "cta",
+    source: "placeholder",
+  };
+  if (items.length === 0) return items;
+  const clampedIndex = Math.min(atIndex, items.length);
+  return [...items.slice(0, clampedIndex), ctaItem, ...items.slice(clampedIndex)];
 }

@@ -24,10 +24,10 @@ interface ArtistWorkGalleryProps {
   onSelectWork: (workId: string) => void;
 }
 
-// Every image of every work, flattened into one dashboard-style tile grid
-// (feature/home-feed-v2) — each image stays linked to its parent work
-// (hover caption + click both resolve back to that work), per the "이미지
-// 피드의 모든 사진은 원본 작품 데이터와 연결되어야 합니다" requirement.
+// One tile per work (its representative/first image) in a dashboard-style
+// grid — the home feed already shows every individual photo flattened
+// together (components/home/VisualFeedCard.tsx), so this page keeps the
+// distinct "one tile per work" gallery format instead of duplicating that.
 // Opening a work still goes through the page's existing
 // activeWork/WorkDetailModal state — no new detail UI.
 //
@@ -37,13 +37,9 @@ interface ArtistWorkGalleryProps {
 // "더 보기" toggle) for the same reason.
 export default function ArtistWorkGallery({ works, onSelectWork }: ArtistWorkGalleryProps) {
   const [expanded, setExpanded] = useState(false);
-  // Every uploaded photo gets its own tile (not just one thumbnail per
-  // work) — each tile still links back to its parent work's detail modal.
-  const items: GalleryItem[] = works.flatMap((work) =>
-    work.images
-      .filter((src) => src !== "")
-      .map((src, idx) => ({ key: `${work.id}-${idx}`, src, work }))
-  );
+  const items: GalleryItem[] = works
+    .map((work) => ({ key: work.id, src: work.images[0] || "", work }))
+    .filter((item) => item.src !== "");
 
   if (items.length === 0) return null;
 

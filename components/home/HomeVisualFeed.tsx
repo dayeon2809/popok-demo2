@@ -8,6 +8,9 @@ const BATCH_SIZE = 24;
 
 interface HomeVisualFeedProps {
   items: FeedItem[];
+  /** Passed through to any kind:"cta" item in `items` — see lib/homeFeedPrototype.ts's insertFeedCta. */
+  onCtaClick?: () => void;
+  ctaHref?: string;
 }
 
 // Pinterest/Behance-style masonry via CSS columns (see .home-visual-feed in
@@ -20,7 +23,7 @@ interface HomeVisualFeedProps {
 // on a bottom sentinel) rather than mounting the whole feed at once — this is
 // the "lazy loading" requirement at the layout level, on top of each <img>'s
 // native loading="lazy".
-export default function HomeVisualFeed({ items }: HomeVisualFeedProps) {
+export default function HomeVisualFeed({ items, onCtaClick, ctaHref }: HomeVisualFeedProps) {
   const [visibleCount, setVisibleCount] = useState(Math.min(BATCH_SIZE, items.length));
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,7 +52,7 @@ export default function HomeVisualFeed({ items }: HomeVisualFeedProps) {
     <div>
       <div className="home-visual-feed">
         {visibleItems.map((item) => (
-          <VisualFeedCard key={item.id} item={item} />
+          <VisualFeedCard key={item.id} item={item} onCtaClick={onCtaClick} ctaHref={ctaHref} />
         ))}
       </div>
       {visibleCount < items.length && <div ref={sentinelRef} style={{ height: "1px" }} aria-hidden="true" />}

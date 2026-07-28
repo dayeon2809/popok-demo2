@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
 const menuItems = [
   { name: "Dashboard", path: "/admin" },
@@ -20,9 +19,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const supabase = createBrowserSupabaseClient();
-    await supabase.auth.signOut();
-    router.replace("/auth");
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.replace("/admin/login");
     router.refresh();
   };
 

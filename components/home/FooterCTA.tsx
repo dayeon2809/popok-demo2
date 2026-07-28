@@ -9,6 +9,12 @@ interface FooterCTAProps {
   description?: ReactNode;
   primaryLabel?: string;
   secondaryLabel?: string;
+  /** Overrides the primary CTA's destination — defaults to /auth (V1 landing page behavior). */
+  primaryHref?: string;
+  /** Fires alongside navigation — used by the V2 home to log home_create_popok_clicked. */
+  onPrimaryClick?: () => void;
+  /** Small badge line shown above the title, e.g. a "free during beta" message. */
+  freeBadge?: ReactNode;
 }
 
 export default function FooterCTA({
@@ -16,6 +22,9 @@ export default function FooterCTA({
   description = <>작품과 이력을 기록하고,<br />다음 활동까지 계속 이어가세요.</>,
   primaryLabel = "내 포퐄 만들기",
   secondaryLabel = "아티스트 둘러보기",
+  primaryHref = "/auth",
+  onPrimaryClick,
+  freeBadge,
 }: FooterCTAProps) {
   return (
     <section className="home-section home-footer-cta" style={{
@@ -57,12 +66,29 @@ export default function FooterCTA({
         position: "relative",
         zIndex: 1
       }}>
-        <motion.h2 
+        {freeBadge && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              background: "rgba(23,20,17,0.06)", border: "1px solid var(--navy)",
+              borderRadius: "20px", padding: "6px 14px", marginBottom: "18px",
+            }}
+          >
+            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--navy)", display: "inline-block" }} />
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)" }}>{freeBadge}</span>
+          </motion.div>
+        )}
+
+        <motion.h2
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="display" 
+          className="display"
           style={{
             fontSize: "clamp(2rem, 5vw, 3.6rem)",
             color: "var(--navy)",
@@ -103,7 +129,7 @@ export default function FooterCTA({
           className="cta-row" 
           style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}
         >
-          <Link href="/auth" style={{
+          <Link href={primaryHref} onClick={onPrimaryClick} style={{
             textDecoration: "none",
             background: "var(--navy)",
             color: "#FFFFFF",

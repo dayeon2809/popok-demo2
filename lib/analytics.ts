@@ -58,6 +58,11 @@ export const analytics = {
   aiDiscoveryNoResults: (mode: string) => trackEvent("ai_discovery_no_results", { mode }),
   aiDiscoveryFailed: (mode: string, code?: string) => trackEvent("ai_discovery_failed", { mode, code }),
 
+  // ── Home conversion CTAs ───────────────────────────────────────────────
+  // location: "hero" | "result_comparison" | "feed_inline" | "steps" | "final_cta"
+  homeCreatePopokClicked: (location: string, isLoggedIn: boolean) =>
+    trackEvent("home_create_popok_clicked", { location, is_logged_in: isLoggedIn }),
+
   // ── Artist Detail ──────────────────────────────────────────────────────
   artistShareClicked: (artistId: string) => trackEvent("artist_share_clicked", { artist_id: artistId }),
   artistConnectClicked: (artistId: string) => trackEvent("artist_connect_clicked", { artist_id: artistId }),
