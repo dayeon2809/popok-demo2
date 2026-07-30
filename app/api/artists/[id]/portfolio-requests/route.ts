@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, getSupabaseServer } from "@/lib/supabaseServer";
 import { notifyArtistPortfolioRequestReceived } from "@/lib/email/notify";
+import { createPortfolioConversation } from "@/lib/conversationsServer";
 
 export const dynamic = "force-dynamic";
 
@@ -102,6 +103,12 @@ export async function POST(
       return NextResponse.json({ success: false, error: "포퐄 전송에 실패했습니다." }, { status: 500 });
     }
 
+    const conversationId = await createPortfolioConversation({
+      requestId: String((created as any).id), requestType: "artist", senderUserId: user.id,
+      recipientUserId: (recipientArtist as any).owner_id ? String((recipientArtist as any).owner_id) : null,
+      senderArtistName, message,
+    });
+
     // Only reached when a request row was genuinely just created.
     await notifyArtistPortfolioRequestReceived({
       requestId: String((created as any).id),
@@ -111,7 +118,7 @@ export async function POST(
       message,
     }).catch((err) => console.error("[POST /api/artists/[id]/portfolio-requests] Notification error:", err));
 
-    return NextResponse.json({ success: true, status: (created as any).status, requestId: (created as any).id });
+    return NextResponse.json({ success: true, status: (created as any).status, requestId: (created as any).id, conversationId });
   } catch (err: any) {
     console.error("[POST /api/artists/[id]/portfolio-requests] Unexpected error:", err);
     return NextResponse.json({ success: false, error: "서버 오류가 발생했습니다." }, { status: 500 });

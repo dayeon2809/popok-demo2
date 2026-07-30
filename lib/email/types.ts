@@ -3,7 +3,8 @@ export type EmailNotificationEvent =
   | "artist_profile_approved"
   | "company_profile_approved"
   | "company_portfolio_request_received"
-  | "artist_portfolio_request_received";
+  | "artist_portfolio_request_received"
+  | "message_received";
 
 export type EmailNotificationStatus =
   | "pending"

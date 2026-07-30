@@ -15,6 +15,8 @@ import {
   buildCompanyPortfolioRequestReceivedEmail,
   buildArtistPortfolioRequestReceivedEmail,
 } from "./templates";
+import { buildMessageReceivedEmail } from "./messageReceivedTemplate";
+import { deliverMessageReceivedEmail } from "./messageReceivedDelivery";
 
 /** Fired when an artist's "+ 단체 연결 신청" (company_manager_requests) is approved. */
 export async function notifyArtistCompanyConnectionApproved(params: {
@@ -166,5 +168,20 @@ export async function notifyArtistPortfolioRequestReceived(params: {
     entityType: "artist_portfolio_request",
     entityId: params.requestId,
     recipientUserId: ownerId,
+  });
+}
+
+export async function notifyMessageReceived(params: {
+  messageId: string;
+  conversationId: string;
+  senderUserId: string;
+  recipientUserId: string;
+  senderName: string;
+  recipientName: string;
+}): Promise<SendPopokEmailResult> {
+  return deliverMessageReceivedEmail(params, {
+    getAccountEmail: getAccountEmailByOwnerId,
+    buildEmail: buildMessageReceivedEmail,
+    sendEmail: sendPopokEmail,
   });
 }
