@@ -751,7 +751,7 @@ export default function MyPopokClient({
               <button type="button" onClick={() => setSelectedContext("artist")} aria-current={selectedContext === "artist" ? "page" : undefined} className="my-popok-management-pill" style={{ border: selectedContext === "artist" ? "1.5px solid var(--navy)" : "1px solid var(--border)", backgroundColor: selectedContext === "artist" ? "var(--navy)" : "#FFFFFF", color: selectedContext === "artist" ? "#FFFFFF" : "var(--navy)" }}>
                 <span>내 프로필</span><span style={{ opacity: 0.75, fontSize: "0.75rem" }}>({artist.name})</span>
               </button>
-              <Link href="/my-popok/messages" className="my-popok-management-pill" style={{ border: "1px solid var(--border)", background: "#fff", color: "var(--navy)" }}>
+              <Link href="/my-popok/messages" className="my-popok-management-pill my-popok-chat-pill" style={{ border: "1px solid var(--accent)", background: "var(--accent)", color: "var(--navy)" }}>
                 포퐄챗
                 {unreadChatCount > 0 && <span className="popok-chat-tab-badge" aria-label={`읽지 않은 포퐄챗 ${unreadChatCount}개`}>{formatUnreadCount(unreadChatCount)}</span>}
               </Link>
@@ -769,6 +769,7 @@ export default function MyPopokClient({
               .my-popok-management-pill { min-height: 44px; padding: 8px 16px; border-radius: 999px; font-size: .82rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; cursor: pointer; text-decoration: none; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
               .my-popok-management-pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
               .my-popok-management-separator { color: var(--border-dark); flex-shrink: 0; margin: 0 4px; }
+              .my-popok-chat-pill .popok-chat-tab-badge { background: var(--navy); color: #fff; }
               .popok-chat-tab-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center; background: var(--accent); color: var(--navy); font-size: .68rem; font-weight: 950; line-height: 1; }
               @media (max-width: 767px) { .my-popok-management-tabs { width: 100%; margin-inline: -2px; padding-inline: 2px; } .my-popok-management-tabs::-webkit-scrollbar { height: 3px; } .my-popok-management-tabs::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 999px; } }
             `}</style>

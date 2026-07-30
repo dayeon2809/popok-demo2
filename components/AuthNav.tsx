@@ -86,6 +86,7 @@ export default function AuthNav() {
     createPopok: language === "ko" ? "내 POPOK 만들기" : "Create my POPOK",
     viewProfile: language === "ko" ? "내 프로필 보기" : "View my profile",
     manageProfile: language === "ko" ? "프로필 관리" : "Manage profile",
+    popokChat: language === "ko" ? "포퐄챗" : "POPOK Chat",
     accountSettings: language === "ko" ? "계정 설정" : "Account settings",
     logout: language === "ko" ? "로그아웃" : "Sign out",
   };
@@ -185,6 +186,10 @@ export default function AuthNav() {
               </Link>
             </>
           )}
+
+          <Link href="/my-popok/messages" onClick={() => setMenuOpen(false)} className="account-menu-item" style={menuItemStyle}>
+            {t.popokChat}
+          </Link>
 
           <Link href="/account" onClick={() => setMenuOpen(false)} className="account-menu-item" style={menuItemStyle}>
             {t.accountSettings}
