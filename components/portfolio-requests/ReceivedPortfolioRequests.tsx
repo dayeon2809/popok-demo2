@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { PORTFOLIO_REQUEST_STATUS_LABEL } from "@/lib/portfolioRequests";
 
 type RequestType = "company" | "artist";
@@ -37,6 +38,7 @@ export default function ReceivedPortfolioRequests({ onToast }: { onToast: (msg: 
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | RequestType>("all");
+  const [acceptedConversationIds, setAcceptedConversationIds] = useState<Record<string, string>>({});
 
   const load = async () => {
     setLoading(true);
@@ -87,6 +89,9 @@ export default function ReceivedPortfolioRequests({ onToast }: { onToast: (msg: 
         return;
       }
       setRequests((prev) => prev.map((r) => (r.id === req.id ? { ...r, status } : r)));
+      if (status === "accepted" && typeof data.conversationId === "string" && data.conversationId) {
+        setAcceptedConversationIds((current) => ({ ...current, [`${req.type}_${req.id}`]: data.conversationId }));
+      }
       onToast(status === "accepted" ? "요청을 수락했습니다." : "요청을 거절했습니다.");
     } catch {
       onToast("서버 통신 오류가 발생했습니다.");
@@ -202,7 +207,15 @@ export default function ReceivedPortfolioRequests({ onToast }: { onToast: (msg: 
                   )}
                 </div>
               </div>
-            </div>
+              {r.status === "accepted" && acceptedConversationIds[`${r.type}_${r.id}`] && (
+                <Link
+                  href={`/my-popok/messages/${acceptedConversationIds[`${r.type}_${r.id}`]}`}
+                  className="btn-lime popok-accepted-chat-cta"
+                  style={{ alignSelf: "flex-end", textDecoration: "none" }}
+                >
+                  {"\uD83D\uDCAC 1:1 \uD3EC\uD404\uCC57 \uD558\uAE30"}
+                </Link>
+              )}            </div>
           );
         })
       )}

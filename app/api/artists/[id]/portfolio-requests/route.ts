@@ -116,6 +116,7 @@ export async function POST(
       recipientArtistName: (recipientArtist as any).name || "아티스트",
       senderArtistName,
       message,
+      conversationId,
     }).catch((err) => console.error("[POST /api/artists/[id]/portfolio-requests] Notification error:", err));
 
     return NextResponse.json({ success: true, status: (created as any).status, requestId: (created as any).id, conversationId });

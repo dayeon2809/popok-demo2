@@ -477,7 +477,7 @@ export default function AdminPerformancesPage() {
         <EmptyState message="등록된 공연이 없습니다." />
       ) : (
         <div style={{ overflowX: "auto", border: "1.5px solid var(--border)", borderRadius: "12px", background: "#fff" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
+          <table className="admin-mobile-cards admin-performances-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
             <thead>
               <tr style={{ background: "#f8f9fa", borderBottom: "1.5px solid var(--border)" }}>
                 <th style={thStyle}><input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAll} /></th>

@@ -8,6 +8,7 @@ import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import PopokCard from "@/components/PopokCard";
 import ArtistStoryShareModal from "@/components/artist/ArtistStoryShareModal";
 import { analytics } from "@/lib/analytics";
+import { getArtistPublicUrl } from "@/lib/publicProfileUrls";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import { toObjectArray, safeYear, getValidWorks } from "@/lib/normalize";
 import {
@@ -1033,7 +1034,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
           role: artist.role,
           instagram: artist.instagram,
           profileImage: artist.profile_image_url || artist.profileImage || null,
-          profileUrl: typeof window !== "undefined" ? window.location.href : `https://popok.kr/artists/${artist.slug || artist.id || id}`,
+          profileUrl: getArtistPublicUrl(artist.slug || artist.id || id),
         }}
       />
 

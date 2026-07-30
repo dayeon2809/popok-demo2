@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import type { Company } from "@/types";
+import { getCompanyPath, getCompanyPublicUrl } from "@/lib/publicProfileUrls";
 
 interface DigitalCardProps {
   company: Company;
@@ -12,8 +13,6 @@ interface DigitalCardProps {
   /** Fires with the next flip state whenever the card is toggled, controlled or not. */
   onFlipChange?: (flipped: boolean) => void;
 }
-
-const PUBLIC_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://popok.kr";
 
 // Helper function to detect contrast color for brand background
 function getContrastColor(hexColor: string | null | undefined) {
@@ -89,9 +88,9 @@ export default function DigitalCard({
   };
 
   const effectiveSlug = company.slug || company.id;
-  const detailHref = `/companies/${effectiveSlug}`;
+  const detailHref = getCompanyPath(effectiveSlug);
   const displayPath = `popok.kr/companies/${effectiveSlug}`;
-  const profileUrl = `${PUBLIC_URL}${detailHref}`;
+  const profileUrl = getCompanyPublicUrl(effectiveSlug);
 
   const cardNo = company.id.substring(0, 4).toUpperCase();
   const displayEnglishName = company.name_en || company.name.toUpperCase();

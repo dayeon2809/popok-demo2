@@ -300,7 +300,7 @@ export default function AdminSubmissionsPage() {
 
       {/* Submissions Grid List */}
       <div style={{ background: "#FFF", border: "1.5px solid var(--border)", borderRadius: "14px", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.86rem" }}>
+        <table className="admin-mobile-cards admin-submissions-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.86rem" }}>
           <thead>
             <tr style={{ background: "#FAF8F5", borderBottom: "1px solid var(--border)", color: "var(--navy)", fontWeight: 700 }}>
               <th style={{ padding: "16px 20px" }}>등록번호</th>

@@ -2,11 +2,14 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import { formatUnreadCount } from "@/lib/messages";
+import { useOptionalPopokChatData } from "@/components/messages/PopokChatDataProvider";
 import PopokCard from "@/components/PopokCard";
 import ArtistStoryShareModal from "@/components/artist/ArtistStoryShareModal";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import AiProfileCompare from "@/components/profile/AiProfileCompare";
 import { analytics } from "@/lib/analytics";
+import { getArtistPath, getArtistPublicUrl } from "@/lib/publicProfileUrls";
 import CompanyCmsEditor from "@/components/company/CompanyCmsEditor";
 import CompanyClaimModal from "@/components/company/CompanyClaimModal";
 import ReceivedPortfolioRequests from "@/components/portfolio-requests/ReceivedPortfolioRequests";
@@ -122,6 +125,8 @@ export default function MyPopokClient({
   const [ownedCompanies, setOwnedCompanies] = useState<Company[]>(initialOwnedCompanies);
   const [selectedContext, setSelectedContext] = useState<string>("artist"); // "artist" | "received-requests" | "sent-requests" | company.id
   const [claimModalOpen, setClaimModalOpen] = useState(false);
+  const chatData = useOptionalPopokChatData();
+  const unreadChatCount = chatData?.unreadCount || 0;
   const [activeEditorSection, setActiveEditorSection] = useState<ProfileEditorSection>("basic");
   const isPremium = false; // Stripe payment connection toggle point
 
@@ -234,11 +239,9 @@ export default function MyPopokClient({
     message: string;
   }>({ valid: true, checking: false, message: "" });
 
-  // Resolve absolute public page URL
-  const publicUrl = useMemo(() => {
-    if (typeof window === "undefined") return `https://popok.kr/artists/${slug}`;
-    return `${window.location.origin}/artists/${slug}`;
-  }, [slug]);
+  const publicProfileKey = slug || artist.slug || artist.id;
+  const artistPath = getArtistPath(publicProfileKey);
+  const publicUrl = getArtistPublicUrl(publicProfileKey);
 
   // Dynamic Status Badge mapping
   const statusConfig = useMemo(() => {
@@ -738,106 +741,38 @@ export default function MyPopokClient({
             boxShadow: "0 4px 16px rgba(23, 20, 17, 0.03)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", flex: 1, minWidth: 0 }}>
             <span className="mono" style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--ink-muted)", textTransform: "uppercase" }}>
               내 프로필 / 단체 관리:
             </span>
 
-            {/* Profile Options */}
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-              <button
-                type="button"
-                onClick={() => setSelectedContext("artist")}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "20px",
-                  fontSize: "0.82rem",
-                  fontWeight: 800,
-                  border: selectedContext === "artist" ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                  backgroundColor: selectedContext === "artist" ? "var(--navy)" : "#FFFFFF",
-                  color: selectedContext === "artist" ? "#FFFFFF" : "var(--navy)",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                <span>○ 내 프로필</span>
-                <span style={{ opacity: 0.75, fontSize: "0.75rem" }}>({artist.name})</span>
+            {/* Profile and POPOK navigation */}
+            <div className="my-popok-management-tabs" role="navigation" aria-label="내 프로필과 포퐄 관리">
+              <button type="button" onClick={() => setSelectedContext("artist")} aria-current={selectedContext === "artist" ? "page" : undefined} className="my-popok-management-pill" style={{ border: selectedContext === "artist" ? "1.5px solid var(--navy)" : "1px solid var(--border)", backgroundColor: selectedContext === "artist" ? "var(--navy)" : "#FFFFFF", color: selectedContext === "artist" ? "#FFFFFF" : "var(--navy)" }}>
+                <span>내 프로필</span><span style={{ opacity: 0.75, fontSize: "0.75rem" }}>({artist.name})</span>
               </button>
-
-              {ownedCompanies.length > 0 && (
-                <span style={{ color: "var(--border-dark)", fontSize: "0.8rem", margin: "0 4px" }}>|</span>
-              )}
-
+              <Link href="/my-popok/messages" className="my-popok-management-pill" style={{ border: "1px solid var(--border)", background: "#fff", color: "var(--navy)" }}>
+                포퐄챗
+                {unreadChatCount > 0 && <span className="popok-chat-tab-badge" aria-label={`읽지 않은 포퐄챗 ${unreadChatCount}개`}>{formatUnreadCount(unreadChatCount)}</span>}
+              </Link>
+              <button type="button" onClick={() => setSelectedContext("received-requests")} aria-current={selectedContext === "received-requests" ? "page" : undefined} className="my-popok-management-pill" style={{ border: selectedContext === "received-requests" ? "1.5px solid var(--navy)" : "1px solid var(--border)", backgroundColor: selectedContext === "received-requests" ? "var(--navy)" : "#FFFFFF", color: selectedContext === "received-requests" ? "#FFFFFF" : "var(--navy)" }}>받은 포퐄</button>
+              <button type="button" onClick={() => setSelectedContext("sent-requests")} aria-current={selectedContext === "sent-requests" ? "page" : undefined} className="my-popok-management-pill" style={{ border: selectedContext === "sent-requests" ? "1.5px solid var(--navy)" : "1px solid var(--border)", backgroundColor: selectedContext === "sent-requests" ? "var(--navy)" : "#FFFFFF", color: selectedContext === "sent-requests" ? "#FFFFFF" : "var(--navy)" }}>보낸 포퐄</button>
+              {ownedCompanies.length > 0 && <span className="my-popok-management-separator" aria-hidden="true">|</span>}
               {ownedCompanies.map((comp) => (
-                <button
-                  key={comp.id}
-                  type="button"
-                  onClick={() => setSelectedContext(comp.id)}
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "20px",
-                    fontSize: "0.82rem",
-                    fontWeight: 800,
-                    border: selectedContext === comp.id ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                    backgroundColor: selectedContext === comp.id ? "var(--navy)" : "#FFFFFF",
-                    color: selectedContext === comp.id ? "#FFFFFF" : "var(--navy)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  <span>○ {comp.name}</span>
-                  <span style={{ fontSize: "0.62rem", background: selectedContext === comp.id ? "rgba(255,255,255,0.2)" : "#FAF9F5", padding: "2px 6px", borderRadius: "10px" }}>
-                    단체
-                  </span>
+                <button key={comp.id} type="button" onClick={() => setSelectedContext(comp.id)} aria-current={selectedContext === comp.id ? "page" : undefined} className="my-popok-management-pill" style={{ border: selectedContext === comp.id ? "1.5px solid var(--navy)" : "1px solid var(--border)", backgroundColor: selectedContext === comp.id ? "var(--navy)" : "#FFFFFF", color: selectedContext === comp.id ? "#FFFFFF" : "var(--navy)" }}>
+                  <span>{comp.name}</span><span style={{ fontSize: "0.62rem", background: selectedContext === comp.id ? "rgba(255,255,255,0.2)" : "#FAF9F5", padding: "2px 6px", borderRadius: "10px" }}>단체</span>
                 </button>
               ))}
-
-              <span style={{ color: "var(--border-dark)", fontSize: "0.8rem", margin: "0 4px" }}>|</span>
-
-              <button
-                type="button"
-                onClick={() => setSelectedContext("received-requests")}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "20px",
-                  fontSize: "0.82rem",
-                  fontWeight: 800,
-                  border: selectedContext === "received-requests" ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                  backgroundColor: selectedContext === "received-requests" ? "var(--navy)" : "#FFFFFF",
-                  color: selectedContext === "received-requests" ? "#FFFFFF" : "var(--navy)",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                받은 포퐄
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedContext("sent-requests")}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "20px",
-                  fontSize: "0.82rem",
-                  fontWeight: 800,
-                  border: selectedContext === "sent-requests" ? "1.5px solid var(--navy)" : "1px solid var(--border)",
-                  backgroundColor: selectedContext === "sent-requests" ? "var(--navy)" : "#FFFFFF",
-                  color: selectedContext === "sent-requests" ? "#FFFFFF" : "var(--navy)",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                보낸 포퐄
-              </button>
             </div>
+            <style>{`
+              .my-popok-management-tabs { min-width: 0; max-width: 100%; display: flex; align-items: center; gap: 8px; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: thin; padding: 2px 2px 6px; }
+              .my-popok-management-pill { min-height: 44px; padding: 8px 16px; border-radius: 999px; font-size: .82rem; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0; cursor: pointer; text-decoration: none; transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+              .my-popok-management-pill:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+              .my-popok-management-separator { color: var(--border-dark); flex-shrink: 0; margin: 0 4px; }
+              .popok-chat-tab-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; display: inline-grid; place-items: center; background: var(--accent); color: var(--navy); font-size: .68rem; font-weight: 950; line-height: 1; }
+              @media (max-width: 767px) { .my-popok-management-tabs { width: 100%; margin-inline: -2px; padding-inline: 2px; } .my-popok-management-tabs::-webkit-scrollbar { height: 3px; } .my-popok-management-tabs::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 999px; } }
+            `}</style>
           </div>
-
           <button
             type="button"
             onClick={() => setClaimModalOpen(true)}
@@ -947,7 +882,7 @@ export default function MyPopokClient({
             }}>
               <div style={{ minWidth: 0, flex: 1, maxWidth: "100%" }}>
                 <span style={{ display: "block", fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 800, marginBottom: "2px" }}>내 공개 링크</span>
-                <Link href={`/artists/${artist.slug}`} target="_blank" style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", textDecoration: "underline", wordBreak: "break-all" }}>
+                <Link href={artistPath} target="_blank" style={{ fontSize: "0.95rem", fontWeight: 800, color: "var(--navy)", textDecoration: "underline", wordBreak: "break-all" }}>
                   {publicUrl}
                 </Link>
               </div>
@@ -960,7 +895,7 @@ export default function MyPopokClient({
                   {copied ? "✓ 복사됨" : "🔗 링크 복사"}
                 </button>
                 <Link
-                  href={`/artists/${artist.slug}`}
+                  href={artistPath}
                   target="_blank"
                   style={{ ...smallButtonStyle, textDecoration: "none", display: "inline-flex", alignItems: "center" }}
                 >
@@ -1190,7 +1125,7 @@ export default function MyPopokClient({
 
           <div style={{ marginTop: "20px", textAlign: "center" }}>
             <Link
-              href={`/artists/${artist.slug}`}
+              href={artistPath}
               target="_blank"
               className="btn-lime"
               style={{

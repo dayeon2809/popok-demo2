@@ -4,6 +4,7 @@ export type EmailNotificationEvent =
   | "company_profile_approved"
   | "company_portfolio_request_received"
   | "artist_portfolio_request_received"
+  | "portfolio_request_accepted"
   | "message_received";
 
 export type EmailNotificationStatus =
@@ -24,6 +25,8 @@ export interface SendPopokEmailParams {
   entityType: string;
   entityId: string;
   recipientUserId?: string | null;
+  notificationType?: "request_received" | "request_accepted";
+  conversationId?: string | null;
 }
 
 export interface SendPopokEmailResult {

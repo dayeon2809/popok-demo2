@@ -204,7 +204,7 @@ export default function AdminCompaniesPage() {
       </div>
 
       <div style={{ background: "#fff", border: "1.5px solid var(--border)", borderRadius: "14px", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.85rem" }}>
+        <table className="admin-mobile-cards admin-companies-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.85rem" }}>
           <thead>
             <tr style={{ background: "#f8fafc", borderBottom: "1.5px solid var(--border)" }}>
               <th style={{ padding: "12px 14px", fontWeight: 800, color: "var(--navy)" }}>단체명</th>

@@ -132,6 +132,7 @@ export async function POST(
       companyName: (targetCompany as any).name || "단체",
       senderArtistName,
       message,
+      conversationId,
     }).catch((err) => console.error("[POST /api/companies/[id]/portfolio-requests] Notification error:", err));
 
     return NextResponse.json({ success: true, status: (created as any).status, requestId: (created as any).id, conversationId });

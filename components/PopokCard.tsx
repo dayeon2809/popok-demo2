@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { analytics } from "@/lib/analytics";
+import { getArtistPath, getArtistPublicUrl } from "@/lib/publicProfileUrls";
 
 interface PopokCardProps {
   name: string;
@@ -17,11 +18,6 @@ interface PopokCardProps {
   /** Fires with the next flip state whenever the card is toggled, controlled or not. */
   onFlipChange?: (flipped: boolean) => void;
 }
-
-// NEXT_PUBLIC_ vars are inlined at build time, so this is identical in the
-// server-rendered HTML and the client's first render — never derived from
-// window.location, which would differ between the two and break hydration.
-const PUBLIC_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://popok.kr";
 
 export default function PopokCard({
   name,
@@ -85,9 +81,9 @@ export default function PopokCard({
   };
 
   const effectiveSlug = slug || id;
-  const detailHref = `/artists/${effectiveSlug}`;
+  const detailHref = getArtistPath(effectiveSlug);
   const displayPath = `popok.kr/${effectiveSlug}`;
-  const profileUrl = `${PUBLIC_URL}${detailHref}`;
+  const profileUrl = getArtistPublicUrl(effectiveSlug);
 
   const cardNo = id.substring(0, 4).toUpperCase();
   const displayEnglishName = nameEn || name.toUpperCase();

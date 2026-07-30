@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, getSupabaseServer } from "@/lib/supabaseServer";
+import { notifyPortfolioRequestAccepted } from "@/lib/email/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export async function PATCH(
 
     const { data: myArtist } = await supabase
       .from("artists" as any)
-      .select("id")
+      .select("id, name")
       .eq("owner_id", user.id)
       .maybeSingle();
     const myArtistId = myArtist ? String((myArtist as any).id) : null;
@@ -94,7 +95,60 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: "상태 변경에 실패했습니다." }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, status: (updated as any).status });
+    const becameAccepted = nextStatus === "accepted" && (existing as any).status !== "accepted";
+    let conversationId: string | null = null;
+    if (nextStatus === "accepted") {
+      const { data: conversation, error: conversationError } = await supabase
+        .from("conversations" as any)
+        .select("id")
+        .eq("portfolio_request_id", requestId)
+        .eq("portfolio_request_type", requestType)
+        .maybeSingle();
+      if (conversationError) {
+        console.error("[PATCH /api/portfolio-requests/[id]] Conversation lookup error:", {
+          portfolio_request_id: requestId,
+          reason: conversationError.code || conversationError.message,
+        });
+      } else if (conversation) {
+        conversationId = String((conversation as any).id);
+      }
+    }
+
+    if (becameAccepted) {
+      const senderArtistId = String((existing as any)[senderField]);
+      const { data: senderArtist, error: senderError } = await supabase
+        .from("artists" as any)
+        .select("name, owner_id")
+        .eq("id", senderArtistId)
+        .maybeSingle();
+      const senderUserId = (senderArtist as any)?.owner_id ? String((senderArtist as any).owner_id) : null;
+      if (senderError || !senderUserId) {
+        console.error("[portfolio request accepted] Sender email lookup skipped", {
+          notification_type: "request_accepted",
+          recipient_exists: false,
+          request_id: requestId,
+          conversation_id_exists: Boolean(conversationId),
+          reason: senderError?.code || "sender_owner_missing",
+        });
+      } else {
+        await notifyPortfolioRequestAccepted({
+          requestId,
+          senderUserId,
+          senderArtistName: (senderArtist as any)?.name || "아티스트",
+          acceptedByName: (myArtist as any)?.name || "POPOK user",
+          conversationId,
+        }).catch((notificationError) => {
+          console.error("[portfolio request accepted] Notification error", {
+            notification_type: "request_accepted",
+            recipient_exists: true,
+            request_id: requestId,
+            conversation_id_exists: Boolean(conversationId),
+            reason: notificationError instanceof Error ? notificationError.message : String(notificationError),
+          });
+        });
+      }
+    }
+    return NextResponse.json({ success: true, status: (updated as any).status, conversationId });
   } catch (err: any) {
     console.error("[PATCH /api/portfolio-requests/[id]] Unexpected error:", err);
     return NextResponse.json({ success: false, error: "서버 오류가 발생했습니다." }, { status: 500 });

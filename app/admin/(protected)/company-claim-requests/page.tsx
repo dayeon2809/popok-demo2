@@ -260,7 +260,7 @@ export default function AdminCompanyClaimRequestsPage() {
               </div>
             ) : (
               <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "#FFFFFF" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem", textAlign: "left" }}>
+                <table className="admin-mobile-cards admin-claims-history-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem", textAlign: "left" }}>
                   <thead>
                     <tr style={{ background: "#FAF9F5", borderBottom: "1px solid var(--border)", color: "var(--navy)" }}>
                       <th style={{ padding: "12px 16px" }}>신청일</th>

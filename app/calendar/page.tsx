@@ -125,6 +125,16 @@ function PerformanceCard({ perf }: { perf: Performance }) {
   );
 }
 
+function isNationalGugakCenterPerformance(perf: Performance): boolean {
+  const labels = [perf.companyName, perf.organizer, perf.title]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.replace(/\s+/g, ""));
+  if (labels.some((value) => value.includes("국립국악원"))) return true;
+
+  return [perf.externalUrl, perf.ticketUrl, perf.sourceUrl].some((value) =>
+    typeof value === "string" && value.toLowerCase().includes("gugak.go.kr")
+  );
+}
 // Header's "공연" tab — every upcoming/published performance, grouped into
 // Monday–Sunday weeks ("이번주 (7/27~8/2)", "다음주 (8/3~8/9)", ...), each
 // week shown as a single horizontally-scrollable row (mobile-friendly by
@@ -132,7 +142,7 @@ function PerformanceCard({ perf }: { perf: Performance }) {
 // + link-resolution the homepage's V1 performance carousel used
 // (lib/performances.ts, lib/performanceLinks.ts, lib/date.ts).
 export default async function CalendarPage() {
-  const performances = await getUpcomingPerformances(60);
+  const performances = (await getUpcomingPerformances(60)).filter((performance) => !isNationalGugakCenterPerformance(performance));
   const weeks = groupByWeek(performances);
 
   return (

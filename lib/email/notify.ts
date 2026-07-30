@@ -15,6 +15,7 @@ import {
   buildCompanyPortfolioRequestReceivedEmail,
   buildArtistPortfolioRequestReceivedEmail,
 } from "./templates";
+import { buildPortfolioRequestAcceptedEmail } from "./portfolioAcceptedTemplate";
 import { buildMessageReceivedEmail } from "./messageReceivedTemplate";
 import { deliverMessageReceivedEmail } from "./messageReceivedDelivery";
 
@@ -100,31 +101,28 @@ export async function notifyCompanyPortfolioRequestReceived(params: {
   companyName: string;
   senderArtistName: string;
   message?: string | null;
+  conversationId?: string | null;
 }): Promise<SendPopokEmailResult | void> {
   const supabase = getSupabaseServer();
-  const { data: repRelation } = await supabase
-    .from("artist_companies" as any)
-    .select("artists(id, name, owner_id)")
-    .eq("company_id", params.companyId)
-    .eq("is_current", true)
-    .eq("is_primary", true)
-    .order("created_at", { ascending: true })
-    .limit(1)
+  const { data: company, error } = await supabase
+    .from("companies" as any)
+    .select("owner_id, name")
+    .eq("id", params.companyId)
     .maybeSingle();
-
-  const rep = (repRelation as any)?.artists;
-  if (!rep) {
+  const ownerId = (company as any)?.owner_id ? String((company as any).owner_id) : null;
+  if (error || !ownerId) {
     await logSkippedNoRecipient({
       eventKey: "company_portfolio_request_received",
       entityType: "company_portfolio_request",
       entityId: params.requestId,
+      notificationType: "request_received",
+      conversationId: params.conversationId,
     });
     return;
   }
-
-  const email = rep.owner_id ? await getAccountEmailByOwnerId(String(rep.owner_id)) : null;
+  const email = await getAccountEmailByOwnerId(ownerId);
   const content = buildCompanyPortfolioRequestReceivedEmail({
-    representativeName: rep.name || "대표자",
+    representativeName: (company as any)?.name || params.companyName,
     senderArtistName: params.senderArtistName,
     companyName: params.companyName,
     message: params.message,
@@ -135,7 +133,9 @@ export async function notifyCompanyPortfolioRequestReceived(params: {
     eventKey: "company_portfolio_request_received",
     entityType: "company_portfolio_request",
     entityId: params.requestId,
-    recipientUserId: rep.owner_id ? String(rep.owner_id) : null,
+    recipientUserId: ownerId,
+    notificationType: "request_received",
+    conversationId: params.conversationId,
   });
 }
 
@@ -146,7 +146,8 @@ export async function notifyArtistPortfolioRequestReceived(params: {
   recipientArtistName: string;
   senderArtistName: string;
   message?: string | null;
-}): Promise<SendPopokEmailResult> {
+  conversationId?: string | null;
+}): Promise<SendPopokEmailResult | void> {
   const supabase = getSupabaseServer();
   const { data: recipientRow } = await supabase
     .from("artists" as any)
@@ -155,7 +156,11 @@ export async function notifyArtistPortfolioRequestReceived(params: {
     .maybeSingle();
 
   const ownerId = (recipientRow as any)?.owner_id ? String((recipientRow as any).owner_id) : null;
-  const email = ownerId ? await getAccountEmailByOwnerId(ownerId) : null;
+  if (!ownerId) {
+    await logSkippedNoRecipient({ eventKey: "artist_portfolio_request_received", entityType: "artist_portfolio_request", entityId: params.requestId, notificationType: "request_received", conversationId: params.conversationId });
+    return;
+  }
+  const email = await getAccountEmailByOwnerId(ownerId);
   const content = buildArtistPortfolioRequestReceivedEmail({
     recipientArtistName: params.recipientArtistName,
     senderArtistName: params.senderArtistName,
@@ -168,9 +173,34 @@ export async function notifyArtistPortfolioRequestReceived(params: {
     entityType: "artist_portfolio_request",
     entityId: params.requestId,
     recipientUserId: ownerId,
+    notificationType: "request_received",
+    conversationId: params.conversationId,
   });
 }
-
+export async function notifyPortfolioRequestAccepted(params: {
+  requestId: string;
+  senderUserId: string;
+  senderArtistName: string;
+  acceptedByName: string;
+  conversationId?: string | null;
+}): Promise<SendPopokEmailResult> {
+  const email = await getAccountEmailByOwnerId(params.senderUserId);
+  const content = buildPortfolioRequestAcceptedEmail({
+    recipientName: params.senderArtistName,
+    acceptedByName: params.acceptedByName,
+    conversationId: params.conversationId,
+  });
+  return sendPopokEmail({
+    to: email || "",
+    ...content,
+    eventKey: "portfolio_request_accepted",
+    entityType: "portfolio_request",
+    entityId: params.requestId,
+    recipientUserId: params.senderUserId,
+    notificationType: "request_accepted",
+    conversationId: params.conversationId,
+  });
+}
 export async function notifyMessageReceived(params: {
   messageId: string;
   conversationId: string;
