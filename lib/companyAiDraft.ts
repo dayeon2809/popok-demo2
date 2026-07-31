@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getClient, MODEL, normalizeYear } from "./profileParser";
 import { PROFILE_SUMMARY_PROMPT } from "./prompts/profileSummaryPrompt";
 import type { OrganizationApplicationForAi } from "./companies";
+import { mapProfileSourceUrlsToReviewLinks } from "./profileReviewLinks";
 
 // Fallback for ai_draft_source_summary's file_name when a stored *_file_name
 // column is unexpectedly empty but the storage path is known.
@@ -36,6 +37,14 @@ const awardSchema = z.object({
 const linkSchema = z.object({
   label: z.string().default(""),
   url: z.string().default(""),
+});
+const reviewLinkSchema = z.object({
+  title: z.string().default(""),
+  publisher: z.string().default(""),
+  work: z.string().optional().default(""),
+  date: z.string().optional().default(""),
+  url: z.string().default(""),
+  description: z.string().optional().default(""),
 });
 
 const reviewSearchHintSchema = z.object({
@@ -84,6 +93,7 @@ export const companyAiDraftSchema = z.object({
   works: z.array(workSchema).default([]),
   awards: z.array(awardSchema).default([]),
   links: z.array(linkSchema).default([]),
+  review_links: z.array(reviewLinkSchema).default([]),
   reviewSearchHints: z.array(reviewSearchHintSchema).default([]),
   needsReview: z.array(needsReviewSchema).default([]),
   missingInformation: z.array(missingInformationSchema).default([]),
@@ -136,8 +146,8 @@ missingInformation은 참고용 안내일 뿐이며, 어떤 company 필드에도
 - admin_source_file ([관리자 최신 첨부 파일])
 - existing_company_data ([참고용 기존 입력값])
 
-리뷰나 기사 URL은 생성하지 마세요.
-다음 단계의 리뷰 검색을 위해
+문서에 없는 리뷰나 기사 URL을 추측하거나 검색으로 생성하지 마세요. 문서에 실제 URL이 있으면 review_links에 포함하세요.
+추가 리뷰 검색을 위해
 단체명, 작품명, 참여 아티스트명, 연도만
 reviewSearchHints에 기록하세요.
 
@@ -158,6 +168,14 @@ reviewSearchHints에 기록하세요.
 - links: 신청서나 문서에 실제 URL이 있을 때만 생성하고, URL을 추측하거나 검색으로 만들어내지 않습니다.
 - 첨부 이력서에서 유의미한 텍스트를 추출하지 못했다고 안내받으면, 그 사실을 needsReview에 반드시 기록하고 신청서 정보와 기존 입력값만으로 판단하세요.
 
+[언론 보도와 외부 링크 분류]
+- source, sources, review, reviewLink, article, articleUrl, 기사, 리뷰, 출처에 포함된 기사 URL은 review_links에 넣습니다.
+- 언론 기사 URL을 links에 넣지 않습니다. links에는 인스타그램, 링크드인, 유튜브, 공식 홈페이지, 포트폴리오 등 단체의 공식 외부 채널만 넣습니다.
+- review_links 항목은 관리자 폼이 실제 사용하는 { "title": "기사 제목", "publisher": "매체명", "work": "연결 작품명", "date": "연도 또는 날짜", "url": "기사 URL", "description": "기사 설명" } 형식입니다.
+- 작품과 연결할 수 있는 기사는 해당 작품명을 work에 정확히 보존합니다. 같은 작품의 기사가 여러 개면 각각 별도 항목으로 만들고 동일한 work 값을 넣습니다.
+- 작품 연결이 자료에서 명확하지 않으면 work를 비워 두며 임의로 추정하지 않습니다.
+- 기사 제목이나 매체명을 모르면 URL의 도메인을 사용합니다. URL을 추측하거나 새로 만들지 않습니다.
+- 작품 또는 수상 정보의 source URL은 참고 메타데이터가 아니라 관리자 화면의 언론 보도 항목입니다.
 ${PROFILE_SUMMARY_PROMPT}
 
 출력 JSON 스키마:
@@ -186,6 +204,9 @@ ${PROFILE_SUMMARY_PROMPT}
   "links": [
     { "label": "", "url": "" }
   ],
+  "review_links": [
+    { "title": "", "publisher": "", "work": "", "date": "", "url": "", "description": "" }
+  ],
   "reviewSearchHints": [
     { "company_name": "", "work_title": "", "artist_names": [], "year": "", "confidence": 0.5 }
   ],
@@ -211,6 +232,7 @@ export interface ExistingCompanyForAi {
   works?: any[];
   awards?: any[];
   links?: any[];
+  review_links?: any[];
 }
 
 /** One extracted-text material plus whatever it takes to describe its state
@@ -425,6 +447,7 @@ export async function structureCompanyDataWithAI(input: StructureCompanyInput): 
         works: existingCompany.works || [],
         awards: existingCompany.awards || [],
         links: existingCompany.links || [],
+        review_links: existingCompany.review_links || [],
       },
       null,
       2
@@ -486,6 +509,16 @@ export async function structureCompanyDataWithAI(input: StructureCompanyInput): 
     throw new Error("AI 응답이 유효한 JSON이 아닙니다.");
   }
 
+  rawParsed = mapProfileSourceUrlsToReviewLinks(rawParsed);
+  rawParsed.review_links = (Array.isArray(rawParsed.review_links) ? rawParsed.review_links : []).map((item: any) => ({
+    title: item?.title || item?.name || "",
+    publisher: item?.publisher || item?.publication || item?.source || item?.press || "",
+    work: item?.work || item?.work_title || item?.workTitle || "",
+    date: item?.date || item?.year || "",
+    url: item?.url || item?.link || "",
+    description: item?.description || item?.summary || "",
+  }));
+
   if (Array.isArray(rawParsed.works)) {
     rawParsed.works = rawParsed.works.map((w: any) => ({ ...w, year: normalizeYear(w.year) }));
   }
@@ -518,6 +551,7 @@ export async function structureCompanyDataWithAI(input: StructureCompanyInput): 
       works: Array.isArray(rawParsed?.works) ? rawParsed.works : [],
       awards: Array.isArray(rawParsed?.awards) ? rawParsed.awards : [],
       links: Array.isArray(rawParsed?.links) ? rawParsed.links : [],
+      review_links: Array.isArray(rawParsed?.review_links) ? rawParsed.review_links : [],
       reviewSearchHints: Array.isArray(rawParsed?.reviewSearchHints) ? rawParsed.reviewSearchHints : [],
       needsReview: Array.isArray(rawParsed?.needsReview) ? rawParsed.needsReview : [],
       missingInformation: Array.isArray(rawParsed?.missingInformation) ? rawParsed.missingInformation : [],

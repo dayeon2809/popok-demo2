@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import type { Performance } from "@/types";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 
+const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Crect width='44' height='44' rx='22' fill='%2327344f'/%3E%3Ctext x='22' y='27' text-anchor='middle' font-family='Arial' font-size='11' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E";
+
 interface PerformanceCarouselProps {
   title: string;
   subtitle?: string;
@@ -14,22 +16,32 @@ interface PerformanceCarouselProps {
   titleLink?: { label: string; href: string };
 }
 
-const FALLBACK_POSTER = "/images/placeholders/cake-placeholder.png";
-
-// A broken/unreachable poster_url (crawled data, expired hotlink, etc.) would
-// otherwise show the browser's bare broken-image icon over the card — falls
-// back to the same placeholder used when there's no poster_url at all.
-function PosterImage({ src, alt }: { src: string; alt: string }) {
+// Image-less and broken-hotlink performances remain visible with a branded
+// CSS placeholder, without depending on a static fallback asset.
+function PosterImage({ src, alt }: { src?: string | null; alt: string }) {
   const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return (
+      <div
+        className="perf-card-poster-placeholder"
+        role="img"
+        aria-label={`${alt} 포스터 준비 중`}
+        style={{
+          width: "100%", height: "100%", display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: "8px",
+          background: "linear-gradient(145deg, var(--navy) 0%, #27344f 64%, var(--accent-dark) 100%)",
+          color: "#fff", textAlign: "center", padding: "20px",
+        }}
+      >
+        <span style={{ fontSize: "0.7rem", fontWeight: 900, letterSpacing: "0.18em" }}>POPOK</span>
+        <strong style={{ fontSize: "1rem", lineHeight: 1.35, maxWidth: "190px" }}>{alt}</strong>
+        <span style={{ fontSize: "0.65rem", opacity: 0.72 }}>PERFORMANCE</span>
+      </div>
+    );
+  }
   return (
-    <img
-      src={failed ? FALLBACK_POSTER : src}
-      alt={alt}
-      className="perf-card-poster-img"
-      loading="lazy"
-      onError={() => setFailed(true)}
-      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-    />
+    <img src={src} alt={alt} className="perf-card-poster-img" loading="lazy"
+      onError={() => setFailed(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
   );
 }
 
@@ -240,7 +252,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
                     background: "#FAF9F5", border: "1px solid var(--border)",
                     position: "relative"
                   }}>
-                    <PosterImage src={perf.posterUrl || FALLBACK_POSTER} alt={perf.title} />
+                    <PosterImage src={perf.posterUrl} alt={perf.title} />
                     {genreLabel && (
                       <span style={{
                         position: "absolute", top: "10px", left: "10px",
@@ -286,7 +298,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
                             style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}
                           >
                             <img
-                              src={artist.profileImage || FALLBACK_POSTER}
+                              src={artist.profileImage || FALLBACK_AVATAR}
                               alt={artist.name}
                               loading="lazy"
                               style={{ width: "22px", height: "22px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border)", flexShrink: 0 }}

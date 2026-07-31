@@ -41,6 +41,7 @@ interface ReviewItem {
   id?: string;
   title: string;
   publisher?: string;
+  work?: string;
   date?: string;
   url?: string;
   description?: string;
@@ -135,6 +136,7 @@ const deriveReviewsFromRaw = (rawReviews: any): ReviewItem[] => {
     id: r.id || `rev_${idx}`,
     title: r.title || r.name || "",
     publisher: r.publisher || r.source || r.press || "",
+    work: r.work || r.work_title || r.workTitle || "",
     date: r.date || "",
     url: r.url || r.link || "",
     description: r.description || r.snippet || r.summary || "",
@@ -742,6 +744,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
         id: `rev_${Date.now()}`,
         title: "",
         publisher: "",
+        work: "",
         date: new Date().toISOString().slice(0, 10),
         url: "",
         description: "",
@@ -753,6 +756,17 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
     setReviewLinks((prev) => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [key]: val };
+      return updated;
+    });
+  };
+
+  const handleMoveReview = (index: number, direction: -1 | 1) => {
+    setReviewLinks((prev) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= prev.length) return prev;
+
+      const updated = [...prev];
+      [updated[index], updated[nextIndex]] = [updated[nextIndex], updated[index]];
       return updated;
     });
   };
@@ -1779,13 +1793,35 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
                     <span className="mono" style={{ fontSize: "0.7rem", fontWeight: 850, color: "var(--navy)" }}>
                       ARTICLE #{ridx + 1}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveReview(ridx)}
-                      style={{ fontSize: "0.78rem", fontWeight: 800, color: "#991B1B", background: "none", border: "none", cursor: "pointer" }}
-                    >
-                      삭제
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveReview(ridx, -1)}
+                        disabled={ridx === 0}
+                        aria-label={`${rev.publisher || rev.title || "언론 보도"} 항목을 위로 이동`}
+                        title="위로 이동"
+                        style={{ minWidth: "36px", minHeight: "36px", fontSize: "0.9rem", fontWeight: 800, color: "var(--navy)", background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "6px", cursor: ridx === 0 ? "not-allowed" : "pointer", opacity: ridx === 0 ? 0.4 : 1 }}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveReview(ridx, 1)}
+                        disabled={ridx === reviewLinks.length - 1}
+                        aria-label={`${rev.publisher || rev.title || "언론 보도"} 항목을 아래로 이동`}
+                        title="아래로 이동"
+                        style={{ minWidth: "36px", minHeight: "36px", fontSize: "0.9rem", fontWeight: 800, color: "var(--navy)", background: "#FFFFFF", border: "1px solid var(--border)", borderRadius: "6px", cursor: ridx === reviewLinks.length - 1 ? "not-allowed" : "pointer", opacity: ridx === reviewLinks.length - 1 ? 0.4 : 1 }}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReview(ridx)}
+                        style={{ minHeight: "36px", padding: "0 8px", fontSize: "0.78rem", fontWeight: 800, color: "#991B1B", background: "none", border: "none", cursor: "pointer" }}
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "12px", marginBottom: "12px" }}>
@@ -1838,6 +1874,19 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
                       value={rev.url || ""}
                       onChange={(e) => handleUpdateReview(ridx, "url", e.target.value)}
                       placeholder="https://..."
+                      style={{ width: "100%", padding: "8px 12px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid var(--border)", background: "#FFFFFF" }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: "12px" }}>
+                    <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 800, color: "var(--navy)", marginBottom: "4px" }}>
+                      연결 작품명
+                    </label>
+                    <input
+                      type="text"
+                      value={rev.work || ""}
+                      onChange={(e) => handleUpdateReview(ridx, "work", e.target.value)}
+                      placeholder="예: 서양극장 속 한옥"
                       style={{ width: "100%", padding: "8px 12px", fontSize: "0.85rem", borderRadius: "4px", border: "1px solid var(--border)", background: "#FFFFFF" }}
                     />
                   </div>

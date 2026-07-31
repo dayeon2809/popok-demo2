@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ParsedProfile } from "@/lib/profileParser";
 import { normalizeArtistCurrentActivity, cleanArtistCurrentActivityForPayload } from "@/lib/artist-profile";
+import { mapProfileSourceUrlsToReviewLinks } from "@/lib/profileReviewLinks";
 
 interface AiProfileCompareProps {
   currentProfile: {
@@ -19,6 +20,7 @@ interface AiProfileCompareProps {
     competitions: any[];
     education: string[];
     links: any[];
+    review_links: any[];
   };
   parsedProfile: ParsedProfile;
   onConfirm: (merged: any) => void;
@@ -60,7 +62,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
   });
 
   // Helper to check array duplicates
-  const compareArrays = (currentArr: any[], parsedArr: any[], type: "works" | "affiliations" | "awards" | "competitions" | "education" | "current_activity" | "links") => {
+  const compareArrays = (currentArr: any[], parsedArr: any[], type: "works" | "affiliations" | "awards" | "competitions" | "education" | "current_activity" | "links" | "review_links") => {
     return parsedArr.map((parsedItem, idx) => {
       let matchIdx = -1;
 
@@ -84,7 +86,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
           cleanString(cur.name) === cleanString(parsedItem.name) &&
           cleanString(cur.position) === cleanString(parsedItem.position)
         );
-      } else if (type === "links") {
+      } else if (type === "links" || type === "review_links") {
         matchIdx = currentArr.findIndex(cur => cleanString(cur.url) === cleanString(parsedItem.url));
       }
 
@@ -101,6 +103,10 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
                         cleanString(curItem.result) === cleanString(parsedItem.result);
         } else if (type === "links") {
           isIdentical = cleanString(curItem.label) === cleanString(parsedItem.label);
+        } else if (type === "review_links") {
+          isIdentical = cleanString(curItem.title) === cleanString(parsedItem.title) &&
+                        cleanString(curItem.publication) === cleanString(parsedItem.publication) &&
+                        cleanString(curItem.work) === cleanString(parsedItem.work);
         }
 
         return {
@@ -140,6 +146,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
     )
   );
   const [linksComp, setLinksComp] = useState(() => compareArrays(currentProfile.links, parsedProfile.links, "links"));
+  const [reviewLinksComp] = useState(() => compareArrays(currentProfile.review_links, parsedProfile.review_links, "review_links"));
 
   // Check state arrays
   const [checkedWorks, setCheckedWorks] = useState(() => worksComp.map(w => w.defaultChecked));
@@ -149,6 +156,7 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
   const [checkedEducation, setCheckedEducation] = useState(() => educationComp.map(e => e.defaultChecked));
   const [checkedCurrentActivity, setCheckedCurrentActivity] = useState(() => currentActivityComp.map(c => c.defaultChecked));
   const [checkedLinks, setCheckedLinks] = useState(() => linksComp.map(l => l.defaultChecked));
+  const [checkedReviewLinks, setCheckedReviewLinks] = useState(() => reviewLinksComp.map(item => item.defaultChecked));
 
   // Perform Merge
   const handleConfirmMerge = () => {
@@ -263,7 +271,15 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
       }
     });
 
-    onConfirm({
+    let mergedReviewLinks = [...currentProfile.review_links];
+    reviewLinksComp.forEach((comp, idx) => {
+      if (!checkedReviewLinks[idx]) return;
+      if (comp.status === "new") mergedReviewLinks.push(comp.item);
+      else if (comp.status === "conflict" && comp.matchingCurrentIndex >= 0) {
+        mergedReviewLinks[comp.matchingCurrentIndex] = comp.item;
+      }
+    });
+    onConfirm(mapProfileSourceUrlsToReviewLinks({
       artist: mergedArtist,
       works: mergedWorks,
       affiliations: mergedAffiliations,
@@ -272,7 +288,8 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
       competitions: mergedCompetitions,
       education: mergedEducation,
       links: mergedLinks,
-    });
+      review_links: mergedReviewLinks,
+    }));
   };
 
   const getStatusBadge = (status: "new" | "conflict" | "identical" | "no-suggestion") => {
@@ -424,6 +441,13 @@ export default function AiProfileCompare({ currentProfile, parsedProfile, onConf
           (item) => `${item.year}년 - ${item.title} (${item.organization || ""})`
         )}
 
+        {renderArraySection(
+          "언론 보도 · 작품 리뷰 (Press & Reviews)",
+          reviewLinksComp,
+          checkedReviewLinks,
+          setCheckedReviewLinks,
+          (item) => `${item.work || "작품"} · ${item.title || item.publication || "관련 기사"}\n${item.url}`
+        )}
         {renderArraySection(
           "외부 링크 비교 (Links)",
           linksComp,

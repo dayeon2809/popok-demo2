@@ -90,6 +90,17 @@ interface Artist {
 }
 
 
+function normalizeInstagramForPayload(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  const username = trimmed
+    .replace(/^@/, "")
+    .replace(/^(www\.)?instagram\.com\//i, "")
+    .split(/[/?#]/)[0]
+    .trim();
+  return username ? `https://instagram.com/${username}` : null;
+}
 export default function MyPopokClient({
   initialArtist,
   profileType,
@@ -593,7 +604,7 @@ export default function MyPopokClient({
           profile_image_urls: cleanArtistRepresentativeImagesForPayload(profileImageUrls),
           motion_video_url: motionVideoUrl.trim() || null,
           youtube_url: youtubeUrl.trim() || null,
-          instagram: instagram.trim() || null,
+          instagram: normalizeInstagramForPayload(instagram),
           website: website.trim() || null,
           works: cleanedWorks,
           affiliations: cleanArtistAffiliationsForPayload(affiliations),
@@ -1362,7 +1373,24 @@ export default function MyPopokClient({
                       />
                     </label>
                   </div>
-                </div>
+
+                  <label style={labelStyle}>
+                    Instagram 사용자명 또는 링크
+                    <input
+                      type="text"
+                      value={instagram}
+                      onChange={(e) => setInstagram(e.target.value)}
+                      placeholder="@username 또는 https://instagram.com/username"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      inputMode="url"
+                      style={inputStyle}
+                    />
+                    <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", fontWeight: 650 }}>
+                      사용자명만 입력해도 저장할 때 Instagram 링크로 자동 변환됩니다.
+                    </span>
+                  </label>                </div>
               </div>
 
               <div hidden={activeEditorSection !== "works"}>
@@ -1669,7 +1697,8 @@ export default function MyPopokClient({
                   awards,
                   competitions,
                   education,
-                  links
+                  links,
+                  review_links: reviewLinks
                 }}
                 parsedProfile={parsedResult}
                 onConfirm={(merged) => {
@@ -1697,6 +1726,7 @@ export default function MyPopokClient({
                   if (merged.competitions) setCompetitions(merged.competitions);
                   if (merged.education) setEducation(merged.education);
                   if (merged.links) setLinks(merged.links);
+                  if (merged.review_links) setReviewLinks(merged.review_links);
 
                   setAiModalOpen(false);
                 }}

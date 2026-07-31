@@ -169,6 +169,7 @@ export default function AiProfileReview({ initialDraft, onConfirm, onCancel }: A
       competitions: competitions.filter((comp) => comp.title.trim()),
       education: education.filter((edu) => edu.trim()),
       links: links.filter((l) => l.url.trim()),
+      review_links: initialDraft.review_links || [],
     };
 
     onConfirm(finalDraft);

@@ -8,9 +8,10 @@ import type { InstagramStory } from "@/lib/instagram";
 import { buildRealFeedItems, padWithPlaceholders, insertFeedCta } from "@/lib/homeFeedPrototype";
 // Performance posters and Instagram/홈노출 posts are intentionally not fed
 // into the feed builder below — see the note in lib/homeFeedPrototype.ts.
-// initialPerformances/initialWeeklyStories are kept in the prop type (app/page.tsx
-// still fetches them, unchanged) but are no longer read by this component.
+// The V2 feed remains artist/company focused; performances are rendered in
+// the dedicated carousel below and link to the full calendar.
 import HomeVisualFeed from "@/components/home/HomeVisualFeed";
+import PerformanceCarousel from "@/components/home/PerformanceCarousel";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import FAQSection from "@/components/FAQSection";
 import HomeHeroV2 from "@/components/home/HomeHeroV2";
@@ -54,6 +55,7 @@ interface HomeClientV2Props {
 
 export default function HomeClientV2({
   initialArtists,
+  initialPerformances,
   initialCompanies,
   isLoggedIn,
   myArtistSlug,
@@ -200,6 +202,13 @@ export default function HomeClientV2({
       >
         내 포퐄 만들기
       </button>
+
+      <PerformanceCarousel
+        title="다가오는 공연"
+        subtitle="POPOK에서 지금 만날 수 있는 공연을 확인해보세요."
+        performances={initialPerformances}
+        titleLink={{ label: "전체 공연 일정", href: "/calendar" }}
+      />
 
       <HomeUseCasesSection />
 

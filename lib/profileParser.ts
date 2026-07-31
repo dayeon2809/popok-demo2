@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PROFILE_EXTRACTION_PROMPT } from "@/lib/prompts/profileExtractionPrompt";
 import { PROFILE_SUMMARY_PROMPT } from "@/lib/prompts/profileSummaryPrompt";
 import { WORK_DESCRIPTION_PROMPT } from "@/lib/prompts/workDescriptionPrompt";
+import { mapProfileSourceUrlsToReviewLinks } from "@/lib/profileReviewLinks";
 
 // Zod validation schema matching the POPOK parsed profile structure
 export const parsedProfileSchema = z.object({
@@ -43,6 +44,13 @@ export const parsedProfileSchema = z.object({
   links: z.array(z.object({
     label: z.string().nullable().default(null),
     url: z.string().default("")
+  })).default([]),
+  review_links: z.array(z.object({
+    title: z.string().default(""),
+    publication: z.string().default(""),
+    work: z.string().default(""),
+    url: z.string().default(""),
+    year: z.string().optional(),
   })).default([])
 });
 
@@ -87,7 +95,10 @@ const SYSTEM_PROMPT = `당신은 아티스트의 이력(PDF, DOCX, TXT, 또는 �
 5. affiliations에는 소속(단체, 컴퍼니 등)을 넣고, current_activity에는 현재 재직 중이거나 상시 활동 중인 텍스트 목록을 넣어주세요.
 6. education에는 학력 정보를 텍스트 목록으로 정리해 주세요 (예: ["OO대학교 무용과 졸업", "OO예술고등학교 졸업"]).
 7. links에는 인스타그램, 유튜브, 포트폴리오 사이트 등 추출할 수 있는 외부 웹링크를 객체 형태로 분류해 주세요 (label과 url 포함).
-8. 응답은 아래 명시된 JSON 형식만 반환해야 하며, 코드블록이나 별도의 설명 텍스트를 포함해서는 안 됩니다.
+   작품의 기사·리뷰·언론 보도 source URL은 links에 넣지 말고 review_links에만 넣으세요.
+8. 작품 또는 수상 정보에 포함된 source URL은 참고용 메타데이터가 아니라 사용자에게 노출되는 리뷰·기사 링크다. 작품과 연결 가능한 모든 source URL을 해당 작품의 reviewLinks에 빠짐없이 포함하라.
+9. affiliations에 포함된 단체 홈페이지나 소속 정보 URL은 작품 reviewLinks로 분류하지 마세요.
+10. 응답은 아래 명시된 JSON 형식만 반환해야 하며, 코드블록이나 별도의 설명 텍스트를 포함해서는 안 됩니다.
 ${PROFILE_EXTRACTION_PROMPT}
 ${PROFILE_SUMMARY_PROMPT}
 ${WORK_DESCRIPTION_PROMPT}
@@ -118,6 +129,9 @@ ${WORK_DESCRIPTION_PROMPT}
   "education": [],
   "links": [
     { "label": null, "url": "" }
+  ],
+  "review_links": [
+    { "title": "", "publication": "", "work": "", "url": "", "year": "" }
   ]
 }`;
 
@@ -144,6 +158,11 @@ export async function parseProfileTextWithAI(text: string): Promise<ParsedProfil
   } catch (e) {
     throw new Error("AI 응답이 유효한 JSON이 아닙니다.");
   }
+
+  // Normalize model-provided source/reviewLinks shapes into the actual
+  // artists.review_links schema before validation. This remains effective
+  // even when the model does not follow the requested output field exactly.
+  rawParsed = mapProfileSourceUrlsToReviewLinks(rawParsed);
 
   // Pre-normalize year fields before Zod validation to guarantee string types
   if (rawParsed.works && Array.isArray(rawParsed.works)) {
@@ -188,6 +207,7 @@ export async function parseProfileTextWithAI(text: string): Promise<ParsedProfil
       competitions: Array.isArray(rawParsed?.competitions) ? rawParsed.competitions : [],
       education: Array.isArray(rawParsed?.education) ? rawParsed.education : [],
       links: Array.isArray(rawParsed?.links) ? rawParsed.links : [],
+      review_links: Array.isArray(rawParsed?.review_links) ? rawParsed.review_links : [],
     };
   }
 

@@ -161,7 +161,7 @@ export interface Company {
   founded_year?: number | null;
   history?: Array<{ year: string; event: string }> | null;
   projects?: Array<{ title: string; date?: string; link?: string; description?: string }> | null;
-  press_links?: Array<{ title: string; publisher?: string; source?: string; date?: string; url?: string; description?: string }> | null;
+  press_links?: Array<{ title: string; publication?: string; publisher?: string; source?: string; work?: string; workTitle?: string; date?: string; year?: string; url?: string; description?: string }> | null;
 
   /**
    * @deprecated `companies.slogan` does not exist on the connected Supabase DB

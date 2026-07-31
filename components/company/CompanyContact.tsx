@@ -16,23 +16,31 @@ export default function CompanyContact({ company }: CompanyContactProps) {
     setOpenWorks(prev => ({ ...prev, [workTitle]: !prev[workTitle] }));
   };
 
-    const groupedReviews = useMemo(() => {
-    const groups: Record<string, Array<{ title: string; source?: string; url?: string }>> = {};
+  const groupedReviews = useMemo(() => {
+    const groups: Record<string, Array<{ title: string; publication: string; date: string; url?: string }>> = {};
     const list = Array.isArray(company.press_links) ? company.press_links : [];
-    
-    if (list.length === 0) return groups;
-    
-    list.forEach(item => {
-      const key = item.title || "기타 언론 보도";
-      if (!groups[key]) groups[key] = [];
-      groups[key].push({
-        title: item.title || "",
-        // CMS/API write `publisher` (see CompanyCmsEditor's ReviewItem, review_links
-        // payload) — `item.source` was always undefined for CMS-entered reviews.
-        source: item.publisher || item.source || "",
-        url: item.url || "",
+
+    list.forEach((item: any) => {
+      const workTitle = String(item.work || item.work_title || item.workTitle || "").trim() || "기타 언론 보도";
+      const url = String(item.url || item.link || "").trim();
+      let publication = String(item.publication || item.publisher || item.source || item.press || "").trim();
+      if (!publication && url) {
+        try {
+          publication = new URL(url).hostname.replace(/^www\./, "");
+        } catch {
+          publication = "언론 보도";
+        }
+      }
+
+      if (!groups[workTitle]) groups[workTitle] = [];
+      groups[workTitle].push({
+        title: String(item.title || item.name || "").trim(),
+        publication: publication || "언론 보도",
+        date: String(item.date || item.year || "").trim(),
+        url,
       });
     });
+
     return groups;
   }, [company.press_links]);
 
@@ -109,7 +117,7 @@ export default function CompanyContact({ company }: CompanyContactProps) {
               {Object.entries(groupedReviews).map(([workTitle, reviews], idx) => {
                 const isOpen = !!openWorks[workTitle];
                 return (
-                  <div key={idx} style={{ border: "1px solid var(--border)", borderRadius: "4px", backgroundColor: "#FFFFFF", overflow: "hidden" }}>
+                  <div key={workTitle} style={{ border: "1px solid var(--border)", borderRadius: "4px", backgroundColor: "#FFFFFF", overflow: "hidden" }}>
                     <button
                       type="button"
                       onClick={() => toggleWork(workTitle)}
@@ -161,10 +169,14 @@ export default function CompanyContact({ company }: CompanyContactProps) {
                             }}
                             className="press-link"
                           >
-                            <span style={{ fontSize: "0.68rem", color: "var(--ink-faint)", display: "block", fontFamily: "monospace", marginBottom: "2px" }}>
-                              {press.source || "NEWS"}
+                            <span style={{ fontWeight: 800, display: "block" }}>
+                              {press.publication} ↗
                             </span>
-                            <span style={{ fontWeight: 700 }}>{press.source && press.source.includes(workTitle) ? press.source : `${press.source || "리뷰 링크"} ↗`}</span>
+                            {press.title && press.title !== press.publication && (
+                              <span style={{ fontSize: "0.72rem", color: "var(--ink-muted)", display: "block", marginTop: "3px" }}>
+                                {press.title}{press.date ? ` · ${press.date}` : ""}
+                              </span>
+                            )}
                           </a>
                         ))}
                       </div>

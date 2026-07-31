@@ -156,7 +156,8 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           awards: aiProfileData?.awards || [],
           competitions: aiProfileData?.competitions || [],
           education: aiProfileData?.education || [],
-          links: aiProfileData?.links || []
+          links: aiProfileData?.links || [],
+          review_links: aiProfileData?.review_links || []
         })
       });
 

@@ -23,7 +23,7 @@ import type { Company } from "@/types";
 import { normalizeCompanyHistory } from "@/lib/company";
 
 interface AwardItem { year?: string | number; title?: string; result?: string; organization?: string; }
-interface ReviewItem { title?: string; publication?: string; source?: string; year?: string | number; url?: string; }
+interface ReviewItem { title?: string; publication?: string; source?: string; work?: string; workTitle?: string; year?: string | number; url?: string; }
 interface LinkItem { label?: string; url?: string; }
 
 interface ConnectedArtist {
@@ -1342,6 +1342,16 @@ export default function AdminCompanyEditPage() {
                     onChange={(e) => {
                       const newPress = [...press];
                       newPress[idx] = { ...item, url: e.target.value };
+                      updateField("review_links", newPress);
+                    }}
+                  />
+                  <input
+                    style={{ ...inputStyle, gridColumn: "1 / -1" }}
+                    placeholder="연결 작품명 (예: 서양극장 속 한옥)"
+                    value={item.work || item.workTitle || ""}
+                    onChange={(e) => {
+                      const newPress = [...press];
+                      newPress[idx] = { ...item, work: e.target.value };
                       updateField("review_links", newPress);
                     }}
                   />

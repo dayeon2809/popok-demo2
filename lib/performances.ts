@@ -147,6 +147,49 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
   }
 }
 
+const CALENDAR_QUERY_PAGE_SIZE = 1000;
+
+/**
+ * Every published performance that overlaps the displayed calendar from
+ * `weekStart` through `weekEnd`. Results are paged explicitly so PostgREST's server-side
+ * row cap cannot silently truncate a busy week.
+ *
+ * A null end_date represents a one-day performance, so the candidate filter
+ * is the PostgREST equivalent of:
+ *   start_date <= weekEnd AND COALESCE(end_date, start_date) >= weekStart
+ */
+export async function getCalendarPerformances(weekStart: string, calendarEnd: string): Promise<Performance[]> {
+  try {
+    const supabase = getSupabaseServer();
+    const rows: any[] = [];
+
+    for (let from = 0; ; from += CALENDAR_QUERY_PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from("performances" as any)
+        .select(`${PERFORMANCE_SELECT_WITH_ARTISTS}, companies ( name )` as any)
+        .eq("status", "published")
+        .lte("start_date", calendarEnd)
+        .or(`end_date.gte.${weekStart},and(end_date.is.null,start_date.gte.${weekStart})`)
+        .order("start_date", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, from + CALENDAR_QUERY_PAGE_SIZE - 1);
+
+      if (error) {
+        console.error("[getCalendarPerformances] Supabase error:", error);
+        return [];
+      }
+
+      const page = data || [];
+      rows.push(...page);
+      if (page.length < CALENDAR_QUERY_PAGE_SIZE) break;
+    }
+
+    return rows.map(mapPerformanceRowToPerformance);
+  } catch (err) {
+    console.error("[getCalendarPerformances] Unexpected error:", err);
+    return [];
+  }
+}
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Single performance by id (uuid) or slug — for a future detail page. */

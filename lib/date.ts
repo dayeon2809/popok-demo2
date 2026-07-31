@@ -70,6 +70,17 @@ export interface DateRangeLike {
   startDate?: string | null;
   endDate?: string | null;
 }
+/** Inclusive overlap: start <= rangeEnd AND COALESCE(end, start) >= rangeStart. */
+export function overlapsDateRange(
+  item: DateRangeLike,
+  rangeStart: string,
+  rangeEnd: string
+): boolean {
+  const start = parseDateOnly(item.startDate);
+  if (!start) return false;
+  const end = parseDateOnly(item.endDate) || start;
+  return start <= rangeEnd && end >= rangeStart;
+}
 
 /**
  * Given a pool of candidate performances, returns up to `limit` for the

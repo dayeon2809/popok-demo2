@@ -33,7 +33,8 @@ export async function POST(request: Request) {
       awards,
       competitions,
       education,
-      links
+      links,
+      review_links
     } = body;
 
     // /onboarding is individual-artist-only — organizations apply via
@@ -116,6 +117,7 @@ export async function POST(request: Request) {
       competitions: cleanArtistCompetitionsForPayload(competitions),
       education: cleanArtistEducationForPayload(education),
       links: Array.isArray(links) ? links : [],
+      review_links: Array.isArray(review_links) ? review_links : [],
     };
 
     const { data: artistData, error: artistError } = await supabase

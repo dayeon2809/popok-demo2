@@ -1,8 +1,9 @@
-import { getUpcomingPerformances } from "@/lib/performances";
+import { getCalendarPerformances } from "@/lib/performances";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
-import { getWeeklyPerformanceRange, parseDateOnly } from "@/lib/date";
+import { getWeeklyPerformanceRange, overlapsDateRange, parseDateOnly } from "@/lib/date";
 import type { Performance } from "@/types";
+import { deduplicatePerformances } from "@/lib/deduplicatePerformances";
 
 export const dynamic = "force-dynamic";
 
@@ -55,27 +56,21 @@ interface WeekGroup {
 function groupByWeek(performances: Performance[]): WeekGroup[] {
   const { weekStart: week0StartStr } = getWeeklyPerformanceRange(new Date());
   const week0Start = addDaysUTC(week0StartStr, 0);
+  const groups: WeekGroup[] = [];
 
-  const groups = new Map<number, Performance[]>();
-  for (const perf of performances) {
-    const start = parseDateOnly(perf.startDate);
-    if (!start) continue;
-    const startDate = addDaysUTC(start, 0);
-    const diffDays = Math.floor((startDate.getTime() - week0Start.getTime()) / 86400000);
-    const weekIndex = Math.max(0, Math.floor(diffDays / 7));
-    if (!groups.has(weekIndex)) groups.set(weekIndex, []);
-    groups.get(weekIndex)!.push(perf);
+  for (let weekIndex = 0; weekIndex < 4; weekIndex += 1) {
+    const weekStart = addDaysUTC(week0StartStr, weekIndex * 7);
+    const weekEnd = addDaysUTC(week0StartStr, weekIndex * 7 + 6);
+    const weekStartString = weekStart.toISOString().slice(0, 10);
+    const weekEndString = weekEnd.toISOString().slice(0, 10);
+    const matching = performances.filter((performance) =>
+      overlapsDateRange(performance, weekStartString, weekEndString)
+    );
+    if (matching.length > 0) groups.push({ weekIndex, weekStart, weekEnd, performances: matching });
   }
 
-  return Array.from(groups.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([weekIndex, perfs]) => {
-      const weekStart = addDaysUTC(week0StartStr, weekIndex * 7);
-      const weekEnd = addDaysUTC(week0StartStr, weekIndex * 7 + 6);
-      return { weekIndex, weekStart, weekEnd, performances: perfs };
-    });
+  return groups;
 }
-
 function PerformanceCard({ perf }: { perf: Performance }) {
   const externalLink = getPerformanceExternalLink(perf);
   const href = externalLink || (perf.companyId ? getCompanyDetailHref(perf.companyId) : null);
@@ -125,14 +120,17 @@ function PerformanceCard({ perf }: { perf: Performance }) {
   );
 }
 
-function isNationalGugakCenterPerformance(perf: Performance): boolean {
-  const labels = [perf.companyName, perf.organizer, perf.title]
+function isNationalGugakCenterPerformance(performance: Performance): boolean {
+  const labels = [performance.companyName, performance.organizer, performance.title]
     .filter((value): value is string => typeof value === "string")
     .map((value) => value.replace(/\s+/g, ""));
+
   if (labels.some((value) => value.includes("국립국악원"))) return true;
 
-  return [perf.externalUrl, perf.ticketUrl, perf.sourceUrl].some((value) =>
-    typeof value === "string" && value.toLowerCase().includes("gugak.go.kr")
+  if (performance.id === "f31f15af-4adc-43d9-9467-c27bea1cb146") return true;
+
+  return [performance.externalUrl, performance.ticketUrl, performance.sourceUrl].some(
+    (value) => typeof value === "string" && value.toLowerCase().includes("gugak.go.kr")
   );
 }
 // Header's "공연" tab — every upcoming/published performance, grouped into
@@ -142,7 +140,13 @@ function isNationalGugakCenterPerformance(perf: Performance): boolean {
 // + link-resolution the homepage's V1 performance carousel used
 // (lib/performances.ts, lib/performanceLinks.ts, lib/date.ts).
 export default async function CalendarPage() {
-  const performances = (await getUpcomingPerformances(60)).filter((performance) => !isNationalGugakCenterPerformance(performance));
+  const { weekStart } = getWeeklyPerformanceRange(new Date());
+  const calendarEnd = addDaysUTC(weekStart, 27).toISOString().slice(0, 10);
+  const performances = deduplicatePerformances(
+    (await getCalendarPerformances(weekStart, calendarEnd)).filter(
+      (performance) => !isNationalGugakCenterPerformance(performance)
+    )
+  );
   const weeks = groupByWeek(performances);
 
   return (

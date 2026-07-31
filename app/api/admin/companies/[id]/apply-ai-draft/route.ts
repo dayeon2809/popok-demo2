@@ -15,6 +15,7 @@ const ARRAY_MERGERS: Record<string, (existing: any[], incoming: any[]) => any[]>
   works: mergeWorks,
   awards: mergeAwards,
   links: mergeLinks,
+  review_links: mergeLinks,
 };
 
 type ArrayMode = "skip" | "merge" | "replace";
@@ -80,6 +81,18 @@ export async function POST(
       }
     }
 
+    if (Array.isArray(update.review_links)) {
+      const reviewUrls = new Set(
+        update.review_links
+          .map((item: any) => typeof item?.url === "string" ? item.url.trim().replace(/\/$/, "").toLowerCase() : "")
+          .filter(Boolean)
+      );
+      const linksToClean = Array.isArray(update.links) ? update.links : (Array.isArray(c.links) ? c.links : []);
+      update.links = linksToClean.filter((item: any) => {
+        const url = typeof item?.url === "string" ? item.url.trim().replace(/\/$/, "").toLowerCase() : "";
+        return !url || !reviewUrls.has(url);
+      });
+    }
     update.ai_draft_status = "applied";
 
     const { error: updateError } = await (supabase.from("companies" as any) as any)

@@ -6,6 +6,7 @@ import {
   normalizePerformanceTitle,
   prepareHomeUpcomingPerformances,
 } from "../lib/deduplicatePerformances.ts";
+import { overlapsDateRange } from "../lib/date.ts";
 
 function performance(overrides: Partial<Performance> & Pick<Performance, "id" | "title">): Performance {
   return {
@@ -115,4 +116,21 @@ test("home limit is applied after deduplication so the configured card count is 
 
   assert.equal(result.length, 3);
   assert.deepEqual(result.map((item) => item.id), ["duplicate-1", "second", "third"]);
+});
+
+test("calendar overlap uses inclusive start and effective end dates", () => {
+  assert.equal(overlapsDateRange({ startDate: "2026-08-16", endDate: null }, "2026-08-10", "2026-08-16"), true);
+  assert.equal(overlapsDateRange({ startDate: "2026-08-01", endDate: "2026-08-10" }, "2026-08-10", "2026-08-16"), true);
+  assert.equal(overlapsDateRange({ startDate: "2026-08-17", endDate: null }, "2026-08-10", "2026-08-16"), false);
+  assert.equal(overlapsDateRange({ startDate: "2026-08-01", endDate: "2026-08-09" }, "2026-08-10", "2026-08-16"), false);
+});
+
+test("calendar overlap does not truncate a 165-performance week", () => {
+  const performances = Array.from({ length: 165 }, (_, index) => ({
+    id: String(index),
+    startDate: "2026-08-10",
+    endDate: "2026-08-16",
+  }));
+  const matching = performances.filter((item) => overlapsDateRange(item, "2026-08-10", "2026-08-16"));
+  assert.equal(matching.length, 165);
 });

@@ -134,6 +134,7 @@ export async function POST(
         works: Array.isArray(company.works) ? company.works : [],
         awards: Array.isArray(company.awards) ? company.awards : [],
         links: Array.isArray(company.links) ? company.links : [],
+        review_links: Array.isArray(company.review_links) ? company.review_links : [],
       },
       applicationResume,
       adminSourceText,
@@ -163,6 +164,20 @@ export async function POST(
     const existingLinks = Array.isArray(company.links) ? company.links : [];
     const incomingLinks = Array.isArray(draft.links) ? draft.links : [];
     const mergedLinks = mergeLinks(existingLinks, incomingLinks);
+
+    const existingReviewLinks = Array.isArray(company.review_links) ? company.review_links : [];
+    const incomingReviewLinks = Array.isArray(draft.review_links) ? draft.review_links : [];
+    const mergedReviewLinks = mergeLinks(existingReviewLinks, incomingReviewLinks);
+
+    const reviewUrls = new Set(
+      mergedReviewLinks
+        .map((item: any) => typeof item?.url === "string" ? item.url.trim().replace(/\/$/, "").toLowerCase() : "")
+        .filter(Boolean)
+    );
+    const cleanedMergedLinks = mergedLinks.filter((item: any) => {
+      const url = typeof item?.url === "string" ? item.url.trim().replace(/\/$/, "").toLowerCase() : "";
+      return !url || !reviewUrls.has(url);
+    });
 
     // Merge core values
     const existingCoreValues = Array.isArray(company.core_values) ? company.core_values : [];
@@ -204,7 +219,8 @@ export async function POST(
         current_activity: mergedCurrentActivity,
         works: mergedWorks,
         awards: mergedAwards,
-        links: mergedLinks,
+        links: cleanedMergedLinks,
+        review_links: mergedReviewLinks,
         core_values: mergedCoreValues,
         history: mergedHistory,
       })
