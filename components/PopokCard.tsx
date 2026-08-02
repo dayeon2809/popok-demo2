@@ -1,5 +1,6 @@
 "use client";
 
+import { getListImageUrl } from "@/lib/imageUrls";
 import { useState, useRef } from "react";
 import Link from "next/link";
 import { analytics } from "@/lib/analytics";
@@ -171,7 +172,7 @@ export default function PopokCard({
               position: "relative"
             }}>
               <img
-                src={profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}`}
+                src={profileImage ? getListImageUrl(profileImage, 600) : `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(name)}`}
                 alt={name}
                 className="popok-card-img"
                 style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}

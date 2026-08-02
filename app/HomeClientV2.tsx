@@ -61,7 +61,6 @@ export default function HomeClientV2({
   myArtistSlug,
 }: HomeClientV2Props) {
   const router = useRouter();
-  const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
   const [selectedField, setSelectedField] = useState("all");
   const [feedSeed, setFeedSeed] = useState(0);
 
@@ -92,8 +91,8 @@ export default function HomeClientV2({
   };
 
   const publishedArtists = useMemo(
-    () => initialArtists.filter((artist) => showDraft || artist.status === "published" || !artist.status),
-    [initialArtists, showDraft]
+    () => initialArtists.filter((artist) => artist.status === "published" || !artist.status),
+    [initialArtists]
   );
 
   // Real, published artist used by the homepage hero card.
@@ -103,8 +102,8 @@ export default function HomeClientV2({
   }, [publishedArtists]);
 
   const publishedCompanies = useMemo(
-    () => initialCompanies.filter((company) => showDraft || company.status === "published" || !company.status),
-    [initialCompanies, showDraft]
+    () => initialCompanies.filter((company) => company.status === "published" || !company.status),
+    [initialCompanies]
   );
 
   const feedItems = useMemo(() => {
@@ -147,6 +146,8 @@ export default function HomeClientV2({
           <button type="button" role="tab" aria-selected={exploreMode === "artists"} className={`discovery-toggle-btn ${exploreMode === "artists" ? "active" : ""}`} onClick={() => { setExploreMode("artists"); setSelectedField("all"); }}>아티스트</button>
           <button type="button" role="tab" aria-selected={exploreMode === "companies"} className={`discovery-toggle-btn ${exploreMode === "companies" ? "active" : ""}`} onClick={() => { setExploreMode("companies"); setSelectedField("all"); }}>단체</button>
         </div>
+
+
         {exploreMode === "artists" ? <AiDiscoveryPrototype variant="bar" placeholder="어떤 작업이나 아티스트를 찾고 있나요?" /> : <CompanyDiscoveryPrototype companies={publishedCompanies} placeholder="어떤 작업이나 단체를 찾고 있나요?" />}
 
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>

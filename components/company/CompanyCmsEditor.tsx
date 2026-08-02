@@ -5,6 +5,7 @@ import type { Company } from "@/types";
 import { normalizeWorkImages, cleanWorksForPayload, creditsToDisplayString, sortWorksForDisplay, applyWorkSortOrder } from "@/lib/company-works";
 import { normalizeCompanyRepresentativeImages, normalizeCompanyAwards, cleanCompanyAwardsForPayload, normalizeCompanyHistory, type CompanyAward } from "@/lib/company";
 import { ArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
+import { compressImageForUpload } from "@/lib/clientImageCompression";
 
 export type CompanyEditorPermissions = {
   editBasicInfo: boolean; editWorks: boolean; editPerformances: boolean; editArtists: boolean; editReviews: boolean; changeOwner: boolean; changePublishStatus: boolean; deleteCompany: boolean;
@@ -431,7 +432,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
 
     setUploadingField("profile");
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await compressImageForUpload(file));
     formData.append("path", `companies/${company.id}`);
 
     try {
@@ -461,7 +462,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
 
     setUploadingField(`work_${workIndex}_img_${imageSlotIndex}`);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await compressImageForUpload(file));
     formData.append("path", `companies/${company.id}/works`);
 
     try {
@@ -506,7 +507,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
 
     setUploadingRepImageSlot(slotIndex);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await compressImageForUpload(file));
     formData.append("path", `companies/${company.id}/representative`);
 
     try {

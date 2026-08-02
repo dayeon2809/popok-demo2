@@ -1,5 +1,7 @@
 "use client";
 
+import { getListImageUrl } from "@/lib/imageUrls";
+
 import { useState } from "react";
 import Link from "next/link";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
@@ -91,8 +93,9 @@ export default function CompanyCard({ company }: CompanyCardProps) {
         <div style={{ width: "100%", aspectRatio: "1.2", background: "#FAF9F5", overflow: "hidden", flexShrink: 0 }}>
           {showImage ? (
             <img
-              src={company.profile_image_url!}
+              src={getListImageUrl(company.profile_image_url!, 600)}
               alt={company.name}
+              loading="lazy"
               onError={() => setImageFailed(true)}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />

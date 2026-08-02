@@ -123,9 +123,8 @@ export default function RecommendClient({ initialArtists }: RecommendClientProps
 
   // 추천 실행 로직
   const handleRecommend = () => {
-    const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
     const published = initialArtists.filter(
-      (a) => showDraft || !a.status || a.status === "published"
+      (a) => !a.status || a.status === "published"
     );
 
     // 사용자가 선택한 모든 답변 키워드 모음 (형식 + 분위기 + 키워드)

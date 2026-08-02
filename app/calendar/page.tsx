@@ -1,3 +1,4 @@
+import ResponsiveImage from "@/components/ResponsiveImage";
 import { getCalendarPerformances } from "@/lib/performances";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
@@ -80,10 +81,10 @@ function PerformanceCard({ perf }: { perf: Performance }) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <div style={{
         width: "100%", aspectRatio: "3 / 4", borderRadius: "8px", overflow: "hidden",
-        background: "#EAE6DD", border: "1px solid var(--border)", marginBottom: "10px",
+        background: "#EAE6DD", border: "1px solid var(--border)", marginBottom: "10px", position: "relative",
       }}>
         {perf.posterUrl && (
-          <img src={perf.posterUrl} alt={perf.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} loading="lazy" />
+          <ResponsiveImage src={perf.posterUrl} alt={perf.title} sizes="150px" maxWidth={300} loading="lazy" />
         )}
       </div>
       <span className="mono" style={{ fontSize: "0.66rem", fontWeight: 800, color: "var(--accent-dark)" }}>

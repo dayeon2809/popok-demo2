@@ -39,6 +39,8 @@ import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 import ProfileEditorNav, { type ProfileEditorSection } from "@/components/profile/ProfileEditorNav";
 import WorksCardEditor from "@/components/profile/WorksCardEditor";
 import { ArrayField, StringArrayField } from "@/components/admin/ArrayField";
+import { compressImageForUpload } from "@/lib/clientImageCompression";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 
 type PendingWorkImage = {
@@ -336,7 +338,7 @@ export default function MyPopokClient({
     setUploadingSlot(slotKey);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", await compressImageForUpload(file));
       formData.append("path", "artists/media");
       formData.append("bucket", "artist-media");
 
@@ -997,7 +999,7 @@ export default function MyPopokClient({
                 {pendingWorkImages.map((image) => (
                   <div key={image.id} style={{ position: "relative" }}>
                     <button type="button" onClick={() => togglePendingWorkImage(image.id)} aria-pressed={image.selected} style={{ width: "100%", aspectRatio: "1", display: "block", padding: 0, overflow: "hidden", borderRadius: "12px", border: image.selected ? "3px solid var(--accent-dark)" : "1px solid var(--border)", background: "#EAE6DD", cursor: "pointer" }}>
-                      <img src={image.url} alt={image.fileName || "업로드한 작품 사진"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={getListImageUrl(image.url, 600)} alt={image.fileName || "업로드한 작품 사진"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       <span style={{ position: "absolute", top: "7px", left: "7px", width: "24px", height: "24px", display: "grid", placeItems: "center", borderRadius: "50%", background: image.selected ? "var(--accent)" : "rgba(23,20,17,.62)", color: image.selected ? "var(--navy)" : "#fff", fontSize: "0.72rem", fontWeight: 950 }}>{image.selected ? "✓" : ""}</span>
                     </button>
                     <button type="button" onClick={() => setPendingWorkImages((prev) => prev.filter((item) => item.id !== image.id))} aria-label="임시 사진 제거" style={{ position: "absolute", top: "7px", right: "7px", width: "24px", height: "24px", border: 0, borderRadius: "50%", background: "rgba(23,20,17,.7)", color: "#fff", cursor: "pointer" }}>×</button>
@@ -1128,7 +1130,7 @@ export default function MyPopokClient({
                   onPointerCancel={() => setDraggedDashboardImageIndex(null)}
                   style={{ position: "relative", aspectRatio: "1 / 1", overflow: "hidden", borderRadius: "12px", background: "#EEEAE2", cursor: "grab", touchAction: "pan-y", opacity: draggedDashboardImageIndex === flatIndex ? .62 : 1, transform: draggedDashboardImageIndex === flatIndex ? "scale(.97)" : "none", transition: "transform .15s ease, opacity .15s ease" }}
                 >
-                  <img src={image.url} alt={image.title} draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }} />
+                  <img src={getListImageUrl(image.url, 600)} alt={image.title} draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", userSelect: "none" }} />
                   <span style={{ position: "absolute", top: "8px", left: "8px", padding: "4px 7px", borderRadius: "999px", background: "rgba(23,20,17,.72)", color: "#fff", fontSize: ".65rem", fontWeight: 900, pointerEvents: "none" }}>{flatIndex + 1}</span>
                   <span aria-hidden="true" style={{ position: "absolute", right: "8px", bottom: "8px", padding: "5px 8px", borderRadius: "999px", background: "rgba(23,20,17,.72)", color: "#fff", fontSize: ".7rem", fontWeight: 900, pointerEvents: "none" }}>⋮⋮</span>
                 </div>
@@ -1283,7 +1285,7 @@ export default function MyPopokClient({
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
                       }}>
                         {profileImageUrl ? (
-                          <img src={profileImageUrl} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <img src={getListImageUrl(profileImageUrl, 300)} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ) : (
                           <span style={{ fontSize: "0.72rem", color: "var(--ink-faint)" }}>사진 없음</span>
                         )}

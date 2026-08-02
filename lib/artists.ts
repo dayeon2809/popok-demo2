@@ -97,7 +97,7 @@ export function mapArtistRowToArtist(record: any): Artist {
     genre: gValue,
     role: record.role || `${fValue} 아티스트`,
     /** @deprecated Deletion candidate in future database migration */
-    type: record.artist_type || (record.role?.includes("단체") || record.company ? "group" : "individual"),
+    type: record.artist_type || (record.role?.includes("단체") ? "group" : "individual"),
     instagram: record.instagram || "",
     website: record.website || "",
     profileImage: profileImage || "",
@@ -195,17 +195,19 @@ export async function getArtists(): Promise<Artist[]> {
   const dbArtists = error ? [] : (data || []).map(mapArtistRowToArtist);
   const demoArtists = getDemoArtists();
   const filteredDemos = demoArtists.filter(d => !dbArtists.some(db => db.id === d.id));
-  return [...dbArtists, ...filteredDemos];
+  const companyLikeTypes = new Set(["organization", "company", "project_group", "group"]);
+  return [...dbArtists, ...filteredDemos].filter((artist) => !companyLikeTypes.has(String(artist.type || "")));
 }
 
 export async function getPublishedArtists(): Promise<Artist[]> {
   const supabase = getSupabaseServer();
-  const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
-
-  let dbQuery = supabase.from("artists" as any).select("*");
-  if (!showDraft) {
-    dbQuery = dbQuery.eq("status", "published");
-  }
+  // Public discovery surfaces must never inherit the dashboard's draft
+  // preview behavior. Draft profiles remain available through owner/admin
+  // readers, while this reader always enforces the publication boundary.
+  let dbQuery = supabase
+    .from("artists" as any)
+    .select("*")
+    .eq("status", "published");
   // Individual-only: organizations now live in public.companies (see
   // lib/companies.ts) and are browsed via /companies, not /artists or the
   // homepage carousel. artists.artist_type is unset for every current row,
@@ -221,7 +223,12 @@ export async function getPublishedArtists(): Promise<Artist[]> {
   const dbArtists = error ? [] : (data || []).map(mapArtistRowToArtist);
   const demoArtists = getDemoArtists();
   const filteredDemos = demoArtists.filter(d => !dbArtists.some(db => db.id === d.id));
-  return [...dbArtists, ...filteredDemos];
+  const companyLikeTypes = new Set(["organization", "company", "project_group", "group"]);
+  return [...dbArtists, ...filteredDemos].filter(
+    (artist) =>
+      (artist.status === "published" || !artist.status) &&
+      !companyLikeTypes.has(String(artist.type || ""))
+  );
 }
 
 export async function getArtistBySlug(slug: string): Promise<Artist | null> {

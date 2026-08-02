@@ -32,12 +32,11 @@ export default function HomeClient({
   myArtistSlug,
 }: HomeClientProps) {
   const { language } = useLanguage();
-  const showDraft = process.env.NEXT_PUBLIC_SHOW_DRAFT_ARTISTS === "true";
   const baseArtists = useMemo(() => {
     return initialArtists.filter(
-      (artist) => artist.profileImage && artist.profileImage !== "" && (showDraft || artist.status === "published" || !artist.status)
+      (artist) => artist.profileImage && artist.profileImage !== "" && (artist.status === "published" || !artist.status)
     );
-  }, [initialArtists, showDraft]);
+  }, [initialArtists]);
 
   // The Hero is intentionally deterministic: prefer Choi Jian, then fall back
   // to the first eligible published artist if that profile is unavailable.

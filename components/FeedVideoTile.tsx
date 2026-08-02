@@ -6,6 +6,7 @@ import { extractYouTubeVideoId } from "@/lib/youtube";
 import { extractVimeoVideoId, getVimeoEmbedUrl } from "@/lib/videoLinks";
 import { isDirectVideoUrl } from "@/lib/video";
 
+import { getListImageUrl } from "@/lib/imageUrls";
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
 interface FeedVideoTileProps {
@@ -86,7 +87,7 @@ export default function FeedVideoTile({ videoUrl, poster, title, aspectRatio = "
         />
       ) : (
         <img
-          src={posterSrc}
+          src={getListImageUrl(posterSrc, 600)}
           alt={title || ""}
           loading="lazy"
           onError={() => setPosterFailed(true)}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { LoadingSpinner, ErrorMessage, EmptyState } from "@/components/ui/States";
+import { compressImageForUpload } from "@/lib/clientImageCompression";
 
 interface AdminPerformanceRow {
   id: string;
@@ -274,7 +275,7 @@ export default function AdminPerformancesPage() {
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", await compressImageForUpload(file));
       formData.append("bucket", "artist-media");
       formData.append("path", `performances/${form.id}`);
 

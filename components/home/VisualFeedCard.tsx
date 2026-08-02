@@ -6,6 +6,7 @@ import type { FeedItem } from "@/lib/homeFeedPrototype";
 import FeedVideoTile from "@/components/FeedVideoTile";
 import FeedCtaCard from "./FeedCtaCard";
 
+import { getListImageUrl } from "@/lib/imageUrls";
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
 interface VisualFeedCardProps {
@@ -34,9 +35,10 @@ export default function VisualFeedCard({ item, onCtaClick, ctaHref }: VisualFeed
     <FeedVideoTile videoUrl={item.videoUrl} poster={item.src} title={item.name} />
   ) : (
     <img
-      src={failed ? FALLBACK_IMAGE : item.src}
+      src={failed ? FALLBACK_IMAGE : getListImageUrl(item.src, 600)}
       alt={isReal && item.name ? item.name : ""}
       loading="lazy"
+      decoding="async"
       onError={() => setFailed(true)}
       style={{ display: "block", width: "100%", height: "auto" }}
     />

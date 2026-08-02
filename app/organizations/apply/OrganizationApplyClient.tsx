@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
 import { analytics } from "@/lib/analytics";
+import { compressImageForUpload } from "@/lib/clientImageCompression";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB — matches API + Storage bucket limit
 const PORTFOLIO_TEXT_MAX = 30000;
@@ -168,7 +169,7 @@ export default function OrganizationApplyClient() {
 
     try {
       const formData = new FormData();
-      formData.append("file", candidate);
+      formData.append("file", await compressImageForUpload(candidate));
       formData.append("path", "organizations/logos");
       formData.append("bucket", "artist-media");
 

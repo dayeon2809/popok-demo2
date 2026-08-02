@@ -8,6 +8,8 @@ import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 
 const FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Crect width='44' height='44' rx='22' fill='%2327344f'/%3E%3Ctext x='22' y='27' text-anchor='middle' font-family='Arial' font-size='11' font-weight='700' fill='white'%3EP%3C/text%3E%3C/svg%3E";
 
+import ResponsiveImage from "@/components/ResponsiveImage";
+import { getListImageUrl } from "@/lib/imageUrls";
 interface PerformanceCarouselProps {
   title: string;
   subtitle?: string;
@@ -40,8 +42,8 @@ function PosterImage({ src, alt }: { src?: string | null; alt: string }) {
     );
   }
   return (
-    <img src={src} alt={alt} className="perf-card-poster-img" loading="lazy"
-      onError={() => setFailed(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    <ResponsiveImage src={src} alt={alt} className="perf-card-poster-img" sizes="(max-width: 640px) 78vw, 270px" maxWidth={600}
+      loading="lazy" onError={() => setFailed(true)} />
   );
 }
 
@@ -77,6 +79,12 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
   const sliderRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [visibleCount, setVisibleCount] = useState(Math.min(8, performances.length));
+  const visiblePerformances = performances.slice(0, visibleCount);
+
+  useEffect(() => {
+    setVisibleCount(Math.min(8, performances.length));
+  }, [performances]);
 
   const pauseAutoScroll = (delay = 8000) => {
     pausedRef.current = true;
@@ -215,7 +223,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
           WebkitOverflowScrolling: "touch",
         }}
       >
-        {performances.map((perf) => {
+        {visiblePerformances.map((perf) => {
           const dateLabel = formatDateRange(perf.startDate, perf.endDate);
           const genreLabel = perf.genre || perf.category || "";
           const link = getPerformanceLink(perf);
@@ -298,7 +306,7 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
                             style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}
                           >
                             <img
-                              src={artist.profileImage || FALLBACK_AVATAR}
+                              src={artist.profileImage ? getListImageUrl(artist.profileImage, 96) : FALLBACK_AVATAR}
                               alt={artist.name}
                               loading="lazy"
                               style={{ width: "22px", height: "22px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border)", flexShrink: 0 }}
@@ -349,6 +357,13 @@ export default function PerformanceCarousel({ title, subtitle, performances, tit
           );
         })}
       </motion.div>
+      {visibleCount < performances.length && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}>
+          <button type="button" className="btn-outline" onClick={() => setVisibleCount((count) => Math.min(count + 8, performances.length))} style={{ padding: "10px 18px", borderRadius: "999px", cursor: "pointer", fontWeight: 800 }}>
+            공연 더 보기
+          </button>
+        </div>
+      )}
       <style>{`
         .perf-card:hover {
           border-color: var(--navy) !important;

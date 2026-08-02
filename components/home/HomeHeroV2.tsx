@@ -59,8 +59,8 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
             fontWeight: 900,
             letterSpacing: "-0.04em",
           }}>
-            창작은 당신이.<br />
-            <span className="seen-highlight">나머지는 POPOK이.</span>
+            당신의 모든 기록이,<br />
+            <span className="seen-highlight">기회가 되도록.</span>
           </h1>
 
           <p style={{
@@ -71,7 +71,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
             maxWidth: "480px",
             marginBottom: "28px",
           }}>
-            이력서만 올리면 AI가 활동 이력을 정리하고, 나만의 POPOK 페이지를 만들어드려요.
+            예술인의 모든 활동을 한 곳에. 포트폴리오를 만들고, 작업을 기록하며, 새로운 협업 기회를 만나보세요.
           </p>
 
           <div className="cta-row" style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -107,7 +107,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
                 fontFamily: "inherit",
               }}
             >
-              완성된 포트폴리오 보기
+              아티스트 탐색하기
             </button>
           </div>
 

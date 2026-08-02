@@ -1,5 +1,7 @@
 "use client";
 
+import { getListImageUrl } from "@/lib/imageUrls";
+
 import { useEffect, useRef, useState } from "react";
 import { creditsToDisplayString, normalizeWorkImages } from "@/lib/works";
 import styles from "./WorksCardEditor.module.css";
@@ -73,7 +75,7 @@ export default function WorksCardEditor({ works, canAdd, countLabel, uploadingSl
           const thumbnail = normalizeWorkImages(work)[0];
           const selected = work.id === selectedId;
           return <button key={work.id || index} type="button" className={styles.workCard} data-selected={selected} onClick={() => selectWork(work.id)} draggable onDragStart={() => setDraggedIndex(index)} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedIndex !== null && draggedIndex !== index) onReorder(draggedIndex, index); setDraggedIndex(null); }}>
-            <div className={styles.thumbnail}>{thumbnail ? <img src={thumbnail} alt="" /> : <span>POPOK</span>}</div>
+            <div className={styles.thumbnail}>{thumbnail ? <img src={getListImageUrl(thumbnail, 300)} alt="" /> : <span>POPOK</span>}</div>
             <div className={styles.cardCopy}><strong>{work.title.trim() || "새 작품"}</strong><span>{work.year || "연도 미입력"}</span><span>{work.role || "역할 미입력"}</span></div>
             <span className={styles.order}>{index + 1}</span>
           </button>;
@@ -96,7 +98,7 @@ export default function WorksCardEditor({ works, canAdd, countLabel, uploadingSl
           <div className={styles.imageGrid}>{Array.from({ length: 4 }, (_, imageIndex) => imageIndex).map((imageIndex) => {
             const imageUrl = normalizeWorkImages(selectedWork)[imageIndex];
             const uploading = uploadingSlot === `work_${selectedIndex}_${imageIndex}`;
-            return <div className={styles.imageSlot} key={imageIndex}>{imageUrl ? <><img src={imageUrl} alt={`${selectedWork.title || "작품"} 이미지 ${imageIndex + 1}`} /><button type="button" onClick={() => onImageRemove(selectedIndex, imageIndex)} aria-label={`${imageIndex + 1}번 이미지 삭제`}>×</button></> : <><input id={`work-card-image-${selectedWork.id}-${imageIndex}`} type="file" accept="image/*" multiple disabled={Boolean(uploadingSlot)} onChange={(event) => onImageUpload(event, selectedIndex, imageIndex)} /><label htmlFor={`work-card-image-${selectedWork.id}-${imageIndex}`}><span>{uploading ? "⏳" : "＋"}</span>{uploading ? "업로드 중" : `이미지 ${imageIndex + 1}`}</label></>}</div>;
+            return <div className={styles.imageSlot} key={imageIndex}>{imageUrl ? <><img src={getListImageUrl(imageUrl, 600)} alt={`${selectedWork.title || "작품"} 이미지 ${imageIndex + 1}`} /><button type="button" onClick={() => onImageRemove(selectedIndex, imageIndex)} aria-label={`${imageIndex + 1}번 이미지 삭제`}>×</button></> : <><input id={`work-card-image-${selectedWork.id}-${imageIndex}`} type="file" accept="image/*" multiple disabled={Boolean(uploadingSlot)} onChange={(event) => onImageUpload(event, selectedIndex, imageIndex)} /><label htmlFor={`work-card-image-${selectedWork.id}-${imageIndex}`}><span>{uploading ? "⏳" : "＋"}</span>{uploading ? "업로드 중" : `이미지 ${imageIndex + 1}`}</label></>}</div>;
           })}</div>
         </>}
       </div>

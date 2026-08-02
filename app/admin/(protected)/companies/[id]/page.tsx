@@ -7,6 +7,7 @@ import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
 import { ArrayField, StringArrayField, labelStyle, inputStyle } from "@/components/admin/ArrayField";
 import { detectResumeFileExtension, RESUME_FILE_ACCEPT } from "@/lib/resumeFileTypes";
 import { normalizeWorkImages, creditsToDisplayString, sortWorksForDisplay, applyWorkSortOrder } from "@/lib/company-works";
+import { compressImageForUpload } from "@/lib/clientImageCompression";
 
 // Public Preview Components — kept in lockstep with app/companies/[slug]/CompanyClientView.tsx
 // so the admin Live Preview never drifts from the real public page structure.
@@ -324,7 +325,7 @@ export default function AdminCompanyEditPage() {
 
   const handleUploadSingleImage = async (field: "profile_image_url" | "hero_image_url", file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await compressImageForUpload(file));
     formData.append("bucket", "artist-media");
     formData.append("path", `companies/${field}`);
 
@@ -347,7 +348,7 @@ export default function AdminCompanyEditPage() {
 
   const handleUploadSliderImage = async (idx: number, file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await compressImageForUpload(file));
     formData.append("bucket", "artist-media");
     formData.append("path", `companies/slider`);
 
@@ -375,7 +376,7 @@ export default function AdminCompanyEditPage() {
   // never truncated just because this screen doesn't have slots to show them.
   const handleUploadWorkImage = async (idx: number, file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", await compressImageForUpload(file));
     formData.append("bucket", "artist-media");
     formData.append("path", `companies/works`);
 
@@ -775,7 +776,7 @@ export default function AdminCompanyEditPage() {
     setUploadingPoster(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", await compressImageForUpload(file));
       formData.append("bucket", "artist-media");
       formData.append("path", `performances/${editingPerf.id}`);
 

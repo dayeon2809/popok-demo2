@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FeedItem } from "@/lib/homeFeedPrototype";
 import VisualFeedCard from "./VisualFeedCard";
 
-const BATCH_SIZE = 24;
+const BATCH_SIZE = 12;
 
 interface HomeVisualFeedProps {
   items: FeedItem[];
@@ -40,7 +40,7 @@ export default function HomeVisualFeed({ items, onCtaClick, ctaHref }: HomeVisua
           setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, items.length));
         }
       },
-      { rootMargin: "600px 0px" }
+      { rootMargin: "200px 0px" }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
