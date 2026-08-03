@@ -5,7 +5,8 @@ export type EmailNotificationEvent =
   | "company_portfolio_request_received"
   | "artist_portfolio_request_received"
   | "portfolio_request_accepted"
-  | "message_received";
+  | "message_received"
+  | "onboarding_reminder";
 
 export type EmailNotificationStatus =
   | "pending"
@@ -35,4 +36,9 @@ export interface SendPopokEmailResult {
   error?: string;
   /** true when this call was a no-op because the (event, entity, recipient) tuple was already logged */
   skipped?: boolean;
+  /** Resend's error.name / error.statusCode — present only on a provider-side rejection, lets callers classify the failure without re-parsing `error`. */
+  errorName?: string;
+  statusCode?: number;
+  /** "not_configured": never reached Resend (no RESEND_API_KEY). "provider_error": Resend accepted the request but rejected/failed the send. */
+  failureKind?: "not_configured" | "provider_error";
 }

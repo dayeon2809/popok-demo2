@@ -14,6 +14,7 @@ import {
   buildCompanyProfileApprovedEmail,
   buildCompanyPortfolioRequestReceivedEmail,
   buildArtistPortfolioRequestReceivedEmail,
+  buildOnboardingReminderEmail,
 } from "./templates";
 import { buildPortfolioRequestAcceptedEmail } from "./portfolioAcceptedTemplate";
 import { buildMessageReceivedEmail } from "./messageReceivedTemplate";
@@ -201,6 +202,39 @@ export async function notifyPortfolioRequestAccepted(params: {
     conversationId: params.conversationId,
   });
 }
+/**
+ * Manual admin nudge (app/api/admin/users/[userId]/send-onboarding-reminder)
+ * for an auth.users account that has no artists/companies row yet. Unlike
+ * the other notifyXxx helpers above, the caller already has a verified
+ * recipient email (re-fetched server-side from auth.admin.getUserById by
+ * userId, never trusted from the client) and a display name to greet them
+ * by, so both are passed in directly rather than re-resolved here.
+ *
+ * The CTA always points at /onboarding (see buildOnboardingReminderEmail) —
+ * no separate onboardingUrl param, matching every other template in this
+ * file, which all bake their own fixed ctaPath rather than accepting one.
+ *
+ * Dedup: entityType/entityId are "user"/userId, so sendPopokEmail's
+ * (event_key, entity_type, entity_id, recipient_email) unique index already
+ * guarantees at most one send per user for this event — no separate
+ * "already sent" tracking needed.
+ */
+export async function notifyIncompleteOnboarding(params: {
+  userId: string;
+  to: string;
+  greetingName: string;
+}): Promise<SendPopokEmailResult> {
+  const content = buildOnboardingReminderEmail({ greetingName: params.greetingName });
+  return sendPopokEmail({
+    to: params.to,
+    ...content,
+    eventKey: "onboarding_reminder",
+    entityType: "user",
+    entityId: params.userId,
+    recipientUserId: params.userId,
+  });
+}
+
 export async function notifyMessageReceived(params: {
   messageId: string;
   conversationId: string;

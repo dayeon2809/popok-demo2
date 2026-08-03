@@ -137,6 +137,11 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
     setStep(prev => prev - 1);
   };
 
+  const handleSkipAi = () => {
+    setAiState("none");
+    setStep(4);
+  };
+
   const handleComplete = async () => {
     setSubmitting(true);
     try {
@@ -432,10 +437,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                 ✨ AI로 빠르게 시작하기
               </button>
               <button
-                onClick={() => {
-                  setAiState("none");
-                  setStep(4);
-                }}
+                onClick={handlePrev}
                 className="btn-outline"
                 style={{
                   padding: "16px",
@@ -448,7 +450,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                   fontSize: "0.95rem"
                 }}
               >
-                건너뛰기
+                이전
               </button>
             </div>
           </div>
@@ -460,7 +462,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               setAiDraft(data);
               setAiState("review");
             }}
-            onCancel={() => setAiState("choose")}
+            onCancel={handleSkipAi}
           />
         )}
 
@@ -518,7 +520,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           <div style={{ display: "flex", gap: "12px", marginTop: "36px" }}>
             {step > 1 && (
               <button
-                onClick={handlePrev}
+                onClick={step === 3 ? handleSkipAi : handlePrev}
                 disabled={submitting}
                 className="btn-outline"
                 style={{
@@ -530,7 +532,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                   cursor: "pointer"
                 }}
               >
-                이전
+                {step === 3 ? "직접 입력하기" : "이전"}
               </button>
             )}
             {step === 3 ? null : step < 4 ? (

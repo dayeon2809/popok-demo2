@@ -60,7 +60,7 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
     );
     await logAttempt(supabase, params, "skipped_not_configured", null);
     logEmailOutcome(params, { success: false, skippedReason: "RESEND_API_KEY_missing" });
-    return { success: false, error: "email sending not configured", skipped: true };
+    return { success: false, error: "email sending not configured", skipped: true, failureKind: "not_configured" };
   }
 
   // Claim the idempotency slot before actually sending.
@@ -100,7 +100,13 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
     if (error) {
       await updateLogStatus(supabase, logId, "failed", undefined, error.message);
       logEmailOutcome(params, { success: false, providerErrorMessage: error.message, providerErrorCode: (error as any).name || (error as any).statusCode });
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: error.message,
+        errorName: (error as any).name,
+        statusCode: (error as any).statusCode,
+        failureKind: "provider_error",
+      };
     }
 
     await updateLogStatus(supabase, logId, "sent", data?.id);
@@ -110,7 +116,13 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
     const message = err?.message || String(err);
     await updateLogStatus(supabase, logId, "failed", undefined, message);
     logEmailOutcome(params, { success: false, providerErrorMessage: message, providerErrorCode: err?.code || err?.statusCode || err?.name });
-    return { success: false, error: message };
+    return {
+      success: false,
+      error: message,
+      errorName: err?.name,
+      statusCode: err?.statusCode,
+      failureKind: "provider_error",
+    };
   }
 }
 

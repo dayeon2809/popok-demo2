@@ -27,24 +27,6 @@ const RESUME_TEMPLATE = `이름
 [소속 및 경력]
 활동 기간  단체·기관명 / 역할`;
 
-const RESUME_EXAMPLE = `홍길동
-공연예술 기획·창작
-
-[학력]
-2024–현재 00대학교 공연예술학과 재학
-
-[작품 및 프로젝트]
-2025 〈프로젝트 A〉
-기획·연출
-
-2024 〈프로젝트 B〉
-창작·출연
-
-[수상 및 선정]
-2025 00예술지원사업
-창작지원 대상 선정`;
-
-
 export default function AiProfileImporter({ onParsed, onCancel }: AiProfileImporterProps) {
   const [activeTab, setActiveTab] = useState<"file" | "text">("file");
   const [file, setFile] = useState<File | null>(null);
@@ -162,12 +144,6 @@ export default function AiProfileImporter({ onParsed, onCancel }: AiProfileImpor
       </ol>
       <p className={styles.processNotice}>AI가 정리한 내용은 자동으로 확정되지 않으며, 공개 전 직접 수정하고 확인할 수 있어요.</p>
     </details>
-    <details className={styles.details}>
-      <summary>간단한 작성 예시 보기</summary>
-      <pre className={styles.example}>{RESUME_EXAMPLE}</pre>
-      <p className={styles.exampleNote}>위 내용은 형식 안내용이며 사용자 데이터로 저장하거나 자동 입력하지 않습니다.</p>
-    </details>
-
     <details className={styles.details}>
       <summary>이력서 파일이 없어요</summary>
       <p className={styles.detailsIntro}>괜찮아요. 아래 양식을 복사해 메모장이나 문서에 작성하거나, 텍스트 입력 화면에 바로 붙여넣을 수 있어요. 대시보드에서 항목별로 직접 입력해도 됩니다.</p>

@@ -309,7 +309,7 @@ export default function AdminArtistsPage() {
       <div style={{ marginBottom: "20px", borderBottom: "1.5px solid var(--border)", paddingBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <h1 style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--navy)" }}>아티스트 관리 (Artists CMS)</h1>
-          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>데이터베이스에 등록된 아티스트 레코드를 모니터링하고 관리합니다.</p>
+          <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginTop: "4px" }}>아티스트 포퐄이 생성되거나 연결된 사용자만 표시됩니다.</p>
         </div>
         <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
           <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--ink-faint)" }}>총 {filteredArtists.length}개 아티스트</span>

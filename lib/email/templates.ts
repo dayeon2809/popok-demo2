@@ -166,6 +166,26 @@ export function buildCompanyPortfolioRequestReceivedEmail(params: {
   });
 }
 
+/**
+ * Fired by an admin from /admin/users (app/api/admin/users/[userId]/send-onboarding-reminder)
+ * — a manual, one-off nudge for accounts with no artists/companies row yet.
+ * Not automated (no cron) — see the route handler.
+ */
+export function buildOnboardingReminderEmail(params: { greetingName: string }): EmailContent {
+  const greetingName = escapeHtml(params.greetingName);
+  return baseEmailLayout({
+    subject: "POPOK 만들기를 아직 완료하지 않으셨어요 🌱",
+    greetingName,
+    bodyLines: [
+      "POPOK 가입은 정상적으로 완료되었지만, 아직 개인 포퐄 만들기가 마무리되지 않아 안내드립니다.",
+      "아래 버튼을 눌러 포퐄 만들기를 이어서 완료해주세요.",
+      "만드시다가 어려운 점이 있으셨나요?\n이 메일에 답장으로 알려주시면 직접 도와드릴게요 :)",
+    ],
+    ctaLabel: "내 포퐄 만들기",
+    ctaPath: "/onboarding",
+  });
+}
+
 export function buildArtistPortfolioRequestReceivedEmail(params: {
   recipientArtistName: string;
   senderArtistName: string;

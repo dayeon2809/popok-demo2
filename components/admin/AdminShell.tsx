@@ -5,7 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 const menuGroups = [
-  { label: "Overview", items: [{ name: "대시보드", path: "/admin" }] },
+  { label: "Overview", items: [
+    { name: "대시보드", path: "/admin" },
+    { name: "회원", path: "/admin/users" },
+  ] },
   { label: "Content", items: [
     { name: "제출 자료", path: "/admin/submissions" },
     { name: "아티스트", path: "/admin/artists" },
@@ -91,6 +94,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           .admin-submissions-table td:nth-child(1)::before{content:"ID"}.admin-submissions-table td:nth-child(2)::before{content:"Name"}.admin-submissions-table td:nth-child(3)::before{content:"Email"}.admin-submissions-table td:nth-child(4)::before{content:"Genre"}.admin-submissions-table td:nth-child(5)::before{content:"Status"}.admin-submissions-table td:nth-child(6)::before{content:"Created"}.admin-submissions-table td:nth-child(7)::before{content:"Actions"}
           .admin-performances-table td:nth-child(1)::before{content:"Select"}.admin-performances-table td:nth-child(2)::before{content:"Poster"}.admin-performances-table td:nth-child(3)::before{content:"Title"}.admin-performances-table td:nth-child(4)::before{content:"Date"}.admin-performances-table td:nth-child(5)::before{content:"Venue"}.admin-performances-table td:nth-child(6)::before{content:"Company"}.admin-performances-table td:nth-child(7)::before{content:"Link"}.admin-performances-table td:nth-child(8)::before{content:"Public"}.admin-performances-table td:nth-child(9)::before{content:"Featured"}.admin-performances-table td:nth-child(10)::before{content:"Status"}.admin-performances-table td:nth-child(11)::before{content:"Order"}.admin-performances-table td:nth-child(12)::before{content:"Actions"}
           .admin-claims-history-table td:nth-child(1)::before{content:"Date"}.admin-claims-history-table td:nth-child(2)::before{content:"Company"}.admin-claims-history-table td:nth-child(3)::before{content:"Applicant"}.admin-claims-history-table td:nth-child(4)::before{content:"Status"}
+          .admin-users-table td:nth-child(1)::before{content:"Email"}.admin-users-table td:nth-child(2)::before{content:"Joined"}.admin-users-table td:nth-child(3)::before{content:"Last login"}.admin-users-table td:nth-child(4)::before{content:"Provider"}.admin-users-table td:nth-child(5)::before{content:"Status"}.admin-users-table td:nth-child(6)::before{content:"Profile"}.admin-users-table td:nth-child(7)::before{content:"Artist"}.admin-users-table td:nth-child(8)::before{content:"Company"}.admin-users-table td:nth-child(9)::before{content:"Actions"}
           .admin-content [style*="position: fixed"]{padding:12px!important;max-width:100vw!important}
           .admin-content [style*="position: fixed"]>div{width:min(95vw,720px)!important;max-width:95vw!important;max-height:90dvh!important;overflow-y:auto!important}
           .admin-content form{max-width:100%}
