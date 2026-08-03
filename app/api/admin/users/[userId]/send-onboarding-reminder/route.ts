@@ -58,6 +58,19 @@ export async function POST(
   const adminError = await requireAdminApi();
   if (adminError) return adminError;
 
+  // Safe runtime config snapshot — booleans and a bare domain only, never
+  // the key/address itself. Cheap enough to always log; makes a prod-only
+  // misconfiguration (e.g. env var present locally but not on the actual
+  // deployment serving the request) visible in Vercel Function Logs without
+  // needing a live repro.
+  console.log("[onboarding-reminder] config", {
+    hasResendApiKey: !!process.env.RESEND_API_KEY,
+    hasFromEmail: !!process.env.POPOK_EMAIL_FROM,
+    fromDomain: process.env.POPOK_EMAIL_FROM?.match(/@([^\s>]+)/)?.[1] || null,
+    siteUrlConfigured: !!process.env.NEXT_PUBLIC_SITE_URL,
+    vercelEnv: process.env.VERCEL_ENV || "unknown",
+  });
+
   const { userId } = await params;
   if (!userId) {
     return NextResponse.json({ success: false, error: "유효하지 않은 사용자 ID입니다." }, { status: 400 });

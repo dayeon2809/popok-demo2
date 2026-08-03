@@ -1,5 +1,5 @@
 import { getSupabaseServer } from "@/lib/supabaseServer";
-import { getResendClient, getEmailFrom } from "./client";
+import { getResendClient, getEmailFrom, getEmailReplyTo } from "./client";
 import type { SendPopokEmailParams, SendPopokEmailResult } from "./types";
 function maskEmail(email?: string | null): string | null {
   if (!email) return null;
@@ -54,12 +54,14 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
   }
 
   const resend = getResendClient();
-  if (!resend) {
+  const from = getEmailFrom();
+  if (!resend || !from) {
+    const missing = !resend ? "RESEND_API_KEY_missing" : "POPOK_EMAIL_FROM_missing_in_production";
     console.log(
-      `[email] RESEND_API_KEY not configured — skipping "${params.eventKey}" for ${params.entityType}/${params.entityId}`
+      `[email] ${missing} — skipping "${params.eventKey}" for ${params.entityType}/${params.entityId}`
     );
     await logAttempt(supabase, params, "skipped_not_configured", null);
-    logEmailOutcome(params, { success: false, skippedReason: "RESEND_API_KEY_missing" });
+    logEmailOutcome(params, { success: false, skippedReason: missing });
     return { success: false, error: "email sending not configured", skipped: true, failureKind: "not_configured" };
   }
 
@@ -90,11 +92,12 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
 
   try {
     const { data, error } = await resend.emails.send({
-      from: getEmailFrom(),
+      from,
       to: params.to,
       subject: params.subject,
       html: params.html,
       text: params.text,
+      replyTo: getEmailReplyTo(),
     });
 
     if (error) {
