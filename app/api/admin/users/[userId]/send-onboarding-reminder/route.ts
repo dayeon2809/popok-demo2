@@ -106,12 +106,16 @@ export async function POST(
 
   const result = await notifyIncompleteOnboarding({ userId, to: user.email, greetingName });
 
-  if (!result.success) {
+  // A message id is the only real proof Resend accepted the send — success
+  // without one (including the "already logged" dedup path returning no
+  // id) must never be reported to the client as sent.
+  if (!result.success || !result.messageId) {
     const reason = classifyEmailFailure(result);
     // Safe subset only: error name/status/message (message run through
     // maskEmailsInMessage) — never the recipient's email, never the raw
     // Resend/service-role credentials.
     console.error("[onboarding-reminder] resend_failed", {
+      hasMessageId: !!result.messageId,
       errorName: result.errorName || null,
       statusCode: result.statusCode || null,
       failureKind: result.failureKind || null,
@@ -120,5 +124,6 @@ export async function POST(
     return NextResponse.json({ success: false, error: "EMAIL_SEND_FAILED", reason }, { status: 502 });
   }
 
-  return NextResponse.json({ success: true });
+  console.log("[onboarding-reminder] sent", { hasMessageId: true });
+  return NextResponse.json({ success: true, messageId: result.messageId });
 }

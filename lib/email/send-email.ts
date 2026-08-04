@@ -81,8 +81,29 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
 
   if (insertErr) {
     if ((insertErr as any).code === "23505") {
-      // Already sent/attempted for this exact (event, entity, recipient) — don't resend.
-      return { success: true, skipped: true };
+      // Already attempted for this exact (event, entity, recipient) tuple —
+      // don't resend, but don't blindly report success either: the existing
+      // row could be from a PRIOR FAILED attempt (e.g. a rejected send while
+      // the sender domain was misconfigured), in which case reporting
+      // success here would be a false positive — the caller/UI would show
+      // "sent" while Resend never actually delivered anything.
+      const { data: existing } = await (supabase.from("email_notification_logs" as any) as any)
+        .select("status, provider_message_id")
+        .eq("event_key", params.eventKey)
+        .eq("entity_type", params.entityType)
+        .eq("entity_id", params.entityId)
+        .eq("recipient_email", params.to)
+        .maybeSingle();
+
+      if ((existing as any)?.status === "sent" && (existing as any)?.provider_message_id) {
+        return { success: true, skipped: true, messageId: (existing as any).provider_message_id };
+      }
+      return {
+        success: false,
+        skipped: true,
+        error: "a previous attempt for this recipient did not succeed and was not retried",
+        failureKind: "provider_error",
+      };
     }
     console.error("[email] Failed to write notification log:", insertErr.message);
     return { success: false, error: "failed to record notification log" };
@@ -100,21 +121,25 @@ export async function sendPopokEmail(params: SendPopokEmailParams): Promise<Send
       replyTo: getEmailReplyTo(),
     });
 
-    if (error) {
-      await updateLogStatus(supabase, logId, "failed", undefined, error.message);
-      logEmailOutcome(params, { success: false, providerErrorMessage: error.message, providerErrorCode: (error as any).name || (error as any).statusCode });
+    // Resend's own contract is "error is null iff data.id is present", but
+    // that's trusted implicitly nowhere else in this codebase — check both
+    // explicitly so a malformed/empty response can never read as success.
+    if (error || !data?.id) {
+      const message = error?.message || "Resend returned no message id";
+      await updateLogStatus(supabase, logId, "failed", undefined, message);
+      logEmailOutcome(params, { success: false, providerErrorMessage: message, providerErrorCode: (error as any)?.name || (error as any)?.statusCode });
       return {
         success: false,
-        error: error.message,
-        errorName: (error as any).name,
-        statusCode: (error as any).statusCode,
+        error: message,
+        errorName: (error as any)?.name,
+        statusCode: (error as any)?.statusCode,
         failureKind: "provider_error",
       };
     }
 
-    await updateLogStatus(supabase, logId, "sent", data?.id);
+    await updateLogStatus(supabase, logId, "sent", data.id);
     logEmailOutcome(params, { success: true });
-    return { success: true, messageId: data?.id };
+    return { success: true, messageId: data.id };
   } catch (err: any) {
     const message = err?.message || String(err);
     await updateLogStatus(supabase, logId, "failed", undefined, message);

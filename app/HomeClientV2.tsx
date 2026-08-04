@@ -3,19 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import CompanyDiscoveryPrototype from "@/components/company/CompanyDiscoveryPrototype";
 import { useRouter } from "next/navigation";
-import type { Artist, Performance, Company } from "@/types";
+import type { Artist, Company } from "@/types";
 import type { InstagramStory } from "@/lib/instagram";
 import { buildRealFeedItems, padWithPlaceholders, insertFeedCta } from "@/lib/homeFeedPrototype";
-// Performance posters and Instagram/홈노출 posts are intentionally not fed
-// into the feed builder below — see the note in lib/homeFeedPrototype.ts.
-// The V2 feed remains artist/company focused; performances are rendered in
-// the dedicated carousel below and link to the full calendar.
 import HomeVisualFeed from "@/components/home/HomeVisualFeed";
-import PerformanceCarousel from "@/components/home/PerformanceCarousel";
 import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import FAQSection from "@/components/FAQSection";
 import HomeHeroV2 from "@/components/home/HomeHeroV2";
+import ServiceValueSection from "@/components/home/ServiceValueSection";
 import HomeUseCasesSection from "@/components/home/HomeUseCasesSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import FooterCTA from "@/components/home/FooterCTA";
 import { getHeroCta } from "@/lib/heroCta";
 import { analytics } from "@/lib/analytics";
@@ -46,7 +43,6 @@ const FIELD_OPTIONS = [
 
 interface HomeClientV2Props {
   initialArtists: Artist[];
-  initialPerformances: Performance[];
   initialCompanies: Company[];
   initialWeeklyStories: InstagramStory[];
   isLoggedIn: boolean;
@@ -55,7 +51,6 @@ interface HomeClientV2Props {
 
 export default function HomeClientV2({
   initialArtists,
-  initialPerformances,
   initialCompanies,
   isLoggedIn,
   myArtistSlug,
@@ -140,6 +135,8 @@ export default function HomeClientV2({
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
       <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} heroArtist={heroArtist} />
 
+      <ServiceValueSection />
+
       <div id="home-explore" style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* 아티스트 / 단체 토글 버튼 */}
         <div className="discovery-toggle-container" role="tablist" aria-label="탐색 대상">
@@ -204,14 +201,9 @@ export default function HomeClientV2({
         내 포퐄 만들기
       </button>
 
-      <PerformanceCarousel
-        title="다가오는 공연"
-        subtitle="POPOK에서 지금 만날 수 있는 공연을 확인해보세요."
-        performances={initialPerformances}
-        titleLink={{ label: "전체 공연 일정", href: "/calendar" }}
-      />
-
       <HomeUseCasesSection />
+
+      <TestimonialsSection />
 
       <FooterCTA
         freeBadge="현재 작품 등록, AI 이력 정리, 포트폴리오 공유까지 모든 기능을 무료로 사용할 수 있어요."

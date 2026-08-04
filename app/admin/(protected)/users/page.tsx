@@ -99,7 +99,10 @@ export default function AdminUsersPage() {
     try {
       const res = await fetch(`/api/admin/users/${u.id}/send-onboarding-reminder`, { method: "POST" });
       const data = await res.json();
-      if (res.ok && data.success) {
+      // messageId is Resend's own proof of acceptance — res.ok/data.success
+      // alone aren't enough (the server can — and once did — report success
+      // without ever actually calling Resend).
+      if (res.ok && data.success && data.messageId) {
         alert("포퐄 만들기 안내 메일을 보냈습니다.");
       } else if (data.error === "EMAIL_SEND_FAILED") {
         alert(EMAIL_FAILURE_REASON_MESSAGE[data.reason as string] || EMAIL_FAILURE_REASON_MESSAGE.UNKNOWN);

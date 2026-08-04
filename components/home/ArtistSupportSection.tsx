@@ -10,12 +10,12 @@ interface SupportItem {
 }
 
 const ITEMS: SupportItem[] = [
-  { title: "나만의 포트폴리오 페이지", note: "지금까지의 작품과 이력이 한 페이지에 남습니다." },
-  { title: "하나의 링크로 활동 공유", note: "필요할 때 최신 포트폴리오를 바로 전달합니다." },
-  { title: "활동 기록 계속 쌓기", note: "새 작품과 공연을 기존 기록에 이어서 더합니다." },
-  { title: "AI로 자료 초안 정리", note: "흩어진 자료를 빠르게 정리해 기록을 시작합니다.", premium: true },
-  { title: "다가오는 활동 반영", note: "새 공연과 작품이 포트폴리오에 빠르게 이어집니다.", premium: true },
-  { title: "포트폴리오 정기 관리", note: "새로운 활동이 생길 때마다 계속 최신 상태로 관리합니다.", premium: true },
+  { title: "나만의 포트폴리오 페이지", note: "작품과 활동 이력을 보기 좋은 한 페이지로 정리해요." },
+  { title: "링크 하나로 간편하게 공유", note: "지원·협업·홍보가 필요한 순간, 최신 포트폴리오를 바로 보내요." },
+  { title: "새로운 활동을 계속 기록", note: "공연과 작품이 생길 때마다 직접 추가하며 나만의 기록을 쌓아요." },
+  { title: "AI로 포트폴리오 빠르게 완성", note: "흩어진 이력과 자료를 AI가 정리해 포트폴리오 초안을 만들어드려요.", premium: true },
+  { title: "포트폴리오 정기 업데이트", note: "새로운 공연과 작품이 생길 때마다 POPOK이 확인해 최신 상태로 관리해드려요.", premium: true },
+  { title: "인스타그램 홍보 콘텐츠 제작·업로드", note: "새로운 공연과 활동을 콘텐츠로 제작해 POPOK 공식 인스타그램에 소개해드려요.", premium: true },
 ];
 
 export default function ArtistSupportSection() {
@@ -42,7 +42,7 @@ export default function ArtistSupportSection() {
           POPOK 아티스트가 되면
         </h2>
         <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", fontWeight: 600, lineHeight: 1.65, margin: 0 }}>
-          등록하면 작품과 이력을 바로 기록할 수 있어요
+          작품과 이력을 한곳에 기록하고, 더 많은 사람과 새로운 기회에 연결할 수 있어요.
         </p>
       </motion.div>
 
@@ -92,7 +92,7 @@ export default function ArtistSupportSection() {
                     background: "var(--accent)", padding: "2px 7px", borderRadius: "6px",
                     letterSpacing: "0.02em",
                   }}>
-                    POPOK Artist
+                    Premium
                   </span>
                 )}
               </div>
@@ -129,4 +129,3 @@ export default function ArtistSupportSection() {
     </section>
   );
 }
-

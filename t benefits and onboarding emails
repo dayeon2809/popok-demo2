@@ -1,0 +1,219 @@
+warning: in the working copy of 'app/HomeClientV2.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/about/AboutClient.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/admin/(protected)/users/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/api/admin/users/[userId]/send-onboarding-reminder/route.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/page.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'components/home/ArtistSupportSection.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'lib/email/send-email.ts', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/app/HomeClientV2.tsx b/app/HomeClientV2.tsx[m
+[1mindex 47b9e97..ba55c7f 100644[m
+[1m--- a/app/HomeClientV2.tsx[m
+[1m+++ b/app/HomeClientV2.tsx[m
+[36m@@ -3,19 +3,16 @@[m
+ import { useEffect, useMemo, useState } from "react";[m
+ import CompanyDiscoveryPrototype from "@/components/company/CompanyDiscoveryPrototype";[m
+ import { useRouter } from "next/navigation";[m
+[31m-import type { Artist, Performance, Company } from "@/types";[m
+[32m+[m[32mimport type { Artist, Company } from "@/types";[m
+ import type { InstagramStory } from "@/lib/instagram";[m
+ import { buildRealFeedItems, padWithPlaceholders, insertFeedCta } from "@/lib/homeFeedPrototype";[m
+[31m-// Performance posters and Instagram/홈노출 posts are intentionally not fed[m
+[31m-// into the feed builder below — see the note in lib/homeFeedPrototype.ts.[m
+[31m-// The V2 feed remains artist/company focused; performances are rendered in[m
+[31m-// the dedicated carousel below and link to the full calendar.[m
+ import HomeVisualFeed from "@/components/home/HomeVisualFeed";[m
+[31m-import PerformanceCarousel from "@/components/home/PerformanceCarousel";[m
+ import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";[m
+ import FAQSection from "@/components/FAQSection";[m
+ import HomeHeroV2 from "@/components/home/HomeHeroV2";[m
+[32m+[m[32mimport ServiceValueSection from "@/components/home/ServiceValueSection";[m
+ import HomeUseCasesSection from "@/components/home/HomeUseCasesSection";[m
+[32m+[m[32mimport TestimonialsSection from "@/components/TestimonialsSection";[m
+ import FooterCTA from "@/components/home/FooterCTA";[m
+ import { getHeroCta } from "@/lib/heroCta";[m
+ import { analytics } from "@/lib/analytics";[m
+[36m@@ -46,7 +43,6 @@[m [mconst FIELD_OPTIONS = [[m
+ [m
+ interface HomeClientV2Props {[m
+   initialArtists: Artist[];[m
+[31m-  initialPerformances: Performance[];[m
+   initialCompanies: Company[];[m
+   initialWeeklyStories: InstagramStory[];[m
+   isLoggedIn: boolean;[m
+[36m@@ -55,7 +51,6 @@[m [minterface HomeClientV2Props {[m
+ [m
+ export default function HomeClientV2({[m
+   initialArtists,[m
+[31m-  initialPerformances,[m
+   initialCompanies,[m
+   isLoggedIn,[m
+   myArtistSlug,[m
+[36m@@ -140,6 +135,8 @@[m [mexport default function HomeClientV2({[m
+     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>[m
+       <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} heroArtist={heroArtist} />[m
+ [m
+[32m+[m[32m      <ServiceValueSection />[m
+[32m+[m
+       <div id="home-explore" style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>[m
+         {/* 아티스트 / 단체 토글 버튼 */}[m
+         <div className="discovery-toggle-container" role="tablist" aria-label="탐색 대상">[m
+[36m@@ -204,15 +201,10 @@[m [mexport default function HomeClientV2({[m
+         내 포퐄 만들기[m
+       </button>[m
+ [m
+[31m-      <PerformanceCarousel[m
+[31m-        title="다가오는 공연"[m
+[31m-        subtitle="POPOK에서 지금 만날 수 있는 공연을 확인해보세요."[m
+[31m-        performances={initialPerformances}[m
+[31m-        titleLink={{ label: "전체 공연 일정", href: "/calendar" }}[m
+[31m-      />[m
+[31m-[m
+       <HomeUseCasesSection />[m
+ [m
+[32m+[m[32m      <TestimonialsSection />[m
+[32m+[m
+       <FooterCTA[m
+         freeBadge="현재 작품 등록, AI 이력 정리, 포트폴리오 공유까지 모든 기능을 무료로 사용할 수 있어요."[m
+         title={<>흩어진 예술 활동을<br />하나의 포트폴리오로.</>}[m
+[1mdiff --git a/app/about/AboutClient.tsx b/app/about/AboutClient.tsx[m
+[1mindex 35f9681..415bf1f 100644[m
+[1m--- a/app/about/AboutClient.tsx[m
+[1m+++ b/app/about/AboutClient.tsx[m
+[36m@@ -6,7 +6,6 @@[m [mimport HowWeWorkSection from "@/components/about/HowWeWorkSection";[m
+ import RoadmapSection from "@/components/about/RoadmapSection";[m
+ import AboutPremiumSection from "@/components/about/AboutPremiumSection";[m
+ import TeamSection from "@/components/about/TeamSection";[m
+[31m-import TestimonialsSection from "@/components/TestimonialsSection";[m
+ import FAQSection from "@/components/FAQSection";[m
+ [m
+ export default function AboutClient() {[m
+[36m@@ -18,7 +17,6 @@[m [mexport default function AboutClient() {[m
+       <RoadmapSection />[m
+       <AboutPremiumSection />[m
+       <TeamSection />[m
+[31m-      <TestimonialsSection />[m
+       <FAQSection />[m
+     </div>[m
+   );[m
+[1mdiff --git a/app/admin/(protected)/users/page.tsx b/app/admin/(protected)/users/page.tsx[m
+[1mindex 15fde7d..def0d9a 100644[m
+[1m--- a/app/admin/(protected)/users/page.tsx[m
+[1m+++ b/app/admin/(protected)/users/page.tsx[m
+[36m@@ -99,7 +99,10 @@[m [mexport default function AdminUsersPage() {[m
+     try {[m
+       const res = await fetch(`/api/admin/users/${u.id}/send-onboarding-reminder`, { method: "POST" });[m
+       const data = await res.json();[m
+[31m-      if (res.ok && data.success) {[m
+[32m+[m[32m      // messageId is Resend's own proof of acceptance — res.ok/data.success[m
+[32m+[m[32m      // alone aren't enough (the server can — and once did — report success[m
+[32m+[m[32m      // without ever actually calling Resend).[m
+[32m+[m[32m      if (res.ok && data.success && data.messageId) {[m
+         alert("포퐄 만들기 안내 메일을 보냈습니다.");[m
+       } else if (data.error === "EMAIL_SEND_FAILED") {[m
+         alert(EMAIL_FAILURE_REASON_MESSAGE[data.reason as string] || EMAIL_FAILURE_REASON_MESSAGE.UNKNOWN);[m
+[1mdiff --git a/app/api/admin/users/[userId]/send-onboarding-reminder/route.ts b/app/api/admin/users/[userId]/send-onboarding-reminder/route.ts[m
+[1mindex ac54703..22939bb 100644[m
+[1m--- a/app/api/admin/users/[userId]/send-onboarding-reminder/route.ts[m
+[1m+++ b/app/api/admin/users/[userId]/send-onboarding-reminder/route.ts[m
+[36m@@ -106,12 +106,16 @@[m [mexport async function POST([m
+ [m
+   const result = await notifyIncompleteOnboarding({ userId, to: user.email, greetingName });[m
+ [m
+[31m-  if (!result.success) {[m
+[32m+[m[32m  // A message id is the only real proof Resend accepted the send — success[m
+[32m+[m[32m  // without one (including the "already logged" dedup path returning no[m
+[32m+[m[32m  // id) must never be reported to the client as sent.[m
+[32m+[m[32m  if (!result.success || !result.messageId) {[m
+     const reason = classifyEmailFailure(result);[m
+     // Safe subset only: error name/status/message (message run through[m
+     // maskEmailsInMessage) — never the recipient's email, never the raw[m
+     // Resend/service-role credentials.[m
+     console.error("[onboarding-reminder] resend_failed", {[m
+[32m+[m[32m      hasMessageId: !!result.messageId,[m
+       errorName: result.errorName || null,[m
+       statusCode: result.statusCode || null,[m
+       failureKind: result.failureKind || null,[m
+[36m@@ -120,5 +124,6 @@[m [mexport async function POST([m
+     return NextResponse.json({ success: false, error: "EMAIL_SEND_FAILED", reason }, { status: 502 });[m
+   }[m
+ [m
+[31m-  return NextResponse.json({ success: true });[m
+[32m+[m[32m  console.log("[onboarding-reminder] sent", { hasMessageId: true });[m
+[32m+[m[32m  return NextResponse.json({ success: true, messageId: result.messageId });[m
+ }[m
+[1mdiff --git a/app/page.tsx b/app/page.tsx[m
+[1mindex 7519641..f558141 100644[m
+[1m--- a/app/page.tsx[m
+[1m+++ b/app/page.tsx[m
+[36m@@ -1,5 +1,4 @@[m
+ import { getPublishedArtists } from "@/lib/artists";[m
+[31m-import { getUpcomingPerformances } from "@/lib/performances";[m
+ import { getPublishedCompanies } from "@/lib/companies";[m
+ import { getWeeklyStories } from "@/lib/instagram";[m
+ import { getViewerHeroState } from "@/lib/viewerState";[m
+[36m@@ -8,9 +7,8 @@[m [mimport HomeClientV2 from "./HomeClientV2";[m
+ export const dynamic = "force-dynamic";[m
+ [m
+ export default async function HomePage() {[m
+[31m-  const [artists, performances, companies, weeklyStories, viewer] = await Promise.all([[m
+[32m+[m[32m  const [artists, companies, weeklyStories, viewer] = await Promise.all([[m
+     getPublishedArtists(),[m
+[31m-    getUpcomingPerformances(14),[m
+     getPublishedCompanies(),[m
+     getWeeklyStories(),[m
+     getViewerHeroState(),[m
+[36m@@ -19,7 +17,6 @@[m [mexport default async function HomePage() {[m
+   return ([m
+     <HomeClientV2[m
+       initialArtists={artists}[m
+[31m-      initialPerformances={performances}[m
+       initialCompanies={companies}[m
+       initialWeeklyStories={weeklyStories}[m
+       isLoggedIn={viewer.isLoggedIn}[m
+[1mdiff --git a/components/home/ArtistSupportSection.tsx b/components/home/ArtistSupportSection.tsx[m
+[1mindex 099adfd..a336824 100644[m
+[1m--- a/components/home/ArtistSupportSection.tsx[m
+[1m+++ b/components/home/ArtistSupportSection.tsx[m
+[36m@@ -10,12 +10,12 @@[m [minterface SupportItem {[m
+ }[m
+ [m
+ const ITEMS: SupportItem[] = [[m
+[31m-  { title: "나만의 포트폴리오 페이지", note: "지금까지의 작품과 이력이 한 페이지에 남습니다." },[m
+[31m-  { title: "하나의 링크로 활동 공유", note: "필요할 때 최신 포트폴리오를 바로 전달합니다." },[m
+[31m-  { title: "활동 기록 계속 쌓기", note: "새 작품과 공연을 기존 기록에 이어서 더합니다." },[m
+[31m-  { title: "AI로 자료 초안 정리", note: "흩어진 자료를 빠르게 정리해 기록을 시작합니다.", premium: true },[m
+[31m-  { title: "다가오는 활동 반영", note: "새 공연과 작품이 포트폴리오에 빠르게 이어집니다.", premium: true },[m
+[31m-  { title: "포트폴리오 정기 관리", note: "새로운 활동이 생길 때마다 계속 최신 상태로 관리합니다.", premium: true },[m
+[32m+[m[32m  { title: "나만의 포트폴리오 페이지", note: "작품과 활동 이력을 보기 좋은 한 페이지로 정리해요." },[m
+[32m+[m[32m  { title: "링크 하나로 간편하게 공유", note: "지원·협업·홍보가 필요한 순간, 최신 포트폴리오를 바로 보내요." },[m
+[32m+[m[32m  { title: "새로운 활동을 계속 기록", note: "공연과 작품이 생길 때마다 직접 추가하며 나만의 기록을 쌓아요." },[m
+[32m+[m[32m  { title: "AI로 포트폴리오 빠르게 완성", note: "흩어진 이력과 자료를 AI가 정리해 포트폴리오 초안을 만들어드려요.", premium: true },[m
+[32m+[m[32m  { title: "포트폴리오 정기 업데이트", note: "새로운 공연과 작품이 생길 때마다 POPOK이 확인해 최신 상태로 관리해드려요.", premium: true },[m
+[32m+[m[32m  { title: "인스타그램 홍보 콘텐츠 제작·업로드", note: "새로운 공연과 활동을 콘텐츠로 제작해 POPOK 공식 인스타그램에 소개해드려요.", premium: true },[m
+ ];[m
+ [m
+ export default function ArtistSupportSection() {[m
+[36m@@ -42,7 +42,7 @@[m [mexport default function ArtistSupportSection() {[m
+           POPOK 아티스트가 되면[m
+         </h2>[m
+         <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", fontWeight: 600, lineHeight: 1.65, margin: 0 }}>[m
+[31m-          등록하면 작품과 이력을 바로 기록할 수 있어요[m
+[32m+[m[32m          작품과 이력을 한곳에 기록하고, 더 많은 사람과 새로운 기회에 연결할 수 있어요.[m
+         </p>[m
+       </motion.div>[m
+ [m
+[36m@@ -92,7 +92,7 @@[m [mexport default function ArtistSupportSection() {[m
+                     background: "var(--accent)", padding: "2px 7px", borderRadius: "6px",[m
+                     letterSpacing: "0.02em",[m
+                   }}>[m
+[31m-                    POPOK Artist[m
+[32m+[m[32m                    Premium[m
+                   </span>[m
+                 )}[m
+               </div>[m
+[36m@@ -129,4 +129,3 @@[m [mexport default function ArtistSupportSection() {[m
+     </section>[m
+   );[m
+ }[m
+[31m-[m
+[1mdi

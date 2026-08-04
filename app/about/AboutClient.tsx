@@ -6,7 +6,6 @@ import HowWeWorkSection from "@/components/about/HowWeWorkSection";
 import RoadmapSection from "@/components/about/RoadmapSection";
 import AboutPremiumSection from "@/components/about/AboutPremiumSection";
 import TeamSection from "@/components/about/TeamSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
 import FAQSection from "@/components/FAQSection";
 
 export default function AboutClient() {
@@ -18,7 +17,6 @@ export default function AboutClient() {
       <RoadmapSection />
       <AboutPremiumSection />
       <TeamSection />
-      <TestimonialsSection />
       <FAQSection />
     </div>
   );
