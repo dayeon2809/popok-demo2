@@ -7,7 +7,7 @@ export type ProfileReviewLink = {
 };
 
 const WORK_SOURCE_KEYS = [
-  "source", "sources", "review", "reviewLink", "article", "articleUrl",
+  "source", "sources", "review", "reviews", "reviewLink", "reviewLinks", "review_links", "article", "articleUrl",
   "\uAE30\uC0AC", "\uB9AC\uBDF0", "\uCD9C\uCC98",
 ] as const;
 

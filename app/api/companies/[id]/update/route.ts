@@ -57,6 +57,8 @@ export async function PUT(
 
     if (body.bio_short !== undefined) updateData.bio_short = typeof body.bio_short === "string" ? body.bio_short.trim() || null : null;
     if (body.bio !== undefined) updateData.bio = typeof body.bio === "string" ? body.bio.trim() || null : null;
+    if (body.bio_en !== undefined) updateData.bio_en = typeof body.bio_en === "string" ? body.bio_en.trim() || null : null;
+    if (body.introduction_en !== undefined) updateData.introduction_en = typeof body.introduction_en === "string" ? body.introduction_en.trim() || null : null;
     if (body.brand_color !== undefined) updateData.brand_color = typeof body.brand_color === "string" ? body.brand_color.trim() || null : null;
 
     // NOTE: logo_url / hero_image_url are NOT accepted here — confirmed absent

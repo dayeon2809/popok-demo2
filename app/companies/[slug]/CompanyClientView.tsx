@@ -8,6 +8,8 @@ import { analytics } from "@/lib/analytics";
 import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
 import type { RepresentativeArtistResult } from "@/lib/companies";
 import type { InstagramStory } from "@/lib/instagram";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath } from "@/lib/i18n/locale";
 
 // Import custom company components
 import CompanyCardStack from "@/components/company/CompanyCardStack";
@@ -45,6 +47,7 @@ export default function CompanyClientView({
 }: CompanyClientViewProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { language } = useLanguage();
 
   if (process.env.NODE_ENV !== "production") {
     console.log("[CompanyClientView representative]", {
@@ -268,6 +271,12 @@ export default function CompanyClientView({
         {/* 9. RELATED DISCOVERY */}
         <RelatedCompanies currentCompany={adaptedCompany as any} relatedCompanies={relatedCompanies} />
 
+      </div>
+
+      <div style={{ textAlign: "center", padding: "24px" }}>
+        <Link href={localizePath(pathname, language === "en" ? "ko" : "en")} hrefLang={language === "en" ? "ko" : "en"} style={{ color: "var(--navy)", fontSize: "0.82rem", fontWeight: 800 }}>
+          {language === "en" ? "한국어로 보기" : "View in English"}
+        </Link>
       </div>
 
       {/* 11. SEND PORTFOLIO CTA */}

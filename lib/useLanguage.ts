@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { LOCALE_COOKIE, localeFromPathname, localizePath, type Locale } from "./i18n/locale";
 
-export type Language = "ko" | "en";
+export type Language = Locale;
 
 export const LANGUAGE_STORAGE_KEY = "popok-language";
 export const LANGUAGE_CHANGE_EVENT = "popok-language-change";
@@ -14,14 +16,19 @@ function getStoredLanguage(): Language {
 
 export function setStoredLanguage(language: Language) {
   window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  document.cookie = `${LOCALE_COOKIE}=${language}; Path=/; Max-Age=31536000; SameSite=Lax`;
   window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: language }));
 }
 
 export function useLanguage() {
-  const [language, setLanguageState] = useState<Language>("ko");
+  const pathname = usePathname();
+  const router = useRouter();
+  const routeLanguage = localeFromPathname(pathname || "/");
+  const [language, setLanguageState] = useState<Language>(routeLanguage);
 
   useEffect(() => {
-    setLanguageState(getStoredLanguage());
+    setLanguageState(routeLanguage);
+    if (typeof window !== "undefined") setStoredLanguage(routeLanguage);
 
     const handleLanguageChange = (event: Event) => {
       const next = (event as CustomEvent<Language>).detail || getStoredLanguage();
@@ -40,11 +47,12 @@ export function useLanguage() {
       window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
       window.removeEventListener("storage", handleStorage);
     };
-  }, []);
+  }, [routeLanguage]);
 
   const setLanguage = (next: Language) => {
     setLanguageState(next);
     setStoredLanguage(next);
+    router.push(localizePath(pathname || "/", next));
   };
 
   return { language, setLanguage };

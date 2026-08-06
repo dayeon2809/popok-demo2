@@ -12,6 +12,9 @@ export interface EditableWork {
   year?: string | number | null;
   description?: string;
   role?: string;
+  title_en?: string;
+  description_en?: string;
+  role_en?: string;
   image_url?: string;
   images?: string[];
   video_url?: string;
@@ -34,6 +37,7 @@ interface WorksCardEditorProps {
 export default function WorksCardEditor({ works, canAdd, countLabel, uploadingSlot, onAdd, onRemove, onChange, onImageUpload, onImageRemove, onReorder }: WorksCardEditorProps) {
   const [selectedId, setSelectedId] = useState<string | null>(works[0]?.id || null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [contentLanguage, setContentLanguage] = useState<"ko" | "en">("ko");
   const editorRef = useRef<HTMLDivElement>(null);
   const selectedIndex = Math.max(0, works.findIndex((work) => work.id === selectedId));
   const selectedWork = works[selectedIndex];
@@ -85,7 +89,11 @@ export default function WorksCardEditor({ works, canAdd, countLabel, uploadingSl
 
       <div ref={editorRef} className={styles.editorPane}>
         {!selectedWork ? <div className={styles.empty}><span>📁</span><p>등록된 작품이 없습니다.</p>{canAdd && <button type="button" onClick={addWork}>＋ 첫 작품 추가</button>}</div> : <>
-          <div className={styles.editorHeader}><div><span>작품 {selectedIndex + 1}</span><h3>{selectedWork.title.trim() || "새 작품"}</h3></div><button type="button" className={styles.deleteButton} onClick={removeSelected}>✕ 작품 삭제</button></div>
+          <div className={styles.editorHeader}><div><span>작품 {selectedIndex + 1}</span><h3>{selectedWork.title.trim() || selectedWork.title_en?.trim() || "새 작품"}</h3></div><button type="button" className={styles.deleteButton} onClick={removeSelected}>✕ 작품 삭제</button></div>
+          <div role="tablist" aria-label="작품 입력 언어" style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+            {(["ko", "en"] as const).map((locale) => <button key={locale} type="button" role="tab" aria-selected={contentLanguage === locale} onClick={() => setContentLanguage(locale)} style={{ border: "1px solid var(--border)", borderRadius: 999, padding: "7px 14px", background: contentLanguage === locale ? "var(--navy)" : "#fff", color: contentLanguage === locale ? "#fff" : "var(--navy)", fontWeight: 800 }}>{locale === "ko" ? "한국어" : "English"}</button>)}
+          </div>
+          {contentLanguage === "ko" ? <>
           <div className={styles.twoColumns}>
             <label>작품명 (Title)<input type="text" value={selectedWork.title} onChange={(event) => onChange(selectedIndex, "title", event.target.value)} placeholder="작품 제목" /></label>
             <label>제작년도 (Year)<input type="text" value={selectedWork.year || ""} onChange={(event) => onChange(selectedIndex, "year", event.target.value)} placeholder="예: 2025" /></label>
@@ -93,6 +101,13 @@ export default function WorksCardEditor({ works, canAdd, countLabel, uploadingSl
             <label>작품 영상 URL<input type="text" value={selectedWork.video_url || ""} onChange={(event) => onChange(selectedIndex, "video_url", event.target.value)} placeholder="https://..." /></label>
           </div>
           <label className={styles.description}>작품 소개 요약 (Description)<textarea value={selectedWork.description || ""} onChange={(event) => onChange(selectedIndex, "description", event.target.value)} placeholder="작품에 대한 간단한 설명을 입력해 주세요." rows={4} /></label>
+          </> : <>
+            <div className={styles.twoColumns}>
+              <label>Work title (optional)<input lang="en" type="text" value={selectedWork.title_en || ""} onChange={(event) => onChange(selectedIndex, "title_en", event.target.value)} placeholder="e.g. The Weight of Air" /></label>
+              <label>Role (optional)<input lang="en" type="text" value={selectedWork.role_en || ""} onChange={(event) => onChange(selectedIndex, "role_en", event.target.value)} placeholder="e.g. Choreographer and Performer" /></label>
+            </div>
+            <label className={styles.description}>Description in English (optional)<textarea lang="en" value={selectedWork.description_en || ""} onChange={(event) => onChange(selectedIndex, "description_en", event.target.value)} placeholder="Describe the work for international presenters and partners." rows={4} /></label>
+          </>}
           <label className={styles.description}>작품 크레딧 (Credits)<textarea value={typeof selectedWork.credits === "string" ? selectedWork.credits : creditsToDisplayString(selectedWork)} onChange={(event) => onChange(selectedIndex, "credits", event.target.value)} placeholder={"자유롭게 입력해 주세요.\n예) 공동창작 및 출연 김예술, 이포퐄 / 인터뷰 홍길동"} rows={4} /><span style={{ fontSize: ".68rem", color: "var(--ink-muted)", fontWeight: 600 }}>문장이나 메모처럼 자유롭게 입력해도 저장할 때 역할별 크레딧으로 정리됩니다.</span></label>
           <div className={styles.imagesHeader}><strong>작품 이미지</strong><span>{normalizeWorkImages(selectedWork).length} / 4장 · 첫 이미지가 대표 썸네일로 표시됩니다.</span></div>
           <div className={styles.imageGrid}>{Array.from({ length: 4 }, (_, imageIndex) => imageIndex).map((imageIndex) => {

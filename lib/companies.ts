@@ -10,6 +10,8 @@ export function mapCompanyRowToCompany(record: any): Company {
     id: String(record.id),
     name: record.name || "",
     name_en: record.name_en || null,
+    bio_en: record.bio_en || null,
+    introduction_en: record.introduction_en || null,
     slug: record.slug || null,
     status: record.status || "draft",
     verified: !!record.verified,

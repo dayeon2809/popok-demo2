@@ -18,6 +18,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   // 1=identity 2=genre&role 3=AI(optional) 4=complete
   const [step, setStep] = useState(1);
   const [displayName, setDisplayName] = useState(defaultDisplayName || "");
+  const [displayNameEn, setDisplayNameEn] = useState("");
   const [username, setUsername] = useState("");
   const [usernameTouched, setUsernameTouched] = useState(false);
   const [genre, setGenre] = useState("");
@@ -150,6 +151,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           displayName,
+          name_en: displayNameEn,
           username,
           genre,
           role,
@@ -279,6 +281,16 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               }}
               autoFocus
             />
+
+            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
+              English name (optional)
+            </label>
+            <input lang="en" type="text" value={displayNameEn} onChange={(e) => setDisplayNameEn(e.target.value)} placeholder="e.g. Gildong Hong" style={{ width: "100%", padding: "14px 16px", border: "1.5px solid var(--border)", borderRadius: "12px", fontSize: "1rem", marginBottom: "20px" }} />
+
+            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
+              English name (optional)
+            </label>
+            <input lang="en" type="text" value={displayNameEn} onChange={(e) => setDisplayNameEn(e.target.value)} placeholder="e.g. Gildong Hong" style={{ width: "100%", padding: "14px 16px", border: "1.5px solid var(--border)", borderRadius: "12px", fontSize: "1rem", marginBottom: "20px" }} />
 
             <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
               공개 주소 (popok.kr/주소) — 활동명으로 자동 채워드려요, 원하면 수정하세요.

@@ -48,6 +48,9 @@ export interface ArtistAffiliation {
   name?: string;
   position?: string;
   year?: string;
+  title_en?: string;
+  organization_en?: string;
+  description_en?: string;
 }
 
 export function normalizeArtistAffiliations(value: unknown): ArtistAffiliation[] {
@@ -56,10 +59,16 @@ export function normalizeArtistAffiliations(value: unknown): ArtistAffiliation[]
       const name = typeof item.name === "string" ? item.name.trim() : "";
       const position = typeof item.position === "string" ? item.position.trim() : "";
       const year = item.year !== undefined && item.year !== null ? String(item.year).trim() : "";
+      const title_en = typeof item.title_en === "string" ? item.title_en.trim() : "";
+      const organization_en = typeof item.organization_en === "string" ? item.organization_en.trim() : "";
+      const description_en = typeof item.description_en === "string" ? item.description_en.trim() : "";
       return {
         name: name || undefined,
         position: position || undefined,
         year: year || undefined,
+        title_en: title_en || undefined,
+        organization_en: organization_en || undefined,
+        description_en: description_en || undefined,
       };
     })
     .filter((a) => a.name);
@@ -75,6 +84,9 @@ export interface ArtistAward {
   title?: string;
   organization?: string;
   result?: string;
+  title_en?: string;
+  organization_en?: string;
+  description_en?: string;
 }
 
 /**
@@ -108,17 +120,23 @@ export function normalizeArtistAwards(value: unknown): ArtistAward[] {
         const title = typeof item.title === "string" ? item.title.trim() : "";
         const organization = typeof item.organization === "string" ? item.organization.trim() : "";
         const result = typeof item.result === "string" ? item.result.trim() : "";
+        const title_en = typeof item.title_en === "string" ? item.title_en.trim() : "";
+        const organization_en = typeof item.organization_en === "string" ? item.organization_en.trim() : "";
+        const description_en = typeof item.description_en === "string" ? item.description_en.trim() : "";
         return {
           year: year || undefined,
           title: title || undefined,
           organization: organization || undefined,
           result: result || undefined,
+          title_en: title_en || undefined,
+          organization_en: organization_en || undefined,
+          description_en: description_en || undefined,
         };
       }
 
       return {};
     })
-    .filter((a) => a.year || a.title || a.organization || a.result);
+    .filter((a) => a.year || a.title || a.organization || a.result || a.title_en || a.organization_en || a.description_en);
 }
 export const cleanArtistAwardsForPayload = normalizeArtistAwards;
 
@@ -183,6 +201,8 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
     name_en,
     bio,
     bio_short,
+    bio_en,
+    introduction_en,
     genre,
     role,
     profile_image_url,
@@ -210,6 +230,8 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
   if (name_en !== undefined) updateData.name_en = name_en;
   if (bio !== undefined) updateData.bio = bio;
   if (bio_short !== undefined) updateData.bio_short = bio_short;
+  if (bio_en !== undefined) updateData.bio_en = typeof bio_en === "string" ? bio_en.trim() || null : null;
+  if (introduction_en !== undefined) updateData.introduction_en = typeof introduction_en === "string" ? introduction_en.trim() || null : null;
   if (genre !== undefined) updateData.genre = genre;
   if (role !== undefined) updateData.role = role;
   if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
@@ -238,4 +260,3 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
 
   return { updateData };
 }
-

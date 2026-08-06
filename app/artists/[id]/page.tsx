@@ -32,6 +32,8 @@ import AiDiscoveryPrototype from "@/components/ai/AiDiscoveryPrototype";
 import RelatedArtists from "@/components/RelatedArtists";
 import VideoEmbed from "@/components/VideoEmbed";
 import { useFireOnceInView } from "@/hooks/useFireOnceInView";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath, localizedCareer, localizedRecord, localizedWork } from "@/lib/i18n/locale";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -97,6 +99,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const [relatedArtists, setRelatedArtists] = useState<any[]>([]);
   const digitalCardFlip = useAutoFlip();
   const pathname = usePathname();
+  const { language } = useLanguage();
   const worksSectionRef = useFireOnceInView<HTMLElement>(() => {
     const key = artist?.recordId || artist?.id;
     if (key) analytics.workGalleryScroll(key);
@@ -193,7 +196,13 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         if (err) {
           setError(`${err}${detail ? ` (${detail})` : ""}`);
         } else {
-          setArtist(data);
+          setArtist({
+            ...localizedRecord(data, language),
+            works: Array.isArray(data?.works) ? data.works.map((work: any) => localizedWork(work, language)) : [],
+            affiliations: Array.isArray(data?.affiliations) ? data.affiliations.map((item: any) => localizedCareer(item, language)) : [],
+            awards: Array.isArray(data?.awards) ? data.awards.map((item: any) => localizedCareer(item, language)) : [],
+            competitions: Array.isArray(data?.competitions) ? data.competitions.map((item: any) => localizedCareer(item, language)) : [],
+          });
         }
         setLoading(false);
       })
@@ -201,7 +210,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
         setError(`네트워크 오류: ${String(e)}`);
         setLoading(false);
       });
-  }, [id]);
+  }, [id, language]);
 
   // Record a view — only after the artist has actually loaded in a real
   // browser (never during SSR/prefetch, and never for a draft/missing
@@ -990,6 +999,9 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               Story Image
             </button>
           </div>
+          <Link href={localizePath(pathname, language === "en" ? "ko" : "en")} hrefLang={language === "en" ? "ko" : "en"} style={{ marginBottom: 20, color: "var(--navy)", fontSize: "0.82rem", fontWeight: 800 }}>
+            {language === "en" ? "한국어로 보기" : "View in English"}
+          </Link>
           <ConnectCta
             target={portfolioTarget}
             viewerState={portfolioViewerState}

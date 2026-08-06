@@ -46,7 +46,7 @@ async function syncOwnerRepresentative(companyId: string, ownerId: string | null
 // written by app/api/admin/companies/[id]/source-file, never this generic PATCH.
 const EDITABLE_FIELDS = [
   "name", "name_en", "slug", "verified", "owner_id", "genre", "category", "city_or_region",
-  "bio_short", "bio", "profile_image_url", "motion_video_url", "email",
+  "bio_short", "bio", "bio_en", "introduction_en", "profile_image_url", "motion_video_url", "email",
   "instagram", "website", "portfolio_url",
   "profile_image_urls", "representative_images", "current_activity", "works", "awards", "review_links", "links",
   "source_text",

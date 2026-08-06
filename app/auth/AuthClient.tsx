@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath } from "@/lib/i18n/locale";
 
 interface AuthClientProps {
   returnPath?: string | null;
@@ -10,6 +12,8 @@ interface AuthClientProps {
 
 export default function AuthClient({ returnPath }: AuthClientProps) {
   const router = useRouter();
+  const { language } = useLanguage();
+  const en = language === "en";
   const [loading, setLoading] = useState(false);
   const [profileType, setProfileType] = useState<"artist" | "organization" | null>(null);
   const supabase = createBrowserSupabaseClient();
@@ -78,7 +82,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
             lineHeight: 1.5,
             fontWeight: 500
           }}>
-            <>당신의 포트폴리오를, 더 가볍게.<br />하나의 링크로 예술적 작업을 연결하세요.</>
+            {en ? <>A lighter way to build your portfolio.<br />Share your artistic practice with one link.</> : <>당신의 포트폴리오를, 더 가볍게.<br />하나의 링크로 예술적 작업을 연결하세요.</>}
           </p>
         </div>
 
@@ -86,7 +90,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
         {profileType === null && (
           <div style={{ textAlign: "left" }}>
             <p style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--ink-muted)", marginBottom: "12px" }}>
-              어떤 POPOK를 시작하시나요?
+              {en ? "Which POPOK profile would you like to create?" : "어떤 POPOK를 시작하시나요?"}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               <button
@@ -101,8 +105,8 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
                   transition: "all 0.15s ease"
                 }}
               >
-                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--navy)", marginBottom: "4px" }}>개인 예술가 (Artist)</div>
-                <div style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>무용수, 안무가, 기획자 등 개인 창작자는 Google 로그인 후 직접 등록합니다.</div>
+                <div style={{ fontWeight: 800, fontSize: "0.95rem", color: "var(--navy)", marginBottom: "4px" }}>{en ? "Individual artist" : "개인 예술가 (Artist)"}</div>
+                <div style={{ fontSize: "0.8rem", color: "var(--ink-muted)" }}>{en ? "Independent artists can sign in with Google and create their own profile." : "무용수, 안무가, 기획자 등 개인 창작자는 Google 로그인 후 직접 등록합니다."}</div>
               </button>
               <button
                 onClick={() => setProfileType("organization")}
@@ -157,7 +161,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
                     <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.59.1-1.17.282-1.706V4.962H.957A8.997 8.997 0 000 9c0 1.455.348 2.83 1.018 4.073l2.946-2.367z" fill="#FBBC05"/>
                     <path d="M9 3.58c1.32 0 2.507.454 3.44 1.346l2.582-2.581C13.463.896 11.426 0 9 0 5.42 0 2.38 2.045 1.018 5.038l2.946 2.367C4.672 5.239 6.656 3.58 9 3.58z" fill="#EA4335"/>
                   </svg>
-                  <span>Google로 계속하기</span>
+                  <span>{en ? "Continue with Google" : "Google로 계속하기"}</span>
                 </>
               )}
             </button>
@@ -176,7 +180,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
                 cursor: loading ? "not-allowed" : "pointer"
               }}
             >
-              ← 이전으로
+              {en ? "← Back" : "← 이전으로"}
             </button>
           </div>
         )}
@@ -198,7 +202,7 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
               POPOK 운영팀이 인터뷰를 통해 단체 포트폴리오를 함께 구축해드립니다.
             </div>
             <button
-              onClick={() => router.push("/organizations/apply")}
+              onClick={() => router.push(localizePath("/organizations/apply", language))}
               className="btn-lime"
               style={{
                 width: "100%",

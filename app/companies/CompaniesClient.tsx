@@ -7,6 +7,8 @@ import type { Company } from "@/types";
 import { analytics } from "@/lib/analytics";
 import CompanyCard from "@/components/CompanyCard";
 import CompanyRecommendationQuiz from "@/components/company/CompanyRecommendationQuiz";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizedRecord, localizedWork, localizePath } from "@/lib/i18n/locale";
 
 const CATEGORIES = [
   { key: "all", label: "ALL" },
@@ -16,6 +18,9 @@ const CATEGORIES = [
 ];
 
 export default function CompaniesClient({ companies }: { companies: Company[] }) {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const displayCompanies = companies.map((company) => ({ ...localizedRecord(company as any, language), works: Array.isArray(company.works) ? company.works.map((work) => localizedWork(work, language)) : [] })) as Company[];
   const [query, setQuery] = useState("");
   const [selectedField, setSelectedField] = useState("all");
 
@@ -29,7 +34,7 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
     return () => clearTimeout(timer);
   }, [query]);
 
-  const filteredCompanies = companies.filter((c) => {
+  const filteredCompanies = displayCompanies.filter((c) => {
     // Category filter
     if (selectedField !== "all") {
       if (c.category !== selectedField) return false;
@@ -73,7 +78,7 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
           POPOK DIRECTORY
         </span>
         <h1 className="display" style={{ fontSize: "clamp(2rem, 5vw, 3rem)", color: "var(--navy)", fontWeight: 900, letterSpacing: "-0.03em" }}>
-          단체
+          {en ? "Companies" : "단체"}
         </h1>
       </div>
 
@@ -110,7 +115,7 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="이름, 장르, 대표작 등으로 단체 검색..."
+            placeholder={en ? "Search by name, genre, or work…" : "이름, 장르, 대표작 등으로 단체 검색..."}
             style={{
               width: "100%",
               padding: "12px 20px",
@@ -125,14 +130,14 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
 
       {filteredCompanies.length === 0 ? (
         <div>
-          <EmptyState message="검색 결과가 없습니다." />
+          <EmptyState message={en ? "No companies found." : "검색 결과가 없습니다."} />
           {query === "" && selectedField === "all" && (
             <div style={{ textAlign: "center", marginTop: "-20px", marginBottom: "40px" }}>
               <p style={{ fontSize: "0.85rem", color: "var(--ink-muted)", marginBottom: "16px" }}>
-                POPOK에 단체의 작품과 활동을 기록해보세요.
+                {en ? "Document your company's work and practice on POPOK." : "POPOK에 단체의 작품과 활동을 기록해보세요."}
               </p>
               <Link
-                href="/organizations/apply"
+                href={localizePath("/organizations/apply", language)}
                 className="btn-lime"
                 style={{
                   display: "inline-block",
@@ -143,7 +148,7 @@ export default function CompaniesClient({ companies }: { companies: Company[] })
                   fontWeight: 800,
                 }}
               >
-                단체 포퐄 등록하기 →
+                {en ? "Create a company portfolio →" : "단체 포퐄 등록하기 →"}
               </Link>
             </div>
           )}

@@ -13,6 +13,9 @@ export interface NormalizedWork {
   year: string;
   description: string;
   role?: string;
+  title_en?: string;
+  description_en?: string;
+  role_en?: string;
   image_url: string;
   images: string[];
   video_url: string;
@@ -142,6 +145,9 @@ export function normalizeWork(work: any): NormalizedWork {
     title: (work?.title || "").trim(),
     year: work?.year ? String(work.year).trim() : "",
     role: work?.role ? String(work.role).trim() : "",
+    title_en: work?.title_en ? String(work.title_en).trim() : "",
+    description_en: work?.description_en ? String(work.description_en).trim() : "",
+    role_en: work?.role_en ? String(work.role_en).trim() : "",
     description: work?.description ? String(work.description).trim() : "",
     video_url: work?.video_url ? String(work.video_url).trim() : (work?.videoUrl || work?.video || ""),
     images,
@@ -166,6 +172,9 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
   const title = (work?.title || "").trim();
   const year = work?.year ? String(work.year).trim() : "";
   const role = work?.role ? String(work.role).trim() : "";
+  const title_en = work?.title_en ? String(work.title_en).trim() : "";
+  const description_en = work?.description_en ? String(work.description_en).trim() : "";
+  const role_en = work?.role_en ? String(work.role_en).trim() : "";
   const description = work?.description ? String(work.description).trim() : "";
   const video_url = work?.video_url ? String(work.video_url).trim() : (work?.videoUrl || work?.video || "").trim();
   const images = normalizeWorkImages(work);
@@ -173,7 +182,7 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
   const dashboard_image_order = Array.isArray(work?.dashboard_image_order) ? work.dashboard_image_order.filter((url: unknown): url is string => typeof url === "string" && Boolean(url.trim())) : undefined;
   const sort_order = Number.isFinite(Number(work?.sort_order)) ? Number(work.sort_order) : undefined;
 
-  const hasContent = Boolean(title) || Boolean(description) || Boolean(role) || Boolean(video_url) || images.length > 0 || credits.length > 0;
+  const hasContent = Boolean(title) || Boolean(description) || Boolean(role) || Boolean(title_en) || Boolean(description_en) || Boolean(role_en) || Boolean(video_url) || images.length > 0 || credits.length > 0;
   if (!hasContent) return null;
 
   const id = work?.id ? String(work.id) : `work_${Date.now()}_${fallbackIdCounter++}`;
@@ -182,9 +191,12 @@ export function cleanWorkForPayload(work: any): NormalizedWork | null {
   return {
     id,
     title,
+    title_en,
     year,
     role,
+    role_en,
     description,
+    description_en,
     video_url,
     images,
     image_url,

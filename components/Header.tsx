@@ -8,6 +8,8 @@ import { useLanguage, type Language } from "@/lib/useLanguage";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import { analytics } from "@/lib/analytics";
 import { SHOW_PREMIUM_UI } from "@/lib/featureFlags";
+import { localizePath, stripLocalePrefix } from "@/lib/i18n/locale";
+import { getMessages } from "@/lib/i18n/messages";
 
 type NavItem = { href: string; label: Record<Language, string>; match: (pathname: string) => boolean };
 
@@ -54,6 +56,8 @@ export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const { language, setLanguage } = useLanguage();
+  const messages = getMessages(language);
+  const routePathname = stripLocalePrefix(pathname);
   const [user, setUser] = useState<any>(null);
   const supabase = createBrowserSupabaseClient();
 
@@ -133,7 +137,7 @@ export default function Header() {
         maxWidth: "1120px", margin: "0 auto", padding: "0 32px", height: "56px",
         display: "grid", gridTemplateColumns: "auto 1fr auto", alignItems: "center", gap: "24px",
       }}>
-        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
+        <Link href={localizePath("/", language)} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "4px" }}>
           <div style={{ fontWeight: 900, fontSize: "1.3rem", color: "var(--navy)", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
             POPOK
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
@@ -142,11 +146,11 @@ export default function Header() {
 
         <div className="header-nav-links" style={{ display: "flex", justifyContent: "center", gap: "28px" }}>
           {NAV_ITEMS.map((item) => {
-            const active = item.match(pathname);
+            const active = item.match(routePathname);
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href.startsWith("/#") ? `${localizePath("/", language)}${item.href.slice(1)}` : localizePath(item.href, language)}
                 onClick={() => {
                   if (item.href === "/popok-artist") {
                     analytics.premiumClick("header");
@@ -161,7 +165,7 @@ export default function Header() {
                   paddingBottom: "2px",
                 }}
               >
-                {item.label[language]}
+                {item.href === "/about" ? messages.nav.about : item.href === "/artists" ? messages.nav.artists : item.href === "/companies" ? messages.nav.companies : item.href === "/calendar" ? messages.nav.performances : item.href === "/#faq" ? messages.nav.faq : item.label[language]}
               </Link>
             );
           })}
@@ -188,6 +192,7 @@ export default function Header() {
                     type="button"
                     onClick={() => setLanguage(item)}
                     aria-pressed={active}
+                    aria-label={item === "ko" ? "한국어로 보기" : "View in English"}
                     style={{
                       border: 0,
                       background: "transparent",
@@ -265,11 +270,11 @@ export default function Header() {
             }}
           >
           {NAV_ITEMS.map((item) => {
-            const active = item.match(pathname);
+            const active = item.match(routePathname);
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={item.href.startsWith("/#") ? `${localizePath("/", language)}${item.href.slice(1)}` : localizePath(item.href, language)}
                 onClick={() => {
                   setMenuOpen(false);
                   if (item.href === "/popok-artist") {

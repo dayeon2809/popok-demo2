@@ -4,6 +4,7 @@ import Link from "next/link";
 import { analytics } from "@/lib/analytics";
 import type { Artist } from "@/types";
 import FlippingArtistCard from "@/components/home/FlippingArtistCard";
+import { useLanguage } from "@/lib/useLanguage";
 
 interface HomeHeroV2Props {
   ctaHref: string;
@@ -20,6 +21,8 @@ interface HomeHeroV2Props {
 // multi-language strings, and a secondary CTA that scrolls to the feed
 // instead of linking to /about.
 export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, heroArtist }: HomeHeroV2Props) {
+  const { language } = useLanguage();
+  const en = language === "en";
   const heroImage = heroArtist?.profile_image_url || heroArtist?.profileImage || heroArtist?.profile_image_urls?.[0] || "";
   return (
     <section className="home-section home-hero-section" style={{
@@ -47,7 +50,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
           }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent-dark)", display: "inline-block" }} />
             <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--navy)", letterSpacing: "0.02em" }}>
-              베타 기간 모든 기능 무료
+              {en ? "All features are free during beta" : "베타 기간 모든 기능 무료"}
             </span>
           </div>
 
@@ -59,8 +62,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
             fontWeight: 900,
             letterSpacing: "-0.04em",
           }}>
-            당신의 모든 기록이,<br />
-            <span className="seen-highlight">기회가 되도록.</span>
+            {en ? <>Turn every creative record<br /><span className="seen-highlight">into an opportunity.</span></> : <>당신의 모든 기록이,<br /><span className="seen-highlight">기회가 되도록.</span></>}
           </h1>
 
           <p style={{
@@ -71,7 +73,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
             maxWidth: "480px",
             marginBottom: "28px",
           }}>
-            예술인의 모든 활동을 한 곳에. 포트폴리오를 만들고, 작업을 기록하며, 새로운 협업 기회를 만나보세요.
+            {en ? "Bring your artistic practice together in one place. Build a portfolio, document your work, and connect with new collaborators." : "예술인의 모든 활동을 한 곳에. 포트폴리오를 만들고, 작업을 기록하며, 새로운 협업 기회를 만나보세요."}
           </p>
 
           <div className="cta-row" style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
@@ -90,7 +92,7 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
                 gap: "8px",
               }}
             >
-              무료로 내 POPOK 만들기 <span style={{ fontSize: "1.05rem" }}>→</span>
+              {en ? "Create my POPOK for free" : "무료로 내 POPOK 만들기"} <span style={{ fontSize: "1.05rem" }}>→</span>
             </Link>
             <button
               type="button"
@@ -107,12 +109,12 @@ export default function HomeHeroV2({ ctaHref, isLoggedIn, onSecondaryClick, hero
                 fontFamily: "inherit",
               }}
             >
-              아티스트 탐색하기
+              {en ? "Explore artists" : "아티스트 탐색하기"}
             </button>
           </div>
 
           <p style={{ marginTop: "14px", fontSize: "0.78rem", color: "var(--ink-faint)", fontWeight: 600 }}>
-            가입 무료 · 현재 모든 기능 무료 · 약 3분 소요
+            {en ? "Free to join · All features currently free · About 3 minutes" : "가입 무료 · 현재 모든 기능 무료 · 약 3분 소요"}
           </p>
         </div>
 

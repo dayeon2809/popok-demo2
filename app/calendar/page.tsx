@@ -5,6 +5,7 @@ import { getCompanyDetailHref } from "@/lib/companyRoute";
 import { getWeeklyPerformanceRange, overlapsDateRange, parseDateOnly } from "@/lib/date";
 import type { Performance } from "@/types";
 import { deduplicatePerformances } from "@/lib/deduplicatePerformances";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -32,11 +33,11 @@ function formatShortDate(dt: Date): string {
   return `${dt.getUTCMonth() + 1}/${dt.getUTCDate()}`;
 }
 
-function formatWeekLabel(weekIndex: number, weekStart: Date, weekEnd: Date): string {
+function formatWeekLabel(weekIndex: number, weekStart: Date, weekEnd: Date, en = false): string {
   const range = `${formatShortDate(weekStart)}~${formatShortDate(weekEnd)}`;
-  if (weekIndex === 0) return `이번주 (${range})`;
-  if (weekIndex === 1) return `다음주 (${range})`;
-  return `${weekIndex}주 후 (${range})`;
+  if (weekIndex === 0) return `${en ? "This week" : "이번주"} (${range})`;
+  if (weekIndex === 1) return `${en ? "Next week" : "다음주"} (${range})`;
+  return en ? `In ${weekIndex} weeks (${range})` : `${weekIndex}주 후 (${range})`;
 }
 
 interface WeekGroup {
@@ -141,6 +142,7 @@ function isNationalGugakCenterPerformance(performance: Performance): boolean {
 // + link-resolution the homepage's V1 performance carousel used
 // (lib/performances.ts, lib/performanceLinks.ts, lib/date.ts).
 export default async function CalendarPage() {
+  const en = (await headers()).get("x-popok-locale") === "en";
   const { weekStart } = getWeeklyPerformanceRange(new Date());
   const calendarEnd = addDaysUTC(weekStart, 27).toISOString().slice(0, 10);
   const performances = deduplicatePerformances(
@@ -156,23 +158,23 @@ export default async function CalendarPage() {
         <h1 className="display" style={{
           fontSize: "clamp(1.8rem, 4vw, 2.4rem)", color: "var(--navy)", fontWeight: 950, letterSpacing: "-0.03em", margin: "0 0 10px",
         }}>
-          다가오는 공연
+          {en ? "Upcoming performances" : "다가오는 공연"}
         </h1>
         <p style={{ fontSize: "0.92rem", color: "var(--ink-muted)" }}>
-          POPOK 아티스트와 단체의 공연 일정을 주별로 확인하세요.
+          {en ? "Browse upcoming performances by POPOK artists and companies." : "POPOK 아티스트와 단체의 공연 일정을 주별로 확인하세요."}
         </p>
       </div>
 
       {weeks.length === 0 ? (
         <div style={{ margin: "0 24px", padding: "80px 24px", textAlign: "center", border: "1px dashed var(--border)", borderRadius: "8px", color: "var(--ink-muted)", fontSize: "0.9rem" }}>
-          예정된 공연이 없습니다.
+          {en ? "No upcoming performances." : "예정된 공연이 없습니다."}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "36px" }}>
           {weeks.map((week) => (
             <section key={week.weekIndex}>
               <h2 style={{ fontSize: "1.05rem", fontWeight: 900, color: "var(--navy)", margin: "0 0 14px", padding: "0 24px" }}>
-                {formatWeekLabel(week.weekIndex, week.weekStart, week.weekEnd)}
+                {formatWeekLabel(week.weekIndex, week.weekStart, week.weekEnd, en)}
               </h2>
               <div
                 className="no-scrollbar"

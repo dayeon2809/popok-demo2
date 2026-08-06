@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import "./discovery.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { localizePath, type Locale } from "@/lib/i18n/locale";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL("https://popok-demo.vercel.app"),
 
   title: "POPOK — Artist's Domain",
@@ -34,9 +36,33 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export async function generateMetadata(): Promise<Metadata> {
+  const headerStore = await headers();
+  const locale = (headerStore.get("x-popok-locale") === "en" ? "en" : "ko") as Locale;
+  const pathname = headerStore.get("x-popok-pathname") || "/";
+  const title = locale === "en" ? "POPOK — Artist Portfolios" : String(baseMetadata.title);
+  const description = locale === "en"
+    ? "Discover performing artists, companies, works, and portfolios from Korea."
+    : String(baseMetadata.description);
+  return {
+    ...baseMetadata,
+    metadataBase: new URL("https://popok.kr"),
+    title,
+    description,
+    alternates: {
+      canonical: localizePath(pathname, locale),
+      languages: { ko: localizePath(pathname, "ko"), en: localizePath(pathname, "en") },
+    },
+    openGraph: { ...baseMetadata.openGraph, locale: locale === "en" ? "en_US" : "ko_KR", url: localizePath(pathname, locale), title, description },
+    twitter: { ...baseMetadata.twitter, title, description },
+  };
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headerStore = await headers();
+  const locale = headerStore.get("x-popok-locale") === "en" ? "en" : "ko";
   return (
-    <html lang="ko" style={{ background: "#FFFFFF" }}>
+    <html lang={locale} style={{ background: "#FFFFFF" }}>
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link

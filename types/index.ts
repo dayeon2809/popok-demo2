@@ -36,6 +36,8 @@ export interface Artist {
   // 하위 호환성을 위해 유지하는 기존 필드들
   recordId?: string;                  // Airtable 내부 record ID
   name_en?: string;
+  bio_en?: string | null;
+  introduction_en?: string | null;
   type?: ArtistType;
   bio_short?: string;
   representative_work?: string;
@@ -88,6 +90,9 @@ export interface Work {
   year?: string | number | null;
   description?: string;
   role?: string;
+  title_en?: string;
+  description_en?: string;
+  role_en?: string;
   image_url?: string;
   video_url?: string;
   videoUrl?: string;
@@ -127,6 +132,8 @@ export interface Company {
   id: string;
   name: string;
   name_en?: string | null;
+  bio_en?: string | null;
+  introduction_en?: string | null;
   slug?: string | null;
   owner_id?: string | null;
   status?: "draft" | "published" | "archived" | string;

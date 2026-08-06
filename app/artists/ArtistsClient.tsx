@@ -9,6 +9,8 @@ import { LoadingSpinner, ErrorMessage, EmptyState } from "@/components/ui/States
 import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
 import { isYouTubeUrl } from "@/lib/youtube";
 import type { ArtistFilter, ArtistField, ArtistType, Artist } from "@/types";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath, localizedRecord, localizedWork } from "@/lib/i18n/locale";
 
 const CATEGORIES = [
   { key: "all", label: "ALL" },
@@ -58,6 +60,8 @@ function getChosung(name: string): string {
 }
 
 export default function ArtistsClient() {
+  const { language } = useLanguage();
+  const en = language === "en";
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -133,7 +137,8 @@ export default function ArtistsClient() {
     field: getApiFieldFilter() as ArtistField | "all",
   };
 
-  const { artists, loading, error } = useArtists(filter);
+  const { artists: rawArtists, loading, error } = useArtists(filter);
+  const artists = rawArtists.map((artist) => ({ ...localizedRecord(artist as any, language), works: Array.isArray(artist.works) ? artist.works.map((work: any) => localizedWork(work, language)) : [] })) as Artist[];
 
   // RAF auto-scroll — active for visible rows
   useEffect(() => {
@@ -445,7 +450,7 @@ export default function ArtistsClient() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="이름, 장르, 대표작 등으로 검색..."
+            placeholder={en ? "Search by name, genre, or work…" : "이름, 장르, 대표작 등으로 검색..."}
             style={{
               width: "100%",
               padding: "12px 16px",
@@ -559,11 +564,11 @@ export default function ArtistsClient() {
 
       {/* ── ARTISTS DIRECTORY RESULT LIST ── */}
       {loading ? (
-        <LoadingSpinner message="아티스트 목록을 불러오는 중..." />
+        <LoadingSpinner message={en ? "Loading artists…" : "아티스트 목록을 불러오는 중..."} />
       ) : error ? (
         <ErrorMessage message={error} />
       ) : totalResultsCount === 0 ? (
-        <EmptyState message="검색 결과가 없습니다." />
+        <EmptyState message={en ? "No artists found." : "검색 결과가 없습니다."} />
       ) : (
         <div style={{ minHeight: "400px" }}>
           {selectedField === "all" ? (
@@ -595,6 +600,7 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
   cleanInstagramHandle: (url: string | null | undefined) => string;
   getGenreLabel: (genre?: string) => string;
 }) {
+  const { language } = useLanguage();
   const worksList = artist.works ?? artist.portfolio_works;
   const firstWork = Array.isArray(worksList) ? (worksList[0] as any) : null;
   const previewUrl = artist.motion_video_url || "";
@@ -610,7 +616,7 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
       }}
     >
       <Link
-        href={`/artists/${artist.id}`}
+        href={localizePath(`/artists/${artist.id}`, language)}
         style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}
       >
         <div

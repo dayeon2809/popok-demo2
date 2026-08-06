@@ -57,6 +57,9 @@ interface Work {
   year?: string | number | null;
   description?: string;
   role?: string;
+  title_en?: string;
+  description_en?: string;
+  role_en?: string;
   image_url?: string;
   images?: string[];
   video_url?: string;
@@ -73,6 +76,8 @@ interface Artist {
   role: string;
   bio?: string | null;
   bio_short?: string | null;
+  bio_en?: string | null;
+  introduction_en?: string | null;
   profile_image_url?: string | null;
   profile_image_urls?: string[];
   motion_video_url?: string | null;
@@ -194,6 +199,9 @@ export default function MyPopokClient({
   const [role, setRole] = useState(artist.role || "");
   const [bio, setBio] = useState(artist.bio || "");
   const [bioShort, setBioShort] = useState(artist.bio_short || "");
+  const [bioEn, setBioEn] = useState(artist.bio_en || "");
+  const [introductionEn, setIntroductionEn] = useState(artist.introduction_en || "");
+  const [profileContentLanguage, setProfileContentLanguage] = useState<"ko" | "en">("ko");
   const [profileImageUrl, setProfileImageUrl] = useState(artist.profile_image_url || "");
   const [profileImageUrls, setProfileImageUrls] = useState<string[]>(() =>
     normalizeArtistRepresentativeImages(artist.profile_image_urls)
@@ -602,6 +610,8 @@ export default function MyPopokClient({
           role: role.trim(),
           bio: bio.trim() || null,
           bio_short: bioShort.trim() || null,
+          bio_en: bioEn.trim() || null,
+          introduction_en: introductionEn.trim() || null,
           profile_image_url: profileImageUrl || null,
           profile_image_urls: cleanArtistRepresentativeImagesForPayload(profileImageUrls),
           motion_video_url: motionVideoUrl.trim() || null,
@@ -1331,7 +1341,10 @@ export default function MyPopokClient({
                   2. 프로필 소개 및 비디오 URL
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-                  <label style={labelStyle}>
+                  <div role="tablist" aria-label="프로필 입력 언어" style={{ display: "flex", gap: 6 }}>
+                    {(["ko", "en"] as const).map((locale) => <button key={locale} type="button" role="tab" aria-selected={profileContentLanguage === locale} onClick={() => setProfileContentLanguage(locale)} style={{ border: "1px solid var(--border)", borderRadius: 999, padding: "8px 15px", background: profileContentLanguage === locale ? "var(--navy)" : "#fff", color: profileContentLanguage === locale ? "#fff" : "var(--navy)", fontWeight: 800 }}>{locale === "ko" ? "한국어" : "English"}</button>)}
+                  </div>
+                  {profileContentLanguage === "ko" ? <><label style={labelStyle}>
                     한 줄 소개 요약
                     <textarea
                       value={bioShort}
@@ -1351,7 +1364,10 @@ export default function MyPopokClient({
                       rows={5}
                       style={textareaStyle}
                     />
-                  </label>
+                  </label></> : <>
+                    <label style={labelStyle}>Short introduction in English (optional)<textarea lang="en" value={introductionEn} onChange={(e) => setIntroductionEn(e.target.value)} placeholder="e.g. Seoul-based choreographer exploring movement and memory." rows={2} style={textareaStyle} /></label>
+                    <label style={labelStyle}>Full biography in English (optional)<textarea lang="en" value={bioEn} onChange={(e) => setBioEn(e.target.value)} placeholder="Write your biography for international presenters, venues, and collaborators." rows={5} style={textareaStyle} /></label>
+                  </>}
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }} className="form-row-2col">
                     <label style={labelStyle}>
@@ -1463,6 +1479,9 @@ export default function MyPopokClient({
                         <input style={inputStyle} placeholder="소속/프로젝트명" value={item.name || ""} onChange={(e) => set({ ...item, name: e.target.value })} />
                         <input style={inputStyle} placeholder="역할/직책 (선택)" value={item.position || ""} onChange={(e) => set({ ...item, position: e.target.value })} />
                         <input style={inputStyle} placeholder="연도 (선택)" value={item.year || ""} onChange={(e) => set({ ...item, year: e.target.value })} />
+                        <input lang="en" style={inputStyle} placeholder="Organization / project in English (optional)" value={item.organization_en || ""} onChange={(e) => set({ ...item, organization_en: e.target.value })} />
+                        <input lang="en" style={inputStyle} placeholder="Role / title in English (optional)" value={item.title_en || ""} onChange={(e) => set({ ...item, title_en: e.target.value })} />
+                        <textarea lang="en" style={textareaStyle} placeholder="Description in English (optional)" value={item.description_en || ""} onChange={(e) => set({ ...item, description_en: e.target.value })} rows={2} />
                       </div>
                     )}
                   />
@@ -1502,6 +1521,8 @@ export default function MyPopokClient({
                         <input style={inputStyle} placeholder="수상·선정명" value={item.title || ""} onChange={(e) => set({ ...item, title: e.target.value })} />
                         <input style={inputStyle} placeholder="주최 기관 (선택)" value={item.organization || ""} onChange={(e) => set({ ...item, organization: e.target.value })} />
                         <input style={inputStyle} placeholder="결과 (선택, 예: 대상)" value={item.result || ""} onChange={(e) => set({ ...item, result: e.target.value })} />
+                        <input lang="en" style={inputStyle} placeholder="Award title in English (optional)" value={item.title_en || ""} onChange={(e) => set({ ...item, title_en: e.target.value })} />
+                        <input lang="en" style={inputStyle} placeholder="Organization in English (optional)" value={item.organization_en || ""} onChange={(e) => set({ ...item, organization_en: e.target.value })} />
                       </div>
                     )}
                   />
@@ -1860,4 +1881,3 @@ const textareaStyle: React.CSSProperties = {
   resize: "vertical",
   lineHeight: 1.5,
 };
-

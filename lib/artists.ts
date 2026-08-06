@@ -88,6 +88,8 @@ export function mapArtistRowToArtist(record: any): Artist {
     slug: record.slug || record.id || "",
     name: record.name || "",
     name_en: record.name_en || null,
+    bio_en: record.bio_en || null,
+    introduction_en: record.introduction_en || null,
     /** @deprecated Deletion candidate in future database migration */
     company: record.company || null,
     bio: record.bio || record.bio_short || `${record.name} 작가의 공식 POPOK 디지털 명함 카드 페이지입니다.`,

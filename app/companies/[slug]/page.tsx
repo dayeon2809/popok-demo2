@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import type { Metadata } from "next";
 import {
   getPublishedCompanyById,
   getPublishedCompanyBySlug,
@@ -9,10 +11,28 @@ import { getUpcomingPerformancesByCompanyId } from "@/lib/performances";
 import { getPortfolioRequestViewerState } from "@/lib/portfolioRequestsServer";
 import { getCompanyStories } from "@/lib/instagram";
 import CompanyClientView from "./CompanyClientView";
+import { localizedCareer, localizedRecord, localizedWork, type Locale, localizePath } from "@/lib/i18n/locale";
 
 export const dynamic = "force-dynamic";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function loadCompany(slug: string) {
+  const decoded = decodeURIComponent(slug).trim();
+  return UUID_RE.test(decoded) ? getPublishedCompanyById(decoded) : getPublishedCompanyBySlug(decoded);
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const company = await loadCompany(slug);
+  if (!company) return {};
+  const headerStore = await headers();
+  const locale = (headerStore.get("x-popok-locale") === "en" ? "en" : "ko") as Locale;
+  const display = localizedRecord(company as any, locale);
+  const pathname = `/companies/${encodeURIComponent(company.slug || company.id)}`;
+  const description = display.bio_short || display.bio || company.bio_short || company.bio || "POPOK company portfolio";
+  return { title: `${display.name} | POPOK`, description, alternates: { canonical: localizePath(pathname, locale), languages: { ko: localizePath(pathname, "ko"), en: localizePath(pathname, "en") } }, openGraph: { title: `${display.name} | POPOK`, description, url: localizePath(pathname, locale) } };
+}
 
 export default async function CompanyDetailPage({
   params,
@@ -20,11 +40,7 @@ export default async function CompanyDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const decoded = decodeURIComponent(slug).trim();
-
-  const company = UUID_RE.test(decoded)
-    ? await getPublishedCompanyById(decoded)
-    : await getPublishedCompanyBySlug(decoded);
+  const company = await loadCompany(slug);
 
   if (!company) {
     notFound();
@@ -78,10 +94,19 @@ export default async function CompanyDetailPage({
         ]
       : [];
   const artists = [...fetchedArtists, ...mockArtists];
+  const headerStore = await headers();
+  const locale = (headerStore.get("x-popok-locale") === "en" ? "en" : "ko") as Locale;
+  const displayCompany = {
+    ...localizedRecord(company as any, locale),
+    works: Array.isArray(company.works) ? company.works.map((work: any) => localizedWork(work, locale)) : [],
+    awards: Array.isArray(company.awards) ? company.awards.map((item: any) => localizedCareer(item, locale)) : [],
+    history: Array.isArray(company.history) ? company.history.map((item: any) => localizedCareer(item, locale)) : [],
+    current_activity: Array.isArray(company.current_activity) ? company.current_activity.map((item: any) => typeof item === "object" ? localizedCareer(item, locale) : item) : [],
+  };
 
   return (
     <CompanyClientView
-      company={company}
+      company={displayCompany}
       artists={artists}
       relatedCompanies={relatedCompanies}
       upcomingPerformances={upcomingPerformances}

@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       displayName,
+      name_en,
       username,
       genre,
       role,
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
     const newArtist = {
       owner_id: user.id,
       name: displayName.trim(),
+      name_en: typeof name_en === "string" ? name_en.trim() || null : null,
       slug: cleanUsername,
       genre: genre.trim(),
       role: role.trim(),

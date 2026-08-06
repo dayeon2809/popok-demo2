@@ -6,6 +6,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import type { Company } from "@/types";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath } from "@/lib/i18n/locale";
 
 interface CompanyCardProps {
   company: Company;
@@ -32,6 +34,7 @@ function getContrastTextColor(hexColor: string): string {
 }
 
 export default function CompanyCard({ company }: CompanyCardProps) {
+  const { language } = useLanguage();
   // `profile_image_url` is often a hotlinked external URL — it can 404 or
   // time out at render time even though it was valid when saved. Fall back
   // to the in-code placeholder (no on-disk asset dependency) rather than
@@ -41,7 +44,7 @@ export default function CompanyCard({ company }: CompanyCardProps) {
 
   return (
     <Link
-      href={getCompanyDetailHref(company.slug || company.id)}
+      href={localizePath(getCompanyDetailHref(company.slug || company.id), language)}
       style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}
     >
       <div className="company-showcase-card">

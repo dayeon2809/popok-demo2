@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/useLanguage";
 import { analytics } from "@/lib/analytics";
 import { POPOK_INSTAGRAM_PROFILE_URL } from "@/lib/instagram";
 import { SHOW_PREMIUM_UI } from "@/lib/featureFlags";
+import { localizePath } from "@/lib/i18n/locale";
 
 export default function Footer() {
   const { language } = useLanguage();
@@ -28,7 +29,7 @@ export default function Footer() {
       }}>
         {/* Left column */}
         <div className="footer-inner" style={{ display: "flex", flexDirection: "column" }}>
-          <Link href="/" onClick={() => analytics.footerPopokClicked()} style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "12px" }}>
+          <Link href={localizePath("/", language)} onClick={() => analytics.footerPopokClicked()} style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "12px" }}>
             <div style={{ fontWeight: 900, fontSize: "1.3rem", color: "var(--navy)", letterSpacing: "-0.04em", display: "flex", alignItems: "center", gap: "2px" }}>
               POPOK
               <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
@@ -43,9 +44,9 @@ export default function Footer() {
         <div style={{ display: "flex", gap: "60px", flexWrap: "wrap" }}>
           <div className="footer-inner" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <span className="mono" style={{ fontSize: "0.68rem", color: "var(--ink)", fontWeight: 700, letterSpacing: "0.1em" }}>POPOK</span>
-            <Link href="/about" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>About</Link>
-            <Link href="/artists" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Artists</Link>
-            <Link href="/companies" style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Companies</Link>
+            <Link href={localizePath("/about", language)} style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>About</Link>
+            <Link href={localizePath("/artists", language)} style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Artists</Link>
+            <Link href={localizePath("/companies", language)} style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Companies</Link>
             {SHOW_PREMIUM_UI && (
               <Link href="/popok-artist" onClick={() => analytics.premiumClick("footer")} style={{ textDecoration: "none", fontSize: "0.875rem", color: "var(--ink-muted)", fontWeight: 500 }}>Premium</Link>
             )}

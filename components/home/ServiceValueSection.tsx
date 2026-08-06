@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/useLanguage";
 
 const VALUES = [
   { meta: "01", title: "기록", body: "작품, 공연, 이력을 한곳에 차곡차곡 남깁니다." },
@@ -10,6 +11,14 @@ const VALUES = [
 ];
 
 export default function ServiceValueSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const values = en ? [
+    { meta: "01", title: "Document", body: "Keep your works, performances, and career in one place." },
+    { meta: "02", title: "Portfolio", body: "Present scattered materials as one coherent page." },
+    { meta: "03", title: "Keep building", body: "Add each new activity to your existing record." },
+    { meta: "04", title: "Share", body: "Share your current practice with a single link." },
+  ] : VALUES;
   return (
     <section className="home-section service-value-section" style={{
       maxWidth: "1120px",
@@ -31,7 +40,7 @@ export default function ServiceValueSection() {
           margin: "0 0 32px",
         }}
       >
-        기록부터 다음 활동까지 한곳에서
+        {en ? "From documentation to your next opportunity" : "기록부터 다음 활동까지 한곳에서"}
       </motion.h2>
 
       <div className="service-value-grid" style={{
@@ -40,7 +49,7 @@ export default function ServiceValueSection() {
         gap: "0",
         borderTop: "1px solid var(--border)",
       }}>
-        {VALUES.map((v, i) => (
+        {values.map((v, i) => (
           <motion.div 
             key={v.title} 
             initial={{ opacity: 0, y: 20 }}
@@ -68,4 +77,3 @@ export default function ServiceValueSection() {
     </section>
   );
 }
-

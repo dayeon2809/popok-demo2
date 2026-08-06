@@ -16,6 +16,8 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import FooterCTA from "@/components/home/FooterCTA";
 import { getHeroCta } from "@/lib/heroCta";
 import { analytics } from "@/lib/analytics";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath } from "@/lib/i18n/locale";
 
 // V2 Home — PROTOTYPE (feature/home-feed-v2 only). Replaces the sectioned
 // landing page (Hero / service intro / artist carousel / company carousel /
@@ -56,6 +58,8 @@ export default function HomeClientV2({
   myArtistSlug,
 }: HomeClientV2Props) {
   const router = useRouter();
+  const { language } = useLanguage();
+  const en = language === "en";
   const [selectedField, setSelectedField] = useState("all");
   const [feedSeed, setFeedSeed] = useState(0);
 
@@ -70,6 +74,7 @@ export default function HomeClientV2({
   // About page Hero use (lib/heroCta.ts), just with the conversion-focused
   // copy below overriding the label.
   const heroCta = getHeroCta(isLoggedIn, myArtistSlug);
+  const localizedHeroCta = { ...heroCta, href: localizePath(heroCta.href, language) };
 
   // "작업 올리기" — checks login before anything else (section 3 of the
   // upload-first brief). Logged out: through /auth's existing safe-redirect
@@ -133,19 +138,19 @@ export default function HomeClientV2({
 
   return (
     <div style={{ background: "#FFFFFF", minHeight: "100vh" }}>
-      <HomeHeroV2 ctaHref={heroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} heroArtist={heroArtist} />
+      <HomeHeroV2 ctaHref={localizedHeroCta.href} isLoggedIn={isLoggedIn} onSecondaryClick={handleScrollToFeed} heroArtist={heroArtist} />
 
       <ServiceValueSection />
 
       <div id="home-explore" style={{ padding: "28px 16px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* 아티스트 / 단체 토글 버튼 */}
         <div className="discovery-toggle-container" role="tablist" aria-label="탐색 대상">
-          <button type="button" role="tab" aria-selected={exploreMode === "artists"} className={`discovery-toggle-btn ${exploreMode === "artists" ? "active" : ""}`} onClick={() => { setExploreMode("artists"); setSelectedField("all"); }}>아티스트</button>
-          <button type="button" role="tab" aria-selected={exploreMode === "companies"} className={`discovery-toggle-btn ${exploreMode === "companies" ? "active" : ""}`} onClick={() => { setExploreMode("companies"); setSelectedField("all"); }}>단체</button>
+          <button type="button" role="tab" aria-selected={exploreMode === "artists"} className={`discovery-toggle-btn ${exploreMode === "artists" ? "active" : ""}`} onClick={() => { setExploreMode("artists"); setSelectedField("all"); }}>{en ? "Artists" : "아티스트"}</button>
+          <button type="button" role="tab" aria-selected={exploreMode === "companies"} className={`discovery-toggle-btn ${exploreMode === "companies" ? "active" : ""}`} onClick={() => { setExploreMode("companies"); setSelectedField("all"); }}>{en ? "Companies" : "단체"}</button>
         </div>
 
 
-        {exploreMode === "artists" ? <AiDiscoveryPrototype variant="bar" placeholder="어떤 작업이나 아티스트를 찾고 있나요?" /> : <CompanyDiscoveryPrototype companies={publishedCompanies} placeholder="어떤 작업이나 단체를 찾고 있나요?" />}
+        {exploreMode === "artists" ? <AiDiscoveryPrototype variant="bar" placeholder={en ? "What kind of work or artist are you looking for?" : "어떤 작업이나 아티스트를 찾고 있나요?"} /> : <CompanyDiscoveryPrototype companies={publishedCompanies} placeholder={en ? "What kind of company are you looking for?" : "어떤 작업이나 단체를 찾고 있나요?"} />}
 
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center", marginTop: "16px" }}>
           <button
@@ -179,8 +184,8 @@ export default function HomeClientV2({
       </div>
 
       <HomeVisualFeed
-        items={feedItems}
-        ctaHref={heroCta.href}
+        items={feedItems.map((item) => ({ ...item, href: item.href ? localizePath(item.href, language) : null }))}
+        ctaHref={localizedHeroCta.href}
         onCtaClick={() => analytics.homeCreatePopokClicked("feed_inline", isLoggedIn)}
       />
 
@@ -198,7 +203,7 @@ export default function HomeClientV2({
           boxShadow: "0 8px 24px rgba(23,20,17,0.2)",
         }}
       >
-        내 포퐄 만들기
+        {en ? "Create my POPOK" : "내 포퐄 만들기"}
       </button>
 
       <HomeUseCasesSection />
@@ -206,13 +211,13 @@ export default function HomeClientV2({
       <TestimonialsSection />
 
       <FooterCTA
-        freeBadge="현재 작품 등록, AI 이력 정리, 포트폴리오 공유까지 모든 기능을 무료로 사용할 수 있어요."
-        title={<>흩어진 예술 활동을<br />하나의 포트폴리오로.</>}
-        description="이력서만 올리면 AI가 활동 이력을 정리하고, 나만의 POPOK 페이지를 만들어드려요."
-        primaryLabel="무료로 내 POPOK 만들기"
-        primaryHref={heroCta.href}
+        freeBadge={en ? "Creating works, organizing your profile, and sharing your portfolio are currently free." : "현재 작품 등록, AI 이력 정리, 포트폴리오 공유까지 모든 기능을 무료로 사용할 수 있어요."}
+        title={en ? <>Bring your artistic practice<br />into one portfolio.</> : <>흩어진 예술 활동을<br />하나의 포트폴리오로.</>}
+        description={en ? "Upload your CV to organize your practice and create your own POPOK page." : "이력서만 올리면 AI가 활동 이력을 정리하고, 나만의 POPOK 페이지를 만들어드려요."}
+        primaryLabel={en ? "Create my POPOK for free" : "무료로 내 POPOK 만들기"}
+        primaryHref={localizedHeroCta.href}
         onPrimaryClick={() => analytics.homeCreatePopokClicked("final_cta", isLoggedIn)}
-        secondaryLabel="아티스트 둘러보기"
+        secondaryLabel={en ? "Explore artists" : "아티스트 둘러보기"}
       />
 
       <div style={{ maxWidth: "1120px", margin: "0 auto" }}>

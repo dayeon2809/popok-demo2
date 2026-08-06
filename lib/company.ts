@@ -50,6 +50,9 @@ export interface CompanyAward {
   title?: string;
   organization?: string;
   result?: string;
+  title_en?: string;
+  organization_en?: string;
+  description_en?: string;
 }
 
 /**
@@ -86,17 +89,23 @@ export function normalizeCompanyAwards(value: unknown): CompanyAward[] {
         const title = typeof item.title === "string" ? item.title.trim() : "";
         const organization = typeof item.organization === "string" ? item.organization.trim() : "";
         const result = typeof item.result === "string" ? item.result.trim() : "";
+        const title_en = typeof item.title_en === "string" ? item.title_en.trim() : "";
+        const organization_en = typeof item.organization_en === "string" ? item.organization_en.trim() : "";
+        const description_en = typeof item.description_en === "string" ? item.description_en.trim() : "";
         return {
           year: year || undefined,
           title: title || undefined,
           organization: organization || undefined,
           result: result || undefined,
+          title_en: title_en || undefined,
+          organization_en: organization_en || undefined,
+          description_en: description_en || undefined,
         };
       }
 
       return {};
     })
-    .filter((a) => a.year || a.title || a.organization || a.result);
+    .filter((a) => a.year || a.title || a.organization || a.result || a.title_en || a.organization_en || a.description_en);
 }
 
 /** Same normalization, used specifically at the save boundary — kept as a

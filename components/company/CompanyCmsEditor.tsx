@@ -156,6 +156,8 @@ interface PayloadFields {
   coreValues: string[];
   bioShort: string;
   bio: string;
+  bioEn: string;
+  introductionEn: string;
   brandColor: string;
   profileImageUrl: string;
   representativeImages: string[];
@@ -186,6 +188,8 @@ const buildPayload = (f: PayloadFields) => ({
   core_values: f.coreValues,
   bio_short: f.bioShort.trim(),
   bio: f.bio.trim(),
+  bio_en: f.bioEn.trim(),
+  introduction_en: f.introductionEn.trim(),
   brand_color: f.brandColor.trim(),
   profile_image_url: f.profileImageUrl.trim(),
   representative_images: normalizeCompanyRepresentativeImages(f.representativeImages),
@@ -216,6 +220,8 @@ const snapshotFromCompany = (c: any) =>
     coreValues: Array.isArray(c.core_values) ? c.core_values : Array.isArray(c.values) ? c.values : [],
     bioShort: c.bio_short || "",
     bio: c.bio || "",
+    bioEn: c.bio_en || "",
+    introductionEn: c.introduction_en || "",
     brandColor: c.brand_color || "#C8EE52",
     profileImageUrl: c.profile_image_url || "",
     representativeImages: normalizeCompanyRepresentativeImages(c.representative_images),
@@ -273,6 +279,9 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
   const [coreValuesInput, setCoreValuesInput] = useState((company.core_values || company.values || []).join(", "));
   const [bioShort, setBioShort] = useState(company.bio_short || "");
   const [bio, setBio] = useState(company.bio || "");
+  const [bioEn, setBioEn] = useState(company.bio_en || "");
+  const [introductionEn, setIntroductionEn] = useState(company.introduction_en || "");
+  const [identityLanguage, setIdentityLanguage] = useState<"ko" | "en">("ko");
 
   // Media state: Single Representative Image
   const [profileImageUrl, setProfileImageUrl] = useState(company.profile_image_url || "");
@@ -572,6 +581,8 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
       coreValues: parsedValues,
       bioShort,
       bio,
+      bioEn,
+      introductionEn,
       brandColor,
       profileImageUrl,
       representativeImages,
@@ -1020,7 +1031,10 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
         {/* ── Tab 2: Identity & Bio ── */}
         {activeTab === "identity" && (
           <div style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "680px" }}>
-            <div>
+            <div role="tablist" aria-label="단체 소개 입력 언어" style={{ display: "flex", gap: 6 }}>
+              {(["ko", "en"] as const).map((locale) => <button key={locale} type="button" role="tab" aria-selected={identityLanguage === locale} onClick={() => setIdentityLanguage(locale)} style={{ border: "1px solid var(--border)", borderRadius: 999, padding: "8px 15px", background: identityLanguage === locale ? "var(--navy)" : "#fff", color: identityLanguage === locale ? "#fff" : "var(--navy)", fontWeight: 800 }}>{locale === "ko" ? "한국어" : "English"}</button>)}
+            </div>
+            {identityLanguage === "ko" ? <><div>
               <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>
                 한 줄 소개 (Short Bio)
               </label>
@@ -1044,7 +1058,10 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
                 placeholder="단체의 설립 배경, 예술적 지향점, 주요 활동 방향에 대한 상세 설명..."
                 style={{ width: "100%", padding: "12px 14px", fontSize: "0.88rem", borderRadius: "6px", border: "1px solid var(--border)", lineHeight: 1.6, resize: "vertical" }}
               />
-            </div>
+            </div></> : <>
+              <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Short introduction in English (optional)</label><input lang="en" type="text" value={introductionEn} onChange={(e) => setIntroductionEn(e.target.value)} placeholder="e.g. A contemporary dance company based in Seoul" style={{ width: "100%", padding: "10px 14px", fontSize: "0.9rem", borderRadius: "6px", border: "1px solid var(--border)" }} /></div>
+              <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Full profile in English (optional)</label><textarea lang="en" rows={6} value={bioEn} onChange={(e) => setBioEn(e.target.value)} placeholder="Introduce your company to international presenters, venues, and partners." style={{ width: "100%", padding: "12px 14px", fontSize: "0.88rem", borderRadius: "6px", border: "1px solid var(--border)", lineHeight: 1.6, resize: "vertical" }} /></div>
+            </>}
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
               <div>

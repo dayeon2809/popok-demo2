@@ -2,6 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mapProfileSourceUrlsToReviewLinks } from "../lib/profileReviewLinks.ts";
 
+test("작품 내부 reviewLinks를 언론 보도로 올리고 작품명을 연결한다", () => {
+  const result = mapProfileSourceUrlsToReviewLinks({
+    works: [{ title: "옛날 옛적에", year: 2016, reviewLinks: [{ title: "춤웹진 리뷰 - 고블린파티 〈옛날 옛적에〉", url: "http://koreadance.kr/review/303" }] }],
+  });
+  assert.deepEqual(result.review_links, [{ title: "춤웹진 리뷰 - 고블린파티 〈옛날 옛적에〉", publication: "춤웹진 리뷰 - 고블린파티 〈옛날 옛적에〉", work: "옛날 옛적에", url: "http://koreadance.kr/review/303", year: "2016" }]);
+});
+
 test("maps work.source to the actual review_links schema", () => {
   const result = mapProfileSourceUrlsToReviewLinks({ works: [{ title: "노동 (勞動)", year: 2022, source: "https://thepreview.co.kr/article/1" }] });
   assert.deepEqual(result.review_links, [{ title: "thepreview.co.kr", publication: "thepreview.co.kr", work: "노동 (勞動)", url: "https://thepreview.co.kr/article/1", year: "2022" }]);
