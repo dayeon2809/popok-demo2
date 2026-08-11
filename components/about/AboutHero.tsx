@@ -1,8 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/useLanguage";
 
 export default function AboutHero() {
+  const { language } = useLanguage();
+  const en = language === "en";
   return (
     <section 
       className="home-section about-hero-section" 
@@ -75,8 +78,8 @@ export default function AboutHero() {
           marginBottom: "32px",
         }}
       >
-        활동이 사라지지 않도록,<br />
-        <span className="seen-highlight" style={{ paddingBottom: "4px" }}>기록의 방식</span>을 다시 생각합니다.
+        {en ? "So your work is never lost," : "활동이 사라지지 않도록,"}<br />
+        {en ? <>we rethink <span className="seen-highlight" style={{ paddingBottom: "4px" }}>how it is documented</span>.</> : <><span className="seen-highlight" style={{ paddingBottom: "4px" }}>기록의 방식</span>을 다시 생각합니다.</>}
       </motion.h1>
 
       <motion.p 
@@ -92,8 +95,7 @@ export default function AboutHero() {
           fontWeight: 500,
         }}
       >
-        POPOK은 예술가의 활동이 한 번의 소개로 끝나지 않고,<br className="desktop-only-break" />
-        시간 속에 차곡차곡 쌓여야 한다는 생각에서 시작했습니다.
+        {en ? <>POPOK began with the belief that an artist&apos;s work should not end with a single introduction,<br className="desktop-only-break" /> but should build into a lasting record over time.</> : <>POPOK은 예술가의 활동이 한 번의 소개로 끝나지 않고,<br className="desktop-only-break" /> 시간 속에 차곡차곡 쌓여야 한다는 생각에서 시작했습니다.</>}
       </motion.p>
 
       {/* Elegant design line decoration */}

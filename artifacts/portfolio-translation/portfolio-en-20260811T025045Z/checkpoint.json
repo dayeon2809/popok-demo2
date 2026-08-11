@@ -1,0 +1,15 @@
+{
+  "job_id": "portfolio-en-20260811T025045Z",
+  "created_at": "2026-08-11T02:50:45.486Z",
+  "updated_at": "2026-08-11T02:50:45.486Z",
+  "model": "gpt-4.1-mini",
+  "rule_version": "2026-08-06.1",
+  "stage": "scanned",
+  "scan_file": "C:\\Users\\dayeo\\Downloads\\popok-landing\\artifacts\\portfolio-translation\\portfolio-en-20260811T025045Z\\scan.json",
+  "translations": {},
+  "failures": {},
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  }
+}

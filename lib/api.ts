@@ -18,6 +18,7 @@ function buildArtistsUrl(filter: ArtistFilter): string {
   if (filter.query?.trim())              params.set("query", filter.query.trim());
   if (filter.type  && filter.type  !== "all") params.set("type",  filter.type);
   if (filter.field && filter.field !== "all") params.set("field", filter.field);
+  if (filter.role?.trim()) params.set("role", filter.role.trim());
   const qs = params.toString();
   return `/api/artists${qs ? "?" + qs : ""}`;
 }
@@ -45,7 +46,7 @@ export function useArtists(filter: ArtistFilter = {}) {
     timer.current = setTimeout(() => fetchArtists(filter), delay);
     return () => { if (timer.current) clearTimeout(timer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter.query, filter.type, filter.field]);
+  }, [filter.query, filter.type, filter.field, filter.role]);
 
   return { artists, loading, error, refetch: () => fetchArtists(filter) };
 }

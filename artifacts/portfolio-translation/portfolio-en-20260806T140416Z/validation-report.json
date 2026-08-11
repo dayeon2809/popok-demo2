@@ -1,0 +1,17 @@
+{
+  "job_id": "portfolio-en-20260806T140416Z",
+  "validated_at": "2026-08-07T01:09:34.423Z",
+  "passed": false,
+  "errors": [
+    "production_source_changed_since_scan"
+  ],
+  "assertions": {
+    "database_operation": "SELECT_ONLY",
+    "database_writes": 0,
+    "performances_read": 0,
+    "performances_translated": 0,
+    "source_snapshot_unchanged": false,
+    "existing_english_preserved": true,
+    "result_count_matches_scan": true
+  }
+}

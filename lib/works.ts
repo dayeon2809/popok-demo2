@@ -4,6 +4,7 @@
 
 export interface WorkCredit {
   role: string;
+  role_en?: string;
   names: string[];
 }
 
@@ -58,29 +59,30 @@ export function normalizeWorkImages(work: any): string[] {
  * Resolves a work's credits into a role-grouped structured array.
  */
 export function normalizeWorkCredits(work: any): WorkCredit[] {
-  const roleMap = new Map<string, string[]>();
+  const roleMap = new Map<string, { names: string[]; role_en?: string }>();
 
-  const addPerson = (roleName: string, nameVal: string) => {
+  const addPerson = (roleName: string, nameVal: string, roleEn?: string) => {
     const role = (roleName || "").trim();
     const name = (nameVal || "").trim();
     if (!role || !name) return;
-    if (!roleMap.has(role)) roleMap.set(role, []);
-    const list = roleMap.get(role)!;
-    if (!list.includes(name)) list.push(name);
+    if (!roleMap.has(role)) roleMap.set(role, { names: [], role_en: roleEn?.trim() || undefined });
+    const entry = roleMap.get(role)!;
+    if (!entry.role_en && roleEn?.trim()) entry.role_en = roleEn.trim();
+    if (!entry.names.includes(name)) entry.names.push(name);
   };
 
   if (Array.isArray(work?.credits_list) && work.credits_list.length > 0) {
     work.credits_list.forEach((item: any) => {
-      if (item && item.role && item.name) addPerson(item.role, item.name);
+      if (item && item.role && item.name) addPerson(item.role, item.name, item.role_en);
     });
   } else if (Array.isArray(work?.credits) && work.credits.length > 0) {
     work.credits.forEach((item: any) => {
       if (item && typeof item === "object") {
         const role = item.role || "역할";
         if (Array.isArray(item.names)) {
-          item.names.forEach((n: any) => addPerson(role, String(n)));
+          item.names.forEach((n: any) => addPerson(role, String(n), item.role_en));
         } else if (typeof item.name === "string") {
-          item.name.split(/[,;&]/).forEach((n: string) => addPerson(role, n));
+          item.name.split(/[,;&]/).forEach((n: string) => addPerson(role, n, item.role_en));
         }
       }
     });
@@ -124,7 +126,7 @@ export function normalizeWorkCredits(work: any): WorkCredit[] {
     addPerson("안무/역할", work.role);
   }
 
-  return Array.from(roleMap.entries()).map(([role, names]) => ({ role, names }));
+  return Array.from(roleMap.entries()).map(([role, entry]) => ({ role, names: entry.names, role_en: entry.role_en }));
 }
 
 export function creditsToDisplayString(work: any): string {

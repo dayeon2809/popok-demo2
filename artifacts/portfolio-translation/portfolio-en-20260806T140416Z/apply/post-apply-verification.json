@@ -1,0 +1,22 @@
+{
+  "job_id": "portfolio-en-20260806T140416Z",
+  "verified_at": "2026-08-07T01:31:42.994Z",
+  "passed": true,
+  "apply_log_counts": {
+    "success": 560
+  },
+  "applied_match": 560,
+  "applied_mismatch": 0,
+  "korean_source_changes": 0,
+  "all_korean_projection_changed_records": 0,
+  "existing_preserved": 17,
+  "existing_changed": 0,
+  "skipped_preserved": 51,
+  "skipped_changed": 0,
+  "outside_target_records_changed": 0,
+  "changed_records": 35,
+  "artists_changed": 23,
+  "companies_changed": 12,
+  "performances_read": 0,
+  "performances_changed": 0
+}

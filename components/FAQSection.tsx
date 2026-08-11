@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { faqItems } from "@/data/faq";
+import { faqItems, faqItemsEn } from "@/data/faq";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath } from "@/lib/i18n/locale";
 
 export default function FAQSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const items = en ? faqItemsEn : faqItems;
   const [openIndexes, setOpenIndexes] = useState<Record<number, boolean>>({});
 
   const toggle = (idx: number) => {
@@ -24,12 +29,12 @@ export default function FAQSection() {
             fontWeight: 900,
             letterSpacing: "-0.03em"
           }}>
-            궁금한 점이 있나요?
+            {en ? "Have a question?" : "궁금한 점이 있나요?"}
           </h2>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
-          {faqItems.map((item, idx) => {
+          {items.map((item, idx) => {
             const isOpen = !!openIndexes[idx];
             const answerId = `faq-answer-${idx}`;
             return (
@@ -87,7 +92,7 @@ export default function FAQSection() {
                   {item.ctaHref && (
                     <div style={{ padding: "0 4px 22px" }}>
                       <Link
-                        href={item.ctaHref}
+                        href={localizePath(item.ctaHref, language)}
                         style={{
                           fontSize: "0.85rem",
                           fontWeight: 800,
@@ -97,7 +102,7 @@ export default function FAQSection() {
                           paddingBottom: "2px",
                         }}
                       >
-                        {item.ctaLabel || "자세히 보기 →"}
+                        {item.ctaLabel || (en ? "Learn more →" : "자세히 보기 →")}
                       </Link>
                     </div>
                   )}

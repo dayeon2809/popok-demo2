@@ -1,0 +1,365 @@
+{
+  "job_id": "portfolio-en-20260811T024204Z",
+  "created_at": "2026-08-11T02:50:31.242Z",
+  "artists": [
+    {
+      "id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "created_at": "2026-08-10T12:17:40.168228+00:00",
+      "updated_at": "2026-08-10T23:29:03.844759+00:00",
+      "submission_id": null,
+      "status": "published",
+      "verified": false,
+      "name": "이채희",
+      "name_en": "Chae Hee Lee",
+      "slug": "chaeapric",
+      "claim_code": null,
+      "email": null,
+      "company": null,
+      "role": "기획자",
+      "genre": "공연 예술",
+      "category": null,
+      "artist_type": null,
+      "city_or_region": null,
+      "bio": null,
+      "bio_short": null,
+      "profile_image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/2b834921-f6a4-4a09-9bc0-795f052637c6.webp",
+      "motion_video_url": null,
+      "youtube_url": null,
+      "youtube_preview_start": 0,
+      "youtube_preview_end": 15,
+      "portfolio_url": null,
+      "instagram": "https://www.instagram.com/chaeapric/",
+      "website": null,
+      "works": [
+        {
+          "id": "work_1786364505377_0",
+          "role": "기획",
+          "year": "2026",
+          "title": "<네버랜드 카니발>",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/d24fa6b2-de18-4dd1-bfa9-cfefb44d6354.webp"
+          ],
+          "credits": [
+            {
+              "role": "안무/역할",
+              "names": [
+                "기획"
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/d24fa6b2-de18-4dd1-bfa9-cfefb44d6354.webp",
+          "video_url": "",
+          "description": ""
+        },
+        {
+          "id": "work_1786364505377_1",
+          "role": "기획",
+          "year": "2025",
+          "title": "<묘책>",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/2e4a7c0c-54d4-4cdd-944c-1160625e60c1.webp"
+          ],
+          "credits": [
+            {
+              "role": "안무/역할",
+              "names": [
+                "기획"
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/2e4a7c0c-54d4-4cdd-944c-1160625e60c1.webp",
+          "video_url": "",
+          "description": ""
+        }
+      ],
+      "review_links": [],
+      "is_demo": false,
+      "profile_image_urls": [],
+      "motion_intro": null,
+      "affiliations": [
+        {
+          "name": "Creatives in Motion (한국예술종합학교X뉴욕문화원)",
+          "year": "2026",
+          "position": "인턴 PD"
+        },
+        {
+          "name": "서울국제무용콩쿠르",
+          "year": "2025",
+          "position": "영/국문 아나운서"
+        },
+        {
+          "name": "KB-YMCA 폴라리스+",
+          "year": "2026",
+          "position": "경제 금융 교육 봉사단"
+        },
+        {
+          "name": "대한 적십자사 대학생 방송국",
+          "year": "2026",
+          "position": "아나운서"
+        },
+        {
+          "name": "국가보훈부/유엔 참전국 미래세대 교류 캠프",
+          "year": "2026"
+        },
+        {
+          "name": "아르코 썸 페스타 서포터즈",
+          "year": "2026",
+          "position": "아썸즈"
+        },
+        {
+          "name": "슬립노모어 서울",
+          "year": "2025",
+          "position": "스튜어드"
+        },
+        {
+          "name": "국가유산청",
+          "position": "경복궁 영어 해설사"
+        }
+      ],
+      "current_activity": [
+        "Creatives in Motion (한국예술종합학교X뉴욕문화원) 인턴 PD",
+        "대한 적십자사 대학생 방송국 아나운서",
+        "KB-YMCA 폴라리스+ 경제 금융 교육 봉사단",
+        "아르코 썸 페스타 서포터즈"
+      ],
+      "awards": [],
+      "competitions": [],
+      "education": [
+        "한국예술종합학교 예술경영 재학"
+      ],
+      "links": [],
+      "owner_id": "93bd6f00-9b9a-4f83-9f84-a2ad53a06254",
+      "view_count": 1,
+      "bio_en": null,
+      "introduction_en": null,
+      "current_activity_en": null,
+      "education_en": null
+    },
+    {
+      "id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "created_at": "2026-08-10T14:11:23.29504+00:00",
+      "updated_at": "2026-08-11T02:43:54.649611+00:00",
+      "submission_id": null,
+      "status": "published",
+      "verified": false,
+      "name": "sOO yOung",
+      "name_en": "Soo Young Yang",
+      "slug": "syyang",
+      "claim_code": null,
+      "email": null,
+      "company": null,
+      "role": "기획자",
+      "genre": "공연예술",
+      "category": null,
+      "artist_type": null,
+      "city_or_region": null,
+      "bio": null,
+      "bio_short": null,
+      "profile_image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/c582bf5e-c620-41a4-8a34-ea8ead8cd845.webp",
+      "motion_video_url": null,
+      "youtube_url": null,
+      "youtube_preview_start": 0,
+      "youtube_preview_end": 15,
+      "portfolio_url": null,
+      "instagram": "https://www.instagram.com/shong.xoxo?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+      "website": null,
+      "works": [
+        {
+          "id": "new-work-1786374688011",
+          "role": "기획 / MD 디자인",
+          "year": "2024",
+          "title": "산책하는 침략자",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/0a605940-a365-4869-b0aa-22164d61414a.webp",
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/16e7942f-b0ba-45c1-b30c-f0a262422715.webp",
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/8b5903cc-49a7-42bc-9a54-8350449730d2.webp",
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/399e0074-2a35-4a76-aa5a-02d5cf4792ff.webp"
+          ],
+          "credits": [
+            {
+              "role": "주관",
+              "names": [
+                "극예술연구회 알"
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/0a605940-a365-4869-b0aa-22164d61414a.webp",
+          "video_url": "https://youtu.be/SyqnU1T-EC8?si=_L6OUk4BnV572Vh8",
+          "description": "<극예술연구회 알> 제 81회 정기공연\n마에카와 토모히로의 <산책하는 침략자>\n-\n인간과 인간다움의 경계에 대하여. \n무엇이 인간을 인간답게 하는가."
+        },
+        {
+          "id": "new-work-1786375371364",
+          "role": "기획 / 조명오퍼레이팅",
+          "year": "2025",
+          "title": "묘책(卯策)",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/b7c739bf-6829-4fcc-82db-8c217c986c11.webp"
+          ],
+          "credits": [
+            {
+              "role": "기획",
+              "names": [
+                "한국예술종합학교 오픈캠퍼스 프로젝트팀"
+              ]
+            },
+            {
+              "role": "주최, 주관",
+              "names": [
+                "한국예술종합학교 공연전시센터",
+                "연극원 예술경영전공",
+                "무용원 예술경영전공"
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/b7c739bf-6829-4fcc-82db-8c217c986c11.webp",
+          "video_url": "",
+          "description": "2025 한국예술종합학교 오픈캠퍼스 프로젝트 @karts.myochaek\n-\n<토끼전>을 모티브로 판소리·무용·가야금·뮤지컬·미술·영상을 서사에 따라 유기적으로 재구성함"
+        },
+        {
+          "id": "new-work-1786376515331",
+          "role": "아트디렉터",
+          "year": "2025",
+          "title": "스텝포드 (Stepford)",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/898d690f-abc1-4814-ab31-19c92705b883.webp",
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/ca596f36-ced1-4e51-9c0a-a75b9d4e9beb.webp"
+          ],
+          "credits": [
+            {
+              "role": "팀 아트디렉터",
+              "names": [
+                "정다은",
+                "양수영"
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/898d690f-abc1-4814-ab31-19c92705b883.webp",
+          "video_url": "",
+          "description": "한국예술종합학교 음악극창작협동과정 25-2 45분 기말독회 \n뮤지컬 스텝포드 (Stepford)"
+        },
+        {
+          "id": "new-work-1786376806240",
+          "role": "기획",
+          "year": "2026",
+          "title": "소프루 Sopro",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/17c5599e-0900-4167-ac4f-5f4f63657802.webp",
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/7075fc99-21c9-4141-b4eb-be99daffcd0b.webp"
+          ],
+          "credits": [
+            {
+              "role": "크레딧",
+              "names": [
+                "."
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/17c5599e-0900-4167-ac4f-5f4f63657802.webp",
+          "video_url": "",
+          "description": "한국예술종합학교 연극원 예술사 26-1 스튜디오 공연\n-\nhttps://www.instagram.com/karts.sopro?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+        },
+        {
+          "id": "new-work-1786376981410",
+          "role": "기획",
+          "year": "2026",
+          "title": "청소년극 <내겐 너무 무거운>",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/15f2beba-301b-4be2-bbbb-0f4db05daf7c.webp"
+          ],
+          "credits": [
+            {
+              "role": "크레딧",
+              "names": [
+                "."
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/15f2beba-301b-4be2-bbbb-0f4db05daf7c.webp",
+          "video_url": "",
+          "description": "한국예술종합학교 연극원 아동청소년극 26-1 졸업공연\n-\nhttps://www.instagram.com/p/DYjRR9azpNn/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+        },
+        {
+          "id": "new-work-1786378361605",
+          "role": "기획",
+          "year": "2026",
+          "title": "기다림 : attendez",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/cdbb54e0-4065-41b7-be2e-40b8956ffd20.webp"
+          ],
+          "credits": [
+            {
+              "role": "크레딧",
+              "names": [
+                "."
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/cdbb54e0-4065-41b7-be2e-40b8956ffd20.webp",
+          "video_url": "https://youtube.com/shorts/xy9_4nV2UJ4?si=16Evbr9ZHLli5blS",
+          "description": "극단선언의 전통악과 움직임이 더해진 연극 <기다림: attendez>\n-\n주최・제작 | 극단선언\n-\nhttps://www.instagram.com/team.seoneon?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+        },
+        {
+          "id": "new-work-1786378677841",
+          "role": "기획",
+          "year": "2026",
+          "title": "Molang Hotel 몰랑호텔",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/24f6063d-6421-4f08-a939-d341a63eb858.webp",
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/0762b529-e38e-47fb-833a-512bd3b98e0d.webp"
+          ],
+          "credits": [
+            {
+              "role": "크레딧",
+              "names": [
+                "."
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/24f6063d-6421-4f08-a939-d341a63eb858.webp",
+          "video_url": "",
+          "description": "오픈리허설 <몰랑 호텔 MOLANG HOTEL>\n다리오 포의 도덕적 도둑을 재창작한 창작코미디 단막극\n-\n2026 한국문화예술위원회 예술대학 예비예술인 현장연계 지원사업\n-\nhttps://www.instagram.com/devisingworkshop_molanghotel?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+        },
+        {
+          "id": "new-work-1786379012262",
+          "role": "기획",
+          "year": "2026",
+          "title": "뮤지컬 <런온 (Run On)>",
+          "images": [
+            "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/ada5fbbf-eb28-42b1-989d-863e6be16af1.webp"
+          ],
+          "credits": [
+            {
+              "role": "크레딧",
+              "names": [
+                "."
+              ]
+            }
+          ],
+          "image_url": "https://sawsqtqjqmesfasbcmyf.supabase.co/storage/v1/object/public/artist-media/artists/media/ada5fbbf-eb28-42b1-989d-863e6be16af1.webp",
+          "video_url": "",
+          "description": "한국예술종합학교 음악극창작협동과정 26-2 정기공연"
+        }
+      ],
+      "review_links": [],
+      "is_demo": false,
+      "profile_image_urls": [],
+      "motion_intro": null,
+      "affiliations": [],
+      "current_activity": [],
+      "awards": [],
+      "competitions": [],
+      "education": [
+        "한국예술종합학교 연극원 연극학과 예술경영전공 재학"
+      ],
+      "links": [],
+      "owner_id": "281e1e54-a23b-4aba-8a80-4756d78c44f0",
+      "view_count": 4,
+      "bio_en": null,
+      "introduction_en": null,
+      "current_activity_en": null,
+      "education_en": null
+    }
+  ],
+  "companies": [],
+  "performances_read": 0
+}

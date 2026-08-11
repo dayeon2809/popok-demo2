@@ -1,0 +1,21 @@
+{
+  "job_id": "portfolio-en-20260806T140416Z",
+  "generated_at": "2026-08-06T14:04:36.082Z",
+  "model": "gpt-4.1-mini",
+  "rule_version": "2026-08-06.1",
+  "database_writes": 0,
+  "performances_read": 0,
+  "performances_translated": 0,
+  "counts": {
+    "translated": 560,
+    "skipped": 51,
+    "existing": 17
+  },
+  "review_required": 488,
+  "unique_api_translations": 360,
+  "failures": 0,
+  "actual_input_tokens": 48277,
+  "actual_output_tokens": 30317,
+  "actual_cost_usd": 0.067818,
+  "source_snapshot_sha256": "4e12d0517aff9b54b21ca1f1c2590303a879bf0e24666d991824bc76dcd0bd2f"
+}

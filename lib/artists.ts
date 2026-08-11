@@ -109,6 +109,7 @@ export function mapArtistRowToArtist(record: any): Artist {
     youtube_url: record.youtube_url || null,
     affiliations: Array.isArray(record.affiliations) ? record.affiliations : [],
     education: Array.isArray(record.education) ? record.education : [],
+    education_en: Array.isArray(record.education_en) ? record.education_en : [],
     awards: Array.isArray(record.awards) ? record.awards : [],
     competitions: Array.isArray(record.competitions) ? record.competitions : [],
     links: Array.isArray(record.links) ? record.links : [],
@@ -124,6 +125,7 @@ export function mapArtistRowToArtist(record: any): Artist {
     city_or_region: record.city_or_region || "",
     category: record.category || null,
     current_activity: record.current_activity ?? null,
+    current_activity_en: Array.isArray(record.current_activity_en) ? record.current_activity_en : [],
     review_links: record.review_links ?? null,
     portfolio_url: record.portfolio_url || null,
     tags: [fValue === "dance" ? "무용" : fValue === "music" ? "음악" : "시각예술", gValue, "검증됨"].filter(Boolean),
@@ -285,7 +287,8 @@ export async function getRelatedArtists(excludeId: string, limit = 3): Promise<A
 export async function searchArtists(
   query: string,
   typeFilter?: string,
-  fieldFilter?: string
+  fieldFilter?: string,
+  roleFilter?: string
 ): Promise<Artist[]> {
   let list = await getPublishedArtists();
 
@@ -318,6 +321,11 @@ export async function searchArtists(
 
       return field === fieldFilter || a.genre === fieldFilter;
     });
+  }
+
+  if (roleFilter?.trim()) {
+    const expectedRole = roleFilter.trim();
+    list = list.filter((artist) => artist.role?.trim() === expectedRole);
   }
 
   if (query && query.trim()) {

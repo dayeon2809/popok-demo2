@@ -53,6 +53,7 @@ export interface CompanyAward {
   title_en?: string;
   organization_en?: string;
   description_en?: string;
+  result_en?: string;
 }
 
 /**
@@ -92,6 +93,7 @@ export function normalizeCompanyAwards(value: unknown): CompanyAward[] {
         const title_en = typeof item.title_en === "string" ? item.title_en.trim() : "";
         const organization_en = typeof item.organization_en === "string" ? item.organization_en.trim() : "";
         const description_en = typeof item.description_en === "string" ? item.description_en.trim() : "";
+        const result_en = typeof item.result_en === "string" ? item.result_en.trim() : "";
         return {
           year: year || undefined,
           title: title || undefined,
@@ -100,12 +102,13 @@ export function normalizeCompanyAwards(value: unknown): CompanyAward[] {
           title_en: title_en || undefined,
           organization_en: organization_en || undefined,
           description_en: description_en || undefined,
+          result_en: result_en || undefined,
         };
       }
 
       return {};
     })
-    .filter((a) => a.year || a.title || a.organization || a.result || a.title_en || a.organization_en || a.description_en);
+    .filter((a) => a.year || a.title || a.organization || a.result || a.title_en || a.organization_en || a.description_en || a.result_en);
 }
 
 /** Same normalization, used specifically at the save boundary — kept as a
@@ -127,12 +130,14 @@ export function formatCompanyAward(award: CompanyAward): string {
 export interface CompanyHistoryItem {
   year: string;
   event: string;
+  description_en?: string;
 }
 
 /** Groups duplicate years into one timeline row while preserving every event. */
 export function normalizeCompanyHistory(value: unknown): CompanyHistoryItem[] {
   const raw = Array.isArray(value) ? value : [];
-  const grouped = new Map<string, string[]>();
+  const english = (input: unknown) => typeof input === "string" ? input.trim() : "";
+  const grouped = new Map<string, Array<{ event: string; description_en?: string }>>();
   const undated: CompanyHistoryItem[] = [];
 
   raw.forEach((item: any) => {
@@ -140,18 +145,18 @@ export function normalizeCompanyHistory(value: unknown): CompanyHistoryItem[] {
     const event = typeof item?.event === "string" ? item.event.trim() : "";
     if (!year && !event) return;
     if (!year) {
-      undated.push({ year: "", event });
+      undated.push({ year: "", event, description_en: english(item?.description_en) || undefined });
       return;
     }
     const events = grouped.get(year) || [];
     event.split(/\n+/).map((line: string) => line.trim()).filter(Boolean).forEach((line: string) => {
-      if (!events.includes(line)) events.push(line);
+      if (!events.some((entry) => entry.event === line)) events.push({ event: line, description_en: english(item?.description_en) || undefined });
     });
     grouped.set(year, events);
   });
 
   const dated = Array.from(grouped.entries())
-    .map(([year, events]) => ({ year, event: events.join("\n") }))
+    .map(([year, events]) => ({ year, event: events.map((entry) => entry.event).join("\n"), description_en: events.map((entry) => entry.description_en).filter(Boolean).join("\n") || undefined }))
     .sort((a, b) => Number.parseInt(b.year, 10) - Number.parseInt(a.year, 10));
   return [...dated, ...undated];
 }

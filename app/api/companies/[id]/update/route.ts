@@ -51,9 +51,12 @@ export async function PUT(
     if (body.founded_year !== undefined) updateData.founded_year = typeof body.founded_year === "number" ? body.founded_year : (body.founded_year ? parseInt(String(body.founded_year), 10) || null : null);
     
     if (body.mission !== undefined) updateData.mission = typeof body.mission === "string" ? body.mission.trim() || null : null;
+    if (body.mission_en !== undefined) updateData.mission_en = typeof body.mission_en === "string" ? body.mission_en.trim() || null : null;
     if (body.vision !== undefined) updateData.vision = typeof body.vision === "string" ? body.vision.trim() || null : null;
+    if (body.vision_en !== undefined) updateData.vision_en = typeof body.vision_en === "string" ? body.vision_en.trim() || null : null;
     if (Array.isArray(body.core_values)) updateData.core_values = body.core_values;
     if (Array.isArray(body.values)) updateData.core_values = body.values;
+    if (Array.isArray(body.core_values_en)) updateData.core_values_en = body.core_values_en;
 
     if (body.bio_short !== undefined) updateData.bio_short = typeof body.bio_short === "string" ? body.bio_short.trim() || null : null;
     if (body.bio !== undefined) updateData.bio = typeof body.bio === "string" ? body.bio.trim() || null : null;
@@ -79,6 +82,7 @@ export async function PUT(
     // credits) is ever persisted — same contract for the CMS and the admin editor.
     if (Array.isArray(body.works)) updateData.works = cleanWorksForPayload(body.works);
     if (Array.isArray(body.current_activity)) updateData.current_activity = body.current_activity;
+    if (Array.isArray(body.current_activity_en)) updateData.current_activity_en = body.current_activity_en;
     if (Array.isArray(body.history)) updateData.history = body.history;
     if (Array.isArray(body.review_links)) updateData.review_links = body.review_links;
     if (Array.isArray(body.links)) updateData.links = body.links;

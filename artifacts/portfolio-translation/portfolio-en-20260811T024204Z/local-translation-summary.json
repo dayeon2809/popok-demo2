@@ -1,0 +1,20 @@
+{
+  "job_id": "portfolio-en-20260811T024204Z",
+  "generated_at": "2026-08-11T02:46:20.561Z",
+  "model": "local-human-reviewed",
+  "rule_version": "2026-08-06.1",
+  "database_writes": 0,
+  "scoped_artist_ids": [
+    "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+    "0b33dea9-2ca5-4295-a9a3-26ad9b179618"
+  ],
+  "scoped_items": 62,
+  "scoped_translated": 60,
+  "counts": {
+    "existing": 504,
+    "translated": 72,
+    "skipped": 52,
+    "pending": 133
+  },
+  "source_snapshot_sha256": "370183c0be37c22659fbf43c9f9676dba4347ec74d6abcab24ae9fff90918c36"
+}

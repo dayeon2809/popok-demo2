@@ -9,8 +9,9 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get("query") ?? "";
     const type  = searchParams.get("type")  ?? "all";
     const field = searchParams.get("field") ?? "all";
+    const role = searchParams.get("role") ?? "";
 
-    const data = await searchArtists(query, type, field);
+    const data = await searchArtists(query, type, field, role);
 
     return NextResponse.json({ data, error: null }, {
       headers: { "Cache-Control": "no-store, no-cache, must-revalidate" }, // Supabase 수정이 CDN/브라우저 캐시 없이 즉시 반영되도록
@@ -23,4 +24,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

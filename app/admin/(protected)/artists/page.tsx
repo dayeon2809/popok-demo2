@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LoadingSpinner, ErrorMessage } from "@/components/ui/States";
+import { ARTIST_ROLES } from "@/lib/artistRoles";
 
 const FIELD_LABELS: Record<string, string> = {
   contemporary_dance: "현대무용",
@@ -567,7 +568,10 @@ export default function AdminArtistsPage() {
                               </label>
                               <label style={editLabelStyle}>
                                 역할
-                                <input value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} style={editInputStyle} />
+                                <input list="admin-artist-role-options" value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} style={editInputStyle} />
+                                <datalist id="admin-artist-role-options">
+                                  {ARTIST_ROLES.map((option) => <option key={option.value} value={option.value}>{option.en}</option>)}
+                                </datalist>
                               </label>
                               <label style={editLabelStyle}>
                                 한줄 소개

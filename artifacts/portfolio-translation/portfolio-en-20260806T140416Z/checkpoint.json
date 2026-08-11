@@ -1,0 +1,2896 @@
+{
+  "job_id": "portfolio-en-20260806T140416Z",
+  "created_at": "2026-08-06T14:04:16.356Z",
+  "updated_at": "2026-08-07T01:09:34.426Z",
+  "model": "gpt-4.1-mini",
+  "rule_version": "2026-08-06.1",
+  "stage": "validated",
+  "scan_file": "C:\\Users\\dayeo\\Downloads\\popok-landing\\artifacts\\portfolio-translation\\portfolio-en-20260806T140416Z\\scan.json",
+  "translations": {
+    "06a07b4492eb328195878b939f4a95626aa4ea6b768e16b82c82e425ff18d00e": {
+      "suggested_en": "Kim Taehee",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cd191399fb456a334ddbbfbbef93aff745e9b5bc688c7acbda61a17b13a7de1d": {
+      "suggested_en": "Gom Siseon",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4e20e41fed40c5ded8b8e80a65d5f47ae150511913e7bf264b91d21a102545ff": {
+      "suggested_en": "Choi Jian",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "747a5c905c79c4becee9141a5728ead114f392301f191307105061ec3bf6cff0": {
+      "suggested_en": "This is the official POPOK digital business card page of artist Choi Jian.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f7ce27baa9bdeb913fc1fd227a176329c667c2207bec0898f17b1b40c0829baf": {
+      "suggested_en": "Official Motion Profile",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2e5d829c3f5531d0ca23607ff1b6da3fe227ff044cd2a589b6ebba42991ed6e4": {
+      "suggested_en": "POPOK registered motion profile video and image archive",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "59e4694e19641f67b4ae2cffb19a7f0195fda1b676a53737dc573c05bcb02399": {
+      "suggested_en": "Artist",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6f2a0f23001c41813e19c4dd7b4f8ba593fc7a0c6783efcbb9abbc6d37d771ed": {
+      "suggested_en": "This is a short introduction verified by AI organization test.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "71801f79f99a785ba080bfea0249c85e7217096f5335e91836619a497eaa546a": {
+      "suggested_en": "Test Performance",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3972a8888e28c8db25866e324659859f57b886a7499a5a2a4096b83be8f758aa": {
+      "suggested_en": "This is a work for verification testing.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4c3353ddd37b00ef7d01622bb95e79bf6a27548325b1a41f8a1b4de082af3844": {
+      "suggested_en": "Company Member",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a1e6b2c64dbc65cc6fad6094afd83836d39d0585a69a01ce3e6818db70ac3bcb": {
+      "suggested_en": "Currently active in POPOK test activities",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bef7f0fac2739b3b6f454998765f8857872d7b82af578d716abf76c07cd1533d": {
+      "suggested_en": "Graduated from POPOK Dance School",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5282bdef104670c0630b7e857f40e6b1072746506bdeb23c92ac439eeb626825": {
+      "suggested_en": "Yoon Kyunggeun",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a7a9855ddfb069ae79ece8f608bca0da7773c4d77d28f7608358168edd6440f0": {
+      "suggested_en": "Explores the image of the body and physicality, seeking new possibilities through collaboration across various genres.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7340928d24523bed18d6de4069f86651d9f9dcca50caf1732b753124df9d1868": {
+      "suggested_en": "Yoon Kyunggeun works as a choreographer in the field of Contemporary Dance, exploring the value of images emerging from the body and physicality. His works combine with various genres to seek new possibilities in dance, aiming to provide experiences where each audience member can discover their own meaning. Recent works focus on the fusion of art and technology.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0f12f3e43ffa447e50fc3319046c1a8de27eda97122cdc2f2954a4ffdeb17b30": {
+      "suggested_en": "<Dining Table>",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "70ee303860325afba468e626f4083748ee630d4d45072bd85f7d296db5dae115": {
+      "suggested_en": "Choreography/Role",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f4cdb6c09e49526598ce27fe29b70bb303268438867736413ebccf76f723871b": {
+      "suggested_en": "ODD BODY Series – <Tree>",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4e52ff2506ca3bdaeecb334bf93dedfdb4980a6010d938b05724149dfbd318c2": {
+      "suggested_en": "This work was broadcast on the Seoul Station Plaza Media Canvas and was selected for the 'Seoullo Media Canvas Nature Project'.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3578a819fc757d9f991e4d924e8b0cdd93698f02fe65773fc3a406bdaabdc49f": {
+      "suggested_en": "<Moseori>",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "17687c8fdd1216427b9808415700c5fd6dd6330dfaf82db0911b574d18cc7f76": {
+      "suggested_en": "Siktak",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "53ed585df5ed28f6e1bb62dfe3d3275d7c418d2723a4928bbfd4b318bdb82361": {
+      "suggested_en": "<Yecund Project>",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0446c2f7178751c5795661de861f93033f562c704329db1a9216019df8a8f578": {
+      "suggested_en": "Korea National University of Arts",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "11e57bf98bd650d45f7d4c4d138b60cbb44ef294db12ab25c71900083574d832": {
+      "suggested_en": "Seoullo Media Canvas Nature Project",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ee6b9be6180237eee58d465176985334d70dedd10153309b07fd9f1fb1f2c995": {
+      "suggested_en": "Selected",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1fbb165fe2ff7b50fc7b8b4e35d7744b216078012388f8a3fd6e45cf138901fc": {
+      "suggested_en": "Creative Process",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7fd22c38e2ae5235266fafc4fd9675ceff7c01dc72b8a8f2ea64e45e1b511a01": {
+      "suggested_en": "Arts Council Korea",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9f6916206dd4c750ed5b1c69f48b930bf8128045bb6660e1e51e348cd3d0ad19": {
+      "suggested_en": "K-ARTS ON-ROAD ON-STAGE Creation Support Project",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d9fc167235cd79fbd824927e8869a12f01daf0793e0e50a9f7e6831eb6dbc205": {
+      "suggested_en": "Online Media Arts Activity Support Project 'Art Change Up'",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2a444d6db6c27b4cb4fc707d608882be4318d204d90654cb593b6b75e773aa9b": {
+      "suggested_en": "Studied in the Choreography Department at the Dance Institute (2015~2021)",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e8e8fb40fa395e5de1d5ea2b6096b4c39ead941724a6c3c826c283bc8011e092": {
+      "suggested_en": "Park Minji",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "89ee8b102c870e888a51c5ab524f98c789988407ca24649e53ff8db0e251ffa4": {
+      "suggested_en": "Kim Dae (Dasstanz)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cf71b481838b80ff5e2b3f7dd1df8f7d9db918c83214060123cd28d1993bc2bc": {
+      "suggested_en": "Myochek",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "84a34efb9cff1ffd18ccd3f7329ca592b3c285b5db35d732db9cf69d474dcc5b": {
+      "suggested_en": "Planning/Direction",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b592cb91e707bd63a4c142053726696c5858d261c682ff07fe00243f3a74458d": {
+      "suggested_en": "Looking for a Person",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b3981a2ac60758aabf482be8d9431237d95de3540081a0d30931827ed6dc60fc": {
+      "suggested_en": "Planning / Publicity Design",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c86e5e9b0caa8fcefc56d576d5eb3a383d25690488c98a03b6f1069aa9ffe73c": {
+      "suggested_en": "Cheon Family",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "013e3a000b2d29ae3a16c95ea4224e7b13c004159e96f3734831ef88448a3c65": {
+      "suggested_en": "Graphic Design / Planning",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "674313773504db2d420720b54c7969171d8113c0c0d3f7bff992dac7d4280832": {
+      "suggested_en": "Dance Film, <nu(~)>",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bd4d1500ec71b0cbf8aa9afacd34b8a0d53d66139647499198c816b0080b8d04": {
+      "suggested_en": "Chun Ha Chu Dong Gan",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b8c5e861f2221899521fc000839c544083a867ff81cc16a57a60f3179704f8bb": {
+      "suggested_en": "Gatekeeper of the Seasons",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "dac87ca28b5b1058d28de290333f8bb5af155576fa7ba9b00c62467414492549": {
+      "suggested_en": "Graphic Design",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "885758151887d8b4bf06946e6809a51a1abe4d83edd28e511098ddbfe20fc754": {
+      "suggested_en": "Communicator",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "44a2015124b315bff315ae28bd1ede8fbbf3503ac30915ac36b242df2007def0": {
+      "suggested_en": "Korea National University of Arts Newspaper",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b15eb66a93c0907c8a3d41b598a3b32da77c399a5c30cb8fa66454442d3648ee": {
+      "suggested_en": "Reporter",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0bebcffa97096cabe7407b90bb9ba9d36aab016ac1d8994ac6aa067b0a61a2f7": {
+      "suggested_en": "Selected for Creative Support Competition",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2da583cae2fa6ba1b33912557e4edd946390809b118b286eaca30d420354069b": {
+      "suggested_en": "Communicator at Korea National Contemporary Dance Company",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "abfd0f3f5d8c5d5b8349e11c1d072b0c6f9b629fb972ea20f2f9a0c611ac674f": {
+      "suggested_en": "Reporter at Korea National University of Arts Newspaper",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "261e2e345cc2559eb4c01f9ffbaf31d5f827cad3cee3d794abb37d4f07d278ec": {
+      "suggested_en": "Currently enrolled as a second-year student majoring in Theory and Arts Management at the School of Dance, Korea National University of Arts",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b31ba1bfa301b3b65aa1da057d256926a53ac691baaa108a35c318711d3fa657": {
+      "suggested_en": "Kim Beom-min",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1180da09836b5b316ca22b109332a8b53bb21856438b684b5736db2b06d4d6a7": {
+      "suggested_en": "Currently enrolled at the School of Dance, Korea National University of Arts",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9d8227c7e00fb8b03b77368cb730533e12d7c0a567b2df7d971375d01a2c9045": {
+      "suggested_en": "Go Hyun-ah",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "abf113776c96a4f0f7030fa5c29a850ec7bc36381b60dee30d4199ff096b87e0": {
+      "suggested_en": "Woo Ji-young",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "efa31ca0057b69adbf5657699b310b8859bb49fb32b8c63ae23af8ca4d17680e": {
+      "suggested_en": "Earthquake: LOVE WAVE",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6d9952e2bf2d9d76b2fb14fff0ca6f58d42b1ddeb3c4ac8c1ff90c4ccedbc026": {
+      "suggested_en": "LOVE WAVE is a work that expresses the emotional waves of love surging and passing through the body’s movements. It depicts moments of touching and distancing with delicate movements and rhythms, unfolding the constantly changing flow of emotions within relationships on stage.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bac09c14be5fad78c2636fce4dea31686cc61f6dfa79532fe579e398b8eb8857": {
+      "suggested_en": "Noh Ye-seul",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a5b2ed918943177e0b9aaee4e3280bd8c1024872bf7b643d6211037befc34699": {
+      "suggested_en": "Dancer affiliated with GONGWON",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "747f37e8fa33b72b390f17733859008d90a83c5deab56e2c4b66e22fb9a3a2e4": {
+      "suggested_en": "Yang Sung-yoon",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cc25f444e43515e4a90d7f85a2426f84cea59f8ee1f6482333fbb8036e8a98a9": {
+      "suggested_en": "Dancer affiliated with GONGWON",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "60d6be9a55fdd19dfe99a5a5b8701e0dfe405cbeda826cb966adb9a593acffce": {
+      "suggested_en": "Kim Hyun-woo",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6540a2a8dad898df14f0464ca68974a4ad79481e2d4b0157406f9ef994812a8f": {
+      "suggested_en": "Recycling? Reusing!",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0c82f4599c6d32f703ad8c4900543b36df917ab531f400b27079bcc1b674811d": {
+      "suggested_en": "Performance Introduction\n\"A ritual exploring new values of the marginalized\"\n#Recycling #Upcycling #SustainableArt #MunmyoJeryeak #Interview\n\nWork Description\n<Recycling? Reusing!> is a ritual that reinterprets marginalized values by borrowing the form and procedures of Munmyo Jeryeak to give them new meaning and use. The halted movements and stories of four interviewees are evoked on stage as sustainable new values and forms through four proxies and symbolic objects.\n\nDirection/Choreography Intent\nThe movements and stories of four interviewees who had to leave the cultural and artistic community were recorded and collected on video. This record was reconstructed beyond recycling into an artistic language of new value and form. By adopting the procedures of Munmyo Jeryeak, a traditional Korean ritual, a structure is established to honor the past and connect it to the present. Each scene is presented on stage like an offering through four proxies and symbolic objects, materializing new meanings and values. Through this process, it is not merely a reproduction of life but an act of exploring, recording, exhibiting, and preserving human essence. Translating stories into movement ultimately aims to deepen understanding of people and the world.\n\nTo practice sustainable art during the production process, symbolic objects used by the participants were reborn as props and sets. Objects that lost their value were transformed into instruments to perform Munmyo Jeryeak, and costumes donated and repurchased through a thrift store were utilized. This experimental attempt explores the connection between performing arts and environmental issues for sustainable art beyond the one-time nature of performing arts through the concept of upcycling.",
+      "needs_review": true,
+      "review_reason": "Proper name or title; long text",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e8224139e00d075a4b2ded149b8414a6609de028346cbec84575b3e14d7b5e29": {
+      "suggested_en": "Co-creation and Performance",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "72de0dc1b67f1a4d18e772db823d15e43168bdc1e513247902201b02e121d66c": {
+      "suggested_en": "Interview",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "fbfaf53d6f7edd91ac32431a256bf6deb1a12d459d7c8c4672f7b293807c4f3d": {
+      "suggested_en": "Music",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cb19ccf063838e74b3591baa34e055ba91bef1e8d1eea433c949038296e6e708": {
+      "suggested_en": "Performance",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "52717236c36eb897ae43d75c70a8a00d9c82d1e6671c8c4b62cdf8f7ecfe6dbc": {
+      "suggested_en": "Stage",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f0d5635c14a13ae24a6e61a1c0b99adac816517786ebad43f701a4e4327db394": {
+      "suggested_en": "Lighting",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "20698624e3d1e1fd6221ded3ef5981b9f2d6e37a9226084ad59e909e4c73dd0d": {
+      "suggested_en": "Credits",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4ca259867da34a3529730c1a4aa889b0cd66f13d911429ae4620f4ba2a673d03": {
+      "suggested_en": "Photography",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ab66a2ef05678da18021e4f755e53898648e7686cfabc936b68011c31e7cdc6b": {
+      "suggested_en": "Video",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c8d48670ffd26270d7ee96cf3783d68e60397d64e0a2135638c7d0bc4833c4d5": {
+      "suggested_en": "Design",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e8b1b4b331495b4ece376674ee3bd1bccffbb075273d5cbb6ede23d3e34ae48d": {
+      "suggested_en": "Rather Than Staying, I Chose Misery",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "27149d1bd42ae65f86e61d70a6d5670db629c87160d185706488fb919f0cfa2e": {
+      "suggested_en": "- June 7, 2025, Guggenheim Museum Spain ACT Festival <Rather Than Staying, I Chose Misery>",
+      "needs_review": true,
+      "review_reason": "Proper name or title; mixed language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "71db55d43b52468ddeb7042186370590c391e246fd3690148af9393d3426fd84": {
+      "suggested_en": "Layer",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "32be1200b834cc4592e46bafe3dabfacf715c58ab9e8a9f36716ace5385884a8": {
+      "suggested_en": "Choreography, Dancer",
+      "needs_review": true,
+      "review_reason": "Proper name or title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "080a05c21f959546ed15b9d57b53c341acccd992ff5890b80e99dc1983c04976": {
+      "suggested_en": "Explores interactive performances connecting emotion and movement.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a84468c24ee022f14e208d5413e7fdc78d1d83b1dee96614b788cfbb553167b5": {
+      "suggested_en": "Da-yeon Lee is a choreographer exploring interactive performances that connect emotion, movement, and audience participation. Major works include Re: Choreograph, Flipping Dance, and Pulse, presenting new meanings of choreography through interactions among AI, dancers, and audiences. Recently, she has been engaged in various art convergence projects, including developing XR-based therapeutic experience programs.",
+      "needs_review": true,
+      "review_reason": "Mixed language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d6c6277226236fe32809a8f7fd3f957fbf7f1510ef170fd6ad77d33010483085": {
+      "suggested_en": "Re: Choreograph (Rewriting the Body)",
+      "needs_review": true,
+      "review_reason": "Proper name or title; mixed language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8bdaa8f93c3a47a6cdc8606644b8ef864aec7a7379acc7a39482be6f7e8119e1": {
+      "suggested_en": "An audience participatory immersive performance and exhibition that rewrites the meaning of the body through the interaction of three subjects: AI, dancers, and the audience.\n\n\"What does it mean to use the body?\"\n\nWe move our bodies every day,\nbut we often easily forget the meaning contained in those movements.\n\n<Re:Choreograph> is an audience participatory exhibition & performance that begins with the fading language of the body and explores the process in which the emotions contained within are deconstructed and disassembled by other subjects.\n\nIn this exhibition, the three subjects [Audience · AI · Dancer] come together, and over 45 minutes you will undergo various transformations of meaning to ‘rewrite the meaning of the body.’\n\nFor us, choreography is not simply writing dance but the entire process in which meaning originating from the body circulates and is rewritten (Re:) (Choreograph).\n\nExperience the process in which the meaning derived from your body becomes text and is deconstructed by AI and dancers.\nThe body becomes language, language becomes movement, and movement leads to new interpretations.\n\nSo, are you ready to rewrite it again?",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language;long_text",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "94c8db457d3378992149290b80b9e77a0ec8465c2fbea731b4fff4a733b56d26": {
+      "suggested_en": "Planning and Direction, Experience Design",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e67053995805164c6c6e19f13f98200567aa5e11df4e8bbced1fb34b61524a2d": {
+      "suggested_en": "Direction. Experience Design",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b312082172ea9ddc933dae9fda9dcb7bc52443c3b284bb2161cb67fadb3124d2": {
+      "suggested_en": "Performance Directing",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e96dd3a3be3a2306e5717e092e7c19ecdf9de4fe8cd2ffe605c9a999adb23bea": {
+      "suggested_en": "Media Art",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0a73a2b95eaa68d28a5b0c11e84ef537e6bb55b89ebfc86f0d273514736fe9d7": {
+      "suggested_en": "Research. Archiving. Web Development",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "76efc30f8dc3c6f8663c633234140926f208d8129adae638500bf567dc572564": {
+      "suggested_en": "Performer",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d83ae70a6fa9d6ea435e9f0832f156e1a833d7ae9b4f8fdf14d48c798f462bbb": {
+      "suggested_en": "Sound Director",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5ffc18946009b212159d7f28b7bc623a1ecbed678f591464fbbe446285f53a23": {
+      "suggested_en": "Staff",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "81f237679c546735d31574ede475d6bb869e77b862c0a6ba16bcf0aca7bf9b57": {
+      "suggested_en": "Host. Organizer",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5f0dd1bc53a2e22c7ef47c805b18c46f8713e961f9edd9eeebe80a060bfc82c2": {
+      "suggested_en": "Sponsor",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b2a540126b28f5985cb5e85e61b27d67b507e0298ca775225a4a49b553861a8f": {
+      "suggested_en": "Dance Reverse",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f0986ae78477cc9eb2474db6fa4f8ef65ca88097634610a07219b96681d1eb43": {
+      "suggested_en": "A 1:1 performance that explores dance not as mere physical movement but as a way of perceiving and relating to life and the world.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bcce9cb491df37923286d172a5d6e32665023d6805b749bae4b124a07a1f31c4": {
+      "suggested_en": "Planning and Direction",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7e27a1eaaa2a651048f550e9d50f078f3b2e33488e9f8a4fb7ed0deb0d9fa80d": {
+      "suggested_en": "Planning/Direction",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a5b2e361d936ac7c17406380ee8d26a9ef005858baa043dbf8e097b322802cc4": {
+      "suggested_en": "Pulse",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "25bfc6b5c97837a36074cafe69d4b4a66c4e54ad1251e0f0e1b3a5ba7be1f8ea": {
+      "suggested_en": "An AI-generated film that interprets rhythm and vitality as the heartbeat of creation and explores the origins of art.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c3eb38c5b505b7ace2050408dc8858608e7a98c97d983790065b3c3a02859d93": {
+      "suggested_en": "Jinchan: Feast of Memory",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "53999e2011472d1eff9b0f367ed26e7f9b2e5c857726a3eb3d56c8482bef525a": {
+      "suggested_en": "An immersive art performance at the 62nd Suwon Hwaseong Cultural Festival.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6f0e68f5d5e9de07381ac26b9086546ddbc66f29c2b9490087f6871df30f669d": {
+      "suggested_en": "Practice of Hwaseong Studies",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "594c2eac21038f7c40e19f9a7a01f7fa9dfcbbdfc5a46d7d612d6c947faa600e": {
+      "suggested_en": "No entry except authorized personnel\nA boundary allowed to some, unreachable to others.\nPassing by, facing, and missing each other\nCreating scenes within changing relationships.\nWe stay in that space in our own ways, moving between inside and outside.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d94c2fb2059383f0c1c045da52485a2d1425f04e329156ee448c8264b43c9719": {
+      "suggested_en": "Best Choreographer Award",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1b1e0ca5e9ba81a4e0bd1e02413df562df2719305f591d57af50abacc46953c7": {
+      "suggested_en": "Korean Dance Association (2022 Young Choreographer Creation Performance)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "fcc58a95cfcfb4f80ceeee4e6d7068d5ca07092202c03aa22b078835eacdb1e8": {
+      "suggested_en": "Awarded — Minister of Culture, Sports and Tourism Award and qualification for invitation performance at the 43rd Seoul Dance Festival 'Passionate Dance Floor'",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "37b8226b37faa7c4f3fb9f565eccb7f31af67d692b360565d32e7b41e1857174": {
+      "suggested_en": "Song Ye-jin",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a3c6b3ec2f09b3323a4a0b3b828f2d9a25533f67e1963a1a6972f84815f6282c": {
+      "suggested_en": "Song Ye-jin is an aesthete who delves deeply into anything related to classical music.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ff41a4d83226b34319698c063c2081ce4824a42fc85ada573af809f4fefb48b2": {
+      "suggested_en": "The artist graduated from the Department of Vocal Music at Sungshin Women's University College of Music, performed as a member of the Sungshin Concert Choir, and appeared in the opening performance of the 2024 Onse-dae Choir Festival organized by the Chuncheon Cultural Foundation. The artist has also worked as an assistant director in major operas and continues activities in performance production.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "326cbbde331e963b9d989ea16ea03820f8d23dc78df41257a13046a96926edb8": {
+      "suggested_en": "Hansel and Gretel",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c4a6ed31df317358652b1b87de75b7fd3a2959ce166bd6fc20143d023a635dd0": {
+      "suggested_en": "Assistant Director",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "048388545c6feeafe9238e8ea7fbe2db34290f6c52fc7c22ce08d6322820caa5": {
+      "suggested_en": "The Magic Flute",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "658382a18a98ff89dbf57149dc478cae146909011e766b854f131ee61a4ad286": {
+      "suggested_en": "Sungshin Concert Choir",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cb1be7660b49644911ab6ef8c27c39b8b530b996cd15839c1e69368c3d37a9fc": {
+      "suggested_en": "Graduated from the Department of Vocal Music, College of Music, Sungshin Women's University",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f2cd1719f9d09e1a5c809910727601f3fe0dcb539e3eacb60dde3cfe95a13623": {
+      "suggested_en": "Min Kyung-won",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "66831de7b634d3e871419b295f392ac0b709daffbbc93762255c3e214a6a0a24": {
+      "suggested_en": "Dancer Min Kyung-won affiliated with GONGWON.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5499aa54c8858e6a66d44271fd3446a4abe562d2fac3f79974db4fcf761f11de": {
+      "suggested_en": "Yeri Yu",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "391bce08d725187764f7b5c28df10b5d395a1ea88931a97f80d8926661af7359": {
+      "suggested_en": "Yeri Yu is a dancer who constantly moves and explores new possibilities.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bf9c5b53d233712c8964ba009dbf0b3cd55e6de619cd6dabfc619d525c0e4ecf": {
+      "suggested_en": "This dancer is a Korean Dance artist active on various domestic and international stages. Major performances include <Ghost Day: Night of the City>, <No matter>, <Flow>, and <Bitten by a Dog>, as well as participation in several international festivals such as the Cannes Dance Festival. The artist has also been awarded for outstanding performance at the Veterans Dance Arts Association's author exhibition and has participated in numerous competitions.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b3acfd34af3b3943b3a51718e8c6608717805e1a964987ed46fdd01c93d63d69": {
+      "suggested_en": "Work by the Hervé KOUBI Dance Company.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ff826bd4a576d2a1e7150c9f801c506de9789096714762db24825a3caf697f0c": {
+      "suggested_en": "Flow",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3ba580d1bd3be544bc60d4ea37c6a16678db2019478db45bd33cb65c7146baf4": {
+      "suggested_en": "Opening invited performance at the Seoul International Choreography Festival.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "881b8ac82c7631ae1b214032a5762e884c193e867b3f361b78882513edc4f9a3": {
+      "suggested_en": "Ghost Day: Night of the City",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1b7131cb92b7c2c95a1b10ff25ed3b75eb91bf79cbdd32c0e6ed73f7c07e50b4": {
+      "suggested_en": "A work by choreographer Kim Ju-bin combining European-style circus, Korean Dance, and Contemporary Dance into an accessible artistic piece",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "45d85cb8445b7e2eb9b43935a3b2cbfc8a2c3968be652c3580ab1ae3bd35894e": {
+      "suggested_en": "Bitten by a Dog",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "08808a7534b4470bfdf8f8c578eec2c330d47848737021bf94edd9bf40448998": {
+      "suggested_en": "Yunhoemaesipjeon",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "44d5997948d8f7cbe6c428b603d33212fed7b09a52736347e66a65bddcac2d5b": {
+      "suggested_en": "Ecology Dance, Journey of Circulation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2ae4fe415659f2e07567edf7c1f4772b3175d1930e9882d6d575ed21c03a3d87": {
+      "suggested_en": "KBS Morning Yard Myungbulheojeon Episode 235",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cd34fc09229f169a84c88897f6df3b9dd3fdb2889336278c688e119c2d293511": {
+      "suggested_en": "Midong, To Be Tormented",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "261bd708be25393bf9eb11d57ae0ff9f1372bf315fef3015694d7f367edd0287": {
+      "suggested_en": "Choreography and Performance",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bce101a611d37b4075340368f385a84418d2d81093f7a09c3bda7d080c1a5061": {
+      "suggested_en": "National Gugak Center X Seodo Band Music Video",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0fb9a2682473bfb3b013dfb8ac39646bf51463fba0ff0e14de3706e4eebd6284": {
+      "suggested_en": "7th Dance Writers Exhibition Acting Award by the Bohun Dance Arts Association",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ab1821d183e3b59ad3cc82255c903c787dec26266bc6ed31b312457e3e082956": {
+      "suggested_en": "Bohun Dance Arts Association",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d0bc23d4493704058acbdee1220951b4937f8ad3be567911613b427f732c9a85": {
+      "suggested_en": "Gold Prize, Korean Creative Division, University Female Category",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c682c4576bbd534ad362c8c7dd54a759bacef89212c8c82ef7f93ac3d1100baa": {
+      "suggested_en": "CAD Korea Dance Grand Prix Competition",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "aeeafb209e9f4e125c7bb2597162080bb2ed2b1df640c12f41e5f9c6fcf50133": {
+      "suggested_en": "Gold Prize",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b2213122da3666792b888e9d425571bc19260ca112d549c6fb99424bd0eb4167": {
+      "suggested_en": "CAD Korea Dance Grand Prix Competition Korean Creative Division University Female Category",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "46f12d38a52af77c907484a09a33ccc7737eb49aa5b2dc0320ad152eaa7eed85": {
+      "suggested_en": "Korean Dance University Female Grand Prize",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "82351f20af10e078757bc4f5af2012378f52c7971791e2dfd8d553ba8d7915b4": {
+      "suggested_en": "Bohun National Dance Competition",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "40509ac18a3d5501ff161ab01ef9228e0bccdbc1e68fc36ee0ff7958724d9fff": {
+      "suggested_en": "Grand Prize",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "af3bff12ae9a24c9df0242dbcb3bc7400e157b0fa7690f71226b8ab97027ea5e": {
+      "suggested_en": "Bohun National Dance Competition Korean Dance University Female Category",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "627752b33d54c9f22de9010f306fe46e7a450c6fc576c580c1f398bf6713b1a9": {
+      "suggested_en": "Seoul International Dance Competition",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bbff4089442a3b74697d3a7230f2ad0c7275f54a9da8515c92ad6f8922fe5ba0": {
+      "suggested_en": "Finalist",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cc9ca5ffe78c631df6d03d1e8d94cb8761645beba11e04783b98d6263856dfc0": {
+      "suggested_en": "National Newcomer Dance Competition",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c1bee81a66ddaec5a5c6233f7ae9437b48fe4203b596bf928859570075f830bb": {
+      "suggested_en": "Semifinalist",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a96de62133b4c19159623a292ba98b62de62c8c428e3d3cb2fcf9de5eb7cd300": {
+      "suggested_en": "Lecturer at Ulsan Arts High School",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8bc68d83a439c9abe916a1bc4d8340ec99dee77470acd5e0296915196cb3b2ae": {
+      "suggested_en": "Bachelor's degree in Dance Arts, Hanyang University ERICA Campus",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b77701790f97834d7a5f7d38d46debcdc68dab830860613fed1fb811a5873e37": {
+      "suggested_en": "Lee Kyung-yeop",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cf1b09280a26cb99720d8cf746e4bcd844d6798a5ca095a8e534f8bece743604": {
+      "suggested_en": "Dancer Lee Kyung-yeop affiliated with GONGWON.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "977d0d227f1a1d687b2f6dab627a6d2133538c3e41ec6e3fb0c2cd6317a2d65d": {
+      "suggested_en": "KISU DS [Whale in the Daylight!]\n\n\"When the greenest dream waves rise, hold my hand. Passionately to the end of the world! We'll be there.\"\n\n\"Whale in the Daylight!\" is a piece depicting the journey of young people still searching for their path, overcoming rough waves and swimming through a sparkling sea. The scene where a dazzlingly beautiful giant whale appears without a set course and leads them to the blue sea portrays the possibility that shines more vividly amid an uncertain life.\n\nThe piece is a modern rock track based on solid band sounds, with refreshing and addictive guitar riffs and powerful rhythms that vividly express the dynamic journey in the lyrics. The structure, starting calmly and bursting out in the chorus, aligns with the message of overcoming rough waves and plunging forward, stirring the listener's heart.\n\nKISU's uniquely soft yet deep appealing voice adds depth and warmth to the voyage of the piece.\n\nExecutive Producer SM UNIVERSE\nExecutive Music & Sound Supervised by Haein Rachel Park\n\nProducing Directed, Planning & Development by Ayoung Cho\nA&R by Ayoung Cho, WOOJAE\nProject Communication by Soonyoung Kim, WOOJAE\nMusic Distribution Planning by Jasper\n\nVocal by KISU\nLyrics by Pete S. Kim, Lee Il-oh, Kyoie, dee(p)ony, Ryoka, WannaSHINe, EOB, Park Sophie (Sophle), Hong Dohyun\nComposed by INFX, WannaSHINe, EOB, Park Sophie (Sophle), Hong Dohyun\n\nBackground Vocals by KISU, EOB, Pete S. Kim, WannaSHINe\nGuitar by Pete S. Kim, Na Wonho\nDrums by INFX\nBass by Hong Dohyun\nMIDI Programming by INFX, Hong Dohyun\nSynthesizer & Keys by INFX\n\nVocal Directed by Park Janghyun (Somebody's Tale)\nVocal Recording by Junhyeok Park @SM UNIVERSE\nVocal Tune & Editing by Junhyeok Park @SM UNIVERSE, Park Janghyun (Somebody's Tale)\nMixed by Junhyeok Park @SM UNIVERSE, Park Janghyun (Somebody's Tale)\nMastered by Joseph J. Park @HBMS\n\nM/V Production by Fromus Film @fromus_film\nDirected by Han Sujin @truman_bluesy\n\nSpecial thanks to.\nPublishing Mentor: JINBYJIN, Lia Kim @Kreation Music Rights\nSongwriting Mentor: INFX, Corbin, ChaMane, PHINY, Aden K., Smooth Life, KIMU, Noche\nVocal Mentor: Taejun Kim @SM UNIVERSE\nVisual AI & VFX Video Mentor: Jinsung Kim",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language;long_text",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ee93dbb84741e1b102d443e546ceacd44745b4f449e11324be3e0dd788381a72": {
+      "suggested_en": "Composer, Lyricist",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cf63b14ee585e80925d9b44e3d0101c295d210bed6c3934243b161f0691d548b": {
+      "suggested_en": "Moon Seoyeon",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bb4b7bc9ebe81d8bbd052a5d6f7276c5ff9d5001d0806995709138c71ca52b96": {
+      "suggested_en": "Currently enrolled as a third-year student in the Department of Dance, Kyung Hee University",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "95c72c32215e45e5191faa14138312330f9021318e8df8ad4a6196e749c86690": {
+      "suggested_en": "Eunmi An is a leading choreographer in Korean contemporary dance, known for works combining bold visual language and social messages. \"Dragons\" is an experimental choreography inspired by the Asian dragon motif, which toured internationally including the UK, and \"Woman, Woman\" highlights the life of modern Korean women with lavish stage and music.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "362d28b493211e152d2a7ad9497c65cc3fd764de7c6077459bee95d4503686c8": {
+      "suggested_en": "Eunmi An is a leading choreographer in Korean contemporary dance, known for works combining bold visual language and social messages. \"Dragons\" is an experimental choreography inspired by the Asian dragon motif, which toured internationally including the UK, and \"Woman, Woman\" highlights the life of modern Korean women with lavish stage and music.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "384e61d6fb1583a50951304eb5ced9c8ccf6db498b018af5523c2e073d77492e": {
+      "suggested_en": "Dance Company",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "eb07f7b201b1b7778292f03eccfc62b57eb9054652265b0841f6fa8ff7924659": {
+      "suggested_en": "Contemporary Dance",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cce47c5dfbca078947eab73baad5ba081759d9e3cd10b318964a7ca43c486bdc": {
+      "suggested_en": "Multiple Works",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "62f79657f1cd2157b1fb6318547ccf29a6f8563580d631c323ffb5a57ba593e4": {
+      "suggested_en": "Verified",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a9b07b3de5b873ec8b79deef4dfbab9629d2fd272b9e3e432766282b55a00d63": {
+      "suggested_en": "Dance Dedicated to Ancestors",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "95bab45c8151cd42d71ca46bcf72b4a110fee1de7cad497876788e5236b036c7": {
+      "suggested_en": "Daesimttangssu",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a45f36c4bf490d26a4463b866c9e869dc80daeea938319ec434c22f9442af985": {
+      "suggested_en": "Eastern Future Express",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a0201ee1785b5c8ff0008d7a14fd3c2ad7847ba31fe6f9c6b4a789696b43eacf": {
+      "suggested_en": "Dragons",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bf4cabf1faaae3f9957997e92b2dfaf64a8e597fc2ce887d575294c7d698f007": {
+      "suggested_en": "Super Virus",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ed93d338e81c2c78634745ec578ad036188a30eab2e071db1ed1a7bcb5ce8be4": {
+      "suggested_en": "Irresponsible Land Use for Middle-aged Men",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cb5448c9d510eb420aa3435f0d632009bce86f0728345fa62112e360ffc0ab7c": {
+      "suggested_en": "An Eun-mi's North Korean Dance",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "068ffd6ad475f3eb22b12a2685cabb4ca915e979e100420bddb3b0ba5e5042b1": {
+      "suggested_en": "Woman, Woman",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8d8151a2b8bf5a4a87cf90858304a92c0efaae6de68846b2a6e86f5b1414d6be": {
+      "suggested_en": "Jinwook Ryu and Ghost Group is a dance company presenting experimental works exploring the relationship between human evolution and the body. Brachiation addresses the 'present body' located at the boundary of evolutionary time, reconstructing evolutionary behaviors that connect past and future through dancers' movements.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ec78611b9ab0a2a5bc416aed2ce4bab8beb09ba78e0deb715a66465aa87400de": {
+      "suggested_en": "Jinwook Ryu and Ghost Group is a dance company presenting experimental works exploring the relationship between human evolution and the body. Brachiation addresses the 'present body' located at the boundary of evolutionary time, reconstructing evolutionary behaviors that connect past and future through dancers' movements.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b670df2d3584b7ad62bdb27be3d47b6ceaff0f25ea8df103022718a72e5fff5e": {
+      "suggested_en": "Choreographer",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5b0499b0f2cc17af64f67893f5bd3df9be7c907a38a552dc3df7b3e907ef527a": {
+      "suggested_en": "Brachiation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d900c9813e17bbca5e02c1eb21947e49641168f231036cee208594ee805516a1": {
+      "suggested_en": "Boram Kim and Ambiguous Dance Company are well known for experimental works that traverse tradition, popular culture, and educational elements.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "dd94c2443c7049b7c6eb306e176763eb2d218cf08ea39129cb4b5d11732d4d75": {
+      "suggested_en": "Boram Kim and Ambiguous Dance Company are well known for experimental works that traverse tradition, popular culture, and educational elements. The work Uneducational Dance takes the form of a lecture performance directly showing the choreography process, and the stage collaboration with E Nalchi combined tradition and modernity, standing at the center of popular culture.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3e8fe41c3da857be3a625e0bf1111485fd213bc1f1dc65a4cbcb40fea6ccd98f": {
+      "suggested_en": "Ambiguous Dance Company Performance",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "97ca49c65f281ba4d2a3646116cbeec100f72df41e1217a2271a1124af7f70be": {
+      "suggested_en": "Ambiguous Dance Company Representative Video",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a44ea219ec461bfd084361d0fb97d668acbc9578dec588ab938ada1b67a596e5": {
+      "suggested_en": "Body Concert",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b20757d0afb9346cfd2628be0dbbec0352418d8436e44434e750e00c82dff19a": {
+      "suggested_en": "ASAC Body Gesture Concert",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3e2f40a7403ded0f07a2db68175e152991368f5523280dcc558af221f1593939": {
+      "suggested_en": "Uneducational Dance",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3f25f0ef1665ce07727b42954112ccd626c6c6a99f05a3af7cbc7109bec807d0": {
+      "suggested_en": "Linguistics",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f89b3da58254497fc880156ebc386406881fa036838e64ae35c783d4716ad10d": {
+      "suggested_en": "Gap",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6118b9c546515f044f6034eb7a8cd72c92fe4b3163e5f314b4541c92c17098f9": {
+      "suggested_en": "Homladang",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "42e27fc8e0ac1f9add708f68d76545a562351d553cfc49be326069b12be4651d": {
+      "suggested_en": "Haeni Lee continues work exploring the boundaries between body and perception, centered on Ballet Blanc and Haenish Ballet. In Pan_Opticon: [Unseen_Code],",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1ff671a0511d113878b1476bfbf4e032ba49ff4f4c459d5cfc04da60a6ac0e41": {
+      "suggested_en": "Lee Haeni continues work centered on Ballet Blanc and Hanish Ballet, exploring the boundaries between body and perception. In Pan_Opticon: [Unseen_Code], the mode of existence of the body within surveillance structures is expressed through audience participation, allowing experience of the boundary between freedom and control. In 되돌이표: 두 개의 숨, the motif of breath is used to address the cyclical structure of life and death.",
+      "needs_review": true,
+      "review_reason": "Mixed language; work title '되돌이표: 두 개의 숨' untranslated, marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3103a636a5505fa827e19f3e151657db4339f91164cebc76227411742f13fa0e": {
+      "suggested_en": "Ballet",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "fd2cc1a7f57a7d1af8ed348cfecf8890a9d527e2c0058373ce78eb1fab5b992c": {
+      "suggested_en": "Kko-kkio",
+      "needs_review": true,
+      "review_reason": "Work title '꼬-끼오' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "598db2f18494e20d6f9c802b953e63a84b2cc5791f4b876dfdcae69daf9916b1": {
+      "suggested_en": "되돌이표",
+      "needs_review": true,
+      "review_reason": "Work title untranslated, marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f7d3eabef1c690a1815cc395d46ede498b29c1adb318b8cde327f981c766d1fb": {
+      "suggested_en": "GONGWON aims to create spaces where conversations and relationships among people continue through works.",
+      "needs_review": true,
+      "review_reason": "Mixed language; company name '공원(GONGWON)' partially romanized, marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "74d22587bfef6e27f81ea8f9ffd18768f02dff93c0f8a118921971264020ae43": {
+      "suggested_en": "GONGWON aims to create spaces where conversations and relationships among people continue through works. The main subject of the works is the body, exploring and creating moments when the everyday body becomes a new story in specific spaces, objects, and situational contexts. The company works across various artistic fields including dance, photography, installation, video, and art tech. It continues recognized creative activities through projects by Seoul Foundation for Arts and Culture, Arts Council Korea, Korea National Contemporary Dance Company, MODAFF, International Duet Festival, and other institutions and foundations.",
+      "needs_review": true,
+      "review_reason": "Mixed language; company name '공원(GONGWON)' partially romanized, marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ad4b7bd42be988c36245cd9aa6a075e94c6796ad56a670bb8053c6b10c56ccf2": {
+      "suggested_en": "Exploration of body and space",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4b118e09e688faf35b5f68dbe326564a6f11567446a12e576ebe01b779ba25fd": {
+      "suggested_en": "Fusion of technology and art",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e2a4860edf0d256002dd57878d8138ce1fd5a13d4962ea5a39f5e3870e46bddb": {
+      "suggested_en": "Research-based creation",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8c33182319927a607ca33e3e7e14fd3d5bcd30d531fdecef40243f8624593155": {
+      "suggested_en": "Inclusive artistic practice",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f6fec7858ac50f2f26abdc9fbc4697e20abd706088742f5c881872ee02a3a1cc": {
+      "suggested_en": "Embrace Even in Falling",
+      "needs_review": true,
+      "review_reason": "Work title '추락에도 포옹' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "14c1f79c5634bb23743b196d3ec1903741efe3544b9217017becb68346c83b68": {
+      "suggested_en": "This work interprets the literary expression and meaning of novelist Yi Sang's Wings through dance. Rather than following the narrative, it portrays the literary experiments attempted by Yi Sang and the social conditions of the modern era he sought to discuss, viewed from a contemporary perspective.",
+      "needs_review": true,
+      "review_reason": "Proper name 'Yi Sang' romanized but marked for review; work title 'Wings' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b3a0b8a9368a44f193c67dcec316368724917655c0f024856c49b61006030bea": {
+      "suggested_en": "Dramaturgy",
+      "needs_review": true,
+      "review_reason": "Role '드라마트루기' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "99345e721ae66c89ceb94c99465736edd6a86b84f90ee6377588c7240c287168": {
+      "suggested_en": "Project Manager",
+      "needs_review": true,
+      "review_reason": "Role '프로젝트매니저' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "77d7bf376047931120914f48f8322ac8ef81eab140ce3426d24bf27d95701c68": {
+      "suggested_en": "Lighting Operator",
+      "needs_review": true,
+      "review_reason": "Role '조명오퍼' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3f6538875294b2672f476048f50c9ee292256719e061dc4a45c51ea5aa4d7822": {
+      "suggested_en": "Stage Manager",
+      "needs_review": true,
+      "review_reason": "Role '무대감독' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7702de73b81a83ab2f846a26daed57df69e8b32870abeb20de2bdcd562167b7c": {
+      "suggested_en": "Stage Designer",
+      "needs_review": true,
+      "review_reason": "Role '무대 디자이너' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "81048d028205046a46dab6877f550de3bfac7be23e4562f3c16f55ef7f9d8572": {
+      "suggested_en": "Stage Crew",
+      "needs_review": true,
+      "review_reason": "Role '무대크루' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2c963c951caf34c5fdf34e2ae0d97fa9d10ea40de3c0096a81eb47e8605de77e": {
+      "suggested_en": "Table",
+      "needs_review": true,
+      "review_reason": "Work title '식탁' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cb5a761175570237703cc308b9365f02a83123a5c10ee3f17590d79657fa2aae": {
+      "suggested_en": "Through the process of the disbandment of the table and the gathering of dancers, this work seeks to understand the true meaning of family.\n\nFamily is the first relationship formed in life and plays an important role. In this work, Table, the disintegration of family is depicted, exploring the changing Korean family culture, attitudes toward loss, and stories about family, inviting the audience to reconsider the true meaning of family.",
+      "needs_review": true,
+      "review_reason": "Work title '식탁' translated conservatively and marked for review.",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a2d51e470c06833a822c1b8e58f0c7a508a5f636d6bc740a8385b3254821ab1a": {
+      "suggested_en": "Edge",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5624f9cd8084a6a042c1657d09a31fd352781f884c212b29a858eef303c52360": {
+      "suggested_en": "Edge is an attempt to overlap the acts of sculpture and choreography to discuss the artistic present. This work process explores the intersection of sculptural processes and choreographic expression, transcending the reproduction of existing sculptural forms with the body and the technical expression of movement, sublimating the exploration of the essence of the act of sculpture into dance.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b229c586bc05c334fce988624cbde8005900e4c46aeb840f26cccb41827114e5": {
+      "suggested_en": "Choreography and Direction for NETFLIX series",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ae465d713e084282e53e7de2df0d2a8989e034451f2f741e555e8635b36c2d7a": {
+      "suggested_en": "Department Store of the Maze",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "92452ba2a9b056a72dd6541e9a34410725d6def975a46c52553ffa3d69c4cc75": {
+      "suggested_en": "Dohwa Hotel",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4084624d3b372e641d257f7530b5c288df76f19e524bc2cca0a911f42fa98cd0": {
+      "suggested_en": "The Sixth Island",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d190238340c6bb003e726496881eb7b2054779582d5b14629f0e9727cbe60738": {
+      "suggested_en": "Study of the Body in the Post-Humanism Era – Focusing on Legal Regulations",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2208dcfae817ad9e2c872174e3246f185f6ff97aa8064d3406c050c3f32d53c6": {
+      "suggested_en": "Seoul Foundation for Arts and Culture Research Project",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b1e3546b3913cdfa3bfc94ada8522f3070171f0b9e258e468790661a221cefc0": {
+      "suggested_en": "ODD BODY Project",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c113cf9c0fbc31e47ecb4bea530865d23f459c5e6ca086faeb0b35f8400d08da": {
+      "suggested_en": "Selected for Korea Arts & Culture Education Service Technology × Art 'Creative Process'",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e25c937210bfcce15af76cf0ebe96428e844a3904fdc697bdd0726c06515a169": {
+      "suggested_en": "Tree",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9b346cf11e8b4b1680504b8db96430da1230411945a878ee62dd3f16386ba8c4": {
+      "suggested_en": "Selected as Korea Arts Council New Work of the Year (Nominee) <Embrace in the Fall>\nSelected for Songpa Cultural Foundation Arts Expansion Support Project <Table>\nSelected for Seoul Foundation for Arts and Culture Creative Arts Activity Support Project <Edge>\nChoreography and Direction for NETFLIX series <Beauty in the Beast (B.I.B)>\nRevival of choreography for musical supporting hearing-impaired children <Department Store of the Maze> (01.30.~01.31.)",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8e8277673b6e0b382030e4e170a49f729e8a72156f45ddb10371e95276b88e0f": {
+      "suggested_en": "Selected for Seoul Foundation for Arts and Culture Street Arts Open Lab Public Space <Table>\nSelected for Incheon Cultural Foundation Collaborative Creation Project <Dohwa Hotel>\nChoreography for musical supporting hearing-impaired children <Department Store of the Maze> (07.19~20. Full cast mobilized)\nPohang Cultural Foundation Art Technology Convergence Playground <The Sixth Island>\nSeoul Foundation for Arts and Culture Research Project <Study of the Body in the Post-Humanism Era – Focusing on Legal Regulations>",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a3311a588fa86f00e06e92986cf61b4fdcfe492d0abba8055713dbe27484b6a7": {
+      "suggested_en": "Invited planned performance <Edge> at Eulsukdo Cultural Center (10.12, Eulsukdo Cultural Center Grand Theater)\nSelected as Korea Arts Council Creative Studio New Work of the Year (Nominee) <Table> (04.21 Mapo Art Center)\nSeoul Foundation for Arts and Culture Art Plus Startup - ODBY Project\nSelected for Songpa Cultural Foundation Arts Expansion Support Project <Table - Art film>\nSelected as artist at Youth Artist Center",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9c47a7ba82ba23a8d30a7248c8556d5c7e182778f43b420449a7bdbb6b3e48fa": {
+      "suggested_en": "Selected for Korea Arts Council Technology × Art 'Creative Process' <ODD BODY Project> (06.01~04. Yeonhui Arts Theater)\nSelected for K-ART ON-ROAD Creative Activity Support Project <Table> (10.07 Platform L Live Hall)\nSelected for Seoul Art Market PAMS LINK <Table>\nSelected for Korea National University of Arts Yekundae Project <ODBY>\nSelected for Seoul Media Canvas Nature Project <Tree> (Broadcast on Seoul Station Plaza Media Canvas)",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "54b25bfd16236e7c12bdbffb1782a1fb2f2b5656ec72cd79591344cd5af55c4f": {
+      "suggested_en": "Selected for Korea Arts Council First Support Project <Edge> (11.18~19 SAC Art Hall)\nKorea Arts Council Online Media Arts Activity Support Project <ODBY Virtual Exhibition>\nInvited for Seoul City Immersive Video Work Production Support Project - Dance\nSelected for K-ART ON-ROAD Creative Support Project <ODD BODY> (10.12.~16. G Contemporary)",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e2e4c4197303fabbf581da7fc79c63a9f1173f2717a9766bd96a8f4e5e327996": {
+      "suggested_en": "Korea Arts Council New Work of the Year (Nominee)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8c31d30a69fe144d9f44117d22b2332e8adaba9ed0c031b9c40b3732a2e0c880": {
+      "suggested_en": "Nominee",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8e329017bdb37b154a92bf9ec7ad48c5b06bda64a9feb2e18ba2d5ed68492baa": {
+      "suggested_en": "Selected for Seoul Foundation for Arts and Culture Street Arts Open Lab Public Space",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5d1cb3731c39d82a279964a35ff6e8df5f176c8f475b437f76d337159c00cd09": {
+      "suggested_en": "Seoul Foundation for Arts and Culture",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "32ff74c9c4146ffbcb7ca1897e1de67af1095458812d83a817130961bdd83545": {
+      "suggested_en": "Selected for Seoul Art Market PAMS LINK",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4489424bf5fe9ffee138f44873527ee5015d7548b5946280fa4689185d84a986": {
+      "suggested_en": "Seoul Art Market",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6eb90d1c9cb6d9ccfc786bf0c78d01f2e7596f5b07d4c26adc5c5d359d21245d": {
+      "suggested_en": "Selected for Korea Arts & Culture Education Service's First Support Project",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "eebeee48573955afc6ec6ad8c363dd4db58b6696de4b7383537542731749d92d": {
+      "suggested_en": "Embrace the Fall",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "0e8bfc6ef81ad3dae1b4c06c18b5018eb93abbdb1dff5de9d7b4df30fd891cef": {
+      "suggested_en": "Connecting Korea's tradition and modernity through creative dance.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "12f33d9cc10d01e0b35b578e48715ea5e5064c2532a119e093b712168d403185": {
+      "suggested_en": "Gomsiseon continues creative activities based on Korean Dance, presenting works that harmoniously connect Korea's tradition and contemporary sensibility. Through works such as \"Overlap\" and \"Chose Misfortune Over Staying,\" it has communicated with audiences on various stages and is currently preparing new performances.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "636d1a39e724ae294b781f051cdf9465a73dedb621bd1903507603695eb3f564": {
+      "suggested_en": "Recycling? Reutilization!",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "80af2178a557ebff51103aeaa14ec3e3bc784902949c516de1915547c9123387": {
+      "suggested_en": "Interviewee",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3f93ea2b32cb0155ba4e04b7b1b723df68795abb1a062a9214f8c5568259b399": {
+      "suggested_en": "Photo and Video Documentation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5d6365d2f8131ef586f5a5ccd1a768bee2964b72ce9ae2f7b52f548e1ffc757a": {
+      "suggested_en": "Our true love may inevitably be an uncomfortable and unhappy choice. Between happiness where nothing happens and persistent discomfort, which side will we choose?",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "96675d979cbd76e009d5d3599340cf185db5fcdcb576ba60cb8fb4b6542fcd17": {
+      "suggested_en": "Porter",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "db0843199e7b2f698696285951a3723f79d142c89be2c998c98eca84fb74a8e9": {
+      "suggested_en": "June 26: Gangwon Special Self-Governing Province Dance Company planned performance 'Beyond Imagination' <Overlap>\nSeptember 18-19: Scheduled performance of <Overlapping> selected for Korea Arts & Culture Education Service Youth Arts Leap Support",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "96deed02c23d79b163efe99e3ff60bc8a573c0a8e5a05fbc8aa61a947840552c": {
+      "suggested_en": "October 3-4: Daehakro Arts Theater, Small Hall Seoul Foundation for Arts and Culture Arts Creation Support <Recycling? Reutilization!>\nSeptember 10: National Gugak Center Umyeondang planned performance 'Young Son-in-law' <Overlap>\nJune 7: Guggenheim Museum Spain ACT Festival <Chose Misfortune Over Staying>",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b428f8ffa48f1c994d8ebfa1205a7a3635d80063c854597c2a9934bc360c1510": {
+      "suggested_en": "Samillo Warehouse Theater SIDance Festival <Chose Misfortune Over Staying>",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "3ba520331f667295dc783338c0e2285b44c1133a17bb2f4934c5b2c277507cd9": {
+      "suggested_en": "Sogang University Mary Hall Small Theater Seoul Foundation for Arts and Culture Arts Creation Support selected <Porter>",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e14a3af1485884dcbde6cd219d35c2ab50ecc5044907d7cca61999ebcc13e66a": {
+      "suggested_en": "Scheduled performance of <Overlapping> selected for Korea Arts & Culture Education Service Youth Arts Leap Support",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f086d7c1f8f029e3b201d75af8c10264fc9693f9e7156c0dd965d0f27b1c473b": {
+      "suggested_en": "Aiming for all forms of art and expanding contemporary dance in various ways.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "fa5655beac3c270b0ba7ba6c404abef2d96241ec402834d087c68014ac53cf76": {
+      "suggested_en": "All Company pursues 'Art of Everything' and expands contemporary dance into stage performances, street, dance films, and arts education. Through a trilogy series themed on sports, it explores human competition and limits. The representative work \"Feast: Eight Moments\" expresses human figures in a competitive society through fencing, and \"On the Rock\" depicts humans overcoming limits through climbing.",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bdeec19442e2c99212ad9167fd26c24ddc0f0d5344ef15efe1e7e7169ec9fee6": {
+      "suggested_en": "To expand and integrate contemporary dance into stage performances, street, dance films, and arts education.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e7524500228079674e6062942ce04cdd3afb800cc483ee9a5f23860005aaad40": {
+      "suggested_en": "Art of Everything",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "51f45749390c0d7cff6e318b28862f3531a658a9d0f02f5605e22d131075a2ad": {
+      "suggested_en": "Expansion",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "62c9b84a9c689c94b0205ce03b081b102b1702c7e226b37f2db1a6c92cbee141": {
+      "suggested_en": "Convergence",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "662cfac78d11f9dcd3ac149d0f22d1ed5fabb99b4720c371797009198fcfffb5": {
+      "suggested_en": "As the first work of the sports trilogy, it depicts human figures in a competitive society using fencing as the theme. Combines touch sensors with real-time video and effects technology.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "616660821d7540e1aebb40cc894486ccff37c67ac68d31ee857153e48568313d": {
+      "suggested_en": "As the second work of the sports trilogy, it portrays humans overcoming limits using climbing as the theme.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "4cf41dc8e249aa0d1177d68f3baee04841732c95d5bf435262c6a8acf137b3d2": {
+      "suggested_en": "Performance Arts Creation Studio 'New Work of the Year'",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "080b7f5170fdf665cde393b670777d4e1922c1c21fca6e76df153ee7d543042e": {
+      "suggested_en": "Explores modern contemporary through Korean dance and traditional dance.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "99843a9cc9a51309db174db8b5287e98db33794662959df78b466ae08fa307eb": {
+      "suggested_en": "Ubomanri is a company that explores modern contemporary based on Korean dance and traditional dance. Major works include Labor (勞動), Only in My Name, and the fine art piece Hanok in a Western Theater, which reinterpret Korean elements through contemporary dance language. Recently, the company has continued various performances and exhibitions related to these themes.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "58ccf6dfaa9a0b12d164367c36c3f352a2d3a3f34b1c87eac140b9eb88aafd42": {
+      "suggested_en": "Incompatible Coexistence",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "5f4cc33498f3dde8e1f70e8f32fa0479e4783f0060ec3b117bd307d7a417b344": {
+      "suggested_en": "Performance Introduction\n#Dance_and_talk_and_experiment_on_stage\n#Things_that_cannot_coexist_share_one_stage\n#Different_views_and_listens_depending_on_seating\n#Beyond_seeing_experiencing_with_senses_performance\n#Experimental_lecture_performance\nA stage where those who have practiced Korean dance perform dance, speech, and experiments together. An experimental lecture performance that opens questions together.\n\nWork Introduction\nIncompatible Coexistence is a new work by choreographer Jo In-ho, who has practiced Korean dance. It is an experimental lecture performance combining dance, speech, and experimentation. Rather than presenting a well-structured dance, the performance unfolds various attempts and questions on stage.\n   The work starts from the question, \"What is dance, and what is performance?\" Instead of showing a completed dance, it unravels accumulated movements in the body one by one for re-examination. It places difficult-to-coexist elements such as tradition and present, seeing and experiencing, life and disappearance side by side on stage without forcing them to merge.\n   Audience members see and hear differently depending on their seating. They may breathe closely with the performers or observe the whole from afar. This stage, combining dance, speech, sound, light, and darkness, proposes a 50-minute experience beyond viewing, engaging the whole body's senses.\n\nSynopsis\nThough we come to watch the same performance, we ultimately do not see the same thing.\nThe stage begins by breathing together with the audience. Carefully refined dances unravel piece by piece, and incompatible elements stand together. Seeing and experiencing, tradition and present, life and disappearance remain side by side without fitting together.\n   Depending on whether the audience sits close or far, the performance appears differently. Sometimes dance stops and speech intervenes; multiple dances pour out simultaneously from all directions. When the light dims, the audience meets the invisible dance again within their own bodies. What remains varies by viewer.\n\nDirector's Intent\nThough I have danced for a long time, I still face the same questions: What is dance? What is performance? Does moving the body make it dance? What remains after the dance disappears?\n  This time, rather than providing answers, I wanted to unfold these questions with the audience. Instead of completing a fixed dance, I chose to present various attempts and experiments on stage. In this sense, the work is close to an experimental lecture performance.\n  Starting from the stage and audience breathing together, it unravels and re-examines accumulated movements and memories. Difficult-to-coexist elements such as tradition and present, seeing and experiencing, life and disappearance are placed side by side without forcing alignment.\n  The body changes over time. I cannot perform the same dance as ten years ago. Yet the changed body has a changed dance. I wanted to view this discrepancy not as loss but as another form of coexistence.\n  Performance is inherently contradictory. Though danced by living bodies, the dance soon disappears and remains only as memory after it ends. I wanted to reveal rather than hide this contradiction, believing it to be the essence of performance.\n\nPlanning Intent\nA performance meets the audience briefly after long preparation and then disappears. This work starts from viewing that disappearance not as regret but as a unique characteristic of performance.\n  Therefore, this performance opens as a place to share the process and experiments with the audience rather than showing a completed result. It uses not only dance but also speech, sound, light, and darkness, and sometimes scenes open with audience participation. The name experimental lecture performance signals that this is a place to question and experience together rather than simply appreciate a well-structured dance.\n  The focus is on density possible only in a small, intimate black box theater rather than large scale. The structure allows each audience member to experience the performance from their own seat with different distances and senses in a close stage-audience setting. Incompatible Coexistence continues Ubomanri's work redefining the relationship between stage and audience and proposes another way for contemporary dance to meet audiences.\n\nChoreographer Introduction\nChoreographer Jo In-ho\nJo In-ho is a choreographer exploring between tradition and contemporary through dance. Based on Korean dance, he unravels traditional dance structures and expands the aesthetics of breath, space, body, and relationships to today's stage. Based on the idea that \"movement creates space, and space creates movement,\" he works within contrasts of stillness and motion, visible and invisible. He earned a PhD researching mathematical concepts such as topology and Riemannian geometry applied to choreography and space.\n\nLeading Ubomanri, he has presented works including Taxidermy, Stranger, Labor, KNOCK, and Hanok in a Western Theater. He served as assistant director for choreography at the 2018 PyeongChang Winter Olympics opening and closing ceremonies and received Bilbao Act Festival Best Performer, 3rd Seoul Arts Award Porsche Frontier, among others. He is currently resident choreographer at Gyeonggi Dance Company and teaches at Korea National University of Arts and the Traditional Arts Institute.\n\nCompany Introduction\nUbomanri (牛步萬里), founded in 2016, is an independent dance company valuing accumulation and observation over rapid results. Based on traditional Korean dance breath and structure, it unravels and reconstructs to create new languages of body, space, and relationships. It has presented works including Taxidermy, Banghachak, Stranger, Labor, KNOCK, and Hanok in a Western Theater. Since 2022, it has expanded dance language through collaborations with artists in music, installation, video, and lighting. Continuing its work redefining stage-audience relations and treating space as part of choreography, it presents Incompatible Coexistence.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language;long_text",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "47b88f506d9c7cc3799d01988fa1db5c65f3d19393abf01019ce37e0344c7e94": {
+      "suggested_en": "Choreography and Direction",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "d4fe268ce956119fe93661f2cb02dffb3d364569ebef9e388138f52fb1cc7cc6": {
+      "suggested_en": "Lighting Director",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "1780be61982cc30722b260c988522c0575f01332970f6095126a23dae134916a": {
+      "suggested_en": "Sound Director",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "de5e4328ff346e7ace86e77d77bf2e38b1303a83be752bea35d82bda0bdc0c09": {
+      "suggested_en": "Graphic Design",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "9f444e439dbe0eb5dd15269e8ca7b9169c0a2422cddb3b5039c06bf4f5f19ffd": {
+      "suggested_en": "Documentation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "65ae41ef5296fcef2552452bf6b4c2bef5cd2e333f5bdfdcd54f3787430eec28": {
+      "suggested_en": "Co-Planning",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "64dbba85ac6b4cfabfd906f039c027308a3e067a521c8d4f302f878ac5cd9c7b": {
+      "suggested_en": "Trajectory of Breath",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "c3fc663fe3d911553d0004e71e96b1b005ff35a91a174bde78a1e9cf6d2398f6": {
+      "suggested_en": "Im Hak-sun Dance Company Jo In-ho 〈Trajectory of Breath〉\n\nTrajectory of Breath\nApril 12, 2026 (Sun) 7:30 PM\nArko Arts Theater, Grand Hall\n\nChoreographic Intent\n\"Anxiety is not an error but a vibration proving life.\"\nThroughout my life as a dancer, my body has always trembled slightly. The more I longed for perfect stability, the darker the shadow beneath my feet became, and in a life where I must constantly be pushed forward, I regarded that trembling as an 'error to be eliminated.' I thought it was a flaw that should not be shown.\n\nHowever, just as the chest vibrates when the heart beats, living beings naturally tremble slightly. What we call anxiety may be the most primal signal that twists stagnant thoughts and life frameworks to move in a different direction. This work views the most fundamental act of human survival, 'breathing,' not as a simple physiological phenomenon but as a dynamic path where self and world brush and collide.\n\nThe work Trajectory of Breath begins by willingly acknowledging that trembling and vibration. Starting from heavy silence, it endures and passes through time that spreads into a festival of hot breath with the body as it is. It is a journey to regain the lost sense of existence by confronting the ground of reality, escaping from time adrift under others' gaze. Without suppressing anxiety but embracing it, it reflects on stage the path of all of us who exhale again and move forward from our own places.\n\nWork Description\nThe work depicts three waves of breath starting from deep within and resonating with the world.\n\nChapter 1. A body adrift in thoughts.\nTime lost direction, swept by others' standards and massive flows. A quiet seat is placed on one side of the stage, seeming to calm the mind if one leans briefly, but the body only brushes past and does not stay easily. Though sitting seems to pause the current trembling, footsteps slip away as if swimming through the air. Beneath the seemingly calm surface lies unspoken pressure, and gradually rising strange anxiety begins to shake the body like fragmented thoughts.\n\nChapter 2. Facing existence, raw breath.\nThe bubble of drifting ideas bursts, finally colliding with the coldest and heaviest ground of reality. Awakening from illusion, left entirely alone. In gasping breath and struggling to push the ground away, one faces the unmasked 'real me.' This rough breath expelled to survive is the honest bodily response to stand on one's own feet.\n\nChapter 3. Trajectory of Breath, walking forward together.\nThe fierce confrontation at the lowest point opens a new body. The isolated breath that struck the ground mixes and allies with others' breaths nearby, spreading into a large flow. Anxiety no longer sinks us. We willingly tremble and move forward at our own pace and direction from our places. The hot breath we exhale together becomes the 'trajectory of breath' we must walk.\n\nChoreography and Performance by Jo In-ho\nPhD in Dance, Sungkyunkwan University\nRepresentative of Ubomanri\nRegular member of Im Hak-sun Dance Company\nLecturer at Korea National University of Arts, School of Dance and Traditional Arts Institute\n2025 3rd Seoul Arts Award 'Porsche Frontier'\n2025 31st Dance Arts Award 'Notable Gaze Award'\n2025 Spain Bilbao Act Festival 'Best Performer'\n2018 Korea Dance Awards 'Chairman Award of Korean Dance Association'\n\nMajor Choreographic Works\nBIRTH, Hanok in a Western Theater, Coexistence, Knock, Holo_Sinawi, Labor, Stranger, Banghachak",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language;long_text",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "bec998dbabb725767d809a3dd3292cfb48fadef9162247b8fbe695aac11c442a": {
+      "suggested_en": "Hanok in a Western Theater (Expanded/Revival Version)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "470c7d0d697eb6aac26df5b28c11bffe8ad24fef84fe66275e646bc0c9421370": {
+      "suggested_en": "A combined exhibition and performance work that deconstructs, transforms, and rearranges the spatial characteristics of hanok and elements of Korean dance on a Western-style proscenium stage.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "474fd21a43fd4007c437825ed79b2a124668408c27621d3cbcf8e568c487e82c": {
+      "suggested_en": "Costume",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 2
+    },
+    "b3db8f5e926bd9ee5e965fa6d41fb1b7ab56e65e24cbd94e95efd60a68982528": {
+      "suggested_en": "Labor (勞動)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9600c9e41f777ae6aa7879e814a3458a0b2db8c5ef815e5018d1f35f457f94ce": {
+      "suggested_en": "Only In My Name",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4c1aa2e17ca69d0ce4451bd8ead2834a82d827cbd96325a4766bf527b0f4b8f4": {
+      "suggested_en": "A Hanok House in a Western Theater",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e95bf4add685e7da8a90fe47242b144d9dd1961387b186dfa1687de7d423ce43": {
+      "suggested_en": "Selected Work for 2022 Next Generation Series",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b4e727cf5c3a95a9fccbae31e4c3fcd1955fd932462ae0e6824cc8fa69b0cf18": {
+      "suggested_en": "Notable Perspective Award (31st Dance Arts Awards)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "58c32f29c29c1262a4749949ab6993ee860b4e8bb1df0ef1b16834778aef718c": {
+      "suggested_en": "Hosted by Changmu Arts Institute / Organized by Dance Monthly Momji",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d2ed83c28fcd7728b0c33bc1a3491a6db38e6788f9b1123cf007c48c228f3788": {
+      "suggested_en": "Awarded Work <A Hanok House in a Western Theater> — Highly praised for its fine art nature that evokes the spatiality of hanok architecture through the body and its perspective on labor",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f6e4bc022acfee7ddbc8b475a82b4cd87c504ba0ca23213d5e728a0acf983e6f": {
+      "suggested_en": "Porsche Frontier Award (Dance Category)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d077d46c3f1bd7b3b6ce2d4e549bd9f682c4de98eba59b05dd4d0e75ae157c0c": {
+      "suggested_en": "Hosted by Seoul Foundation for Arts and Culture (SFAC), 3rd Seoul Arts Awards",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "325da6bd122b665081b943608698433c592859c54910df10e8f48975adccc67d": {
+      "suggested_en": "Awarded Work <A Hanok House in a Western Theater> (Ubo Manri)",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "79856ec2f339cc424716c76e0fa3db575e4e970f9b9bf9c4e0e7936b4e85c3b2": {
+      "suggested_en": "A Hanok House in a Western Theater (Expanded/Revival Version)",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "40939af7dfbb643da57d85b7d5ae9020d5a2b417d97ea1b1996f825c1a399e72": {
+      "suggested_en": "Route of Breath (New Work)",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "860c55e2b04972f483772b8a6f7bf9bc9df78e026407991d9486407c4141dc63": {
+      "suggested_en": "We aim to practice art that is as malleable and enduring as copper, capable of creating and containing anything.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "fd8025f008e19939865fa075a45c9fe868c40a2e3c32803bf45eba6ed07b89ec": {
+      "suggested_en": "Denominator of Sensation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9a2e9749878b61bb38a704ac9c6be463108e83f4ac882aa5678956757c250081": {
+      "suggested_en": "'2025 Arko Dance UP:RISE' Stage 1 Selected Work. Explores the essence of sensation based on the premise of the absence of hearing.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e4b15274b69c3d4714726381d5be4d28713ae3ff982057728e350ddaac9cea38": {
+      "suggested_en": "Dramaturg",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "fd7a93a0fa1a6a8e67b786490ca90473c841aa5dca951354b994f93185323dee": {
+      "suggested_en": "Co-creation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "83020a9ea553f60ffaaf9f72c2f182979d033db34304c8cf6330945d1bd0fbaa": {
+      "suggested_en": "炳 Bright. 病 Body. 神: Will to Transcend",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "aa37fe545204f51d3127345215e3a5e9363aa8f4a1d7f37d695196acb0be6174": {
+      "suggested_en": "Sign Language Interpretation",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "152075d6f9da1736bad44e2e43de88478af617d5dab342d1f787591618e36821": {
+      "suggested_en": "Photography",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "61674732654d24220438724f40d3da25c7cfb65bde204f8a9158bce04295550d": {
+      "suggested_en": "Video Filming",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "82d2a69b4d944386053819f0c15ff3fe655677152b4cb922cc0d4259965d3aa8": {
+      "suggested_en": "Promotional Materials",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "01f020c60439a49cae7fb82c0e0062d6fab573a5257b3a990da068dcda87baad": {
+      "suggested_en": "Hosted, Organized, Produced, Promoted",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e3beb4a93fba673b44f80474b2d5943a20cf1d27d85aec61f61e541f659c1bc8": {
+      "suggested_en": "Weight of Breath",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9f4c5788437a2e7fc24f3624e80e768048800ebde0b229286f3ca4a1a37661c1": {
+      "suggested_en": "Exploring human existence, class, and the limits of survival through the breath and life of Jeju haenyeo divers",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "10abf7916a6dd590fbaa117f9b903bb987970800b5b37678db21d0d594f11db8": {
+      "suggested_en": "Final performance of the Korea Arts Creation Academy 'Next Generation Spotlight 2016!' at Sogang University Mary Hall Grand Theater — a fusion of Korean Dance and West African folk dance",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5fcfddabc0fa3a4f076dc7113b1de4142f2464e5b65620f77b8a19910857f20e": {
+      "suggested_en": "Twelve Doors",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b53d931b00ed81dc8b757770b2fb5cdf4261376fb5c648a8c5fd8284b08493be": {
+      "suggested_en": "A story of beings who have endured painful times becoming doors to one another",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6226c20ffecb3606064710af4cba88fc80ece3eeabf34cc2dd075b184a6e928d": {
+      "suggested_en": "Jang Hyerim leads 99 Art Company as a choreographer who interprets Korean sensibility, labor, and history with a contemporary sensibility. The \"Burning Life\" series sensitively depicts anonymous labor and daily life.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e20274f0d1a8eea21d1e819cc410f0ba574f094b580c6f3c7433bcd05e1dab57": {
+      "suggested_en": "Jang Hyerim leads 99 Art Company as a choreographer who interprets Korean sensibility, labor, and history with a contemporary sensibility. The \"Burning Life\" series evokes anonymous labor and daily life through intricate dance composition, winning the 2023 Dance Critics Award for Work of the Year. \"Travelers to the Other Shore\" and \"In the Corridor\" are recognized as works exploring the foundations and totality of Korean dance.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e20be89b716c45616f3fe2d901ea9132455cc46d9913fa870569a248b0447b3f": {
+      "suggested_en": "Korean Dance",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ad3bb21ca1b5e31094cbff32509b449181823607ada01017a50a07b1c5acf5c7": {
+      "suggested_en": "Abyss",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4dd5035d08426869613cbf71c1d044f0ccb93f93ee6375f67ba9dfa8a7ccbb8c": {
+      "suggested_en": "Travelers to the Other Shore",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d896a949abdf8961eedf1ae01be348cc76bab9d376d9f85b8e0fea737dab5a95": {
+      "suggested_en": "Burning Life",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "054c8306970a0c93942c77bb80b18007e47c3df4bdffbe5e2a4c41a5c4ed0e81": {
+      "suggested_en": "Reading History with the Heart: Yu Gwan-sun Edition",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cecdc6211ed197dd54eb88e8d74c4c046762e7cf76b8752a599cc628b2521b35": {
+      "suggested_en": "Sweden Connection II",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "80d8278cc400f7d89e877df9f0bb124255532cc8432540244ca0b72cb3e39948": {
+      "suggested_en": "Chuncheon Art Festival",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5ce001d16e143baae5be24f6ed2fd9615c3f3687e80d139ac17f0c806f3d82d9": {
+      "suggested_en": "Silence",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8daba342708f1a9725965d91833fa04511cfa967851b26457ddacbe1fd181f70": {
+      "suggested_en": "In the Corridor",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c3f7467d56028d6858f1e643ebc02a667aa7f32e3481b13ba4c900aaa16ce32f": {
+      "suggested_en": "Return to Totality",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d6471b0f1833ad78a7ee37ca78b2eadbf0e4f04f95d4af5d4a5ae7f492e3798f": {
+      "suggested_en": "A performing arts group that reinterprets tradition and modernity through props and play.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "85ac247b9442336e9df516e3598d1ebe5d35130c7f5f1d2c5dc14c4d624bd8c4": {
+      "suggested_en": "Goblin Party is a performing arts group that deconstructs and reconstructs traditional themes based on props and play, presenting humor, wit, and acrobatic movements. Their representative work, \"Once Upon a Time,\" humorously deconstructs the archetype of the yangban and was also used in their South American tour. Through various works such as \"신선 (神仙)\" and \"세일: 팝니다,\" they attempt immersive performances based on props and live music.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; personal name or title review needed for 'Goblin Party' and works",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "218e23846a1ecfe2f754251e2599b6f250ca8bc5499297e612f2cafd92b0d580": {
+      "suggested_en": "Let's try rolling a square that does not roll.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "84c1182dd65b46d097c27f7a38104742e5b121b532eb6dc20ade8bfac6443b5d": {
+      "suggested_en": "Humor",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a788d7b1ac767c38a4fae664598081f9c005664b8449cde07e94aeff6c405703": {
+      "suggested_en": "Wit",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d84d93ab9700ccd1d25b7790cc174a82667197f59a4564e55c181b89fecde956": {
+      "suggested_en": "Reconstruction of traditional themes",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b94db38f5141cfb45bfaa6af4bc3030eec8a78ef4a22a57d691c95d33a0f5690": {
+      "suggested_en": "Gwimun (鬼門): A Door Anyone Can Enter",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "00e3eefc7672fd0fb38c032bbe0f6a56054613660d1a07e5d32a421c66080706": {
+      "suggested_en": "Collaboration with b-boy group Gambler Crew, selected for 2025 PAMS Choice\n<Gambler Crew x Goblin Party>\nA new resonance created as instruments, dance, sound, and gestures collide!\nThe new work \"Gwimun\" presented by Goblin Party and Gambler Crew opens the \"door anyone can enter\" and leads the audience on a journey to another dimension.\n\nThis collaboration is particularly significant as it brings together Goblin Party, which has established a unique language in Korean contemporary dance, and Gambler Crew, which represents Korean street dance on the global stage. When these two completely different dance languages intersect, the audience will encounter unfamiliar clashes and profound resonance beyond conventional frameworks.\n\n\"Gwimun\" emphasizes sincerity and reflection over spectacle. On stage, the door symbolizes boundaries and simultaneously poses a question to the audience.\n\n\"What kind of door is art to you?\"\n\nUpon passing through that door, we face another world that is \"strange yet intimate.\"",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed language; review of 'Gwimun' and 'Gambler Crew'",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "678fa65cc6cbccd48e1be9babe34760ed07b243cf03a8baecd9bc94de8ceffa4": {
+      "suggested_en": "Sale: 팝니다 (Sale: For Sale)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5b2c7c15db7dae89f5854231430352e0233679d5badfad8ac80471f38c44054f": {
+      "suggested_en": "An immersive attempt based on props and live music\n2024 Goblin Party new work [SALE]\n\nSelling dance.\nSelling skills and craftsmanship made through dance.\nEveryday life is made up of endless transactions,\nand dance similarly trades thoughts and emotions.\n\nCombine and transform vague puzzle pieces of thought,\nand purchase moments remade into unfamiliar forms at reasonable prices.\nTake freely the miscellany of small movements, sounds, textures, and more offered with our attention and love.\n\nThis is the final sale.\n\n<SALE>\n* Daehakro Arts Theater, Small Hall\n* March 29 (Fri) – March 30 (Sat), 2024\n* Fri 19:30 / Sat 15:00\n* Goblin Party_Im Jin-ho, Ji Kyung-min, Lee Kyung-gu\n* Percussion_Kim Hyun-bin, Gayageum_Kim Min-jung.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed_language; personal names for review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2f51dfa2e632c8bc05446e04d06420c5bb9bb9acdd5c7e6f5b2bf7a23b8d4c65": {
+      "suggested_en": "Frankly (솔직히)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "118c5e36261f5745ea7a4292c695b971d7ea79ea8d20ef6ac2774b3b97d2bc8e": {
+      "suggested_en": "A Korea-Japan co-creation with Japan's Kedadoro, selected for ACC International Co-creation and Production Project",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed_language; review of 'Kedadoro'",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f8e7e370c7bd5507b1c17b6b6ee9bdf7ca1954cfd8916073971e80ff68bd43fd": {
+      "suggested_en": "신선 (神仙)",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bc514bc615f7146c3318dd0d83466c40ad904906b7990863d8bb4c4d9473ace1": {
+      "suggested_en": "Korean Dance based on the theme of alcohol\nNational Dance Company of Korea X Goblin Party <신선>\n\nThe 2022 production <신선> with the National Dance Company of Korea\nwill be revived this year in an expanded one-hour version.\nWe are grateful and delighted to reunite.\n\n🍶\n\"Receive, receive this cup of alcohol.\"\nFollowing the drinking song, the immortal beings forget worldly worries and immerse themselves solely in dance. Their movements, staggering as if intoxicated yet seeking balance, connect with the unique soothing and releasing motions of Korean dance. The dancers reborn as immortals perform a dance that moves between stillness and motion, stirring the audience's excitement and suddenly intoxicating them with dance.\n\n🌬️\nJune 27 | June 29, 2024\nThu 19:30 | Sat 15:00\nNational Theater, Daloreum Theater",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7eee4274b3d937da750094a96466869d417d1ff536fc168a0d5ea348198751b4": {
+      "suggested_en": "Once Upon a Time",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "17fdd251075e3f173b3fcff8849e1d14b2e2f6e9d4a9a0294543fd5555997894": {
+      "suggested_en": "A representative repertoire that humorously deconstructs the archetype of the yangban",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "d59c970bdbca5f72f39bed1bed5f4e27a4e720305f94d627a6ca7686a4e6515c": {
+      "suggested_en": "2024 South America tour",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7827b52720f60b1c0b02e7df52cab0a9bb3a6e1543e87380facc362bf1b63184": {
+      "suggested_en": "2025 PAMS Choice selected work \"Gwimun (鬼門): A Door Anyone Can Enter\"",
+      "needs_review": true,
+      "review_reason": "mixed_language; proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e4131a151b63591ca2064eb52d3e6e4595c9df6a1f09c0bef189ea2e1ef1a8b7": {
+      "suggested_en": "Exploring the stage by combining various physical languages based on contemporary dance.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6d91ae8c429fe992291f64a1b65ac582d90d639b783b006a853363a4ee6378b7": {
+      "suggested_en": "Breakthrough is a group that aims to break through artistic boundaries, social stereotypes, and technological limits. Based on contemporary dance, it combines various physical languages such as breaking, acrobatics, and street dance to create original movements, expressing contemporary themes on stage through explosive physical energy. In particular, works like \"Alpinist & Sherpa\" and \"Pharmakos\" explore thematic objects and physical interactions.",
+      "needs_review": true,
+      "review_reason": "mixed_language; proper_name_or_title; review of 'Breakthrough' and works",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f639bc749f20de7d21a2de58ab89db61a983776e1bf2f1dc0911da4cf492e05f": {
+      "suggested_en": "We aim to transcend artistic boundaries, social stereotypes, and technological limitations.",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bb49b11b95f34d08e7fca6909153250a4d5257c060a0fc0062bd1612aadcc94d": {
+      "suggested_en": "Chuncheon Performing Arts Festival\nAn experimental work depicting the process where AI learns dancers' movements to generate virtual choreography, which then conflicts with the dancers' subjectivity. A complex multimedia art performance using TouchDesigner for real-time motion tracking and visual effects, Kling and Runway for AI video generation, and ChatGPT to interpret text-based choreography commands.",
+      "needs_review": true,
+      "review_reason": "work title and proper names require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "8ba1a6f0748deb97564da7783d5aea1a1b91d22b426b2b5e94e6e436a9ff7df4": {
+      "suggested_en": "Baddha(받다)",
+      "needs_review": true,
+      "review_reason": "work title with mixed language requires review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "a665203b90fd4ede37e9f51256c1c7010e847c18e1fbf90b502e82f365fce5dd": {
+      "suggested_en": "The 2nd Physical Performance Festival",
+      "needs_review": true,
+      "review_reason": "event title requires review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "455c0ce67f47016b6d524848a9172ae3fe26329205c38ff0ca1cc403f1e2f8d8": {
+      "suggested_en": "Jeonju Arts Festival Next Generation Director Planned Performance\n<Kinesis> is a biological term referring to the phenomenon where living organisms change the frequency or speed of their movement in response to external stimuli.\n\nDepending on the intensity of stimuli such as temperature, humidity, and light, living beings repeat undirected movements to find the most suitable environment for survival. This concept of 'Kinesis' is deeply embedded in human life.\n\nWe continuously face challenges and make choices amid changing environments and times, leaving our own traces through adaptation and creation.\n\nIn a rapidly transforming society, we encounter numerous external stimuli including jobs, relationships, identity, and technological advances. Though our movements may seem directionless, we struggle to find the way of life and environment best suited to us.\n\n<Kinesis> sublimates this process into bodily movement presented on stage.\n\nUltimately, <Kinesis> asks:\n\n\"Among the traces we leave, the waves we create, and the new beings we encounter, with what movement will you prove your existence?\"",
+      "needs_review": true,
+      "review_reason": "work title and mixed language require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "587bb0e0cd6e3d739b2a278fbb6c2ca8dcc218a494925ae6b9f30cd601ae2fff": {
+      "suggested_en": "Yeonhui Arts Theater Planned Performance\nA work by Breakthrough led by next-generation director Baek In-geun at Jeonju Arts Festival. 'Kinesis' is a biological term meaning that the movement of organisms varies according to the intensity of stimuli. Unique 'Kinesis' of each meets, resulting in desperate movements for survival responding to change. A moment to experience the intense energy unique to Breakthrough through the encounter of installation art and dance.",
+      "needs_review": true,
+      "review_reason": "proper names and work title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "7362d53071e2fd3272c603dc1c14051fc27b1eb685a43d558478523ac7ee1998": {
+      "suggested_en": "M Theater Planned Performance",
+      "needs_review": true,
+      "review_reason": "venue and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4148f6fc353566e59ae2308af4ecdf7abab730bb8dfc4acc8c61ea5af84b33b5": {
+      "suggested_en": "Breakthrough Planned Dance Film",
+      "needs_review": true,
+      "review_reason": "company name and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "07becc44874edc868922d2cd9d3af63a9ce823fdb499bf275639fe0090ed8f38": {
+      "suggested_en": "Chuncheon Performing Arts Festival [Breakthrough] Festival Theater Gesture\nThe 3rd Physical Performance Festival [Pharmakos] Yeonhui Arts Theater",
+      "needs_review": true,
+      "review_reason": "mixed language and event titles require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ee6bf8e07d96b4eec4f9e8d41eac46df72b09edfadb10c29cff453f15758c254": {
+      "suggested_en": "Chuncheon Performing Arts Festival [Beyond the Algorithm] Festival Theater Gesture\nThe 2nd Physical Performance Festival [Baddha(받다)] Earthling Theater\nBreakthrough Planned Performance [Kinesis] Chuncheon Puppet Theater\nRecipient of the 2025 Gangwon Artist of the Year Award",
+      "needs_review": true,
+      "review_reason": "mixed language and event titles require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "b72656cc0536fff75a7c6ba182efdea38b1a175bb0cea990358227448cdcbdd3": {
+      "suggested_en": "Jeonju Arts Festival Next Generation Director Planned Performance [Kinesis] Around Jeonju Palbok-dong Area",
+      "needs_review": true,
+      "review_reason": "mixed language and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "371ce0fd18dbb8d3e377c28e5b1a271ed8a80d8e36f010d266ae0d47aacb7b61": {
+      "suggested_en": "Breakthrough Planned Performance [Pharmakos] Yeonhui Arts Theater",
+      "needs_review": true,
+      "review_reason": "mixed language and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ada166cecf7a0ec0cc52d36b348ea2766ce3945e27d858cd1b68c9024c6826d9": {
+      "suggested_en": "Breakthrough Planned Performance [Alpinist & Sherpa] M Theater\nSelected as M Theater Best Repertoire, Invited to Art Tri Angle [Alpinist & Sherpa]",
+      "needs_review": true,
+      "review_reason": "mixed language and event titles require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "e8191fcb33e076388ef0b8caf3af6388fcde3f029d113e01f4c008540746b265": {
+      "suggested_en": "Breakthrough Founded\nBreakthrough Planned Dance Film [Peter pan Effect]",
+      "needs_review": true,
+      "review_reason": "company name and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c00766ccec58ac1c06175b1d09e3ecdda629ba61278ba8e17e1a7b517420bf56": {
+      "suggested_en": "2025 Gangwon Artist of the Year Award",
+      "needs_review": true,
+      "review_reason": "award title requires review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5a0045e7dd11fa98915621d7523afab68354a462e5568950a6d47044cb35b8e6": {
+      "suggested_en": "Recipient of the 2025 Gangwon Artist of the Year Award",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "06d292cd18d87f52c6317a79810a34ad18702de66fdd6d75bc8c302fc1a5b1fa": {
+      "suggested_en": "Chuncheon Performing Arts Festival [Breakthrough] Festival Theater Gesture (2026)",
+      "needs_review": true,
+      "review_reason": "mixed language and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c5ff15f5c386ec71db5ceef07787264395125f96be5c47bf3f8cbedf051696e4": {
+      "suggested_en": "The 3rd Physical Performance Festival [Pharmakos] Yeonhui Arts Theater (2026)",
+      "needs_review": true,
+      "review_reason": "mixed language and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "702a85b7677d72ef210443b6decd7973c0229727782c62efff2eb4a64d21bafd": {
+      "suggested_en": "Chuncheon Performing Arts Festival <Breakthrough> Festival Theater Gesture (2026)",
+      "needs_review": true,
+      "review_reason": "mixed language and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bc97bd9c2c3381c06a76daeaa7c06073736f5268bb6022d876f636234200e160": {
+      "suggested_en": "The 3rd Physical Performance Festival <Pharmakos> Yeonhui Arts Theater (2026)",
+      "needs_review": true,
+      "review_reason": "mixed language and event title require review",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4bacf890157a4dc7980fbe873565ee389b35cd5b856c965018ce91f43ca0a576": {
+      "suggested_en": "Seoul Performing Arts Festival (SPAF) workshop performance.",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "986a27799d3464ea0f11fae40c67e5b237db89acd0b75068ddf7b8480466a939": {
+      "suggested_en": "Perth Festival Lab",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "6d9c19065f85d75de5a251b29e6ad8a3097fe6fa24b4f54129998c16d856c4a4": {
+      "suggested_en": "Invited Artist",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "bb9c4b85efb51cdb5ffa06ce13de60708aaf81f73cdf6a8692d1897de8a7c1ca": {
+      "suggested_en": "AI & Art & Medicine Hackathon",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "5385d69109be126484834900a0ebc2fd8c17bdac6ccb06c37071e3ab26e11dbf": {
+      "suggested_en": "Participant",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "66fc1b68c190d72dc395ef616916cd13e75b99acc661c5f976d48d178abcc254": {
+      "suggested_en": "LG Crew 5th Generation Home Robot UX Research Team",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title; mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "cf5e70c7330f6679ac4d636a3742df40adfabc97736f95e751ec2285d67557d0": {
+      "suggested_en": "Team Member",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "ce3065befa9dcd95b68052b59168db8468f99959f00ec99603bf06cee186192d": {
+      "suggested_en": "Korea National University of Arts Newspaper",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1847fd6037d10ccdc0eaa38478f3ad982cd7d6b65cd794d19056186be2cbd8d3": {
+      "suggested_en": "Deputy Editor-in-Chief",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "79c1d7f5477a8d00ce7b43198bdffd9566539a9c835874af593a7e4d66e26752": {
+      "suggested_en": "Korea National Contemporary Dance Company · Chum.Sai Communicator",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "74a025a0bfd1b0e040e3967821848db8484fb363c5f36133f25f8c5f5bfe592f": {
+      "suggested_en": "5th Term",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "2a484905400256340abb7a79bd42c1f7f9c458205cacd81684b6b6330eed056a": {
+      "suggested_en": "Jeonsi Planning Club Who's Art",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "c40ef14873654cefe5fd39fd772819fabee1d18c4ef091c8f796cae59c203bb4": {
+      "suggested_en": "Planning Team, New Business Planning Team",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "1c4e76c5d1e1a8fdf60bce4cd632ef3ec802b3e82555884959aadbbd1a571428": {
+      "suggested_en": "HCI Korea Creative Awards — New Challenge Award",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "f7fb32807a806fd3130258ca94741388f2ac486780eccf4a63f6877de01be6c8": {
+      "suggested_en": "KARTS Young Critics Award Exhibition and Performance Category Honorable Mention",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title;mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "9d5b02ffa3b5ccecd9a6112de0bcafc9f51af22bbf8693bb5d47300aad6ba300": {
+      "suggested_en": "Bachelor of Arts in Dance Theory and Minor in Arts Management, Korea National University of Arts",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "4ffb0b7ae47bf639a40d7f0ad7abe345a225f68be18984173a2c10198efa4ec9": {
+      "suggested_en": "Graduated from National Gugak High School, Major in Korean Dance",
+      "needs_review": false,
+      "review_reason": "",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "82aa25ac74f5a35bcf4afb866ad24e8a50cb69415e1c11d1ec991e6dfe624f04": {
+      "suggested_en": "Jo Seonjae",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "699fbc78d4c2956f6ee844d0dd473306eee164629c071e56fefda4c4ccef8de6": {
+      "suggested_en": "Dancer Jo Seonjae, affiliated with Gongwon",
+      "needs_review": true,
+      "review_reason": "mixed_language",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    },
+    "20a107ba1f89f375989716af00ec506b83c8a7614206a336321e4850ab3fd311": {
+      "suggested_en": "Staff Only",
+      "needs_review": true,
+      "review_reason": "proper_name_or_title",
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "retries": 0
+    }
+  },
+  "failures": {},
+  "usage": {
+    "input_tokens": 48277,
+    "output_tokens": 30317
+  }
+}

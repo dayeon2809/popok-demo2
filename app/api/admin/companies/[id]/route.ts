@@ -48,9 +48,9 @@ const EDITABLE_FIELDS = [
   "name", "name_en", "slug", "verified", "owner_id", "genre", "category", "city_or_region",
   "bio_short", "bio", "bio_en", "introduction_en", "profile_image_url", "motion_video_url", "email",
   "instagram", "website", "portfolio_url",
-  "profile_image_urls", "representative_images", "current_activity", "works", "awards", "review_links", "links",
+  "profile_image_urls", "representative_images", "current_activity", "current_activity_en", "works", "awards", "review_links", "links",
   "source_text",
-  "founded_year", "brand_color", "mission", "vision", "core_values", "history",
+  "founded_year", "brand_color", "mission", "mission_en", "vision", "vision_en", "core_values", "core_values_en", "history",
 ];
 
 export async function GET(

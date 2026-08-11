@@ -1,0 +1,40 @@
+{
+  "version": "2026-08-06.1",
+  "artist_names": {},
+  "company_names": {},
+  "work_titles": {},
+  "institutions": {
+    "국립현대무용단": "Korea National Contemporary Dance Company",
+    "국립무용단": "National Dance Company of Korea",
+    "예술의전당": "Seoul Arts Center",
+    "국립아시아문화전당": "Asia Culture Center"
+  },
+  "venues": {
+    "대학로예술극장": "Daehakro Arts Theater",
+    "대학로예술극장 소극장": "Daehakro Arts Theater, Small Hall",
+    "예술의전당 자유소극장": "Seoul Arts Center, Jayu Theater"
+  },
+  "festivals_and_programs": {},
+  "genres": {
+    "현대무용": "Contemporary Dance",
+    "한국무용": "Korean Dance",
+    "발레": "Ballet",
+    "다원예술": "Interdisciplinary Arts"
+  },
+  "roles": {
+    "안무": "Choreography",
+    "안무가": "Choreographer",
+    "출연": "Performance",
+    "무용수": "Dancer",
+    "연출": "Direction",
+    "기획": "Planning",
+    "제작": "Production",
+    "공동안무": "Co-choreography"
+  },
+  "common_terms": {
+    "초연": "World Premiere",
+    "재공연": "Revival",
+    "선정": "Selected",
+    "수상": "Awarded"
+  }
+}

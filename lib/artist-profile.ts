@@ -17,8 +17,8 @@
 // enforcement, and lib/profileParser.ts's AI import is not the only past
 // write path), so no existing data is ever dropped on read.
 
-import { toStringArray, toObjectArray } from "./normalize";
-import { cleanWorksForPayload } from "./works";
+import { toStringArray, toObjectArray } from "./normalize.ts";
+import { cleanWorksForPayload } from "./works.ts";
 
 // ── Education — plain string list. Kept as strings rather than a
 // structured {school, department, degree} object: 0/13 live rows use a
@@ -87,6 +87,7 @@ export interface ArtistAward {
   title_en?: string;
   organization_en?: string;
   description_en?: string;
+  result_en?: string;
 }
 
 /**
@@ -123,6 +124,7 @@ export function normalizeArtistAwards(value: unknown): ArtistAward[] {
         const title_en = typeof item.title_en === "string" ? item.title_en.trim() : "";
         const organization_en = typeof item.organization_en === "string" ? item.organization_en.trim() : "";
         const description_en = typeof item.description_en === "string" ? item.description_en.trim() : "";
+        const result_en = typeof item.result_en === "string" ? item.result_en.trim() : "";
         return {
           year: year || undefined,
           title: title || undefined,
@@ -131,12 +133,13 @@ export function normalizeArtistAwards(value: unknown): ArtistAward[] {
           title_en: title_en || undefined,
           organization_en: organization_en || undefined,
           description_en: description_en || undefined,
+          result_en: result_en || undefined,
         };
       }
 
       return {};
     })
-    .filter((a) => a.year || a.title || a.organization || a.result || a.title_en || a.organization_en || a.description_en);
+    .filter((a) => a.year || a.title || a.organization || a.result || a.title_en || a.organization_en || a.description_en || a.result_en);
 }
 export const cleanArtistAwardsForPayload = normalizeArtistAwards;
 
@@ -214,7 +217,9 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
     works,
     affiliations,
     current_activity,
+    current_activity_en,
     education,
+    education_en,
     awards,
     competitions,
     links,
@@ -243,7 +248,9 @@ export function buildArtistUpdateFromPayload(input: Record<string, any>): BuildA
   if (works !== undefined) updateData.works = cleanWorksForPayload(works);
   if (affiliations !== undefined) updateData.affiliations = cleanArtistAffiliationsForPayload(affiliations);
   if (current_activity !== undefined) updateData.current_activity = cleanArtistCurrentActivityForPayload(current_activity);
+  if (current_activity_en !== undefined) updateData.current_activity_en = Array.isArray(current_activity_en) ? current_activity_en : null;
   if (education !== undefined) updateData.education = cleanArtistEducationForPayload(education);
+  if (education_en !== undefined) updateData.education_en = Array.isArray(education_en) ? education_en : null;
   if (awards !== undefined) updateData.awards = cleanArtistAwardsForPayload(awards);
   if (competitions !== undefined) updateData.competitions = cleanArtistCompetitionsForPayload(competitions);
   if (links !== undefined) updateData.links = links;

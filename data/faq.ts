@@ -41,3 +41,38 @@ export const faqItems: FaqItem[] = [
     ctaLabel: "Premium 안내 보기 →",
   },
 ];
+
+export const faqItemsEn: FaqItem[] = [
+  {
+    question: "What is POPOK?",
+    answer: "POPOK brings dancers' and artists' scattered work records together on a single personal profile page.",
+  },
+  {
+    question: "Can anyone create a profile?",
+    answer: "We are currently starting with dance artists and will expand gradually from ballet, Korean dance, and contemporary dance into other fields.",
+  },
+  {
+    question: "What materials do I need to create a profile?",
+    answer: "Please send a profile photo, a video that shows your movement, and information about representative works or activities.",
+  },
+  {
+    question: "Is my profile published immediately after submission?",
+    answer: "Not yet. The POPOK team reviews and organizes the materials first, then sends you an email when the profile is ready.",
+  },
+  {
+    question: "Can I edit my profile later?",
+    answer: "Yes. You can request basic edits, and we also plan to offer a Premium service that manages your portfolio regularly.",
+  },
+  {
+    question: "Can companies and organizations create profiles too?",
+    answer: "Yes. Organizations apply through a separate form, and the POPOK operations team helps produce the portfolio through an interview process.",
+    ctaHref: "/organizations/apply",
+    ctaLabel: "Apply for an organization portfolio →",
+  },
+  {
+    question: "What is POPOK Premium?",
+    answer: "It is a management service in which the POPOK team regularly checks and organizes new performances and creative activity to keep an artist's profile up to date.",
+    ctaHref: "/premium",
+    ctaLabel: "View Premium information →",
+  },
+];

@@ -72,12 +72,14 @@ export interface Artist {
   } | null;
   affiliations?: any[];
   education?: string[];
+  education_en?: Array<string | null>;
   awards?: any[];
   competitions?: any[];
   links?: any[];
   view_count?: number;                // 누적 조회수
   category?: string | null;
   current_activity?: unknown;         // string | object | array — normalize with lib/normalize before use
+  current_activity_en?: Array<string | null>;
   review_links?: unknown;             // string | object | array — normalize with lib/normalize before use
   portfolio_url?: string | null;
   connectedCompany?: ConnectedCompany | null;
@@ -155,18 +157,22 @@ export interface Company {
   website?: string | null;
   portfolio_url?: string | null;
   current_activity?: string[];
+  current_activity_en?: Array<string | null>;
   createdAt?: string | null;
   updatedAt?: string | null;
 
   // Rich Brand/Company Extensions
   brand_color?: string | null;
   mission?: string | null;
+  mission_en?: string | null;
   vision?: string | null;
+  vision_en?: string | null;
   values?: string[] | null;
   core_values?: string[] | null;
+  core_values_en?: Array<string | null> | null;
   view_count?: number | null;
   founded_year?: number | null;
-  history?: Array<{ year: string; event: string }> | null;
+  history?: Array<{ year: string; event: string; description_en?: string }> | null;
   projects?: Array<{ title: string; date?: string; link?: string; description?: string }> | null;
   press_links?: Array<{ title: string; publication?: string; publisher?: string; source?: string; work?: string; workTitle?: string; date?: string; year?: string; url?: string; description?: string }> | null;
 
@@ -216,6 +222,7 @@ export interface ApiResponse<T> {
 export interface ArtistFilter {
   type?: ArtistType | "all";
   field?: ArtistField | "all";
+  role?: string;
   query?: string;
 }
 

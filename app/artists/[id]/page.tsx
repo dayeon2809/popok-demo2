@@ -33,7 +33,8 @@ import RelatedArtists from "@/components/RelatedArtists";
 import VideoEmbed from "@/components/VideoEmbed";
 import { useFireOnceInView } from "@/hooks/useFireOnceInView";
 import { useLanguage } from "@/lib/useLanguage";
-import { localizePath, localizedCareer, localizedRecord, localizedWork } from "@/lib/i18n/locale";
+import { localizePath, localizedCareer, localizedParallelStrings, localizedRecord, localizedWork } from "@/lib/i18n/locale";
+import { getArtistRoleLabel } from "@/lib/artistRoles";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -202,6 +203,8 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
             affiliations: Array.isArray(data?.affiliations) ? data.affiliations.map((item: any) => localizedCareer(item, language)) : [],
             awards: Array.isArray(data?.awards) ? data.awards.map((item: any) => localizedCareer(item, language)) : [],
             competitions: Array.isArray(data?.competitions) ? data.competitions.map((item: any) => localizedCareer(item, language)) : [],
+            current_activity: localizedParallelStrings(data?.current_activity, data?.current_activity_en, language),
+            education: localizedParallelStrings(data?.education, data?.education_en, language),
           });
         }
         setLoading(false);
@@ -447,7 +450,7 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
   const englishName = artist.name_en || (artist.name ? artist.name.toUpperCase() : "CREATIVE");
   const tags = Array.isArray(artist.tags) ? artist.tags : [artist.field, artist.genre].filter(Boolean);
 
-  const roleLine = [artist.role, artist.genre, artist.city_or_region].filter(Boolean).join(" · ");
+  const roleLine = [getArtistRoleLabel(artist.role, language), artist.genre, artist.city_or_region].filter(Boolean).join(" · ");
   const currentActivityLine = normalizeArtistCurrentActivity(artist.current_activity)[0] || null;
 
   const openWorkDetail = (workId: string) => {

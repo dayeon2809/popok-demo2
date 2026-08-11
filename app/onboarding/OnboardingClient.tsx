@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import { analytics } from "@/lib/analytics";
 import AiProfileReview from "@/components/profile/AiProfileReview";
+import { ARTIST_ROLES, getArtistRoleLabel } from "@/lib/artistRoles";
+import { useLanguage } from "@/lib/useLanguage";
 
 export default function OnboardingClient({ defaultEmail, defaultDisplayName }: { defaultEmail: string; defaultDisplayName: string }) {
   const router = useRouter();
+  const { language } = useLanguage();
 
   // Wizard state
   // /onboarding is now individual-artist-only — organizations apply via
@@ -189,7 +192,6 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   };
 
   const GENRE_OPTIONS = ["현대무용", "발레", "한국무용", "음악", "미술", "배우"];
-  const ROLE_OPTIONS = ["무용수", "안무가", "배우", "기획자", "단원", "예술감독", "작곡가", "지휘자", "연주자", "성악가"];
 
   return (
     <div style={{
@@ -383,16 +385,17 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               주 역할
             </span>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
-              {ROLE_OPTIONS.map(opt => (
+              {ARTIST_ROLES.map((option) => (
                 <button
-                  key={opt}
-                  onClick={() => setRole(opt)}
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRole(option.value)}
                   style={{
                     padding: "10px 16px",
                     borderRadius: "20px",
                     border: "1.5px solid",
-                    borderColor: role === opt ? "var(--navy)" : "var(--border-dark)",
-                    background: role === opt ? "var(--accent)" : "transparent",
+                    borderColor: role === option.value ? "var(--navy)" : "var(--border-dark)",
+                    background: role === option.value ? "var(--accent)" : "transparent",
                     color: "var(--navy)",
                     fontSize: "0.88rem",
                     fontWeight: 700,
@@ -400,7 +403,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                     transition: "all 0.15s ease"
                   }}
                 >
-                  {opt}
+                  {getArtistRoleLabel(option.value, language)}
                 </button>
               ))}
             </div>

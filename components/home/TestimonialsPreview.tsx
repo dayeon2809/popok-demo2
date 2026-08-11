@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { testimonials } from "@/data/testimonials";
+import { useLanguage } from "@/lib/useLanguage";
 
 export default function TestimonialsPreview() {
+  const { language } = useLanguage();
+  const en = language === "en";
   const previewList = testimonials;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -54,10 +57,10 @@ export default function TestimonialsPreview() {
           marginBottom: "12px",
           margin: 0
         }}>
-          POPOK을 먼저 경험한 아티스트들
+          {en ? "Artists who experienced POPOK first" : "POPOK을 먼저 경험한 아티스트들"}
         </h2>
         <p style={{ fontSize: "0.95rem", color: "rgba(255,255,255,0.65)", fontWeight: 600, margin: "6px 0 0" }}>
-          흩어져 있던 작업이 하나의 프로필이 되었습니다.
+          {en ? "Scattered work became one coherent profile." : "흩어져 있던 작업이 하나의 프로필이 되었습니다."}
         </p>
       </div>
 
@@ -111,7 +114,7 @@ export default function TestimonialsPreview() {
                 margin: 0,
                 whiteSpace: "pre-line"
               }}>
-                “{t.quote}”
+                “{en ? t.quoteEn : t.quote}”
               </p>
             </div>
             <div style={{
@@ -123,13 +126,13 @@ export default function TestimonialsPreview() {
               marginTop: "10px"
             }}>
               <span style={{ fontSize: "0.85rem", fontWeight: 900, color: "var(--navy)" }}>
-                {t.name}
+                {en ? t.nameEn : t.name}
               </span>
               <span style={{
                 fontSize: "0.7rem", fontWeight: 800, color: "var(--accent-dark)",
                 background: "var(--navy)", padding: "4px 8px", borderRadius: "6px"
               }}>
-                {t.genre}
+                {en ? t.genreEn : t.genre}
               </span>
             </div>
           </div>

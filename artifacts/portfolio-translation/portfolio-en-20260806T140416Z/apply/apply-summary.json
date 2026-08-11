@@ -1,0 +1,12 @@
+{
+  "job_id": "portfolio-en-20260806T140416Z",
+  "completed_at": "2026-08-07T01:29:25.964Z",
+  "counts": {
+    "success": 560
+  },
+  "changed_records": 35,
+  "backup_file": "C:\\Users\\dayeo\\Downloads\\popok-landing\\artifacts\\portfolio-translation\\portfolio-en-20260806T140416Z\\apply\\pre-apply-backup.json",
+  "backup_sha256": "7ba304952639c35f07a2186d9e0b027acb7968b291eba49d4acddd090d17e7f9",
+  "performances_read": 0,
+  "performances_changed": 0
+}

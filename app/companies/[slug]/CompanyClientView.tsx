@@ -9,7 +9,7 @@ import type { PortfolioRequestViewerState } from "@/lib/portfolioRequestsServer"
 import type { RepresentativeArtistResult } from "@/lib/companies";
 import type { InstagramStory } from "@/lib/instagram";
 import { useLanguage } from "@/lib/useLanguage";
-import { localizePath } from "@/lib/i18n/locale";
+import { localizePath, localizedCareer, localizedParallelStrings, localizedRecord, localizedValue, localizedWork } from "@/lib/i18n/locale";
 
 // Import custom company components
 import CompanyCardStack from "@/components/company/CompanyCardStack";
@@ -95,21 +95,28 @@ export default function CompanyClientView({
 
   const rgbAccent = hexToRgb(brandAccent);
 
+  const localizedCompany = localizedRecord(company as any, language) as Company;
+  const localizedValues = localizedParallelStrings(company.core_values, company.core_values_en, language);
+  const localizedActivities = localizedParallelStrings(company.current_activity, company.current_activity_en, language);
   const adaptedCompany = {
-    ...company,
-    slogan: company.bio_short ? company.bio_short : null,
-    values: Array.isArray(company.core_values) ? company.core_values : [],
-    projects: Array.isArray(company.current_activity) ? company.current_activity : [],
+    ...localizedCompany,
+    mission: localizedValue(company as any, "mission", "mission_en", language),
+    vision: localizedValue(company as any, "vision", "vision_en", language),
+    slogan: localizedCompany.bio_short ? localizedCompany.bio_short : null,
+    values: localizedValues,
+    projects: localizedActivities,
     press_links: Array.isArray(company.review_links) ? company.review_links : [],
 
     // ensure arrays are safe
-    core_values: Array.isArray(company.core_values) ? company.core_values : [],
-    current_activity: Array.isArray(company.current_activity) ? company.current_activity : [],
+    core_values: localizedValues,
+    current_activity: Array.isArray(company.current_activity) && company.current_activity.some((item) => typeof item === "object")
+      ? company.current_activity.map((item: any) => typeof item === "object" ? localizedCareer(item, language) : item)
+      : localizedActivities,
     review_links: Array.isArray(company.review_links) ? company.review_links : [],
-    works: Array.isArray(company.works) ? company.works : [],
-    awards: Array.isArray(company.awards) ? company.awards : [],
+    works: Array.isArray(company.works) ? company.works.map((work: any) => ({ ...localizedWork(work, language), credits: Array.isArray(work.credits) ? work.credits.map((credit: any) => ({ ...credit, role: localizedValue(credit, "role", "role_en", language) })) : work.credits })) : [],
+    awards: Array.isArray(company.awards) ? company.awards.map((item: any) => ({ ...localizedCareer(item, language), result: localizedValue(item, "result", "result_en", language) })) : [],
     links: Array.isArray(company.links) ? company.links : [],
-    history: Array.isArray(company.history) ? company.history : [],
+    history: Array.isArray(company.history) ? company.history.map((item: any) => localizedCareer(item, language)) : [],
   };
 
   return (

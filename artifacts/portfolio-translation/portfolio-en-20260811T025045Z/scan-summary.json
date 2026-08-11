@@ -1,0 +1,55 @@
+{
+  "job_id": "portfolio-en-20260811T025045Z",
+  "created_at": "2026-08-11T02:50:45.469Z",
+  "model": "gpt-4.1-mini",
+  "rule_version": "2026-08-06.1",
+  "database_mode": "SELECT_ONLY",
+  "excluded_tables": [
+    "performances"
+  ],
+  "source_snapshot_sha256": "b396e3782a5f78cdb024f269fd66999eca7f22d64f64246e37baca9136dc0917",
+  "source_rows": {
+    "artists": 27,
+    "companies": 13,
+    "performances_read": 0
+  },
+  "items": 761,
+  "statuses": {
+    "existing": 558,
+    "pending": 139,
+    "skipped": 52,
+    "translated": 12
+  },
+  "unique_before": 151,
+  "unique_after": 121,
+  "estimate": {
+    "pending_items": 139,
+    "unique_api_phrases": 121,
+    "duplicate_cache_reused": 18,
+    "glossary_reused": 12,
+    "source_chars": 6460,
+    "estimated_input_tokens": 13729,
+    "estimated_output_tokens": 8556,
+    "estimated_cost_usd": 0.019181,
+    "estimated_batches": 7
+  },
+  "storage_map": {
+    "version": "2026-08-06.1",
+    "existing_jsonb_keys": {
+      "works[].title": "works[].title_en",
+      "works[].description": "works[].description_en",
+      "works[].role": "works[].role_en",
+      "works[].credits[].role": "works[].credits[].role_en",
+      "awards[].result": "awards[].result_en",
+      "competitions[].result": "competitions[].result_en"
+    },
+    "future_columns": {
+      "artists.current_activity[]": "artists.current_activity_en[]",
+      "artists.education[]": "artists.education_en[]",
+      "companies.current_activity[]": "companies.current_activity_en[]",
+      "companies.mission": "companies.mission_en",
+      "companies.vision": "companies.vision_en",
+      "companies.core_values[]": "companies.core_values_en[]"
+    }
+  }
+}

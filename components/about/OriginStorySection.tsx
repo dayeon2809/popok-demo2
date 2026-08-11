@@ -1,9 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/useLanguage";
 
 export default function OriginStorySection() {
-  const problems = [
+  const { language } = useLanguage();
+  const en = language === "en";
+  const problems = en ? [
+    { num: "01", text: "The résumé is revised after every performance," },
+    { num: "02", text: "photos and videos are scattered across folders," },
+    { num: "03", text: "and upcoming work quickly disappears in social feeds." }
+  ] : [
     { num: "01", text: "공연이 끝날 때마다 이력서를 다시 고치고," },
     { num: "02", text: "작품 사진과 영상은 여러 폴더에 흩어지고," },
     { num: "03", text: "다가오는 활동은 SNS에서 금방 지나갑니다." }
@@ -40,8 +47,8 @@ export default function OriginStorySection() {
             lineHeight: 1.3,
             margin: "0 0 32px",
           }}>
-            예술가의 활동은 계속되는데,<br />
-            <span style={{ color: "var(--ink-muted)" }}>기록은 자꾸 흩어집니다.</span>
+            {en ? "An artist's practice keeps moving," : "예술가의 활동은 계속되는데,"}<br />
+            <span style={{ color: "var(--ink-muted)" }}>{en ? "but the record keeps scattering." : "기록은 자꾸 흩어집니다."}</span>
           </h2>
 
           {/* Restructuring paragraph into styled problem blocks */}
@@ -99,8 +106,7 @@ export default function OriginStorySection() {
               fontWeight: 800,
               maxWidth: "560px",
             }}>
-              POPOK은 예술가의 활동을 한곳에 남기고,<br />
-              다음 활동으로 자연스럽게 이어지게 하기 위해 시작되었습니다.
+              {en ? <>POPOK began to keep an artist&apos;s work in one place<br />and carry that record naturally into what comes next.</> : <>POPOK은 예술가의 활동을 한곳에 남기고,<br />다음 활동으로 자연스럽게 이어지게 하기 위해 시작되었습니다.</>}
             </p>
           </motion.div>
         </motion.div>
@@ -153,8 +159,7 @@ export default function OriginStorySection() {
             margin: "0 0 28px",
             fontWeight: 500,
           }}>
-            예술가이자 연출진으로서 겪었던 복잡하고 파편화된 프로필 관리의 한계를 해결하기 위해 POPOK을 시작했습니다.
-            예술가의 시간이 흩어지지 않고 기록으로 남는 방식을 만들어가고 있습니다.
+            {en ? "I started POPOK to address the limits of complex, fragmented profile management that I experienced as both an artist and a member of creative teams. We are building a way for artists' time and work to remain as a coherent record." : "예술가이자 연출진으로서 겪었던 복잡하고 파편화된 프로필 관리의 한계를 해결하기 위해 POPOK을 시작했습니다. 예술가의 시간이 흩어지지 않고 기록으로 남는 방식을 만들어가고 있습니다."}
           </p>
 
           <div style={{ 
@@ -165,7 +170,7 @@ export default function OriginStorySection() {
             justifyContent: "space-between"
           }}>
             <div>
-              <div style={{ fontSize: "1rem", fontWeight: 950, color: "var(--navy)" }}>이다연</div>
+              <div style={{ fontSize: "1rem", fontWeight: 950, color: "var(--navy)" }}>{en ? "Dayeon Lee" : "이다연"}</div>
               <div style={{ fontSize: "0.76rem", fontWeight: 700, color: "var(--accent-dark)", marginTop: "2px" }}>
                 POPOK Founder · Dancer
               </div>

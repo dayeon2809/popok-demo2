@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // An unrelated package-lock.json exists above this repo. Pin the project
+  // root so Turbopack resolves this app's installed server dependencies.
+  turbopack: {
+    root: process.cwd(),
+  },
   images: {
     qualities: [75, 80],
   },

@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/useLanguage";
 
-const STEPS = [
+const STEPS_KO = [
   { 
     num: "01", 
     title: "AI 모니터링 시작", 
@@ -30,7 +31,18 @@ const STEPS = [
   },
 ];
 
+const STEPS_EN = [
+  { num: "01", title: "Start AI monitoring", body: "We begin detecting and gathering scattered work and career materials in one place." },
+  { num: "02", title: "Verify new activity", body: "We cross-check titles, roles, years, and the original sources of each record." },
+  { num: "03", title: "Organize work and activity", body: "We shape the material into a clear record that viewers can understand at a glance." },
+  { num: "04", title: "Update the portfolio", body: "Recent credits and new work are reflected on the portfolio website." },
+  { num: "05", title: "Continue the record", body: "Each new activity is added to the existing portfolio without breaking its continuity." },
+];
+
 export default function HowWeWorkSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const steps = en ? STEPS_EN : STEPS_KO;
   return (
     <section className="home-section" style={{
       maxWidth: "800px",
@@ -51,7 +63,7 @@ export default function HowWeWorkSection() {
           margin: "0 0 54px",
         }}
       >
-        POPOK이 기록을 다루는 방식
+        {en ? "How POPOK manages your record" : "POPOK이 기록을 다루는 방식"}
       </motion.h2>
 
       <div style={{ position: "relative", paddingLeft: "16px" }}>
@@ -66,7 +78,7 @@ export default function HowWeWorkSection() {
         }} />
 
         <div style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-          {STEPS.map((step, idx) => (
+          {steps.map((step, idx) => (
             <motion.div 
               key={step.title}
               initial={{ opacity: 0, x: -20 }}
@@ -139,4 +151,3 @@ export default function HowWeWorkSection() {
     </section>
   );
 }
-

@@ -152,8 +152,11 @@ interface PayloadFields {
   cityOrRegion: string;
   foundedYear: string;
   mission: string;
+  missionEn: string;
   vision: string;
+  visionEn: string;
   coreValues: string[];
+  coreValuesEn: Array<string | null>;
   bioShort: string;
   bio: string;
   bioEn: string;
@@ -167,6 +170,7 @@ interface PayloadFields {
   portfolioUrl: string;
   works: WorkItem[];
   currentActivity: any[];
+  currentActivityEn: Array<string | null>;
   history: any[];
   reviewLinks: ReviewItem[];
   links: any[];
@@ -184,8 +188,11 @@ const buildPayload = (f: PayloadFields) => ({
   city_or_region: f.cityOrRegion.trim(),
   founded_year: f.foundedYear ? parseInt(f.foundedYear, 10) || null : null,
   mission: f.mission.trim(),
+  mission_en: f.missionEn.trim(),
   vision: f.vision.trim(),
+  vision_en: f.visionEn.trim(),
   core_values: f.coreValues,
+  core_values_en: f.coreValuesEn,
   bio_short: f.bioShort.trim(),
   bio: f.bio.trim(),
   bio_en: f.bioEn.trim(),
@@ -199,6 +206,7 @@ const buildPayload = (f: PayloadFields) => ({
   portfolio_url: f.portfolioUrl.trim(),
   works: cleanWorksForPayload(f.works),
   current_activity: f.currentActivity,
+  current_activity_en: f.currentActivityEn,
   history: normalizeCompanyHistory(f.history),
   review_links: f.reviewLinks,
   links: f.links,
@@ -216,8 +224,11 @@ const snapshotFromCompany = (c: any) =>
     cityOrRegion: c.city_or_region || "",
     foundedYear: c.founded_year ? String(c.founded_year) : "",
     mission: c.mission || "",
+    missionEn: c.mission_en || "",
     vision: c.vision || "",
+    visionEn: c.vision_en || "",
     coreValues: Array.isArray(c.core_values) ? c.core_values : Array.isArray(c.values) ? c.values : [],
+    coreValuesEn: Array.isArray(c.core_values_en) ? c.core_values_en : [],
     bioShort: c.bio_short || "",
     bio: c.bio || "",
     bioEn: c.bio_en || "",
@@ -231,6 +242,7 @@ const snapshotFromCompany = (c: any) =>
     portfolioUrl: c.portfolio_url || "",
     works: deriveWorksFromRaw(c.works),
     currentActivity: Array.isArray(c.current_activity) ? c.current_activity : [],
+    currentActivityEn: Array.isArray(c.current_activity_en) ? c.current_activity_en : [],
     history: normalizeCompanyHistory(c.history),
     reviewLinks: deriveReviewsFromRaw(c.review_links),
     links: Array.isArray(c.links) ? c.links : [],
@@ -275,8 +287,11 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
 
   // Identity states
   const [mission, setMission] = useState(company.mission || "");
+  const [missionEn, setMissionEn] = useState(company.mission_en || "");
   const [vision, setVision] = useState(company.vision || "");
+  const [visionEn, setVisionEn] = useState(company.vision_en || "");
   const [coreValuesInput, setCoreValuesInput] = useState((company.core_values || company.values || []).join(", "));
+  const [coreValuesEn, setCoreValuesEn] = useState<Array<string | null>>(Array.isArray(company.core_values_en) ? company.core_values_en : []);
   const [bioShort, setBioShort] = useState(company.bio_short || "");
   const [bio, setBio] = useState(company.bio || "");
   const [bioEn, setBioEn] = useState(company.bio_en || "");
@@ -303,6 +318,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
 
   // Current Activity / Projects state
   const [currentActivity, setCurrentActivity] = useState<any[]>(Array.isArray(company.current_activity) ? company.current_activity : []);
+  const [currentActivityEn, setCurrentActivityEn] = useState<Array<string | null>>(Array.isArray(company.current_activity_en) ? company.current_activity_en : []);
 
   // History state
   const [history, setHistory] = useState<any[]>(() => normalizeCompanyHistory(company.history));
@@ -408,8 +424,11 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
     setFoundedYear(company.founded_year ? String(company.founded_year) : "");
     setBrandColor(company.brand_color || "#C8EE52");
     setMission(company.mission || "");
+    setMissionEn(company.mission_en || "");
     setVision(company.vision || "");
+    setVisionEn(company.vision_en || "");
     setCoreValuesInput((company.core_values || company.values || []).join(", "));
+    setCoreValuesEn(Array.isArray(company.core_values_en) ? company.core_values_en : []);
     setBioShort(company.bio_short || "");
     setBio(company.bio || "");
     setProfileImageUrl(company.profile_image_url || "");
@@ -418,6 +437,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
     setInstagram(company.instagram || "");
     setWebsite(company.website || "");
     setPortfolioUrl(company.portfolio_url || "");
+    setCurrentActivityEn(Array.isArray(company.current_activity_en) ? company.current_activity_en : []);
     setWorks(deriveWorksFromRaw(company.works));
     setCurrentActivity(Array.isArray(company.current_activity) ? company.current_activity : []);
     setHistory(normalizeCompanyHistory(company.history));
@@ -577,8 +597,11 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
       cityOrRegion,
       foundedYear,
       mission,
+      missionEn,
       vision,
+      visionEn,
       coreValues: parsedValues,
+      coreValuesEn,
       bioShort,
       bio,
       bioEn,
@@ -592,6 +615,7 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
       portfolioUrl,
       works,
       currentActivity,
+      currentActivityEn,
       history,
       reviewLinks,
       links,
@@ -1061,6 +1085,9 @@ export default function CompanyCmsEditor({ company, onSaveSuccess, accessMode = 
             </div></> : <>
               <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Short introduction in English (optional)</label><input lang="en" type="text" value={introductionEn} onChange={(e) => setIntroductionEn(e.target.value)} placeholder="e.g. A contemporary dance company based in Seoul" style={{ width: "100%", padding: "10px 14px", fontSize: "0.9rem", borderRadius: "6px", border: "1px solid var(--border)" }} /></div>
               <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Full profile in English (optional)</label><textarea lang="en" rows={6} value={bioEn} onChange={(e) => setBioEn(e.target.value)} placeholder="Introduce your company to international presenters, venues, and partners." style={{ width: "100%", padding: "12px 14px", fontSize: "0.88rem", borderRadius: "6px", border: "1px solid var(--border)", lineHeight: 1.6, resize: "vertical" }} /></div>
+              <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Mission in English (optional)</label><textarea lang="en" rows={3} value={missionEn} onChange={(e) => setMissionEn(e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: "6px", border: "1px solid var(--border)" }} /></div>
+              <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Vision in English (optional)</label><textarea lang="en" rows={3} value={visionEn} onChange={(e) => setVisionEn(e.target.value)} style={{ width: "100%", padding: "12px 14px", borderRadius: "6px", border: "1px solid var(--border)" }} /></div>
+              <div><label style={{ display: "block", fontSize: "0.82rem", fontWeight: 800, color: "var(--navy)", marginBottom: "6px" }}>Core values in English (comma-separated)</label><input lang="en" value={coreValuesEn.filter(Boolean).join(", ")} onChange={(e) => setCoreValuesEn(e.target.value.split(",").map((value) => value.trim()).filter(Boolean))} style={{ width: "100%", padding: "10px 14px", borderRadius: "6px", border: "1px solid var(--border)" }} /></div>
             </>}
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>

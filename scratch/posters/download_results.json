@@ -1,0 +1,218 @@
+[
+  {
+    "name": "32_Slide02",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26008988_p.gif",
+    "ext": "gif",
+    "frameId": "558:1649",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 125759,
+    "file": "scratch\\posters\\32_Slide02.gif"
+  },
+  {
+    "name": "32_Slide04",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260602//상반기 썸네일_404_591.jpg",
+    "ext": "jpg",
+    "frameId": "558:1732",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "32_Slide05",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260602//문화가있는날.jpg",
+    "ext": "jpg",
+    "frameId": "654:537",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "32_Slide06",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260615//404_591.jpg",
+    "ext": "jpg",
+    "frameId": "558:1819",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "32_Slide07",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260707//0705_3.jpg",
+    "ext": "jpg",
+    "frameId": "558:1860",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "32_Slide08",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260602//[크기변환]Poster_404x591.JPG",
+    "ext": "jpg",
+    "frameId": "654:578",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "32_Slide09",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260602//[크기변환]Poster_404x591.JPG",
+    "ext": "jpg",
+    "frameId": "558:1947",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "33_Slide02",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010140_p.gif",
+    "ext": "gif",
+    "frameId": "660:524",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\33_Slide02.gif"
+  },
+  {
+    "name": "33_Slide03",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26009979_p.gif",
+    "ext": "gif",
+    "frameId": "660:566",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\33_Slide03.gif"
+  },
+  {
+    "name": "33_Slide04",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010146_p.gif",
+    "ext": "gif",
+    "frameId": "660:607",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 180423,
+    "file": "scratch\\posters\\33_Slide04.gif"
+  },
+  {
+    "name": "33_Slide05",
+    "url": "https://www.kncdc.kr/mnt/files/board/2026/01/1767765169159",
+    "ext": "jpg",
+    "frameId": "660:787",
+    "ok": false,
+    "error": "HTTP 404"
+  },
+  {
+    "name": "33_Slide06",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010204_p.gif",
+    "ext": "gif",
+    "frameId": "660:648",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\33_Slide06.gif"
+  },
+  {
+    "name": "33_Slide07",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010087_p.gif",
+    "ext": "gif",
+    "frameId": "660:689",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\33_Slide07.gif"
+  },
+  {
+    "name": "33_Slide09",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260602//문화가있는날.jpg",
+    "ext": "jpg",
+    "frameId": "660:730",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "34_Slide02",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010152_p.gif",
+    "ext": "gif",
+    "frameId": "660:897",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\34_Slide02.gif"
+  },
+  {
+    "name": "34_Slide03",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010157_p.gif",
+    "ext": "gif",
+    "frameId": "660:939",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\34_Slide03.gif"
+  },
+  {
+    "name": "34_Slide04",
+    "url": "https://ticketimage.interpark.com/Play/image/large/P0/P0004472_p.gif",
+    "ext": "gif",
+    "frameId": "660:980",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 342650,
+    "file": "scratch\\posters\\34_Slide04.gif"
+  },
+  {
+    "name": "34_Slide05",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010128_p.gif",
+    "ext": "gif",
+    "frameId": "660:1160",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\34_Slide05.gif"
+  },
+  {
+    "name": "34_Slide06",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26010033_p.gif",
+    "ext": "gif",
+    "frameId": "660:1021",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 197869,
+    "file": "scratch\\posters\\34_Slide06.gif"
+  },
+  {
+    "name": "34_Slide07",
+    "url": "https://ticketimage.interpark.com/Play/image/large/26/26009611_p.gif",
+    "ext": "gif",
+    "frameId": "660:1062",
+    "ok": true,
+    "contentType": "image/gif",
+    "bytes": 131551,
+    "file": "scratch\\posters\\34_Slide07.gif"
+  },
+  {
+    "name": "34_Slide09",
+    "url": "http://portal.gugak.go.kr/upload/PECUER/20260313//404_591_1.jpg",
+    "ext": "jpg",
+    "frameId": "660:1103",
+    "ok": false,
+    "error": "fetch failed"
+  },
+  {
+    "name": "32_Slide03",
+    "url": "https://www.kncdc.kr/mnt/files/board/2026/01/1767761493086",
+    "ext": "jpg",
+    "frameId": "558:1691",
+    "ok": false,
+    "error": "HTTP 404"
+  },
+  {
+    "name": "33_Slide08",
+    "url": "https://www.kncdc.kr/mnt/files/board/2026/01/1767761493086",
+    "ext": "jpg",
+    "frameId": "660:828",
+    "ok": false,
+    "error": "HTTP 404"
+  },
+  {
+    "name": "34_Slide08",
+    "url": "https://www.kncdc.kr/mnt/files/board/2026/01/1767761493086",
+    "ext": "jpg",
+    "frameId": "660:1201",
+    "ok": false,
+    "error": "HTTP 404"
+  }
+]

@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/useLanguage";
 
-const ROLES = [
+const ROLES_KO = [
   { 
     role: "기획 · 운영", 
     desc: "자료 접수부터 프로필 공개까지, POPOK의 전체 여정을 설계하고 운영합니다.",
@@ -29,7 +30,17 @@ const ROLES = [
   },
 ];
 
+const ROLES_EN = [
+  { role: "Planning · Operations", desc: "We design and operate the full POPOK journey, from receiving materials to publishing profiles.", color: "var(--accent)", letter: "P" },
+  { role: "Design", desc: "We create screens and a visual tone that let each artist's practice come through clearly.", color: "var(--accent-yellow)", letter: "D" },
+  { role: "Development", desc: "We build a reliable service where records accumulate and lead into the next activity.", color: "var(--accent-light)", letter: "D" },
+  { role: "Content · Partnerships", desc: "We connect documented work with more people and organizations.", color: "var(--tag-bg)", letter: "C" },
+];
+
 export default function TeamSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const roles = en ? ROLES_EN : ROLES_KO;
   return (
     <section className="home-section" style={{
       background: "#FFFFFF",
@@ -60,7 +71,7 @@ export default function TeamSection() {
             margin: "0 0 16px",
           }}
         >
-          기록을 함께 만들어가는 사람들
+          {en ? "The people building the record together" : "기록을 함께 만들어가는 사람들"}
         </motion.h2>
         <motion.p 
           initial={{ opacity: 0 }}
@@ -69,7 +80,7 @@ export default function TeamSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{ fontSize: "0.95rem", color: "var(--ink-muted)", lineHeight: 1.75, margin: "0 0 48px", maxWidth: "560px", fontWeight: 500 }}
         >
-          예술가이자 연출진으로 시작한 POPOK은, 각자의 역할로 기록의 다음 단계를 만들어가는 팀과 함께하고 있습니다.
+          {en ? "POPOK began from the perspective of artists and creative teams. Today, our team brings different roles together to build the next stage of documentation." : "예술가이자 연출진으로 시작한 POPOK은, 각자의 역할로 기록의 다음 단계를 만들어가는 팀과 함께하고 있습니다."}
         </motion.p>
 
         <div className="team-grid" style={{
@@ -77,7 +88,7 @@ export default function TeamSection() {
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "20px",
         }}>
-          {ROLES.map((item, idx) => (
+          {roles.map((item, idx) => (
             <motion.div 
               key={item.role}
               initial={{ opacity: 0, y: 15 }}
@@ -134,5 +145,4 @@ export default function TeamSection() {
     </section>
   );
 }
-
 

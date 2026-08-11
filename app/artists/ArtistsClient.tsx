@@ -11,6 +11,7 @@ import { isYouTubeUrl } from "@/lib/youtube";
 import type { ArtistFilter, ArtistField, ArtistType, Artist } from "@/types";
 import { useLanguage } from "@/lib/useLanguage";
 import { localizePath, localizedRecord, localizedWork } from "@/lib/i18n/locale";
+import { getArtistRoleLabel, matchesArtistRole, type ArtistRoleValue } from "@/lib/artistRoles";
 
 const CATEGORIES = [
   { key: "all", label: "ALL" },
@@ -18,6 +19,8 @@ const CATEGORIES = [
   { key: "music", label: "MUSIC" },
   { key: "visual", label: "VISUAL" },
   { key: "actor", label: "ACTOR" },
+  { key: "producer", role: "기획자", labelKo: "기획자", labelEn: "PRODUCER" },
+  { key: "critic", role: "평론가", labelKo: "평론가", labelEn: "CRITIC" },
 ];
 
 const DANCE_SUB_FIELDS = [
@@ -128,13 +131,15 @@ export default function ArtistsClient() {
     if (selectedField === "dance" && selectedSubField !== "all") {
       return selectedSubField;
     }
-    return selectedField === "actor" ? "all" : selectedField;
+    return selectedField === "actor" || selectedField === "producer" || selectedField === "critic" ? "all" : selectedField;
   };
+  const selectedRole = CATEGORIES.find((category) => category.key === selectedField && "role" in category)?.role as ArtistRoleValue | undefined;
 
   const filter: ArtistFilter = {
     query,
     type: selectedType as ArtistType | "all",
     field: getApiFieldFilter() as ArtistField | "all",
+    role: selectedRole,
   };
 
   const { artists: rawArtists, loading, error } = useArtists(filter);
@@ -225,16 +230,23 @@ export default function ArtistsClient() {
   const musicArtists = allFetched.filter((a) => a.field === "music");
   const visualArtists = allFetched.filter((a) => a.field === "visual");
   const actorArtists = allFetched.filter((a) => /배우|연기|연극|뮤지컬|actor|acting|theatre|theater/i.test(`${a.field || ""} ${a.genre || ""} ${a.role || ""}`));
+  const roleArtists = selectedRole ? allFetched.filter((artist) => matchesArtistRole(artist.role, selectedRole)) : [];
+  const categorizedArtistIds = new Set([...danceArtists, ...musicArtists, ...visualArtists, ...actorArtists].map((artist) => artist.id));
+  const uncategorizedNewRoleArtists = allFetched.filter((artist) =>
+    !categorizedArtistIds.has(artist.id) && (matchesArtistRole(artist.role, "기획자") || matchesArtistRole(artist.role, "평론가"))
+  );
 
   const totalResultsCount = selectedField === "all"
-    ? (danceArtists.length + musicArtists.length + visualArtists.length + actorArtists.length)
+    ? (danceArtists.length + musicArtists.length + visualArtists.length + actorArtists.length + uncategorizedNewRoleArtists.length)
     : selectedField === "dance"
       ? danceArtists.length
       : selectedField === "music"
         ? musicArtists.length
         : selectedField === "visual"
           ? visualArtists.length
-          : actorArtists.length;
+          : selectedRole
+            ? roleArtists.length
+            : actorArtists.length;
 
   const renderSliderRow = (
     title: string,
@@ -403,6 +415,17 @@ export default function ArtistsClient() {
           aspect-ratio: 0.68;
           min-height: 320px;
         }
+        .artist-category-tabs {
+          max-width: 100%;
+          overflow-x: auto;
+          padding: 2px 2px 6px;
+          scrollbar-width: thin;
+          -webkit-overflow-scrolling: touch;
+        }
+        .artist-category-tabs > button {
+          flex: 0 0 auto;
+          min-height: 44px;
+        }
         @media (max-width: 768px) {
           .gallery-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -463,7 +486,7 @@ export default function ArtistsClient() {
         </div>
         
         {/* Category Pill Buttons */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+        <div className="artist-category-tabs" style={{ display: "flex", gap: "8px" }}>
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
@@ -484,7 +507,7 @@ export default function ArtistsClient() {
                 transition: "all 0.2s ease",
               }}
             >
-              {cat.label}
+              {"role" in cat ? (en ? cat.labelEn : cat.labelKo) : cat.label}
             </button>
           ))}
         </div>
@@ -577,6 +600,7 @@ export default function ArtistsClient() {
               {renderSliderRow("MUSIC", "music", musicArtists, musicSliderRef)}
               {renderSliderRow("VISUAL", "visual", visualArtists, visualSliderRef)}
               {renderSliderRow("ACTOR", "actor", actorArtists, actorSliderRef)}
+              {uncategorizedNewRoleArtists.length > 0 && renderGallery(en ? "PRODUCER · CRITIC" : "기획자 · 평론가", uncategorizedNewRoleArtists)}
             </>
           ) : selectedField === "dance" ? (
             renderGallery("DANCE", danceArtists)
@@ -584,6 +608,8 @@ export default function ArtistsClient() {
             renderGallery("MUSIC", musicArtists)
           ) : selectedField === "visual" ? (
             renderGallery("VISUAL", visualArtists)
+          ) : selectedRole ? (
+            renderGallery(getArtistRoleLabel(selectedRole, language).toUpperCase(), roleArtists)
           ) : (
             renderGallery("ACTOR", actorArtists)
           )}
@@ -671,7 +697,9 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
               padding: "4px 10px", borderRadius: "12px", fontWeight: 800,
               border: "1px solid rgba(255,255,255,0.2)"
             }}>
-              {getGenreLabel(artist.genre)}
+              {matchesArtistRole(artist.role, "기획자") || matchesArtistRole(artist.role, "평론가")
+                ? getArtistRoleLabel(artist.role, language).toUpperCase()
+                : getGenreLabel(artist.genre)}
             </span>
           </div>
 

@@ -4,8 +4,19 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { PREMIUM_PLAN } from "@/lib/premiumPlans";
 import { analytics } from "@/lib/analytics";
+import { useLanguage } from "@/lib/useLanguage";
+import { localizePath } from "@/lib/i18n/locale";
 
 export default function AboutPremiumSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const features = en ? [
+    "More time for creating, less time spent documenting",
+    "Automatic monitoring and updates for performance news",
+    "Support for promotional performance content",
+    "Features on POPOK's main page and social channels",
+    "Ongoing review and management of activity records",
+  ] : PREMIUM_PLAN.features;
   return (
     <section className="home-section" style={{
       background: "#FFFFFF",
@@ -39,17 +50,15 @@ export default function AboutPremiumSection() {
             lineHeight: 1.3,
             margin: "0 0 20px",
           }}>
-            활동이 생길 때마다<br />
-            <span className="seen-highlight" style={{ paddingBottom: "2px" }}>처음부터 다시 정리</span>하지 않아도 되도록
+            {en ? "When new work happens," : "활동이 생길 때마다"}<br />
+            {en ? <>you should not have to <span className="seen-highlight" style={{ paddingBottom: "2px" }}>start organizing from scratch</span></> : <><span className="seen-highlight" style={{ paddingBottom: "2px" }}>처음부터 다시 정리</span>하지 않아도 되도록</>}
           </h2>
           <p style={{ fontSize: "0.95rem", color: "var(--ink-muted)", lineHeight: 1.8, marginBottom: "32px", maxWidth: "480px", fontWeight: 500 }}>
-            POPOK Artist는 기능을 더 많이 제공하는 요금제에 그치지 않고,
-            예술가의 포트폴리오가 계속 이어질 수 있도록
-            정리와 업데이트의 부담을 줄여주는 서비스입니다.
+            {en ? "POPOK Artist is more than a plan with additional features. It reduces the burden of organizing and updating, so an artist's portfolio can continue to grow." : "POPOK Artist는 기능을 더 많이 제공하는 요금제에 그치지 않고, 예술가의 포트폴리오가 계속 이어질 수 있도록 정리와 업데이트의 부담을 줄여주는 서비스입니다."}
           </p>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ display: "inline-block" }}>
             <Link
-              href="/popok-artist"
+              href={localizePath("/popok-artist", language)}
               onClick={() => analytics.premiumClick("about_premium_section")}
               className="btn-lime premium-cta-btn"
               style={{
@@ -64,7 +73,7 @@ export default function AboutPremiumSection() {
                 boxShadow: "0 4px 14px rgba(200,238,82,0.3)"
               }}
             >
-              POPOK Artist 알아보기 
+              {en ? "Explore POPOK Artist" : "POPOK Artist 알아보기"}
               <span className="arrow" style={{ fontSize: "1.05rem", transition: "transform 0.2s" }}>→</span>
             </Link>
           </motion.div>
@@ -93,10 +102,10 @@ export default function AboutPremiumSection() {
             borderBottom: "1.5px solid var(--accent)",
             paddingBottom: "2px"
           }}>
-            함께 관리하는 것들
+            {en ? "What we manage with you" : "함께 관리하는 것들"}
           </span>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {PREMIUM_PLAN.features.map((feature, idx) => (
+            {features.map((feature, idx) => (
               <motion.div 
                 key={feature} 
                 initial={{ opacity: 0, y: 8 }}

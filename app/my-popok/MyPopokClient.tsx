@@ -41,6 +41,7 @@ import WorksCardEditor from "@/components/profile/WorksCardEditor";
 import { ArrayField, StringArrayField } from "@/components/admin/ArrayField";
 import { compressImageForUpload } from "@/lib/clientImageCompression";
 import { getListImageUrl } from "@/lib/imageUrls";
+import { ARTIST_ROLES } from "@/lib/artistRoles";
 
 
 type PendingWorkImage = {
@@ -1279,7 +1280,10 @@ export default function MyPopokClient({
                     </label>
                     <label style={labelStyle}>
                       주 역할
-                      <input type="text" value={role} onChange={(e) => setRole(e.target.value)} placeholder="예: 안무가" style={inputStyle} />
+                      <input type="text" list="artist-role-options" value={role} onChange={(e) => setRole(e.target.value)} placeholder="예: 안무가" style={inputStyle} />
+                      <datalist id="artist-role-options">
+                        {ARTIST_ROLES.map((option) => <option key={option.value} value={option.value}>{option.en}</option>)}
+                      </datalist>
                     </label>
                   </div>
 

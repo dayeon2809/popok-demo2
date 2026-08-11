@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { testimonials } from "@/data/testimonials";
+import { useLanguage } from "@/lib/useLanguage";
 
 export default function TestimonialsSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -51,10 +54,10 @@ export default function TestimonialsSection() {
           letterSpacing: "-0.03em",
           marginBottom: "12px"
         }}>
-          POPOK을 먼저 경험한 아티스트들
+          {en ? "Artists who experienced POPOK first" : "POPOK을 먼저 경험한 아티스트들"}
         </h2>
         <p style={{ fontSize: "1rem", color: "rgba(255,255,255,0.65)", fontWeight: 600 }}>
-          흩어져 있던 작업이 하나의 프로필이 되었습니다.
+          {en ? "Scattered work became one coherent profile." : "흩어져 있던 작업이 하나의 프로필이 되었습니다."}
         </p>
       </div>
 
@@ -108,7 +111,7 @@ export default function TestimonialsSection() {
                 marginBottom: "24px",
                 whiteSpace: "pre-line"
               }}>
-                “{t.quote}”
+                “{en ? t.quoteEn : t.quote}”
               </p>
             </div>
             <div style={{
@@ -121,9 +124,9 @@ export default function TestimonialsSection() {
               paddingTop: "14px",
             }}>
               <span style={{ fontSize: "0.88rem", fontWeight: 800, color: "var(--navy)" }}>
-                {t.name}
+                {en ? t.nameEn : t.name}
               </span>
-              <span className="tag" style={{ flexShrink: 0 }}>{t.genre}</span>
+              <span className="tag" style={{ flexShrink: 0 }}>{en ? t.genreEn : t.genre}</span>
             </div>
           </div>
         ))}

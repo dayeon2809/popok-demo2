@@ -1,0 +1,52 @@
+{
+  "job_id": "portfolio-en-20260806T140416Z",
+  "verified_at": "2026-08-07T01:31:42.994Z",
+  "passed": true,
+  "apply_log_counts": {
+    "success": 560
+  },
+  "applied_match": 560,
+  "applied_mismatch": 0,
+  "korean_source_changes": 0,
+  "all_korean_projection_changed_records": 0,
+  "existing_preserved": 17,
+  "existing_changed": 0,
+  "skipped_preserved": 51,
+  "skipped_changed": 0,
+  "outside_target_records_changed": 0,
+  "changed_records": 35,
+  "artists_changed": 23,
+  "companies_changed": 12,
+  "performances_read": 0,
+  "performances_changed": 0,
+  "backup": {
+    "path": "C:\\Users\\dayeo\\Downloads\\popok-landing\\artifacts\\portfolio-translation\\portfolio-en-20260806T140416Z\\apply\\pre-apply-backup.json",
+    "sha256": "7ba304952639c35f07a2186d9e0b027acb7968b291eba49d4acddd090d17e7f9",
+    "verified": true
+  },
+  "logs": {
+    "json": "C:\\Users\\dayeo\\Downloads\\popok-landing\\artifacts\\portfolio-translation\\portfolio-en-20260806T140416Z\\apply\\apply-log.json",
+    "csv": "C:\\Users\\dayeo\\Downloads\\popok-landing\\artifacts\\portfolio-translation\\portfolio-en-20260806T140416Z\\apply\\apply-log.csv"
+  },
+  "routes": {
+    "artist_en": {
+      "status": 200
+    },
+    "company_en": {
+      "status": 200
+    }
+  },
+  "checks": {
+    "translation_preservation_tests": "passed",
+    "i18n_fallback_tests": "passed",
+    "related_regression_tests": "passed",
+    "typecheck": "passed",
+    "production_build": "passed"
+  },
+  "schema_columns_verified": 6,
+  "constraints_catalog_verified": false,
+  "constraints_basis": "user-confirmed migration; pg_catalog not exposed through PostgREST",
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}

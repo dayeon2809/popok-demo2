@@ -60,3 +60,13 @@ export function localizedCareer<T extends Record<string, any>>(item: T, locale: 
     event: localizedValue(item, "event", "description_en", locale),
   };
 }
+
+export function localizedParallelStrings(source: unknown, english: unknown, locale: Locale): string[] {
+  const korean = Array.isArray(source) ? source : [];
+  const translated = Array.isArray(english) ? english : [];
+  return korean.map((value, index) => {
+    const ko = typeof value === "string" ? value.trim() : "";
+    const en = typeof translated[index] === "string" ? translated[index].trim() : "";
+    return locale === "en" ? en || ko : ko || en;
+  }).filter(Boolean);
+}

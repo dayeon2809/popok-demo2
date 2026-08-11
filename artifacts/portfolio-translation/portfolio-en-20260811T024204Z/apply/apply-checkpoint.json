@@ -1,0 +1,491 @@
+{
+  "job_id": "portfolio-en-20260811T024204Z",
+  "started_at": "2026-08-11T02:50:31.250Z",
+  "completed_records": [
+    "artists:a94ceaca-4631-4072-8c3f-415a0d26aae3",
+    "artists:0b33dea9-2ca5-4295-a9a3-26ad9b179618"
+  ],
+  "item_logs": [
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[0].title_en",
+      "source_hash": "d4d0fc5ac83954d5926734c7b8a035397ca04676f922da030ee0b918de8ac9ae",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[0].description_en",
+      "source_hash": "9b9e0082321e4645084bd309a0f30094e5fd7fedab7d36c7bd505d73df879ee9",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[0].role_en",
+      "source_hash": "598bf20bff37f80ed18eff1d3de5c15918f80240ddebfa9353fca835ece064a7",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[0].credits[0].role_en",
+      "source_hash": "5716c0495427e0086c37116442a6ec6b0f334a4e85ef222a63a02362acbe6c3a",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[1].title_en",
+      "source_hash": "2698f974e223e43da04fb95186368efdbc57d9e00480548b8f6ed6dbca716c35",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[1].description_en",
+      "source_hash": "2daa4b55dcbb68470b5f264f787bc248e29daca33a1ecdd62a77ee88c8eb8e88",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[1].role_en",
+      "source_hash": "20b6ae47b3f7e0d635a9ae50047a5e01ede33bd5a753663843c6e6fc3bed8ec6",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[1].credits[0].role_en",
+      "source_hash": "bf058b341278ee5bf2d9813c22e986841ab041bd12d94ecb1960a364327eeb75",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[1].credits[1].role_en",
+      "source_hash": "861a9cb1af80c0776adcc80052dd6d0c09ac2a8948160f690f9ea7f1138bf012",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[2].title_en",
+      "source_hash": "d082ee1c4f1014d65b89021dd4d791e4f05f03a53fb22b879bfb59af73f969de",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[2].description_en",
+      "source_hash": "251a5d573d7c57e0c4daae1844c8e3737743d6fbd1a7c1c830d9db65c67d7d61",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[2].role_en",
+      "source_hash": "92f1d49c488b702a7e68daf53c55cd66594b2708e3e38ad7b39ac7664bd6cf37",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[2].credits[0].role_en",
+      "source_hash": "44e6accac3e98ccc0e100b71f0bd78690c61e2822a3785f990ffb13a8fff1e53",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[3].title_en",
+      "source_hash": "b8599750bc7299b5e07039ead0448ee3b678dec2a92bb1339fc709b53ad39e24",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[3].description_en",
+      "source_hash": "ab15f703c384c3ece148674725a56f7343d8b3b46c5b18afc71fecc3c6273e0c",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[3].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[3].credits[0].role_en",
+      "source_hash": "20698624e3d1e1fd6221ded3ef5981b9f2d6e37a9226084ad59e909e4c73dd0d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[4].title_en",
+      "source_hash": "010f225eabfdc535de734744a5be5f61415a4caca97180052eabeb6ab0f28531",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[4].description_en",
+      "source_hash": "ded190cdc5be15bab2acc71a4c2c97d8607a761f8dac2e1b5010d4c540f357ed",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[4].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[4].credits[0].role_en",
+      "source_hash": "20698624e3d1e1fd6221ded3ef5981b9f2d6e37a9226084ad59e909e4c73dd0d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[5].title_en",
+      "source_hash": "ad9b25d5c93c03c2f355a6be326e7e93997184b9ed4fc04213ad876a0c6fc710",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[5].description_en",
+      "source_hash": "d74602b2b6d69b11ddf82ebf920c405a98c209af50796774550e806edc79164a",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[5].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[5].credits[0].role_en",
+      "source_hash": "20698624e3d1e1fd6221ded3ef5981b9f2d6e37a9226084ad59e909e4c73dd0d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[6].title_en",
+      "source_hash": "5b10e26687de35203fd56e289768a00286d5cee81cf15c37cc9f8141748dc93d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[6].description_en",
+      "source_hash": "253c23a22d796d64cdc367dc2ee1ab5b7164423bfd3c03cccc59246850f4deec",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[6].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[6].credits[0].role_en",
+      "source_hash": "20698624e3d1e1fd6221ded3ef5981b9f2d6e37a9226084ad59e909e4c73dd0d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[7].title_en",
+      "source_hash": "2f8d5c096c84bc0215f54642e2a705b45d47450d30c6db8d37ed9445ca3b5195",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[7].description_en",
+      "source_hash": "db72de885f5e003f33fd1672adb87402fa9c93675767e7391ecfaa86103cf57e",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work",
+      "json_path": "works[7].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_work_credit",
+      "json_path": "works[7].credits[0].role_en",
+      "source_hash": "20698624e3d1e1fd6221ded3ef5981b9f2d6e37a9226084ad59e909e4c73dd0d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "a94ceaca-4631-4072-8c3f-415a0d26aae3",
+      "content_type": "artist_education",
+      "json_path": "education_en[0]",
+      "source_hash": "446813ef4be9433bf2d1649ffc2cfe55d7f74035767708428f71cd78103b969d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_work",
+      "json_path": "works[0].title_en",
+      "source_hash": "5e1e0f1145f769da3cf1b24f05d318b07d3c7cfb4726b8fbc7b462a2459594e2",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_work",
+      "json_path": "works[0].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_work_credit",
+      "json_path": "works[0].credits[0].role_en",
+      "source_hash": "70ee303860325afba468e626f4083748ee630d4d45072bd85f7d296db5dae115",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_work",
+      "json_path": "works[1].title_en",
+      "source_hash": "f00a626c3cc87c0c41a7db4780f0e1c6b577f833da45d71728113dd72717f03e",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_work",
+      "json_path": "works[1].role_en",
+      "source_hash": "679db4854ce974f355b6b34eba552151437b6de22f7a8b643bea30349353a1fe",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_work_credit",
+      "json_path": "works[1].credits[0].role_en",
+      "source_hash": "70ee303860325afba468e626f4083748ee630d4d45072bd85f7d296db5dae115",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[0].organization_en",
+      "source_hash": "c8e7747020e9970d2c495274b74186c9982157b899904e5f01082f76a8899949",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[0].title_en",
+      "source_hash": "942a7f7489b2b775d1630f9647625c56117d7f4b378606143319182749536a2f",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[1].organization_en",
+      "source_hash": "05f21185d7b85a8b81d531880f2f06525a41bcb352c59cd44f48e3d3fd9a2a1b",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[1].title_en",
+      "source_hash": "3052616683d2652c39cfd636a492ac07aba189bbeda6983d0d4b1d9cf963339a",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[2].organization_en",
+      "source_hash": "6f9339acc19942d60626d1795aa8b807cfa3adb5b5738a6621e1077b2f46f22d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[2].title_en",
+      "source_hash": "917890792fa4e5095241901376e65aa544b884c43668fa8242423b16e94e24d5",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[3].organization_en",
+      "source_hash": "5bc9cec8ea798e497a0341a8973495af48c76deb8f2036eb1767bd4910b5ade4",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[3].title_en",
+      "source_hash": "9328b39e9f026a5ec0d44d78141a4a13bc5a7cdc4199a90fa5c5d63c20aa1e78",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[4].organization_en",
+      "source_hash": "d6bbf1e8a950e94b52764519e88788d99178d817fec99c92c1b64dd3df81d43e",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[5].organization_en",
+      "source_hash": "03dd637601501a0b553f2aa0235ab718e870f24d3da94719377f4f054db547b8",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[5].title_en",
+      "source_hash": "205817af3c7550ed3d5eb1e32c52043fd30b188845503df6f660a4917097780d",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[6].organization_en",
+      "source_hash": "50206955b9011e3db02f645f56935b3d6066faa665c7b5f0b8f589b61061fb0a",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[6].title_en",
+      "source_hash": "14e865f771ea26a9246ea61938dea69472cfa6e3ea01d7f89a9fff9835d192f0",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[7].organization_en",
+      "source_hash": "5caa13aca5387b7555835bc86cc95eb5d47e3c01dc8c3cbd43af7763444435ac",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_affiliations",
+      "json_path": "affiliations[7].title_en",
+      "source_hash": "687be78e28176a7db6ca1e95404eb67537d195b5176afc2ed054a26b2192b268",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_current_activity",
+      "json_path": "current_activity_en[0]",
+      "source_hash": "7576c0840cb476841bc34cc927372e20ae45228c85079c5c5ee673b745b3b3f1",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_current_activity",
+      "json_path": "current_activity_en[1]",
+      "source_hash": "130b5e40645bce11b8832ccf71deae23edeb9eb9ae4e80695a70e73b73f27f91",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_current_activity",
+      "json_path": "current_activity_en[2]",
+      "source_hash": "7cf1dce80ad137fb65970160490959af95ac911d2d353826b5912232b2c4f41a",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_current_activity",
+      "json_path": "current_activity_en[3]",
+      "source_hash": "60c2e07dc640ebbeebf2599005e913bcefb669e48ae02808c5b15aab5c35d290",
+      "status": "success",
+      "reason": ""
+    },
+    {
+      "record_id": "0b33dea9-2ca5-4295-a9a3-26ad9b179618",
+      "content_type": "artist_education",
+      "json_path": "education_en[0]",
+      "source_hash": "637655d69099669fc60cc5d06170b38952eea76933ba03e3192ed476d0940286",
+      "status": "success",
+      "reason": ""
+    }
+  ],
+  "updated_at": "2026-08-11T02:50:31.597Z"
+}

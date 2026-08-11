@@ -1,0 +1,19 @@
+{
+  "version": "2026-08-06.1",
+  "existing_jsonb_keys": {
+    "works[].title": "works[].title_en",
+    "works[].description": "works[].description_en",
+    "works[].role": "works[].role_en",
+    "works[].credits[].role": "works[].credits[].role_en",
+    "awards[].result": "awards[].result_en",
+    "competitions[].result": "competitions[].result_en"
+  },
+  "future_columns": {
+    "artists.current_activity[]": "artists.current_activity_en[]",
+    "artists.education[]": "artists.education_en[]",
+    "companies.current_activity[]": "companies.current_activity_en[]",
+    "companies.mission": "companies.mission_en",
+    "companies.vision": "companies.vision_en",
+    "companies.core_values[]": "companies.core_values_en[]"
+  }
+}

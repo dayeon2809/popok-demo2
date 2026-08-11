@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/useLanguage";
 
-const STAGES = [
+const STAGES_KO = [
   {
     phase: "1단계 · 지금",
     status: "ACTIVE",
@@ -32,7 +33,28 @@ const STAGES = [
   },
 ];
 
+const STAGES_EN = [
+  {
+    phase: "Stage 1 · Now", status: "ACTIVE", statusColor: "var(--accent-dark)", statusBg: "var(--accent-light)",
+    title: "Document the work", tags: ["Personal portfolio", "Work and activity management", "Artist and company profiles", "Share with one link"],
+    body: "We began by bringing an artist's activities together in one place.",
+  },
+  {
+    phase: "Stage 2 · In progress", status: "IN PROGRESS", statusColor: "#7A5C2E", statusBg: "#FFF8E6",
+    title: "Keep the record moving", tags: ["AI-assisted organization", "Performance information", "Portfolio updates", "POPOK content"],
+    body: "We are making portfolios that continue to grow whenever new work appears.",
+  },
+  {
+    phase: "Stage 3 · Ahead", status: "UPCOMING", statusColor: "var(--ink-muted)", statusBg: "var(--tag-bg)",
+    title: "Create more connections", tags: ["Company collaboration", "Expanded performance promotion", "Institutional partnerships", "More opportunities"],
+    body: "We are expanding POPOK's role so documented work can meet more people and organizations.",
+  },
+];
+
 export default function RoadmapSection() {
+  const { language } = useLanguage();
+  const en = language === "en";
+  const stages = en ? STAGES_EN : STAGES_KO;
   return (
     <section className="home-section" style={{
       maxWidth: "1120px",
@@ -63,7 +85,7 @@ export default function RoadmapSection() {
           margin: "0 0 48px",
         }}
       >
-        POPOK 로드맵
+        {en ? "POPOK Roadmap" : "POPOK 로드맵"}
       </motion.h2>
 
       <div className="roadmap-grid" style={{
@@ -71,7 +93,7 @@ export default function RoadmapSection() {
         gridTemplateColumns: "repeat(3, 1fr)",
         gap: "24px",
       }}>
-        {STAGES.map((stage, i) => (
+        {stages.map((stage, i) => (
           <motion.div 
             key={stage.title}
             initial={{ opacity: 0, y: 20 }}
@@ -168,4 +190,3 @@ export default function RoadmapSection() {
     </section>
   );
 }
-
