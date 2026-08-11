@@ -1,0 +1,12 @@
+<svg width="800" height="1200" viewBox="0 0 800 1200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="POPOK prototype placeholder — performance poster mood">
+  <title>mock placeholder — prototypeOnly</title>
+  <rect width="800" height="1200" fill="#8CAB1E"/>
+  <rect x="0" y="0" width="800" height="1200" fill="#171411" opacity="0.06"/>
+  <g fill="#171411" opacity="0.9">
+    <rect x="0" y="900" width="800" height="300"/>
+  </g>
+  <circle cx="400" cy="430" r="220" fill="none" stroke="#171411" stroke-width="6" opacity="0.5"/>
+  <circle cx="400" cy="430" r="140" fill="#F2FAA6" opacity="0.55"/>
+  <rect x="300" y="990" width="200" height="14" fill="#F2FAA6" opacity="0.8"/>
+  <rect x="340" y="1030" width="120" height="10" fill="#F2FAA6" opacity="0.5"/>
+</svg>

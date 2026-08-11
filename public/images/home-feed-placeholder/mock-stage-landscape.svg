@@ -1,0 +1,13 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="POPOK prototype placeholder — stage mood">
+  <title>mock placeholder — prototypeOnly</title>
+  <rect width="1200" height="900" fill="#171411"/>
+  <ellipse cx="600" cy="900" rx="640" ry="220" fill="#22251c"/>
+  <ellipse cx="600" cy="760" rx="260" ry="60" fill="#C8EE52" opacity="0.16"/>
+  <g stroke="#8CAB1E" stroke-width="1.5" opacity="0.5">
+    <line x1="0" y1="900" x2="600" y2="500"/>
+    <line x1="1200" y1="900" x2="600" y2="500"/>
+    <line x1="150" y1="900" x2="600" y2="500"/>
+    <line x1="1050" y1="900" x2="600" y2="500"/>
+  </g>
+  <circle cx="600" cy="500" r="10" fill="#F2FAA6"/>
+</svg>
