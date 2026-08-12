@@ -20,6 +20,9 @@
     "test:images": "node --test --experimental-strip-types tests/imageUrls.test.ts",
     "test:i18n": "node --test --experimental-strip-types tests/i18n.test.ts",
     "test:artist-roles": "node --test --experimental-strip-types tests/artistRoles.test.ts",
+    "test:opportunities": "node --test --experimental-strip-types tests/opportunities/*.test.ts",
+    "opportunities:crawl": "node --experimental-strip-types scripts/opportunities-crawl.ts",
+    "opportunities:artnuri:bulk": "node --experimental-strip-types scripts/artnuri-bulk-publish.ts",
     "migrate": "node scratch/migrate.js",
     "migrate-artists": "node scratch/migrate-artists.js"
   },
@@ -29,6 +32,7 @@
     "@supabase/supabase-js": "^2.110.0",
     "@types/qrcode": "^1.5.6",
     "airtable": "^0.12.2",
+    "cheerio": "^1.2.0",
     "framer-motion": "^12.42.2",
     "mammoth": "^1.12.0",
     "next": "16.2.9",

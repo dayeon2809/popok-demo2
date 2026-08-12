@@ -58,6 +58,18 @@ export const analytics = {
   aiDiscoveryNoResults: (mode: string) => trackEvent("ai_discovery_no_results", { mode }),
   aiDiscoveryFailed: (mode: string, code?: string) => trackEvent("ai_discovery_failed", { mode, code }),
 
+  opportunitiesPageView: () => trackEvent("opportunities_page_view"),
+  opportunityFilterClick: (category: string) =>
+    trackEvent("opportunity_filter_click", { category }),
+  opportunityCardClick: (opportunityId: string) =>
+    trackEvent("opportunity_card_click", { opportunity_id: opportunityId }),
+  opportunitySaveClick: (opportunityId: string) =>
+    trackEvent("opportunity_save_click", { opportunity_id: opportunityId }),
+  opportunityExternalLinkClick: (opportunityId: string) =>
+    trackEvent("opportunity_external_link_click", { opportunity_id: opportunityId }),
+  opportunityCollaborationConnectClick: (postId: string) =>
+    trackEvent("opportunity_collaboration_connect_click", { post_id: postId }),
+
   // ── Home conversion CTAs ───────────────────────────────────────────────
   // location: "hero" | "result_comparison" | "feed_inline" | "steps" | "final_cta"
   homeCreatePopokClicked: (location: string, isLoggedIn: boolean) =>

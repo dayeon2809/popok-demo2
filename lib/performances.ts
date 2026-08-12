@@ -190,10 +190,7 @@ export async function getCalendarPerformances(weekStart: string, calendarEnd: st
     return [];
   }
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> 2888e32 (feat: unify performance discovery and calendar)
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Single performance by id (uuid) or slug — for a future detail page. */
