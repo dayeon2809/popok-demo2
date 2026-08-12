@@ -6,6 +6,7 @@ import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import { COMPANY_RECOMMENDATION_QUESTIONS, recommendCompanies, type CompanyRecommendationResult } from "@/lib/companyRecommendation";
 import { normalizeWorks } from "@/lib/works";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { Company } from "@/types";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
@@ -32,7 +33,7 @@ function ResultCard({ result }: ResultCardProps) {
         <div style={{ width: "100%", aspectRatio: "4 / 3", background: "#EAE6DD", overflow: "hidden" }}>
           {image ? (
             <img
-              src={failed ? FALLBACK_IMAGE : image}
+              src={failed ? FALLBACK_IMAGE : getListImageUrl(image, 384)}
               alt={company.name}
               loading="lazy"
               onError={() => setFailed(true)}

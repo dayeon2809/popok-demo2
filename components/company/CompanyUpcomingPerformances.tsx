@@ -3,6 +3,7 @@
 import React from "react";
 import type { Performance } from "@/types";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface CompanyUpcomingPerformancesProps {
   performances: Performance[];
@@ -317,9 +318,11 @@ export default function CompanyUpcomingPerformances({
               <div className="poster-wrapper">
                 {hasPoster ? (
                   <img
-                    src={perf.posterUrl!}
+                    src={getListImageUrl(perf.posterUrl!, 384)}
                     alt={`${perf.title} 포스터`}
                     className="poster-image"
+                    loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="poster-placeholder">

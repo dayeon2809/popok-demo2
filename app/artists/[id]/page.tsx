@@ -35,6 +35,7 @@ import { useFireOnceInView } from "@/hooks/useFireOnceInView";
 import { useLanguage } from "@/lib/useLanguage";
 import { localizePath, localizedCareer, localizedParallelStrings, localizedRecord, localizedWork } from "@/lib/i18n/locale";
 import { getArtistRoleLabel } from "@/lib/artistRoles";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 // Safe default while /api/portfolio-requests/viewer-state is loading (or if
 // it ever fails) — the CTA must still mount and behave correctly for a
@@ -782,8 +783,10 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
                   }}
                 >
                   <img
-                    src={work.image}
+                    src={getListImageUrl(work.image, 128)}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     style={{ width: "56px", height: "56px", borderRadius: "6px", objectFit: "cover", flexShrink: 0, background: "#EAE6DD" }}
                   />
                   <div style={{ minWidth: 0 }}>
@@ -820,8 +823,13 @@ export default function ArtistDetailPage({ params }: { params: Promise<{ id: str
               }}
             >
               <img
-                src={artist.connectedCompany.company.profile_image_url || "/images/placeholders/cake-placeholder.png"}
+                src={getListImageUrl(
+                  artist.connectedCompany.company.profile_image_url || "/images/placeholders/cake-placeholder.png",
+                  96
+                )}
                 alt={artist.connectedCompany.company.name}
+                loading="lazy"
+                decoding="async"
                 style={{ width: "40px", height: "40px", borderRadius: "4px", objectFit: "cover", flexShrink: 0 }}
               />
               <div style={{ minWidth: 0 }}>

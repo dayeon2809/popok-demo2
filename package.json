@@ -18,6 +18,7 @@
     "translation:apply": "node --experimental-strip-types scripts/applyPortfolioTranslations.ts",
     "test:translation-preservation": "node --test --experimental-strip-types tests/translationPreservation.test.ts",
     "test:images": "node --test --experimental-strip-types tests/imageUrls.test.ts",
+    "test:image-egress": "node --test --experimental-strip-types tests/imageEgress.test.ts",
     "test:i18n": "node --test --experimental-strip-types tests/i18n.test.ts",
     "test:artist-roles": "node --test --experimental-strip-types tests/artistRoles.test.ts",
     "test:opportunities": "node --test --experimental-strip-types tests/opportunities/*.test.ts",

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Artist } from "@/types";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface ArtistCompactCardProps {
   artist: Artist;
@@ -38,7 +39,13 @@ export default function ArtistCompactCard({ artist, onShare }: ArtistCompactCard
         flexShrink: 0, background: "#EAE6DD", border: "1px solid var(--border)",
       }}>
         {profileImage && (
-          <img src={profileImage} alt={artist.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img
+            src={getListImageUrl(profileImage, 96)}
+            alt={artist.name}
+            loading="lazy"
+            decoding="async"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         )}
       </div>
 

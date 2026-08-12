@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { Company } from "@/types";
 
 interface CompanyHeroProps {
@@ -76,8 +77,9 @@ export default function CompanyHero({
       >
         {heroImage ? (
           <img
-            src={heroImage}
+            src={getListImageUrl(heroImage, 600)}
             alt={`${company.name} Poster`}
+            decoding="async"
             style={{
               width: "100%",
               height: "100%",
@@ -114,8 +116,10 @@ export default function CompanyHero({
           {/* Logo overlay */}
           {(company.logo_url || company.profile_image_url) && (
             <img
-              src={company.logo_url || company.profile_image_url || ""}
+              src={getListImageUrl(company.logo_url || company.profile_image_url || "", 128)}
               alt={`${company.name} Logo`}
+              loading="lazy"
+              decoding="async"
               style={{
                 width: "56px",
                 height: "56px",

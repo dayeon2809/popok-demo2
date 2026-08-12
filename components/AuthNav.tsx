@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/useLanguage";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 const menuItemStyle: React.CSSProperties = {
   display: "block",
@@ -134,7 +135,13 @@ export default function AuthNav() {
           flexShrink: 0, fontSize: "0.65rem", fontWeight: 800, color: "var(--accent-dark)",
         }}>
           {avatarUrl ? (
-            <img src={avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img
+              src={getListImageUrl(avatarUrl, 48)}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
           ) : (
             accountHandle.charAt(0).toUpperCase()
           )}

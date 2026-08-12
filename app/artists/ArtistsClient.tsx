@@ -12,6 +12,7 @@ import type { ArtistFilter, ArtistField, ArtistType, Artist } from "@/types";
 import { useLanguage } from "@/lib/useLanguage";
 import { localizePath, localizedRecord, localizedWork } from "@/lib/i18n/locale";
 import { getArtistRoleLabel, matchesArtistRole, type ArtistRoleValue } from "@/lib/artistRoles";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 const CATEGORIES = [
   { key: "all", label: "ALL" },
@@ -670,8 +671,13 @@ function ShowcaseCard({ artist, slider = false, cleanInstagramHandle, getGenreLa
               />
             ) : (
               <img
-                src={artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`}
+                src={getListImageUrl(
+                  artist.profileImage || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(artist.name)}`,
+                  600
+                )}
                 alt={artist.name}
+                loading="lazy"
+                decoding="async"
                 style={{
                   width: "100%", height: "100%", objectFit: "cover",
                   filter: "contrast(1.02) brightness(0.9)",

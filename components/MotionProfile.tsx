@@ -5,6 +5,7 @@ import YouTubeMotionPreview from "./YouTubeMotionPreview";
 import { extractYouTubeVideoId } from "@/lib/youtube";
 import { extractVimeoVideoId, getVimeoEmbedUrl } from "@/lib/videoLinks";
 import { isDirectVideoUrl } from "@/lib/video";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface MotionProfileProps {
   name: string;
@@ -140,8 +141,9 @@ export default function MotionProfile({ name, genre, image, quote, videoUrl }: M
             ) : (
               <div style={{ width: "100%", height: "100%", background: "#171411", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <img
-                  src={image}
+                  src={getListImageUrl(image, 600)}
                   alt={`${name} Motion Profile`}
+                  decoding="async"
                   style={{
                     width: "100%",
                     height: "100%",
@@ -173,8 +175,9 @@ export default function MotionProfile({ name, genre, image, quote, videoUrl }: M
             />
           ) : (
             <img
-              src={image}
+              src={getListImageUrl(image, 600)}
               alt={`${name} Motion Profile`}
+              decoding="async"
               style={{
                 width: "100%",
                 height: "100%",

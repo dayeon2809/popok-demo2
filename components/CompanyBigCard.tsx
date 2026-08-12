@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { Company } from "@/types";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
@@ -60,13 +61,15 @@ export default function CompanyBigCard({ company }: CompanyBigCardProps) {
         <div className="company-big-card-hero" style={{ width: "100%", aspectRatio: "16 / 10", background: "#FAF9F5", overflow: "hidden", flexShrink: 0, position: "relative" }}>
           {showHero ? (
             <img
-              src={heroImage!}
+              src={getListImageUrl(heroImage!, 600)}
               alt={company.name}
+              loading="lazy"
+              decoding="async"
               onError={() => setHeroFailed(true)}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
-            <img src={FALLBACK_IMAGE} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }} />
+            <img src={FALLBACK_IMAGE} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.5 }} />
           )}
           <span style={{
               position: "absolute", top: "14px", right: "14px",
@@ -107,7 +110,7 @@ export default function CompanyBigCard({ company }: CompanyBigCardProps) {
             <div style={{ display: "flex", gap: "8px", marginTop: "auto", paddingTop: "16px" }}>
               {secondaryImages.map((img, idx) => (
                 <div key={idx} style={{ width: "56px", height: "56px", borderRadius: "8px", overflow: "hidden", background: "#EAE6DD", flexShrink: 0 }}>
-                  <img src={img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={getListImageUrl(img, 128)} alt="" loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 </div>
               ))}
             </div>

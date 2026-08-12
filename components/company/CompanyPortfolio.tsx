@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { Company } from "@/types";
 import { normalizeWorkImages, sortWorksForDisplay } from "@/lib/company-works";
+import { getListImageUrl } from "@/lib/imageUrls";
 import WorkDetailModal from "@/components/works/WorkDetailModal";
 
 interface CompanyPortfolioProps {
@@ -183,9 +184,11 @@ export default function CompanyPortfolio({ company }: CompanyPortfolioProps) {
                   <div className="portfolio-image-wrapper">
                     {hasImage ? (
                       <img
-                        src={imageUrl}
+                        src={getListImageUrl(imageUrl, 600)}
                         alt={work.title}
                         className="portfolio-image"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <WorkImagePlaceholder company={company} />

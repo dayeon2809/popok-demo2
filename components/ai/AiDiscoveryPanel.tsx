@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useMobileBodyScrollLock } from "@/hooks/useMobileBodyScrollLock";
 import { analytics } from "@/lib/analytics";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { DiscoveryMode, DiscoveryResponse, DiscoveryResultView } from "@/lib/aiDiscovery";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
@@ -90,7 +91,7 @@ function ResultCard({ result, position, onFindSimilar }: ResultCardProps) {
         <div style={{ width: "100%", aspectRatio: "4 / 3", background: "#EAE6DD", overflow: "hidden" }}>
           {result.image && (
             <img
-              src={failed ? FALLBACK_IMAGE : result.image}
+              src={failed ? FALLBACK_IMAGE : getListImageUrl(result.image, 384)}
               alt={result.name}
               loading="lazy"
               onError={() => setFailed(true)}

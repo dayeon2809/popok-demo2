@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface ArtistMinimalHeaderProps {
   name: string;
@@ -36,8 +37,9 @@ export default function ArtistMinimalHeader({
       <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
         {profileImage && (
           <img
-            src={profileImage}
+            src={getListImageUrl(profileImage, 96)}
             alt={name}
+            decoding="async"
             style={{ width: "44px", height: "44px", borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "1px solid var(--border)" }}
           />
         )}

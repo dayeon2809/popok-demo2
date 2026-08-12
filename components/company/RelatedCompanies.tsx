@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { Company } from "@/types";
 
 interface RelatedCompaniesProps {
@@ -130,8 +131,10 @@ export default function RelatedCompanies({ currentCompany, relatedCompanies = []
               {/* Thumbnail image */}
               <div className="related-thumb-wrapper" style={{ width: "100%", aspectRatio: "1.7", overflow: "hidden", background: "#FAF8F5" }}>
                 <img
-                  src={compImage}
+                  src={getListImageUrl(compImage, 384)}
                   alt={comp.name}
+                  loading="lazy"
+                  decoding="async"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </div>

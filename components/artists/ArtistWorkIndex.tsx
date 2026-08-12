@@ -1,5 +1,7 @@
 "use client";
 
+import { getListImageUrl } from "@/lib/imageUrls";
+
 interface IndexWork {
   id: string;
   title: string;
@@ -38,7 +40,13 @@ export default function ArtistWorkIndex({ works, onSelectWork }: ArtistWorkIndex
         >
           <div style={{ width: "72px", height: "72px", borderRadius: "6px", overflow: "hidden", background: "#FAF8F5", border: "1px solid var(--border)", flexShrink: 0 }}>
             {work.image && !work.image.includes("cake-placeholder") && (
-              <img src={work.image} alt={work.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img
+                src={getListImageUrl(work.image, 128)}
+                alt={work.title}
+                loading="lazy"
+                decoding="async"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             )}
           </div>
           <div style={{ minWidth: 0 }}>

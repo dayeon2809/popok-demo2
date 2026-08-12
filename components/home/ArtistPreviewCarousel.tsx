@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Artist } from "@/types";
 import { FIELD_LABELS } from "@/types";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface ArtistPreviewCarouselProps {
   title: string;
@@ -173,7 +174,7 @@ export default function ArtistPreviewCarousel({ title, subtitle, artists, moreLi
             >
               <div style={{ width: "100%", aspectRatio: "4/3", overflow: "hidden", background: "#EAE6DD", position: "relative" }}>
                 {a.profileImage ? (
-                  <img src={a.profileImage} alt={a.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={getListImageUrl(a.profileImage, 600)} alt={a.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.4rem", fontWeight: 800, color: "var(--accent-dark)" }}>
                     {a.name.charAt(0)}

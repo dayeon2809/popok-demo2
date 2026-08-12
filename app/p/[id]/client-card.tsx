@@ -6,6 +6,7 @@ import PopokCard from "@/components/PopokCard";
 import YouTubeMotionPreview from "@/components/YouTubeMotionPreview";
 import { getVimeoEmbedUrl, isVimeoUrl } from "@/lib/videoLinks";
 import { isYouTubeUrl } from "@/lib/youtube";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface Props {
   record: {
@@ -157,7 +158,7 @@ export default function ClientCard({ record }: Props) {
                 transition: "all 0.2s ease"
               }}
             >
-              <img src={imgUrl} alt={`gallery_${idx}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={getListImageUrl(imgUrl, 96)} alt={`gallery_${idx}`} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </button>
           ))}
         </div>

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import type { Artist } from "@/types";
 import { analytics } from "@/lib/analytics";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface RelatedArtistsProps {
   artists: Artist[];
@@ -87,7 +88,13 @@ export default function RelatedArtists({ artists = [] }: RelatedArtistsProps) {
               onClick={() => analytics.artistRelatedArtistClicked(artist.recordId || artist.id)}
             >
               <div className="related-artist-thumb" style={{ width: "100%", aspectRatio: "1.7", overflow: "hidden", background: "#FAF9F5" }}>
-                <img src={image} alt={artist.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img
+                  src={getListImageUrl(image, 384)}
+                  alt={artist.name}
+                  loading="lazy"
+                  decoding="async"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
               </div>
 
               <div className="related-artist-info" style={{ padding: "20px", height: "150px" }}>
