@@ -35,6 +35,13 @@ const ALL_NAV_ITEMS: NavItem[] = [
     match: (pathname) => pathname === "/calendar",
   },
   {
+    href: "/opportunities",
+    label: { ko: "기회", en: "Opportunities" },
+    match: (pathname) =>
+      pathname === "/opportunities" ||
+      pathname.startsWith("/opportunities/"),
+  },
+  {
     href: "/popok-artist",
     label: { ko: "POPOK Artist", en: "POPOK Artist" },
     match: (pathname) => pathname === "/popok-artist",
@@ -144,7 +151,7 @@ export default function Header() {
           </div>
         </Link>
 
-        <div className="header-nav-links" style={{ display: "flex", justifyContent: "center", gap: "28px" }}>
+        <div className="header-nav-links" style={{ display: "flex", justifyContent: "center", gap: "20px" }}>
           {NAV_ITEMS.map((item) => {
             const active = item.match(routePathname);
             return (
