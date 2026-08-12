@@ -136,37 +136,43 @@ npm run test:image-egress
 
 ## 5. 남은 일
 
-### 미해결 — `no-cache`가 계속 생기는 경로
+### 해결됨 — `no-cache`의 원인은 Supabase 쪽이다 (2026-08-12 확정)
 
-2026-08-02 커밋 `0ae07cd`가 업로드 라우트에 `cacheControl: "31536000"`을 넣었는데, **8월 10·11일 업로드분 35장도 여전히 `no-cache`다.**
+**우리 코드 문제가 아니다. `cacheControl`은 정확히 지정돼 있고, Supabase Storage가 그것을 무시한다.**
 
-**가설**
+확인 방법 — `/api/upload`를 타는 경로(프로필 관리)로 이미지를 하나 올리고 원본 URL의 헤더를 쟀다.
 
-1. **배포 시점** (가장 유력) — `0ae07cd`가 실제 프로덕션에 반영된 시각이 8/11 이후일 수 있다. 그렇다면 8/4~8/11 업로드분이 전부 `no-cache`인 것이 한 번에 설명된다
-2. Supabase 대시보드에서 수동 업로드
-3. `upsert: true` 덮어쓰기 때 메타데이터 미갱신
-4. 로컬에서 `scripts/` 실행
-
-**확인 방법 A — 테스트 업로드 (가장 확실, 5분)**
-
-`/api/upload`를 타는 경로로 이미지를 하나 올리고 헤더를 본다. 아래 세 곳 모두 같은 라우트를 쓴다.
-
-| 화면 | 버킷 / 경로 |
-|---|---|
-| **프로필 관리 → 새 작업 올리기** | `artist-media` / `artists/media` ← 조사한 185장과 같은 경로 |
-| 단체 CMS 편집기 | `artist-media` / `companies/{id}` |
-| 단체 지원 폼 로고 | `artist-media` / `organizations/logos` |
-
-올린 뒤 그 이미지의 공개 URL로:
-
-```bash
-curl -sI "업로드된_이미지_URL" | grep -i cache-control
+```
+Last-Modified: Wed, 12 Aug 2026 04:46:16 GMT   ← 방금 올린 것
+Cache-Control: no-cache                        ← 코드는 31536000 을 지정하고 있다
+Content-Length: 34462
 ```
 
-- `max-age=31536000` → 코드는 정상. **가설 1 또는 2 확정.** 과거 파일만 고치면 된다
-- `no-cache` → 코드가 안 먹고 있다. 업로드 라우트를 다시 봐야 한다
+배포 누락도 아니다. `/api/image`와 `cacheControl`은 **같은 커밋 `0ae07cd`에 들어 있고**, `/api/image`는 라이브에서 정상 동작한다(5.54 MB → 11.9 KB 실측). 즉 그 커밋은 배포돼 있다.
 
-**확인 방법 B — SQL Editor (읽기 전용)**
+**알려진 플랫폼 이슈다.**
+
+| 출처 | 내용 |
+|---|---|
+| [supabase/storage#18](https://github.com/supabase/storage/issues/18) | 업로드 시 보낸 cache-control이 무시되고 `no-cache`로 응답. 닫혔으나 증상은 지속 |
+| [supabase#21119](https://github.com/orgs/supabase/discussions/21119) | 기존 객체의 cacheControl을 바꾸는 방법 문의 — **미답변**. 버킷 단위 설정도 없다 |
+| [supabase-swift#550](https://github.com/supabase/supabase-swift/issues/550) | 다른 클라이언트에서도 동일 증상 |
+
+**결론 — 작업 5(cacheControl 일괄 갱신)는 우리가 할 수 있는 게 없다.**
+재업로드해도 같은 API를 타므로 같은 결과가 나온다. 버킷 단위로 강제하는 설정도 없다.
+
+**그리고 이미 해결돼 있다.** 위 이슈들에서 공통으로 제시되는 우회로가 "직접 만든 프록시로 서빙하며 헤더를 직접 붙인다"인데, `/api/image`가 정확히 그것이고 커밋 `d7c31c8`로 공개 화면 전체에 연결했다.
+
+```
+Supabase 원본     Cache-Control: no-cache                              (고칠 수 없음)
+/api/image 출력   Cache-Control: public, max-age=31536000, immutable   (우리가 붙인다)
+```
+
+이용자는 프록시 출력만 받으므로 `no-cache`는 프록시가 원본을 끌어오는 몇 번에만 영향을 준다. 실질적으로 무해해졌다.
+
+남은 선택지 하나 — `upsert: true`가 원인일 가능성이 있다(그 경로에서 헤더가 누락된다는 보고가 있다). 확인하려면 코드를 바꿔 배포해야 하므로 우선순위는 낮다.
+
+**참고 — SQL Editor로 현황 보기 (읽기 전용)**
 
 ```sql
 select
@@ -209,18 +215,21 @@ order by sum((metadata->>'size')::bigint) desc;
 
 **확인 방법 C** — Vercel 대시보드에서 `0ae07cd`가 프로덕션에 반영된 시각 확인. 가설 1의 직접 검증이다.
 
-### 작업 3+5 — 저장된 원본 교체 (미착수)
+### 작업 3 — 2MB 초과 원본 30장 교체 (미착수)
 
-**둘을 함께 해야 한다.** Supabase에는 메타데이터만 바꾸는 API가 없어서 `cacheControl` 변경도 결국 재업로드다. 따로 하면 같은 파일을 두 번 올리게 된다.
+**작업 5는 취소됐다** (위 참조 — Supabase가 `cacheControl`을 무시하므로 우리가 할 수 있는 게 없다). 작업 3만 남았고, 목적도 캐시가 아니라 **크기**다.
 
-**원인 확정 전에는 하지 않는다.** 새 업로드가 다시 `no-cache`로 쌓이면 헛수고다.
+여전히 할 가치가 있는 이유 두 가지 —
+
+- 2MB를 넘으면 **Next.js 데이터 캐시에 저장되지 않아**, 프록시가 실행될 때마다 Supabase에서 원본을 다시 받는다. 이 30장이 원본 총량 150.77 MB 중 91.3 MB다
+- **파일 저장 1GB 한도**도 같이 완화된다
 
 ```
 1. 백업       전체 버킷을 로컬로 다운로드. 되돌릴 수 없다
-2. 목록       2MB 초과 30장 선별 (위 SQL)
+2. 목록       2MB 초과 30장 선별 (아래 SQL)
 3. 변환       sharp: 최대 1600px, 품질 82
-4. 재업로드   같은 경로에 upsert + cacheControl 31536000
-5. 검증       curl -sI 로 크기와 캐시 헤더 재측정
+4. 재업로드   같은 경로에 upsert
+5. 검증       curl -sI 로 크기 재측정 (캐시 헤더는 여전히 no-cache일 것이다 — 정상이다)
 ```
 
 - 같은 경로에 덮어쓰므로 **URL이 바뀌지 않는다.** DB의 `image_url`을 손댈 필요가 없어 위험이 크게 준다
@@ -253,4 +262,5 @@ order by sum((metadata->>'size')::bigint) desc;
 | 2026-08-12 | 홈 이미지 185장 전수 측정. 평균 835 KB, 전부 `no-cache` 확인 |
 | 2026-08-12 | 크롤러 가설 배제 (전 브랜치 업로드 경로 조사) |
 | 2026-08-12 | `fix/image-egress` 커밋 `d7c31c8` — 프록시 36곳 연결, lazy 23곳, robots.txt, 회귀 테스트 |
-| | ↓ 다음: 테스트 업로드로 `no-cache` 원인 확정 |
+| 2026-08-12 | 테스트 업로드로 `no-cache` 원인 확정 — **Supabase Storage가 `cacheControl`을 무시한다.** 우리 코드는 정상. 작업 5 취소 |
+| | ↓ 다음: 작업 3(2MB 초과 30장 축소), 브랜치 배포 여부 결정 |
