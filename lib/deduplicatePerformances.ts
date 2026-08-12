@@ -218,13 +218,20 @@ function mergeGroup(group: Performance[]): Performance {
 /** Returns a new array and never mutates the input performances. */
 export function deduplicatePerformances(performances: readonly Performance[]): Performance[] {
   const groups: Performance[][] = [];
+  const groupsByTitle = new Map<string, Performance[][]>();
 
   for (const performance of performances) {
-    const matchingGroup = groups.find((group) =>
+    const title = getPerformanceDuplicateKey(performance);
+    const candidates = title ? groupsByTitle.get(title) || [] : [];
+    const matchingGroup = candidates.find((group) =>
       group.some((existing) => areDuplicatePerformances(existing, performance))
     );
     if (matchingGroup) matchingGroup.push(performance);
-    else groups.push([performance]);
+    else {
+      const group = [performance];
+      groups.push(group);
+      if (title) groupsByTitle.set(title, [...candidates, group]);
+    }
   }
 
   return groups.map(mergeGroup);

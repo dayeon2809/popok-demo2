@@ -176,7 +176,10 @@ async function fetchMediaPool(poolSize: number, logLabel: string): Promise<RawIn
 
     // Keep results reasonably fresh while still avoiding a Graph API request
     // on every page view.
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(5_000),
+    });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       devError(`[${logLabel}] Instagram API error`, res.status, body);

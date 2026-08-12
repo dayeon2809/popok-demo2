@@ -3,6 +3,7 @@ import { mapArtistRowToArtist } from "./artists";
 import { getSeoulToday, parseDateOnly } from "./date";
 import { prepareHomeUpcomingPerformances } from "./deduplicatePerformances";
 import type { Performance, RelatedPerformanceArtist } from "@/types";
+import { unstable_cache } from "next/cache";
 
 // Selects performances plus their linked artists via performance_artists.
 // Requires supabase/migrations/create_performances.sql and
@@ -149,6 +150,61 @@ export async function getUpcomingPerformances(limit = 8): Promise<Performance[]>
 
 const CALENDAR_QUERY_PAGE_SIZE = 1000;
 
+const CALENDAR_PERFORMANCE_SELECT = `
+  id, title, slug, poster_url, source_url, ticket_url, venue,
+  start_date, end_date, organizer, genre, category, status, featured,
+  created_at, updated_at, company_id, external_url, display_order,
+  companies ( name )
+`;
+
+async function queryPerformanceRange(
+  rangeStart: string,
+  rangeEnd: string,
+  select: string,
+): Promise<Performance[]> {
+  const supabase = getSupabaseServer();
+  const baseQuery = () => supabase
+    .from("performances" as any)
+    .select(select as any, { count: "exact" })
+    .eq("status", "published")
+    .lte("start_date", rangeEnd)
+    .or(`end_date.gte.${rangeStart},and(end_date.is.null,start_date.gte.${rangeStart})`)
+    .order("start_date", { ascending: true })
+    .order("id", { ascending: true });
+
+  const first = await baseQuery().range(0, CALENDAR_QUERY_PAGE_SIZE - 1);
+  if (first.error) throw first.error;
+
+  const rows = [...(first.data || [])];
+  const total = first.count ?? rows.length;
+  const pageStarts: number[] = [];
+  for (let from = CALENDAR_QUERY_PAGE_SIZE; from < total; from += CALENDAR_QUERY_PAGE_SIZE) {
+    pageStarts.push(from);
+  }
+
+  const remaining = await Promise.all(pageStarts.map((from) =>
+    baseQuery().range(from, from + CALENDAR_QUERY_PAGE_SIZE - 1)
+  ));
+  for (const page of remaining) {
+    if (page.error) throw page.error;
+    rows.push(...(page.data || []));
+  }
+
+  return rows.map(mapPerformanceRowToPerformance);
+}
+
+const getCachedCalendarPerformances = unstable_cache(
+  (rangeStart: string, rangeEnd: string) => queryPerformanceRange(rangeStart, rangeEnd, CALENDAR_PERFORMANCE_SELECT),
+  ["public-calendar-performances-v2"],
+  { revalidate: 120, tags: ["public-performances"] },
+);
+
+const getCachedMagazinePerformances = unstable_cache(
+  (rangeStart: string, rangeEnd: string) => queryPerformanceRange(rangeStart, rangeEnd, `${PERFORMANCE_SELECT_WITH_ARTISTS}, companies ( name )`),
+  ["public-magazine-performances-v2"],
+  { revalidate: 120, tags: ["public-performances"] },
+);
+
 /**
  * Every published performance that overlaps the displayed calendar from
  * `weekStart` through `weekEnd`. Results are paged explicitly so PostgREST's server-side
@@ -160,33 +216,19 @@ const CALENDAR_QUERY_PAGE_SIZE = 1000;
  */
 export async function getCalendarPerformances(weekStart: string, calendarEnd: string): Promise<Performance[]> {
   try {
-    const supabase = getSupabaseServer();
-    const rows: any[] = [];
-
-    for (let from = 0; ; from += CALENDAR_QUERY_PAGE_SIZE) {
-      const { data, error } = await supabase
-        .from("performances" as any)
-        .select(`${PERFORMANCE_SELECT_WITH_ARTISTS}, companies ( name )` as any)
-        .eq("status", "published")
-        .lte("start_date", calendarEnd)
-        .or(`end_date.gte.${weekStart},and(end_date.is.null,start_date.gte.${weekStart})`)
-        .order("start_date", { ascending: true })
-        .order("id", { ascending: true })
-        .range(from, from + CALENDAR_QUERY_PAGE_SIZE - 1);
-
-      if (error) {
-        console.error("[getCalendarPerformances] Supabase error:", error);
-        return [];
-      }
-
-      const page = data || [];
-      rows.push(...page);
-      if (page.length < CALENDAR_QUERY_PAGE_SIZE) break;
-    }
-
-    return rows.map(mapPerformanceRowToPerformance);
+    return await getCachedCalendarPerformances(weekStart, calendarEnd);
   } catch (err) {
     console.error("[getCalendarPerformances] Unexpected error:", err);
+    return [];
+  }
+}
+
+/** Full relationship data for the short editorial window only. */
+export async function getMagazinePerformances(rangeStart: string, rangeEnd: string): Promise<Performance[]> {
+  try {
+    return await getCachedMagazinePerformances(rangeStart, rangeEnd);
+  } catch (err) {
+    console.error("[getMagazinePerformances] Unexpected error:", err);
     return [];
   }
 }
