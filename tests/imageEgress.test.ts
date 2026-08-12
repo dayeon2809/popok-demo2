@@ -138,10 +138,18 @@ test("robots.txt blocks bulk scrapers but keeps search engines", () => {
 
   const wildcard = rules.find((rule) => rule.userAgent === "*");
   assert.ok(wildcard, "there must be a catch-all rule so search engines are not blocked by omission");
-  assert.equal(wildcard!.allow, "/");
+  assert.ok((wildcard!.allow as string[]).includes("/"), "the site itself must stay crawlable");
   assert.ok(
     (wildcard!.disallow as string[]).includes("/admin"),
     "the admin tree must not be advertised to crawlers"
+  );
+
+  // /api/ is disallowed, but /api/image serves every photograph on the site
+  // now that the proxy is wired in everywhere. Without the narrower Allow,
+  // Googlebot renders the pages with all images missing.
+  assert.ok(
+    (wildcard!.allow as string[]).includes("/api/image"),
+    "/api/image must stay fetchable or crawlers render the site without images"
   );
 
   for (const agent of ["GPTBot", "ClaudeBot", "Bytespider", "CCBot"]) {

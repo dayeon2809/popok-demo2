@@ -134,9 +134,12 @@ export default function AuthNav() {
           background: "var(--accent-light)", display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0, fontSize: "0.65rem", fontWeight: 800, color: "var(--accent-dark)",
         }}>
+          {/* 24px circle requested at 4x: this is the viewer's own avatar and
+              it appears on every page, so softness here is the most noticeable
+              kind. The larger variant costs about 1KB. */}
           {avatarUrl ? (
             <img
-              src={getListImageUrl(avatarUrl, 48)}
+              src={getListImageUrl(avatarUrl, 96)}
               alt=""
               loading="lazy"
               decoding="async"

@@ -247,7 +247,7 @@ export default function CompanyRepresentativeCard({
           >
             {company.logo_url && (
               <img
-                src={getListImageUrl(company.logo_url, 32)}
+                src={getListImageUrl(company.logo_url, 64)}
                 alt=""
                 loading="lazy"
                 decoding="async"
