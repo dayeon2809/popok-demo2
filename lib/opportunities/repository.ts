@@ -1,7 +1,7 @@
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { selectRepresentativeOpportunities } from "./ingestion";
 
-const PUBLIC_COLUMNS = "id, source, external_id, source_url, canonical_source_url, original_publisher_url, title, normalized_title, organization, normalized_organization, opportunity_type, target_audience, art_genres, region, summary, application_url, thumbnail_url, published_at, application_start_at, deadline, is_featured, is_verified, review_status, created_at";
+const PUBLIC_COLUMNS = "id, source, external_id, source_url, canonical_source_url, original_publisher_url, title, normalized_title, organization, normalized_organization, opportunity_type, target_audience, art_genres, region, summary, description, application_url, thumbnail_url, published_at, application_start_at, deadline, lifecycle_status, is_featured, is_verified, review_status, created_at";
 
 export async function listPublicOpportunities(limit = 500) {
   const { data, error } = await getSupabaseServer().from("opportunities" as never).select(PUBLIC_COLUMNS)

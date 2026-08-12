@@ -15,6 +15,8 @@ export type Opportunity = {
   title: string;
   organization: string;
   summary?: string;
+  description?: string;
+  opportunityType?: string;
   location?: string;
   compensation?: string;
   schedule?: string;
@@ -31,6 +33,13 @@ export type Opportunity = {
   targetAudience?: string[];
   applicationStartAt?: string;
   isClosingSoon?: boolean;
+};
+
+export type OpportunityViewerProfile = {
+  genre?: string | null;
+  role?: string | null;
+  region?: string | null;
+  careerItemCount: number;
 };
 
 export type CollaborationPost = {

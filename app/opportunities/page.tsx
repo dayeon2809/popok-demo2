@@ -4,6 +4,7 @@ import { listPublicOpportunities } from "@/lib/opportunities/repository";
 import { getOpportunityTypeLabel } from "@/lib/opportunities/labels";
 import { isOpportunityClosingSoon } from "@/lib/opportunities/status";
 import type { Opportunity } from "@/lib/opportunities/types";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ export function mapOpportunityRow(row: any): Opportunity {
     title: row.title,
     organization: row.organization,
     summary: row.summary,
+    description: row.description,
+    opportunityType: row.opportunity_type,
     location: row.region,
     deadline: row.deadline?.slice(0, 10),
     sourceUrl: `/opportunities/${row.id}`,
@@ -35,5 +38,9 @@ export function mapOpportunityRow(row: any): Opportunity {
 export default async function OpportunitiesPage() {
   let opportunities: any[] = [];
   try { opportunities = await listPublicOpportunities(); } catch (error) { console.error("[opportunities] public query failed", error); }
-  return <OpportunitiesClient locale="ko" initialOpportunities={opportunities.map(mapOpportunityRow)} />;
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: artist } = user ? await supabase.from("artists").select("genre, role, city_or_region, works, education, current_activity").eq("owner_id", user.id).maybeSingle() : { data: null };
+  const profile = artist ? { genre: artist.genre, role: artist.role, region: artist.city_or_region, careerItemCount: [artist.works, artist.education, artist.current_activity].reduce((sum, value) => sum + (Array.isArray(value) ? value.length : 0), 0) } : null;
+  return <OpportunitiesClient locale="ko" initialOpportunities={opportunities.map(mapOpportunityRow)} initialUserId={user?.id ?? null} viewerProfile={profile} />;
 }

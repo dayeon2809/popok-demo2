@@ -17,6 +17,15 @@
   --navy: #171411;
   --verified: #2A6B3A;
   --needs-review: #7A5C2E;
+
+  /* Editorial point color for the Opportunities and Performances tabs —
+     matches the blue already used by the performance magazine's kickers
+     and category labels, kept distinct from --accent (lime), which stays
+     reserved for primary CTA buttons site-wide. */
+  --editorial-blue: #173B67;
+  --editorial-blue-soft: #EEF2F8;
+  --urgent: #B23B2E;
+  --urgent-soft: #FBECEA;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
