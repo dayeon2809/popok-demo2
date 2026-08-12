@@ -1,7 +1,7 @@
 import { getSeoulToday, getWeeklyPerformanceRange, overlapsDateRange, parseDateOnly } from "./date.ts";
 import type { Artist, Company, Performance } from "@/types";
 
-export type PerformanceShelf = { key: "today" | "opening" | "closing" | "popok"; items: Performance[] };
+export type PerformanceShelf = { key: "opening" | "nextWeek" | "popok"; items: Performance[] };
 export type CuratedProfile = {
   key: string;
   kind: "artist" | "company";
@@ -41,23 +41,20 @@ export function selectMagazineCover(items: Performance[], referenceDate = new Da
 export function buildPerformanceShelves(items: Performance[], referenceDate = new Date()): PerformanceShelf[] {
   const today = getSeoulToday(referenceDate);
   const { weekStart, weekEnd } = getWeeklyPerformanceRange(referenceDate);
-  const closingEnd = addDays(today, 7);
+  const nextWeekStart = addDays(weekEnd, 1);
+  const nextWeekEnd = addDays(weekEnd, 7);
   const current = upcomingOnly(items, today);
   const shelves: PerformanceShelf[] = [
-    { key: "today", items: current.filter((item) => overlapsDateRange(item, today, today)) },
     { key: "opening", items: current.filter((item) => {
       const start = parseDateOnly(item.startDate);
       return Boolean(start && start >= today && start >= weekStart && start <= weekEnd);
     }) },
-    { key: "closing", items: current.filter((item) => {
-      const end = parseDateOnly(item.endDate) || parseDateOnly(item.startDate);
-      return Boolean(end && end >= today && end <= closingEnd);
-    }) },
+    { key: "nextWeek", items: current.filter((item) => overlapsDateRange(item, nextWeekStart, nextWeekEnd)) },
     { key: "popok", items: current.filter((item) => Boolean(item.companyId || item.relatedArtists?.length)) },
   ];
 
   return shelves
-    .map((shelf) => ({ ...shelf, items: shelf.items.slice(0, 10) }))
+    .map((shelf) => ({ ...shelf, items: shelf.items.slice(0, 16) }))
     .filter((shelf) => shelf.items.length > 0);
 }
 

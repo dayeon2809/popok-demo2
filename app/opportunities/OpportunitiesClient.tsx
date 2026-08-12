@@ -239,7 +239,7 @@ export default function OpportunitiesClient({ locale, initialOpportunities, init
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>{t.eyebrow}</p>
-            <h1>{t.heroTitle[0]}<br />{t.heroTitle[1]}</h1>
+            <h1 className="display">{t.heroTitle[0]}<br />{t.heroTitle[1]}</h1>
             <p className={styles.heroDescription}>{t.heroDescription[0]}<br />{t.heroDescription[1]}</p>
             <div className={styles.heroActions}>
               <a href="#opportunity-list" className={styles.primaryButton}>{t.viewToday}</a>

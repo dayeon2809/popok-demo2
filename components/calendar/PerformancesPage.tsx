@@ -5,7 +5,7 @@ import { getPublishedArtists } from "@/lib/artists";
 import { getPublishedCompanies } from "@/lib/companies";
 import { deduplicatePerformances } from "@/lib/deduplicatePerformances";
 import { getSeoulToday } from "@/lib/date";
-import { balanceMagazinePerformances, filterPerformances, hasValidPoster, normalizePerformanceGenre, sortPerformances, type PerformanceGenre, type PerformanceQuick, type PerformanceRegion, type PerformanceSort } from "@/lib/performanceDiscovery";
+import { balanceMagazinePerformances, filterPerformances, hasValidPoster, isPublicPerformanceEligible, normalizePerformanceGenre, sortPerformances, type PerformanceGenre, type PerformanceQuick, type PerformanceRegion, type PerformanceSort } from "@/lib/performanceDiscovery";
 import { normalizePerformanceRegion } from "@/lib/performanceDiscovery";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
@@ -33,16 +33,20 @@ export async function renderPerformancesPage(locale: "ko" | "en", raw: Record<st
   if (query.quick === "my-region" && viewerRegion !== "unknown") query.region = viewerRegion;
   const rangeStart = selectedMonth.start < today ? selectedMonth.start : today; const rangeEnd = addDays(today, 365) > selectedMonth.end ? addDays(today, 365) : selectedMonth.end;
   const [rawPerformances, artists, companies] = await Promise.all([getCalendarPerformances(rangeStart, rangeEnd), getPublishedArtists(), getPublishedCompanies()]);
-  const performances = deduplicatePerformances(rawPerformances);
-  const baseOptions = { region: query.region, q: query.q, quick: query.quick, today, weekEnd: addDays(today, 7), monthEnd: currentMonth.end };
+  const performances = deduplicatePerformances(rawPerformances).filter((item) => isPublicPerformanceEligible(item));
+  const baseOptions = { region: query.region, q: query.q, quick: query.quick, today, weekEnd, monthEnd: currentMonth.end };
   const filtered = filterPerformances(performances, { ...baseOptions, genre: query.genre });
   const posterResults = sortPerformances(filtered.filter(hasValidPoster), query.sort, today);
   const calendarSource = filterPerformances(performances, { ...baseOptions, genre: query.genre }).filter((item) => item.startDate! <= selectedMonth.end && (item.endDate || item.startDate)! >= selectedMonth.start);
   const counts = { all: performances.length, dance:0, music:0, theater:0, traditional:0, unclassified:0 } as Record<PerformanceGenre, number>;
   performances.forEach((item) => counts[normalizePerformanceGenre(item)]++);
-  const magazineBase = query.genre === "all" ? balanceMagazinePerformances(filtered) : filtered.filter(hasValidPoster).slice(0, 24);
+  // The editorial area is based on actual Supabase rows that overlap today
+  // through this Sunday. Text-only rows remain available in the calendar.
+  const nextWeekEnd = addDays(weekEnd, 7);
+  const editorialWindow = filterPerformances(performances, { ...baseOptions, genre:query.genre, quick:"all" }).filter((item) => item.startDate! <= nextWeekEnd && (item.endDate || item.startDate)! >= today);
+  const magazineBase = query.genre === "all" ? balanceMagazinePerformances(editorialWindow, 36) : editorialWindow.filter(hasValidPoster).slice(0, 36);
   const pageStart = (query.page - 1) * 24;
-  const navigation = <PerformanceNavigation locale={locale} query={query} counts={counts} isLoggedIn={Boolean(user)} hasViewerRegion={viewerRegion !== "unknown"} />;
+  const navigation = <PerformanceNavigation locale={locale} query={query} counts={counts} />;
   const discovery = <PerformanceDiscovery locale={locale} query={query} list={posterResults.slice(pageStart, pageStart + 24)} calendar={calendarSource} total={posterResults.length} monthStart={selectedMonth.start} />;
   return <PerformanceMagazine locale={locale} performances={magazineBase} artists={artists} companies={companies} navigation={navigation} discovery={discovery} />;
 }

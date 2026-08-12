@@ -18,7 +18,7 @@ const copy = {
     people: "지금 주목받는 아티스트", peopleSub: "새로운 활동을 이어가는 아티스트와 단체",
     empty: "현재 등록된 예정 공연이 없습니다.", newsletter: "이번 주의 공연예술 소식을 받아보세요", newsletterDesc: "새로운 공연, 아티스트, 리뷰와 기회 정보를 한 번에 전해드려요.",
     email: "이메일 주소", subscribe: "구독하기 · 준비 중입니다", genres: ["무용", "음악", "연극·뮤지컬"],
-    shelf: { today: "오늘 볼 수 있는 공연", opening: "이번 주 개막", closing: "곧 마감되는 공연", popok: "POPOK 아티스트·단체의 공연" },
+    shelf: { opening: "이번 주 개막", nextWeek: "다음 주 공연", popok: "POPOK 아티스트·단체의 공연" },
     reason: { upcoming: "곧 공연을 앞두고 있어요", active: "최근 활동을 업데이트했어요", popular: "최근 많이 찾는 프로필", new: "새로 합류한 프로필" },
   },
   en: {
@@ -27,7 +27,7 @@ const copy = {
     people: "Artists to watch", peopleSub: "Artists and companies shaping new work",
     empty: "There are no upcoming performances at the moment.", newsletter: "Get this week's performing arts stories", newsletterDesc: "New performances, artists, reviews, and opportunities, delivered together.",
     email: "Email address", subscribe: "Subscribe · Coming soon", genres: ["Dance", "Music", "Theatre & Musical"],
-    shelf: { today: "On stage today", opening: "Opening this week", closing: "Closing soon", popok: "Featuring POPOK artists & companies" },
+    shelf: { opening: "Opening this week", nextWeek: "Next week's performances", popok: "Featuring POPOK artists & companies" },
     reason: { upcoming: "Performing soon", active: "Recently updated", popular: "Trending profile", new: "New to POPOK" },
   },
 } as const;
@@ -67,7 +67,7 @@ export default function PerformanceMagazine({ locale, performances, artists, com
 
   return <div className={styles.page} lang={locale}>
     <header className={styles.intro}>
-      <p>{t.kicker}</p><h1>{t.title}</h1>
+      <p>{t.kicker}</p><h1 className="display">{t.title}</h1>
       <div><span>{t.description}</span><b>{new Intl.DateTimeFormat(locale === "ko" ? "ko-KR" : "en-US", { year: "numeric", month: "long" }).format(new Date())}</b></div>
       <MagazineTabs locale={locale} active="magazine" />
     </header>

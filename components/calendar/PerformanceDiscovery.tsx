@@ -11,10 +11,8 @@ export type DiscoveryQuery = { genre: PerformanceGenre; region: PerformanceRegio
 
 const GENRES: PerformanceGenre[] = ["all", "dance", "music", "theater", "traditional"];
 const REGIONS: PerformanceRegion[] = ["all", "seoul", "capital", "gangwon", "chungcheong", "jeolla", "gyeongsang", "jeju", "nationwide"];
-const QUICKS: PerformanceQuick[] = ["all", "today", "week", "month", "soon"];
 const genreLabel = { all:{ko:"전체",en:"All"},dance:{ko:"무용",en:"Dance"},music:{ko:"음악",en:"Music"},theater:{ko:"연극·뮤지컬",en:"Theatre & Musical"},traditional:{ko:"국악",en:"Korean Traditional"},unclassified:{ko:"미분류",en:"Unclassified"} } as const;
 const regionLabel = {all:{ko:"전체 지역",en:"All regions"},seoul:{ko:"서울",en:"Seoul"},capital:{ko:"경기·인천",en:"Gyeonggi & Incheon"},gangwon:{ko:"강원",en:"Gangwon"},chungcheong:{ko:"충청",en:"Chungcheong"},jeolla:{ko:"전라",en:"Jeolla"},gyeongsang:{ko:"경상",en:"Gyeongsang"},jeju:{ko:"제주",en:"Jeju"},nationwide:{ko:"전국·온라인",en:"Nationwide · Online"}} as const;
-const quickLabel = {all:{ko:"전체 공연",en:"All"},today:{ko:"오늘 공연",en:"Today"},week:{ko:"이번 주",en:"This week"},month:{ko:"이번 달",en:"This month"},soon:{ko:"곧 시작",en:"Starting soon"},"my-region":{ko:"내 지역",en:"My region"}} as const;
 
 function href(locale: Locale, query: DiscoveryQuery, change: Partial<Record<keyof DiscoveryQuery, string | number>>) {
   const next = { ...query, ...change }; const params = new URLSearchParams();
@@ -22,11 +20,10 @@ function href(locale: Locale, query: DiscoveryQuery, change: Partial<Record<keyo
   return `${locale === "en" ? "/en/performances" : "/performances"}${params.size ? `?${params}` : ""}`;
 }
 
-export function PerformanceNavigation({ locale, query, counts, isLoggedIn, hasViewerRegion }: { locale: Locale; query: DiscoveryQuery; counts: Record<PerformanceGenre, number>; isLoggedIn: boolean; hasViewerRegion: boolean }) {
+export function PerformanceNavigation({ locale, query, counts }: { locale: Locale; query: DiscoveryQuery; counts: Record<PerformanceGenre, number> }) {
   return <div className={styles.discoveryNav}>
     <nav className={styles.genreTabs} aria-label={locale === "ko" ? "공연 장르" : "Performance genre"}>{GENRES.map((genre) => <Link key={genre} href={href(locale, query, { genre, page: 1 })} className={query.genre === genre ? styles.genreTabActive : styles.genreTab} aria-current={query.genre === genre ? "page" : undefined}>{genreLabel[genre][locale]} <small>{counts[genre]}</small></Link>)}</nav>
     <form action={locale === "en" ? "/en/performances" : "/performances"} className={styles.performanceSearch}><label><span className="sr-only">{locale === "ko" ? "공연 검색" : "Search performances"}</span><input name="q" defaultValue={query.q} placeholder={locale === "ko" ? "공연명, 아티스트, 단체, 공연장을 검색해보세요" : "Search performances, artists, companies, and venues"} /></label>{(["genre","region","quick","sort","view","month"] as const).map((key) => query[key] && query[key] !== "all" && query[key] !== "list" ? <input key={key} type="hidden" name={key} value={String(query[key])} /> : null)}<button type="submit">{locale === "ko" ? "검색" : "Search"}</button></form>
-    <nav className={styles.quickFilters} aria-label={locale === "ko" ? "빠른 필터" : "Quick filters"}>{QUICKS.map((quick) => <Link key={quick} href={href(locale, query, { quick, page: 1 })} className={query.quick === quick ? styles.quickActive : ""}>{quickLabel[quick][locale]}</Link>)}<Link href={!isLoggedIn ? `/auth?redirect=${encodeURIComponent(locale === "en" ? "/en/performances?quick=my-region" : "/performances?quick=my-region")}` : hasViewerRegion ? href(locale, query, { quick:"my-region", page:1 }) : href(locale, query, { region:"all", quick:"all", page:1 })} className={query.quick === "my-region" ? styles.quickActive : ""}>{quickLabel["my-region"][locale]}</Link></nav>
   </div>;
 }
 
@@ -39,7 +36,7 @@ export default function PerformanceDiscovery({ locale, query, list, calendar, to
   const queryRecord = { genre: query.genre, region: query.region, quick: query.quick, sort: query.sort, q: query.q };
   return <section className={styles.discoverySection} aria-labelledby="performance-results-title">
     <div className={styles.discoveryToolbar}>
-      <div><p>PERFORMANCE DISCOVERY</p><h2 id="performance-results-title">{locale === "ko" ? "공연 탐색" : "Explore performances"}</h2><span>{locale === "ko" ? `${total}개의 공연` : `${total} performances`}</span></div>
+      <div><p>PERFORMANCE SCHEDULE</p><h2 id="performance-results-title">{locale === "ko" ? "공연 일정" : "Performance schedule"}</h2><span>{locale === "ko" ? `${total}개의 공연` : `${total} performances`}</span></div>
       <div className={styles.discoveryControls}><form><input type="hidden" name="genre" value={query.genre === "all" ? "" : query.genre} /><input type="hidden" name="q" value={query.q} />{query.quick !== "all" && <input type="hidden" name="quick" value={query.quick} />}{query.view !== "list" && <input type="hidden" name="view" value={query.view} />}{query.month && <input type="hidden" name="month" value={query.month} />}<select name="region" defaultValue={query.region} aria-label={locale === "ko" ? "지역 선택" : "Select region"}>{REGIONS.map((region) => <option key={region} value={region}>{regionLabel[region][locale]}</option>)}</select><select name="sort" defaultValue={query.sort} aria-label={locale === "ko" ? "정렬" : "Sort"}><option value="start-date">{locale === "ko" ? "곧 시작하는 순" : "Starting soon"}</option><option value="newest">{locale === "ko" ? "새로 등록된 순" : "Newest"}</option><option value="ending">{locale === "ko" ? "종료 임박순" : "Ending soon"}</option><option value="recommended">{locale === "ko" ? "추천순" : "Recommended"}</option></select><button type="submit">{locale === "ko" ? "적용" : "Apply"}</button></form></div>
     </div>
     <div className={styles.viewSwitch}><Link href={href(locale, query, { view:"list", page:1 })} aria-current={query.view === "list" ? "page" : undefined}>{locale === "ko" ? "목록 보기" : "List"}</Link><Link href={href(locale, query, { view:"calendar", page:1 })} aria-current={query.view === "calendar" ? "page" : undefined}>{locale === "ko" ? "월간 캘린더" : "Calendar"}</Link></div>

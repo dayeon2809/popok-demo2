@@ -23,10 +23,29 @@ export function normalizePerformanceGenre(performance: Pick<Performance, "genre"
   return "unclassified";
 }
 
-const INVALID_POSTER = /(?:placeholder|transparent|spacer|blank|default[-_]?image|no[-_]?image|logo|banner)(?:[._/-]|$)/i;
+const INVALID_POSTER = /(?:placeholder|transparent|spacer|blank|default[-_]?image|no[-_]?image|no_image|logo|banner)(?:[._/-]|$)/i;
 export function hasValidPoster(performance: Pick<Performance, "posterUrl">) {
   if (!performance.posterUrl) return false;
   try { const url = new URL(performance.posterUrl); return /^https?:$/.test(url.protocol) && !INVALID_POSTER.test(url.pathname); } catch { return false; }
+}
+
+/** Explicit institution/source exclusion requested for the public performance tab. */
+export function isNationalGugakPerformance(performance: Pick<Performance, "sourceUrl" | "externalUrl" | "ticketUrl" | "venue" | "organizer">) {
+  const urls = `${performance.sourceUrl || ""} ${performance.externalUrl || ""} ${performance.ticketUrl || ""}`;
+  const identity = `${performance.venue || ""} ${performance.organizer || ""}`;
+  return /(?:^|\.)gugak\.go\.kr/i.test(urls) || /국립국악원/.test(identity);
+}
+
+const EXCLUDED_TITLES = ["무용기술 창작랩", "넌댄스 댄스"];
+export function isPublicPerformanceEligible(performance: Pick<Performance, "title" | "startDate" | "endDate" | "sourceUrl" | "externalUrl" | "ticketUrl" | "venue" | "organizer">, maxDurationDays = 45) {
+  if (isNationalGugakPerformance(performance)) return false;
+  const compactTitle = (performance.title || "").replace(/\s+/g, " ").trim();
+  if (EXCLUDED_TITLES.some((title) => compactTitle.includes(title))) return false;
+  if (performance.startDate && performance.endDate) {
+    const start = Date.parse(`${performance.startDate.slice(0,10)}T00:00:00Z`); const end = Date.parse(`${performance.endDate.slice(0,10)}T00:00:00Z`);
+    if (Number.isFinite(start) && Number.isFinite(end) && (end - start) / 86400000 + 1 > maxDurationDays) return false;
+  }
+  return true;
 }
 
 export function normalizePerformanceRegion(performance: Pick<Performance, "venue" | "organizer">): PerformanceRegion | "unknown" {

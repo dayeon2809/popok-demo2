@@ -39,3 +39,7 @@
 @media(max-width:900px){.heroInner{grid-template-columns:1fr;gap:38px}.statCard{max-width:440px}.quickGrid{grid-template-columns:repeat(2,1fr)}.cardGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){.hero{padding:54px 18px}.hero h1{font-size:clamp(2.45rem,13vw,3.5rem)}.heroDescription br{display:none}.heroActions{flex-direction:column}.primaryButton,.secondaryButton{width:100%;box-sizing:border-box}.content{padding:8px 16px 72px}.aiBanner{grid-template-columns:auto 1fr;padding:19px;margin-top:16px}.aiBanner button{grid-column:1/-1;width:100%}.section{padding-top:54px}.quickGrid{grid-template-columns:1fr}.cardGrid{grid-template-columns:1fr}.sectionHeading{align-items:start;flex-direction:column;gap:8px}.filterRows>div{grid-template-columns:1fr}.filterRows>div>strong{padding:4px 0}.collaborationCard{grid-template-columns:auto 1fr}.connectButton{grid-column:1/-1;width:100%;box-sizing:border-box}.statCard strong{font-size:3.8rem}}
 @media(prefers-reduced-motion:reduce){.quickCard{transition:none}.quickCard:hover{transform:none}.secondaryFilters{transition:none}}
+
+/* Same title typography as the About POPOK hero and softer card geometry. */
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.25;letter-spacing:-.04em}.opportunityCard{border-radius:24px}.quickCard{border-radius:22px}.aiBanner{border-radius:24px}
+@media(max-width:620px){.hero h1{font-size:clamp(2.2rem,10vw,3.25rem)}.opportunityCard{border-radius:20px}}

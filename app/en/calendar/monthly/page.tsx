@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import MonthlyCalendar, { buildMonthGrid } from "@/components/calendar/MonthlyCalendar";
+import MonthlyCalendar from "@/components/calendar/MonthlyCalendar";
+import { buildMonthGrid } from "@/lib/monthGrid";
 import { getCalendarPerformances } from "@/lib/performances";
 import { deduplicatePerformances } from "@/lib/deduplicatePerformances";
 import { getSeoulToday } from "@/lib/date";
+import { isPublicPerformanceEligible } from "@/lib/performanceDiscovery";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -20,5 +22,5 @@ export default async function EnglishCalendarMonthlyPage({ searchParams }: { sea
   const monthStart = resolveMonthStart(month);
   const { gridStart, gridEnd } = buildMonthGrid(monthStart);
   const performances = await getCalendarPerformances(gridStart, gridEnd);
-  return <MonthlyCalendar locale="en" monthStart={monthStart} performances={deduplicatePerformances(performances)} />;
+  return <MonthlyCalendar locale="en" monthStart={monthStart} performances={deduplicatePerformances(performances).filter(isPublicPerformanceEligible)} />;
 }
