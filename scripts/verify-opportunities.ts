@@ -1,0 +1,10 @@
+import { readFile } from "node:fs/promises"; import { createClient } from "@supabase/supabase-js";
+const envFile=process.argv.find((arg)=>arg.startsWith("--env-file="))?.split("=",2)[1]; if(!envFile)throw new Error("--env-file is required");
+for(const line of (await readFile(envFile,"utf8")).split(/\r?\n/)){const match=line.match(/^([A-Z0-9_]+)=(.*)$/);if(match&&!process.env[match[1]])process.env[match[1]]=match[2].trim().replace(/^['\"]|['\"]$/g,"");}
+const url=process.env.SUPABASE_URL||process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error("Missing Supabase server credentials");
+const client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});const ids=["CWCF_RENTAL_20260812070013001","DDMAC_NOTICE_20260812045002001","JFAC_NOTICE_20260812044642001"];
+const {data,error}=await client.from("opportunities").select("source,external_id,title,lifecycle_status,publication_status,review_status,is_verified,application_start_at,deadline,original_publisher_url,application_url").eq("source","artnuri").in("external_id",ids).order("external_id");if(error)throw error;
+const rows=(data??[]).map((row)=>({...row,url_domain:new URL(row.original_publisher_url||row.application_url).hostname.replace(/^www\./,"")}));
+const {data:duplicates,error:duplicateError}=await client.from("opportunities").select("source,external_id").eq("source","artnuri").in("external_id",ids);if(duplicateError)throw duplicateError;const counts=new Map<string,number>();for(const row of duplicates??[])counts.set(row.external_id,(counts.get(row.external_id)??0)+1);
+const {data:runs,error:runError}=await client.from("opportunity_ingestion_runs").select("source,mode,status,pages_checked,items_found,items_parsed,items_failed,summary,started_at,finished_at").eq("source","artnuri").order("started_at",{ascending:false}).limit(1);if(runError)throw runError;
+console.log(JSON.stringify({projectRef:new URL(url).hostname.split(".")[0],storedCount:rows.length,rows,duplicateCounts:Object.fromEntries(counts),latestIngestionRun:runs?.[0]??null},null,2));

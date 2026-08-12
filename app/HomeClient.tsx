@@ -11,6 +11,7 @@ import ArtistSupportSection from "@/components/home/ArtistSupportSection";
 import ComparisonSection from "@/components/home/ComparisonSection";
 import ArtistPreviewCarousel from "@/components/home/ArtistPreviewCarousel";
 import PerformanceCarousel from "@/components/home/PerformanceCarousel";
+import OpportunitiesSection from "@/components/home/OpportunitiesSection";
 import ContentCarousel from "@/components/home/ContentCarousel";
 import FooterCTA from "@/components/home/FooterCTA";
 import FAQSection from "@/components/FAQSection";
@@ -68,6 +69,7 @@ export default function HomeClient({
         performances={initialPerformances.slice(2)}
         titleLink={{ label: "월간 공연 일정", href: "/calendar" }}
       />
+      <OpportunitiesSection />
       <ContentCarousel stories={initialWeeklyStories} />
       <FooterCTA
         title={
