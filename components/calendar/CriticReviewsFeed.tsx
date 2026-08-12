@@ -6,7 +6,29 @@ import styles from "./performanceMagazine.module.css";
 export default function CriticReviewsFeed({ locale, reviews }: { locale:"ko"|"en"; reviews:CriticReview[] }) {
   const ko = locale === "ko";
   return <div className={styles.page} lang={locale}>
-    <header className={styles.intro}><p>POPOK PERFORMANCE MAGAZINE</p><h1 className="display">{ko ? "평론가 리뷰" : "Critics' Reviews"}</h1><div><span>{ko ? "공연예술을 깊이 읽는 평론과 비평을 만나보세요." : "Read criticism and reviews that look deeper into the performing arts."}</span></div><MagazineTabs locale={locale} active="reviews" /></header>
+    <header className={styles.intro}>
+      <div className={styles.eyebrowBadge}>
+        <span className={styles.eyebrowDot} />
+        <span className={styles.eyebrowText}>POPOK PERFORMANCE MAGAZINE</span>
+      </div>
+      <h1 className="display">
+        {ko ? (
+          <>
+            깊이 있는 <span className="seen-highlight">평론가 리뷰</span>
+          </>
+        ) : (
+          <>
+            In-depth <span className="seen-highlight">Critics&apos; Reviews</span>
+          </>
+        )}
+      </h1>
+      <div className={styles.introMeta}>
+        <span className={styles.introDesc}>
+          {ko ? "공연예술을 깊이 읽는 평론과 비평을 만나보세요." : "Read criticism and reviews that look deeper into the performing arts."}
+        </span>
+      </div>
+      <MagazineTabs locale={locale} active="reviews" />
+    </header>
     <div className={styles.shell}><section className={styles.section} style={{paddingTop:0}}>
       {reviews.length ? <div className={styles.criticGrid}>{reviews.map((review) => <article key={review.id} className={styles.criticCard}>
         <p>{review.publisher || (ko ? "평론·리뷰" : "Criticism")}</p>{review.relatedPerformance && <div className={styles.reviewPerformance}><span>{ko ? "연관 공연" : "Related performance"}</span><strong>{review.relatedPerformance}</strong></div>}<h2>{review.title}</h2>{review.description && <blockquote>“{review.description}”</blockquote>}<div className={styles.reviewMeta}><Link href={review.subjectHref}>{review.subject}</Link>{review.date && <time dateTime={review.date}>{review.date}</time>}</div><a href={review.url} target="_blank" rel="noopener noreferrer">{ko ? "리뷰 전문 읽기" : "Read full review"} ↗</a>

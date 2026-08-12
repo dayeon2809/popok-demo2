@@ -4,38 +4,37 @@ import OnboardingClient from "./OnboardingClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ resume?: string }> }) {
+  const { resume } = await searchParams;
   const supabase = await createServerSupabaseClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    redirect("/auth");
-  }
-
-  // Fetch onboarding state from artists and profiles table
-  const { data: artist } = await supabase
+  // Guests can finish the draft and preview before Google authentication.
+  const { data: artist } = user ? await supabase
     .from("artists")
     .select("id")
     .eq("owner_id", user.id)
-    .maybeSingle();
+    .maybeSingle() : { data: null };
 
   if (artist) {
     redirect("/my-popok");
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = user ? await supabase
     .from("profiles")
     .select("display_name, email")
     .eq("id", user.id)
-    .maybeSingle();
+    .maybeSingle() : { data: null };
 
-  const defaultEmail = profile?.email || user.email || "";
-  const defaultDisplayName = profile?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || "";
+  const defaultEmail = profile?.email || user?.email || "";
+  const defaultDisplayName = profile?.display_name || user?.user_metadata?.full_name || user?.user_metadata?.name || "";
 
   return (
     <OnboardingClient
       defaultEmail={defaultEmail}
       defaultDisplayName={defaultDisplayName}
+      isLoggedIn={Boolean(user)}
+      shouldResume={resume === "1"}
     />
   );
 }

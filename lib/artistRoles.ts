@@ -23,5 +23,17 @@ export function getArtistRoleLabel(role: string | null | undefined, locale: Arti
 }
 
 export function matchesArtistRole(role: string | null | undefined, expected: ArtistRoleValue): boolean {
-  return role?.trim() === expected;
+  const normalized = role?.trim() || "";
+  if (expected === "기획자") return normalized === expected || normalized.includes("기획자");
+  if (expected === "평론가") return normalized === expected || normalized.includes("평론가");
+  return normalized === expected;
+}
+
+/** Actor/theatre classification without false positives such as "공연기획자". */
+export function isActorProfile(field?: string | null, genre?: string | null, role?: string | null): boolean {
+  const normalizedRole = role?.trim() || "";
+  if (normalizedRole === "연기") return true;
+  return /배우|연기자|연기\s*배우|연극|뮤지컬|\bactor\b|\bacting\b|\btheatre\b|\btheater\b/i.test(
+    `${field || ""} ${genre || ""} ${normalizedRole}`
+  );
 }

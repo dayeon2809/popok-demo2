@@ -9,9 +9,9 @@ import styles from "./performanceMagazine.module.css";
 type Locale = "ko" | "en";
 export type DiscoveryQuery = { genre: PerformanceGenre; region: PerformanceRegion; quick: PerformanceQuick; sort: PerformanceSort; q: string; view: "list" | "calendar"; month: string; page: number };
 
-const GENRES: PerformanceGenre[] = ["all", "dance", "music", "theater", "traditional"];
+const GENRES: PerformanceGenre[] = ["all", "music", "dance", "theater", "musical", "traditional"];
 const REGIONS: PerformanceRegion[] = ["all", "seoul", "capital", "gangwon", "chungcheong", "jeolla", "gyeongsang", "jeju", "nationwide"];
-const genreLabel = { all:{ko:"전체",en:"All"},dance:{ko:"무용",en:"Dance"},music:{ko:"음악",en:"Music"},theater:{ko:"연극·뮤지컬",en:"Theatre & Musical"},traditional:{ko:"국악",en:"Korean Traditional"},unclassified:{ko:"미분류",en:"Unclassified"} } as const;
+const genreLabel = { all:{ko:"전체",en:"All"},music:{ko:"음악",en:"Music"},dance:{ko:"무용",en:"Dance"},theater:{ko:"연극",en:"Theatre"},musical:{ko:"뮤지컬",en:"Musical"},traditional:{ko:"국악",en:"Korean Traditional"},unclassified:{ko:"미분류",en:"Unclassified"} } as const;
 const regionLabel = {all:{ko:"전체 지역",en:"All regions"},seoul:{ko:"서울",en:"Seoul"},capital:{ko:"경기·인천",en:"Gyeonggi & Incheon"},gangwon:{ko:"강원",en:"Gangwon"},chungcheong:{ko:"충청",en:"Chungcheong"},jeolla:{ko:"전라",en:"Jeolla"},gyeongsang:{ko:"경상",en:"Gyeongsang"},jeju:{ko:"제주",en:"Jeju"},nationwide:{ko:"전국·온라인",en:"Nationwide · Online"}} as const;
 
 function href(locale: Locale, query: DiscoveryQuery, change: Partial<Record<keyof DiscoveryQuery, string | number>>) {

@@ -67,8 +67,25 @@ export default function PerformanceMagazine({ locale, performances, artists, com
 
   return <div className={styles.page} lang={locale}>
     <header className={styles.intro}>
-      <p>{t.kicker}</p><h1 className="display">{t.title}</h1>
-      <div><span>{t.description}</span><b>{new Intl.DateTimeFormat(locale === "ko" ? "ko-KR" : "en-US", { year: "numeric", month: "long" }).format(new Date())}</b></div>
+      <div className={styles.eyebrowBadge}>
+        <span className={styles.eyebrowDot} />
+        <span className={styles.eyebrowText}>{t.kicker}</span>
+      </div>
+      <h1 className="display">
+        {locale === "ko" ? (
+          <>
+            지금, <span className="seen-highlight">공연예술계에서는</span>
+          </>
+        ) : (
+          <>
+            Now in <span className="seen-highlight">Performing Arts</span>
+          </>
+        )}
+      </h1>
+      <div className={styles.introMeta}>
+        <span className={styles.introDesc}>{t.description}</span>
+        <b className={styles.introDate}>{new Intl.DateTimeFormat(locale === "ko" ? "ko-KR" : "en-US", { year: "numeric", month: "long" }).format(new Date())}</b>
+      </div>
       <MagazineTabs locale={locale} active="magazine" />
     </header>
 

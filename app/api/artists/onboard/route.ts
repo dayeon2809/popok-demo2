@@ -108,7 +108,7 @@ export async function POST(request: Request) {
       slug: cleanUsername,
       genre: genre.trim(),
       role: role.trim(),
-      status: "draft",
+      status: "published",
       verified: false,
       bio: typeof bio === "string" ? bio : null,
       bio_short: typeof bio_short === "string" ? bio_short : null,

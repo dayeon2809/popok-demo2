@@ -38,7 +38,7 @@ export async function GET(request: Request) {
         else if (!artist) reason = "artist_not_found";
 
         console.error("[Auth Callback] Redirecting to /onboarding. Reason:", reason);
-        return NextResponse.redirect(`${origin}/onboarding`);
+        return NextResponse.redirect(`${origin}${returnPath || "/onboarding"}`);
       }
 
       const destination = returnPath || "/my-popok";

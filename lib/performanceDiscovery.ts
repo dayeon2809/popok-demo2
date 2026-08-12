@@ -1,6 +1,6 @@
 import type { Performance } from "@/types";
 
-export type PerformanceGenre = "all" | "dance" | "music" | "theater" | "traditional" | "unclassified";
+export type PerformanceGenre = "all" | "dance" | "music" | "theater" | "musical" | "traditional" | "unclassified";
 export type PerformanceRegion = "all" | "seoul" | "capital" | "gangwon" | "chungcheong" | "jeolla" | "gyeongsang" | "jeju" | "nationwide";
 export type PerformanceQuick = "all" | "today" | "week" | "month" | "soon" | "my-region";
 export type PerformanceSort = "start-date" | "newest" | "ending" | "recommended";
@@ -9,7 +9,8 @@ function overlapsDateRange(item: Pick<Performance, "startDate" | "endDate">, ran
 
 const DANCE = /무용|현대무용|한국무용|발레|contemporary.?dance|ballet|dance/i;
 const MUSIC = /클래식|오페라|재즈|대중음악|콘서트|음악|classic|opera|jazz|music|concert/i;
-const THEATER = /연극|뮤지컬|아동극|가족극|theat(?:re|er)|musical/i;
+const MUSICAL = /뮤지컬|musical/i;
+const THEATER = /연극|아동극|가족극|theat(?:re|er)/i;
 const TRADITIONAL = /국악|전통음악|창극|판소리|정가|민요|사물놀이|풍물|전통연희|한국음악|국악관현악|traditional/i;
 
 /** Uses explicit genre/category only. Venue, source and title never decide genre. */
@@ -18,6 +19,7 @@ export function normalizePerformanceGenre(performance: Pick<Performance, "genre"
   if (!value) return "unclassified";
   if (TRADITIONAL.test(value)) return "traditional";
   if (DANCE.test(value)) return "dance";
+  if (MUSICAL.test(value)) return "musical";
   if (THEATER.test(value)) return "theater";
   if (MUSIC.test(value)) return "music";
   return "unclassified";
@@ -91,7 +93,7 @@ export function sortPerformances(items: Performance[], sort: PerformanceSort, to
 export function balanceMagazinePerformances(items: Performance[], limit = 24) {
   const buckets = new Map<string, Performance[]>();
   for (const item of items.filter(hasValidPoster)) { const key = normalizePerformanceGenre(item); buckets.set(key, [...(buckets.get(key) || []), item]); }
-  const keys = ["dance", "music", "theater", "traditional", "unclassified"];
+  const keys = ["music", "dance", "theater", "musical", "traditional", "unclassified"];
   const result: Performance[] = [];
   for (let index = 0; result.length < limit; index++) {
     let added = false;

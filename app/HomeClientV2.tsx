@@ -18,6 +18,8 @@ import { getHeroCta } from "@/lib/heroCta";
 import { analytics } from "@/lib/analytics";
 import { useLanguage } from "@/lib/useLanguage";
 import { localizePath } from "@/lib/i18n/locale";
+import OpportunitiesSection from "@/components/home/OpportunitiesSection";
+import { isActorProfile, matchesArtistRole } from "@/lib/artistRoles";
 
 // V2 Home — PROTOTYPE (feature/home-feed-v2 only). Replaces the sectioned
 // landing page (Hero / service intro / artist carousel / company carousel /
@@ -41,6 +43,8 @@ const FIELD_OPTIONS = [
   { key: "music", label: "MUSIC" },
   { key: "visual", label: "VISUAL" },
   { key: "actor", label: "ACTOR" },
+  { key: "producer", label: "PRODUCER" },
+  { key: "critic", label: "CRITIC" },
 ];
 
 interface HomeClientV2Props {
@@ -49,6 +53,7 @@ interface HomeClientV2Props {
   initialWeeklyStories: InstagramStory[];
   isLoggedIn: boolean;
   myArtistSlug: string | null;
+  opportunities: { opportunityType: string }[];
 }
 
 export default function HomeClientV2({
@@ -56,6 +61,7 @@ export default function HomeClientV2({
   initialCompanies,
   isLoggedIn,
   myArtistSlug,
+  opportunities,
 }: HomeClientV2Props) {
   const router = useRouter();
   const { language } = useLanguage();
@@ -117,14 +123,18 @@ export default function HomeClientV2({
       });
       return insertFeedCta(padWithPlaceholders(buildRealFeedItems([], filtered), FEED_DENSITY_TARGET), 5);
     }
-    const isActor = (artist: Artist) => /배우|연기|연극|뮤지컬|actor|acting|theatre|theater/i.test(
-      `${artist.field || ""} ${artist.genre || ""} ${artist.role || ""}`
-    );
+    const isActor = (artist: Artist) => isActorProfile(artist.field, artist.genre, artist.role);
+    const isProducer = (artist: Artist) => matchesArtistRole(artist.role, "기획자");
+    const isCritic = (artist: Artist) => matchesArtistRole(artist.role, "평론가");
     const filtered = selectedField === "all"
       ? publishedArtists
-      : publishedArtists.filter((artist) => selectedField === "actor"
-        ? isActor(artist)
-        : (artist.field || "dance") === selectedField);
+      : publishedArtists.filter((artist) => {
+        if (selectedField === "producer") return isProducer(artist);
+        if (selectedField === "critic") return isCritic(artist);
+        if (selectedField === "actor") return !isProducer(artist) && !isCritic(artist) && isActor(artist);
+        const isDisciplineWithProducerExcluded = selectedField === "dance";
+        return !(isDisciplineWithProducerExcluded && isProducer(artist)) && !isActor(artist) && (artist.field || "dance") === selectedField;
+      });
     const randomized = feedSeed === 0 ? filtered : [...filtered].sort((a, b) => {
       const score = (value: string) => {
         let hash = feedSeed;
@@ -208,11 +218,18 @@ export default function HomeClientV2({
 
       <HomeUseCasesSection />
 
+      <OpportunitiesSection
+        total={opportunities.length}
+        auditions={opportunities.filter((item) => item.opportunityType === "audition").length}
+        collaborations={opportunities.filter((item) => item.opportunityType === "job").length}
+        grants={opportunities.filter((item) => item.opportunityType === "grant").length}
+      />
+
       <TestimonialsSection />
 
       <FooterCTA
         freeBadge={en ? "Creating works, organizing your profile, and sharing your portfolio are currently free." : "현재 작품 등록, AI 이력 정리, 포트폴리오 공유까지 모든 기능을 무료로 사용할 수 있어요."}
-        title={en ? <>Bring your artistic practice<br />into one portfolio.</> : <>흩어진 예술 활동을<br />하나의 포트폴리오로.</>}
+        title={en ? <>Bring your artistic practice<br />into one portfolio.</> : <>당신의 시간을,<br />창작으로 돌려드립니다.</>}
         description={en ? "Upload your CV to organize your practice and create your own POPOK page." : "이력서만 올리면 AI가 활동 이력을 정리하고, 나만의 POPOK 페이지를 만들어드려요."}
         primaryLabel={en ? "Create my POPOK for free" : "무료로 내 POPOK 만들기"}
         primaryHref={localizedHeroCta.href}

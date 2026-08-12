@@ -5,13 +5,16 @@ import { useMemo, useState } from "react";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
 import { getSeoulToday, overlapsDateRange } from "@/lib/date";
-import { normalizePerformanceGenre } from "@/lib/performanceDiscovery";
+import { normalizePerformanceGenre, type PerformanceGenre } from "@/lib/performanceDiscovery";
 import { buildMonthGrid, shiftMonth } from "@/lib/monthGrid";
 import type { Performance } from "@/types";
 import MagazineTabs from "./MagazineTabs";
 import styles from "./performanceMagazine.module.css";
 
 type Locale = "ko" | "en";
+
+const GENRES: PerformanceGenre[] = ["all", "music", "dance", "theater", "musical", "traditional"];
+const genreLabel = { all:{ko:"전체",en:"All"},music:{ko:"음악",en:"Music"},dance:{ko:"무용",en:"Dance"},theater:{ko:"연극",en:"Theatre"},musical:{ko:"뮤지컬",en:"Musical"},traditional:{ko:"국악",en:"Korean Traditional"},unclassified:{ko:"미분류",en:"Unclassified"} } as const;
 
 const copy = {
   ko: {
@@ -51,21 +54,22 @@ function AgendaEntry({ performance }: { performance: Performance }) {
     : <Link className={styles.agendaEntry} href={destination.href}>{body}</Link>;
 }
 
-export default function MonthlyCalendar({ locale, monthStart, performances, embedded = false, query = {} }: { locale: Locale; monthStart: string; performances: Performance[]; embedded?: boolean; query?: Record<string, string> }) {
+export default function MonthlyCalendar({ locale, monthStart, performances, embedded = false, query = {}, selectedGenre = "all" }: { locale: Locale; monthStart: string; performances: Performance[]; embedded?: boolean; query?: Record<string, string>; selectedGenre?: PerformanceGenre }) {
   const t = copy[locale];
   const { days, gridStart, gridEnd } = buildMonthGrid(monthStart);
   const [year, month] = monthStart.split("-").map(Number);
   const today = getSeoulToday();
   const base = embedded ? (locale === "en" ? "/en/performances" : "/performances") : (locale === "en" ? "/en/calendar/monthly" : "/calendar/monthly");
-  const monthHref = (value: string) => { const params = new URLSearchParams({ ...query, view: "calendar", month: value.slice(0, 7) }); return `${base}?${params}`; };
+  const monthHref = (value: string, genre = selectedGenre) => { const params = new URLSearchParams({ ...query, view: "calendar", month: value.slice(0, 7) }); if (genre === "all") params.delete("genre"); else params.set("genre", genre); return `${base}?${params}`; };
   const prevHref = monthHref(shiftMonth(monthStart, -1));
   const nextHref = monthHref(shiftMonth(monthStart, 1));
   const todayHref = monthHref(`${today.slice(0, 7)}-01`);
   const monthLabel = new Intl.DateTimeFormat(locale === "ko" ? "ko-KR" : "en-US", { year: "numeric", month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
 
+  const visiblePerformances = selectedGenre === "all" ? performances : performances.filter((item) => normalizePerformanceGenre(item) === selectedGenre);
   const dayEntries = days.map((day) => ({
     day,
-    items: performances.filter((item) => overlapsDateRange(item, day, day)).sort((a, b) => (a.title || "").localeCompare(b.title || "")),
+    items: visiblePerformances.filter((item) => overlapsDateRange(item, day, day)).sort((a, b) => (a.title || "").localeCompare(b.title || "")),
   }));
   const initialDay = dayEntries.find(({day,items}) => day === today && items.length)?.day || dayEntries.find(({day,items}) => day.startsWith(monthStart.slice(0,7)) && items.length)?.day || null;
   const [selectedDay, setSelectedDay] = useState<string | null>(initialDay);
@@ -75,12 +79,29 @@ export default function MonthlyCalendar({ locale, monthStart, performances, embe
   return (
     <div className={styles.page} lang={locale}>
       {!embedded && <header className={styles.intro}>
-        <p>{t.kicker}</p><h1>{t.title}</h1>
-        <div><span>{t.description}</span></div>
+        <div className={styles.eyebrowBadge}>
+          <span className={styles.eyebrowDot} />
+          <span className={styles.eyebrowText}>{t.kicker}</span>
+        </div>
+        <h1 className="display">
+          {locale === "ko" ? (
+            <>
+              월간 <span className="seen-highlight">캘린더</span>
+            </>
+          ) : (
+            <>
+              Monthly <span className="seen-highlight">Calendar</span>
+            </>
+          )}
+        </h1>
+        <div className={styles.introMeta}>
+          <span className={styles.introDesc}>{t.description}</span>
+        </div>
         <MagazineTabs locale={locale} active="monthly" />
       </header>}
 
       <div className={styles.shell}>
+        {!embedded && <nav className={`${styles.genreTabs} ${styles.calendarGenreNav}`} aria-label={locale === "ko" ? "월간 공연 장르" : "Monthly performance genre"}>{GENRES.map((genre) => <Link key={genre} href={monthHref(monthStart, genre)} className={selectedGenre === genre ? styles.genreTabActive : styles.genreTab} aria-current={selectedGenre === genre ? "page" : undefined}>{genreLabel[genre][locale]}</Link>)}</nav>}
         <section className={styles.section} style={{ paddingTop: 0 }}>
           <div className={styles.monthNav}>
             <div className={styles.monthControls}>

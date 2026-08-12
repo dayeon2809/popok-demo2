@@ -7,12 +7,13 @@ export interface HeroCta {
 }
 
 /**
- * logged out -> sign up/login, logged in without a linked artist profile ->
- * onboarding, logged in with a profile -> manage it. Mirrors the same
+ * logged out or logged in without a linked artist profile -> onboarding,
+ * logged in with a profile -> manage it. Authentication is requested only
+ * after the guest has completed the onboarding preview.
  * owner_id check app/my-popok/page.tsx uses as its source of truth.
  */
 export function getHeroCta(isLoggedIn: boolean, myArtistSlug: string | null): HeroCta {
-  if (!isLoggedIn) return { href: "/auth", label: "내 포퐄 만들기" };
+  if (!isLoggedIn) return { href: "/onboarding", label: "내 포퐄 만들기" };
   if (!myArtistSlug) return { href: "/onboarding", label: "내 포퐄 만들기" };
   return { href: "/my-popok", label: "내 포퐄 관리" };
 }

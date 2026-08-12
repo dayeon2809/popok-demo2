@@ -32,7 +32,11 @@ const ALL_NAV_ITEMS: NavItem[] = [
   {
     href: "/calendar",
     label: { ko: "공연", en: "Performances" },
-    match: (pathname) => pathname === "/calendar",
+    match: (pathname) =>
+      pathname === "/calendar" ||
+      pathname === "/performances" ||
+      pathname.startsWith("/calendar/") ||
+      pathname.startsWith("/performances/"),
   },
   {
     href: "/opportunities",
@@ -168,11 +172,22 @@ export default function Header() {
                   fontSize: "0.875rem",
                   fontWeight: 600,
                   color: active ? "var(--navy)" : "var(--ink-muted)",
-                  borderBottom: active ? "2px solid var(--accent)" : "2px solid transparent",
+                  borderBottom: active
+                    ? item.href === "/calendar" || item.href === "/opportunities"
+                      ? "2px solid var(--editorial-blue)"
+                      : "2px solid var(--accent)"
+                    : "2px solid transparent",
                   paddingBottom: "2px",
                 }}
               >
-                {item.href === "/about" ? messages.nav.about : item.href === "/artists" ? messages.nav.artists : item.href === "/companies" ? messages.nav.companies : item.href === "/calendar" ? messages.nav.performances : item.href === "/#faq" ? messages.nav.faq : item.label[language]}
+                {item.href === "/about" ? messages.nav.about :
+                 item.href === "/artists" ? messages.nav.artists :
+                 item.href === "/companies" ? messages.nav.companies :
+                 item.href === "/calendar" ? messages.nav.performances :
+                 item.href === "/opportunities" ? messages.nav.opportunities :
+                 item.href === "/popok-artist" ? messages.nav.popokArtist :
+                 item.href === "/#faq" ? messages.nav.faq :
+                 item.label[language]}
               </Link>
             );
           })}
@@ -293,11 +308,18 @@ export default function Header() {
                   padding: "14px 6px",
                   fontSize: "0.95rem",
                   fontWeight: 700,
-                  color: active ? "var(--navy)" : "var(--ink-muted)",
+                  color: active ? (item.href === "/calendar" || item.href === "/opportunities" ? "var(--editorial-blue)" : "var(--navy)") : "var(--ink-muted)",
                   borderBottom: "1px solid var(--border)",
                 }}
               >
-                {item.label[language]}
+                {item.href === "/about" ? messages.nav.about :
+                 item.href === "/artists" ? messages.nav.artists :
+                 item.href === "/companies" ? messages.nav.companies :
+                 item.href === "/calendar" ? messages.nav.performances :
+                 item.href === "/opportunities" ? messages.nav.opportunities :
+                 item.href === "/popok-artist" ? messages.nav.popokArtist :
+                 item.href === "/#faq" ? messages.nav.faq :
+                 item.label[language]}
               </Link>
             );
           })}

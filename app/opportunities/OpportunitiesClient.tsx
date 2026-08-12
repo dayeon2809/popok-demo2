@@ -238,11 +238,28 @@ export default function OpportunitiesClient({ locale, initialOpportunities, init
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>{t.eyebrow}</p>
-            <h1 className="display">{t.heroTitle[0]}<br />{t.heroTitle[1]}</h1>
-            <p className={styles.heroDescription}>{t.heroDescription[0]}<br />{t.heroDescription[1]}</p>
+            <div className={styles.eyebrowBadge}>
+              <span className={styles.eyebrowDot} />
+              <span className={styles.eyebrowText}>{t.eyebrow}</span>
+            </div>
+            <h1 className="display">
+              {locale === "ko" ? (
+                <>
+                  당신의 다음 무대를<br />
+                  <span className="seen-highlight">오늘 발견하세요.</span>
+                </>
+              ) : (
+                <>
+                  Find your next stage,<br />
+                  <span className="seen-highlight">today.</span>
+                </>
+              )}
+            </h1>
+            <p className={styles.heroDescription}>
+              {t.heroDescription[0]}<br />{t.heroDescription[1]}
+            </p>
             <div className={styles.heroActions}>
-              <a href="#opportunity-list" className={styles.primaryButton}>{t.viewToday}</a>
+              <a href="#opportunity-list" className={styles.primaryButton}>{t.viewToday} →</a>
               <button type="button" className={styles.secondaryButton} disabled title={t.registerSoon}>{t.registerSoon}</button>
             </div>
           </div>

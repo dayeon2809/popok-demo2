@@ -1,4 +1,80 @@
-.page{background:var(--bg);color:var(--ink);min-height:100vh}.hero{background:var(--navy);color:#fff;padding:76px 24px}.heroInner,.content{width:min(1120px,100%);margin:0 auto}.heroInner{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.7fr);gap:64px;align-items:end}.eyebrow,.sectionHeading p{margin:0 0 18px;color:var(--editorial-blue);font-size:.72rem;font-weight:900;letter-spacing:.18em}.hero .eyebrow{color:#8fb4e6}.hero h1{margin:0;font-size:clamp(2.7rem,6vw,5.4rem);line-height:1.02;letter-spacing:-.06em;font-weight:950}.heroDescription{margin:26px 0 0;color:rgba(255,255,255,.72);font-size:clamp(.95rem,1.5vw,1.08rem);line-height:1.8;font-weight:600}.heroActions{display:flex;gap:10px;margin-top:34px;flex-wrap:wrap}.primaryButton,.secondaryButton,.detailButton,.connectButton{min-height:46px;padding:0 20px;border-radius:12px;font:inherit;font-size:.84rem;font-weight:850;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}.primaryButton{background:var(--accent);color:var(--navy);border:1px solid var(--accent)}.secondaryButton{background:transparent;color:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.25);cursor:not-allowed}.statCard{background:#fff;color:var(--navy);border-radius:20px;padding:28px;border-top:7px solid var(--editorial-blue)}.statCard span{display:block;font-size:.8rem;font-weight:800;color:var(--ink-muted)}.statCard strong{display:block;font-size:4.5rem;line-height:1;margin:16px 0;font-weight:950;letter-spacing:-.06em}.statCard p{margin:0;font-size:.82rem;font-weight:850}.content{padding:24px 24px 96px}.section{padding-top:72px;scroll-margin-top:70px}.sectionHeading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:24px}.sectionHeading p{color:var(--ink-muted);margin-bottom:8px}.sectionHeading h2{margin:0;font-size:clamp(1.65rem,3vw,2.35rem);letter-spacing:-.045em;color:var(--navy)}.sectionHeading>span{font-size:.78rem;color:var(--ink-muted);font-weight:750}.quickGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.quickCard{min-width:0;padding:22px 18px;background:#fff;border:1px solid var(--border);border-radius:16px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:13px;text-align:left;color:var(--navy);font-family:inherit;cursor:pointer;transition:border-color .15s,transform .15s}.quickCard:hover{border-color:var(--navy);transform:translateY(-2px)}.quickMark{width:42px;height:42px;border-radius:12px;background:var(--accent);display:grid;place-items:center;font-size:.67rem;font-weight:950}.quickCard strong,.quickCard small{display:block}.quickCard strong{font-size:.9rem}.quickCard small{margin-top:5px;color:var(--ink-muted);font-size:.7rem}
+.page{background:var(--bg);color:var(--ink);min-height:100vh}
+.hero{background:#FFFFFF;color:var(--navy);padding:72px 24px 80px}
+.heroInner,.content{width:min(1120px,100%);margin:0 auto}
+.heroInner{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.7fr);gap:64px;align-items:center}
+.eyebrow,.sectionHeading p{margin:0 0 18px;color:var(--ink-muted);font-size:.72rem;font-weight:900;letter-spacing:.18em}
+
+/* Hero Badge Pill */
+.eyebrowBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  margin-bottom: 24px;
+}
+.eyebrowDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-dark);
+  display: inline-block;
+}
+.eyebrowText {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+}
+
+.hero h1{margin:0 0 24px;font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.18;letter-spacing:-.04em;font-weight:900;color:var(--navy)}
+.heroDescription{margin:24px 0 0;color:var(--ink-muted);font-size:clamp(0.95rem,2vw,1.1rem);line-height:1.6;font-weight:600;max-width:580px}
+.heroActions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap;align-items:center}
+.primaryButton,.secondaryButton,.detailButton,.connectButton{min-height:46px;padding:0 20px;border-radius:12px;font:inherit;font-size:.84rem;font-weight:850;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}
+
+.primaryButton {
+  background: var(--accent);
+  color: var(--navy);
+  border: none;
+  border-radius: 999px;
+  padding: 15px 30px;
+  min-height: 48px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(200, 238, 82, 0.2);
+  transition: all 0.2s ease;
+}
+.primaryButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(200, 238, 82, 0.3);
+}
+.secondaryButton {
+  background: transparent;
+  color: var(--ink-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 15px 30px;
+  min-height: 48px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.statCard {
+  background: var(--bg-warm);
+  color: var(--navy);
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-top: 7px solid var(--editorial-blue);
+  box-shadow: 0 12px 30px rgba(23, 20, 17, 0.04);
+}
+.statCard span{display:block;font-size:.8rem;font-weight:800;color:var(--ink-muted)}
+.statCard strong{display:block;font-size:4.5rem;line-height:1;margin:12px 0;font-weight:950;letter-spacing:-.06em;color:var(--navy)}
+.statCard p{margin:0;font-size:.82rem;font-weight:850;color:var(--navy)}.content{padding:24px 24px 96px}.section{padding-top:72px;scroll-margin-top:70px}.sectionHeading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:24px}.sectionHeading p{color:var(--ink-muted);margin-bottom:8px}.sectionHeading h2{margin:0;font-size:clamp(1.65rem,3vw,2.35rem);letter-spacing:-.045em;color:var(--navy)}.sectionHeading>span{font-size:.78rem;color:var(--ink-muted);font-weight:750}.quickGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.quickCard{min-width:0;padding:22px 18px;background:#fff;border:1px solid var(--border);border-radius:16px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:13px;text-align:left;color:var(--navy);font-family:inherit;cursor:pointer;transition:border-color .15s,transform .15s}.quickCard:hover{border-color:var(--navy);transform:translateY(-2px)}.quickMark{width:42px;height:42px;border-radius:12px;background:var(--accent);display:grid;place-items:center;font-size:.67rem;font-weight:950}.quickCard strong,.quickCard small{display:block}.quickCard strong{font-size:.9rem}.quickCard small{margin-top:5px;color:var(--ink-muted);font-size:.7rem}
 
 .aiBanner{margin-top:24px;padding:24px 26px;border:1px solid var(--border);border-radius:20px;background:linear-gradient(105deg,#fff 0%,var(--editorial-blue-soft) 100%);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:18px}.aiIcon{width:48px;height:48px;border-radius:14px;background:var(--accent);color:var(--navy);display:grid;place-items:center;font-size:1.25rem}.aiBanner p{margin:0 0 5px;color:var(--editorial-blue);font-size:.66rem;font-weight:900;letter-spacing:.14em}.aiBanner h2{margin:0;color:var(--navy);font-size:1.2rem;letter-spacing:-.025em}.aiBanner span{display:block;margin-top:7px;color:var(--ink-muted);font-size:.8rem}.aiBanner button,.loadMore{min-height:44px;border:1px solid var(--navy);border-radius:12px;background:var(--navy);color:#fff;padding:0 17px;font:inherit;font-size:.78rem;font-weight:850;cursor:pointer}.quickChips{display:flex;gap:8px;overflow-x:auto;padding:18px 2px 2px;scrollbar-width:none}.quickChips button{flex:0 0 auto;border:1px solid var(--border-dark);border-radius:999px;background:#fff;color:var(--ink-muted);padding:9px 15px;font:inherit;font-size:.78rem;font-weight:800;cursor:pointer}.quickChips .activeChip{background:var(--navy);border-color:var(--navy);color:#fff}.sortBox select{height:44px;border:1px solid var(--border-dark);border-radius:12px;background:#fff;color:var(--navy);padding:0 34px 0 12px;font:inherit;font-size:.78rem;font-weight:800}.filterRows{display:grid;gap:8px;margin-bottom:10px}.filterRows>div{display:grid;grid-template-columns:74px minmax(0,1fr);align-items:start}.filterRows>div>strong{padding-top:12px;color:var(--ink-muted);font-size:.75rem}.matchBadge{padding:6px 9px;background:var(--accent);border-radius:7px;color:var(--navy);font-size:.68rem;font-weight:900}.loadMore{display:block;margin:26px auto 0;min-width:180px;background:#fff;color:var(--navy)}
 

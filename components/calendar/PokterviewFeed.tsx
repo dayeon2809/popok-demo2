@@ -23,8 +23,24 @@ export default function PokterviewFeed({ locale, stories }: { locale: Locale; st
   return (
     <div className={styles.page} lang={locale}>
       <header className={styles.intro}>
-        <p>{t.kicker}</p><h1>{t.title}</h1>
-        <div><span>{t.description}</span></div>
+        <div className={styles.eyebrowBadge}>
+          <span className={styles.eyebrowDot} />
+          <span className={styles.eyebrowText}>{t.kicker}</span>
+        </div>
+        <h1 className="display">
+          {locale === "ko" ? (
+            <>
+              예술인 인터뷰, <span className="seen-highlight">퐄터뷰</span>
+            </>
+          ) : (
+            <>
+              Artist Interviews, <span className="seen-highlight">Pokterview</span>
+            </>
+          )}
+        </h1>
+        <div className={styles.introMeta}>
+          <span className={styles.introDesc}>{t.description}</span>
+        </div>
         <MagazineTabs locale={locale} active="pokterview" />
       </header>
 

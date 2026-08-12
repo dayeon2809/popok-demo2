@@ -11,7 +11,7 @@ import { isYouTubeUrl } from "@/lib/youtube";
 import type { ArtistFilter, ArtistField, ArtistType, Artist } from "@/types";
 import { useLanguage } from "@/lib/useLanguage";
 import { localizePath, localizedRecord, localizedWork } from "@/lib/i18n/locale";
-import { getArtistRoleLabel, matchesArtistRole, type ArtistRoleValue } from "@/lib/artistRoles";
+import { getArtistRoleLabel, isActorProfile, matchesArtistRole, type ArtistRoleValue } from "@/lib/artistRoles";
 import { getListImageUrl } from "@/lib/imageUrls";
 
 const CATEGORIES = [
@@ -20,8 +20,8 @@ const CATEGORIES = [
   { key: "music", label: "MUSIC" },
   { key: "visual", label: "VISUAL" },
   { key: "actor", label: "ACTOR" },
-  { key: "producer", role: "기획자", labelKo: "기획자", labelEn: "PRODUCER" },
-  { key: "critic", role: "평론가", labelKo: "평론가", labelEn: "CRITIC" },
+  { key: "producer", role: "기획자", label: "PRODUCER" },
+  { key: "critic", role: "평론가", label: "CRITIC" },
 ];
 
 const DANCE_SUB_FIELDS = [
@@ -104,26 +104,30 @@ export default function ArtistsClient() {
   const musicSliderRef = useRef<HTMLDivElement>(null);
   const visualSliderRef = useRef<HTMLDivElement>(null);
   const actorSliderRef = useRef<HTMLDivElement>(null);
-  const pausedRowsRef = useRef<Record<string, boolean>>({ dance: false, music: false, visual: false, actor: false });
-  const resumeTimersRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>({ dance: null, music: null, visual: null, actor: null });
+  const producerSliderRef = useRef<HTMLDivElement>(null);
+  const criticSliderRef = useRef<HTMLDivElement>(null);
+  type SliderRow = "dance" | "music" | "visual" | "actor" | "producer" | "critic";
+  const pausedRowsRef = useRef<Record<SliderRow, boolean>>({ dance: false, music: false, visual: false, actor: false, producer: false, critic: false });
+  const resumeTimersRef = useRef<Record<SliderRow, ReturnType<typeof setTimeout> | null>>({ dance: null, music: null, visual: null, actor: null, producer: null, critic: null });
 
-  const pauseRowTemporarily = (row: "dance" | "music" | "visual" | "actor", delay = 8000) => {
+  const pauseRowTemporarily = (row: SliderRow, delay = 8000) => {
     pausedRowsRef.current[row] = true;
     const t = resumeTimersRef.current[row];
     if (t) clearTimeout(t);
     resumeTimersRef.current[row] = setTimeout(() => { pausedRowsRef.current[row] = false; }, delay);
   };
 
-  const setRowPaused = (row: "dance" | "music" | "visual" | "actor", paused: boolean) => {
+  const setRowPaused = (row: SliderRow, paused: boolean) => {
     pausedRowsRef.current[row] = paused;
     const t = resumeTimersRef.current[row];
     if (t) clearTimeout(t);
     resumeTimersRef.current[row] = null;
   };
 
-  const scrollSlider = (row: "dance" | "music" | "visual" | "actor", dir: "left" | "right") => {
+  const scrollSlider = (row: SliderRow, dir: "left" | "right") => {
     pauseRowTemporarily(row);
-    const ref = row === "dance" ? danceSliderRef : row === "music" ? musicSliderRef : row === "visual" ? visualSliderRef : actorSliderRef;
+    const refs = { dance: danceSliderRef, music: musicSliderRef, visual: visualSliderRef, actor: actorSliderRef, producer: producerSliderRef, critic: criticSliderRef };
+    const ref = refs[row];
     if (ref.current) ref.current.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
   };
 
@@ -156,6 +160,8 @@ export default function ArtistsClient() {
       { key: "music" as const, ref: musicSliderRef, speed: 22 },
       { key: "visual" as const, ref: visualSliderRef, speed: 25 },
       { key: "actor" as const, ref: actorSliderRef, speed: 24 },
+      { key: "producer" as const, ref: producerSliderRef, speed: 23 },
+      { key: "critic" as const, ref: criticSliderRef, speed: 21 },
     ].filter((row) => selectedField === "all" || selectedField === row.key);
 
     let lastTs: number | null = null;
@@ -214,9 +220,14 @@ export default function ArtistsClient() {
 
   // Partition fetched artists into respective horizontal showcase categories
   const allFetched = artists || [];
+  const isProducerOrCritic = (artist: Artist) =>
+    matchesArtistRole(artist.role, "기획자") || matchesArtistRole(artist.role, "평론가");
+  const isProducerArtist = (artist: Artist) => matchesArtistRole(artist.role, "기획자");
+  const isActorArtist = (artist: Artist) =>
+    isActorProfile(artist.field, artist.genre, artist.role);
   let danceArtists = allFetched.filter((a) => {
     const f = a.field || "dance";
-    return f === "dance" || f === "contemporary_dance" || f === "korean_dance" || f === "ballet" || f === "interdisciplinary";
+    return !isProducerArtist(a) && !isActorArtist(a) && (f === "dance" || f === "contemporary_dance" || f === "korean_dance" || f === "ballet" || f === "interdisciplinary");
   });
 
   if (selectedField === "dance" && selectedConsonant !== "all") {
@@ -228,9 +239,15 @@ export default function ArtistsClient() {
       return cho === selectedConsonant;
     });
   }
-  const musicArtists = allFetched.filter((a) => a.field === "music");
-  const visualArtists = allFetched.filter((a) => a.field === "visual");
-  const actorArtists = allFetched.filter((a) => /배우|연기|연극|뮤지컬|actor|acting|theatre|theater/i.test(`${a.field || ""} ${a.genre || ""} ${a.role || ""}`));
+  const isMusicArtist = (artist: Artist) => {
+    const musicText = `${artist.field || ""} ${artist.genre || ""} ${(artist.tags || []).join(" ")}`;
+    return /음악|클래식|music|classical|composition|composer|ensemble/i.test(musicText);
+  };
+  const musicArtists = allFetched.filter((a) => !isActorArtist(a) && isMusicArtist(a));
+  const visualArtists = allFetched.filter((a) => !isActorArtist(a) && a.field === "visual");
+  const actorArtists = allFetched.filter((a) => !isProducerOrCritic(a) && isActorArtist(a));
+  const producerArtists = allFetched.filter((artist) => matchesArtistRole(artist.role, "기획자"));
+  const criticArtists = allFetched.filter((artist) => matchesArtistRole(artist.role, "평론가"));
   const roleArtists = selectedRole ? allFetched.filter((artist) => matchesArtistRole(artist.role, selectedRole)) : [];
   const categorizedArtistIds = new Set([...danceArtists, ...musicArtists, ...visualArtists, ...actorArtists].map((artist) => artist.id));
   const uncategorizedNewRoleArtists = allFetched.filter((artist) =>
@@ -251,11 +268,12 @@ export default function ArtistsClient() {
 
   const renderSliderRow = (
     title: string,
-    key: "dance" | "music" | "visual" | "actor",
+    key: SliderRow,
     artistsList: Artist[],
-    sliderRef: React.RefObject<HTMLDivElement | null>
+    sliderRef: React.RefObject<HTMLDivElement | null>,
+    showWhenEmpty = false,
   ) => {
-    if (artistsList.length === 0) return null;
+    if (artistsList.length === 0 && !showWhenEmpty) return null;
 
     return (
       <div key={key} style={{ marginBottom: "56px" }}>
@@ -275,7 +293,7 @@ export default function ArtistsClient() {
             </span>
           </div>
 
-          <div style={{ display: "flex", gap: "8px" }}>
+          {artistsList.length > 0 && <div style={{ display: "flex", gap: "8px" }}>
             <button
               onClick={() => scrollSlider(key, "left")}
               aria-label={`scroll left ${title}`}
@@ -312,11 +330,16 @@ export default function ArtistsClient() {
             >
               →
             </button>
-          </div>
+          </div>}
         </div>
 
         {/* Horizontal Slider */}
-        <div
+        {artistsList.length === 0 ? (
+          <div className="artist-role-empty">
+            <span className="mono">COMING SOON</span>
+            <p>{en ? `No ${title.toLowerCase()} profiles are registered yet.` : `아직 등록된 ${title} 프로필이 없습니다.`}</p>
+          </div>
+        ) : <div
           ref={sliderRef}
           onMouseEnter={() => setRowPaused(key, true)}
           onMouseLeave={() => setRowPaused(key, false)}
@@ -342,14 +365,13 @@ export default function ArtistsClient() {
               getGenreLabel={getGenreLabel}
             />
           ))}
-        </div>
+        </div>}
       </div>
     );
   };
 
-  const renderGallery = (title: string, artistsList: Artist[]) => {
-    if (artistsList.length === 0) return null;
-
+  const renderGallery = (title: string, artistsList: Artist[], showWhenEmpty = false) => {
+    if (artistsList.length === 0 && !showWhenEmpty) return null;
     return (
       <div style={{ marginBottom: "56px" }}>
         {/* Gallery Header */}
@@ -370,7 +392,12 @@ export default function ArtistsClient() {
         </div>
 
         {/* Gallery Grid */}
-        <div className="gallery-grid">
+        {artistsList.length === 0 ? (
+          <div className="artist-role-empty">
+            <span className="mono">COMING SOON</span>
+            <p>{en ? `No ${title.toLowerCase()} profiles are registered yet.` : `아직 등록된 ${title} 프로필이 없습니다.`}</p>
+          </div>
+        ) : <div className="gallery-grid">
           {artistsList.map((artist) => (
             <ShowcaseCard
               key={artist.id}
@@ -380,7 +407,7 @@ export default function ArtistsClient() {
               getGenreLabel={getGenreLabel}
             />
           ))}
-        </div>
+        </div>}
       </div>
     );
   };
@@ -427,6 +454,21 @@ export default function ArtistsClient() {
           flex: 0 0 auto;
           min-height: 44px;
         }
+        .artist-role-empty {
+          min-height: 132px;
+          padding: 28px;
+          border: 1.5px dashed var(--border);
+          border-radius: 14px;
+          background: var(--bg-warm);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          color: var(--ink-muted);
+          text-align: center;
+        }
+        .artist-role-empty p { margin: 0; font-size: .82rem; font-weight: 650; }
         @media (max-width: 768px) {
           .gallery-grid {
             grid-template-columns: repeat(2, 1fr) !important;
@@ -508,7 +550,7 @@ export default function ArtistsClient() {
                 transition: "all 0.2s ease",
               }}
             >
-              {"role" in cat ? (en ? cat.labelEn : cat.labelKo) : cat.label}
+              {cat.label}
             </button>
           ))}
         </div>
@@ -591,7 +633,7 @@ export default function ArtistsClient() {
         <LoadingSpinner message={en ? "Loading artists…" : "아티스트 목록을 불러오는 중..."} />
       ) : error ? (
         <ErrorMessage message={error} />
-      ) : totalResultsCount === 0 ? (
+      ) : totalResultsCount === 0 && selectedField !== "all" && selectedField !== "producer" && selectedField !== "critic" ? (
         <EmptyState message={en ? "No artists found." : "검색 결과가 없습니다."} />
       ) : (
         <div style={{ minHeight: "400px" }}>
@@ -601,7 +643,8 @@ export default function ArtistsClient() {
               {renderSliderRow("MUSIC", "music", musicArtists, musicSliderRef)}
               {renderSliderRow("VISUAL", "visual", visualArtists, visualSliderRef)}
               {renderSliderRow("ACTOR", "actor", actorArtists, actorSliderRef)}
-              {uncategorizedNewRoleArtists.length > 0 && renderGallery(en ? "PRODUCER · CRITIC" : "기획자 · 평론가", uncategorizedNewRoleArtists)}
+              {renderSliderRow("PRODUCER", "producer", producerArtists, producerSliderRef, true)}
+              {renderSliderRow("CRITIC", "critic", criticArtists, criticSliderRef, true)}
             </>
           ) : selectedField === "dance" ? (
             renderGallery("DANCE", danceArtists)
@@ -610,7 +653,7 @@ export default function ArtistsClient() {
           ) : selectedField === "visual" ? (
             renderGallery("VISUAL", visualArtists)
           ) : selectedRole ? (
-            renderGallery(getArtistRoleLabel(selectedRole, language).toUpperCase(), roleArtists)
+            renderGallery(selectedField === "producer" ? "PRODUCER" : "CRITIC", roleArtists, true)
           ) : (
             renderGallery("ACTOR", actorArtists)
           )}

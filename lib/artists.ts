@@ -2,18 +2,21 @@ import fs from "fs";
 import path from "path";
 import { getSupabaseServer } from "./supabaseServer";
 import type { Artist, ArtistFilter } from "@/types";
+import { isActorProfile, matchesArtistRole } from "./artistRoles";
 
 export function mapArtistRowToArtist(record: any): Artist {
   if (!record) return {} as Artist;
 
   // Parse category from genre: "dance,contemporary" -> field="dance", genre="contemporary"
+  // Legacy profiles without a recognized discipline remain in DANCE. Role-only
+  // profiles are kept out of discipline rows by the exclusive role filters below.
   let fValue = "dance";
   let gValue = "contemporary";
   if (record.genre && typeof record.genre === "string") {
     const parts = record.genre.split(",").map((s: string) => s.trim());
     if (parts.length > 1) {
-      fValue = parts[0] || "dance";
-      gValue = parts[1] || "contemporary";
+        fValue = parts[0] || "dance";
+        gValue = parts[1] || "contemporary";
     } else {
       const val = parts[0] || "";
       const lowerVal = val.toLowerCase();
@@ -308,11 +311,17 @@ export async function searchArtists(
   if (fieldFilter && fieldFilter !== "all") {
     list = list.filter(a => {
       const field = a.field || "dance";
+      const role = a.role?.trim() || "";
+      const isActor = isActorProfile(field, a.genre, role);
+      const isProducer = matchesArtistRole(role, "기획자");
       if (fieldFilter === "dance") {
-        return field === "dance" || field === "contemporary_dance" || field === "korean_dance" || field === "ballet" || field === "interdisciplinary";
+        return !isProducer && !isActor && (field === "dance" || field === "contemporary_dance" || field === "korean_dance" || field === "ballet" || field === "interdisciplinary");
       }
-      if (fieldFilter === "music") return field === "music";
-      if (fieldFilter === "visual") return field === "visual";
+      if (fieldFilter === "music") {
+        const musicText = `${field} ${a.genre || ""} ${(a.tags || []).join(" ")}`;
+        return !isActor && /음악|클래식|music|classical|composition|composer|ensemble/i.test(musicText);
+      }
+      if (fieldFilter === "visual") return !isActor && field === "visual";
 
       // Sub-genres
       if (fieldFilter === "contemporary") return a.genre === "contemporary" || a.genre === "contemporary_dance";
@@ -325,7 +334,11 @@ export async function searchArtists(
 
   if (roleFilter?.trim()) {
     const expectedRole = roleFilter.trim();
-    list = list.filter((artist) => artist.role?.trim() === expectedRole);
+    if (expectedRole === "기획자" || expectedRole === "평론가") {
+      list = list.filter((artist) => matchesArtistRole(artist.role, expectedRole));
+    } else {
+      list = list.filter((artist) => artist.role?.trim() === expectedRole);
+    }
   }
 
   if (query && query.trim()) {

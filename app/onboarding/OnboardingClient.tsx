@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import AiProfileImporter from "@/components/profile/AiProfileImporter";
 import { analytics } from "@/lib/analytics";
 import AiProfileReview from "@/components/profile/AiProfileReview";
 import { ARTIST_ROLES, getArtistRoleLabel } from "@/lib/artistRoles";
 import { useLanguage } from "@/lib/useLanguage";
+import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
+import PopokCard from "@/components/PopokCard";
 
-export default function OnboardingClient({ defaultEmail, defaultDisplayName }: { defaultEmail: string; defaultDisplayName: string }) {
+const ONBOARDING_DRAFT_KEY = "popok_onboarding_draft_v1";
+
+export default function OnboardingClient({ defaultEmail, defaultDisplayName, isLoggedIn, shouldResume }: { defaultEmail: string; defaultDisplayName: string; isLoggedIn: boolean; shouldResume: boolean }) {
   const router = useRouter();
   const { language } = useLanguage();
 
@@ -40,6 +44,43 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   }>({ valid: false, checking: false, message: "" });
 
   const [submitting, setSubmitting] = useState(false);
+  const resumeStartedRef = useRef(false);
+
+  const buildPayload = useCallback(() => ({
+    displayName, name_en: displayNameEn, username, genre, role,
+    bio: aiProfileData?.artist?.bio || null,
+    bio_short: aiProfileData?.artist?.bio_short || null,
+    works: aiProfileData?.works || [], affiliations: aiProfileData?.affiliations || [],
+    current_activity: aiProfileData?.current_activity || [], awards: aiProfileData?.awards || [],
+    competitions: aiProfileData?.competitions || [], education: aiProfileData?.education || [],
+    links: aiProfileData?.links || [], review_links: aiProfileData?.review_links || [],
+  }), [displayName, displayNameEn, username, genre, role, aiProfileData]);
+
+  const saveAndPublish = useCallback(async (payload: ReturnType<typeof buildPayload>) => {
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/artists/onboard", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || "프로필을 저장하지 못했습니다.");
+      sessionStorage.removeItem(ONBOARDING_DRAFT_KEY);
+      analytics.signUp("google");
+      if (data.artistId) analytics.portfolioCreated(data.artistId);
+      router.push("/my-popok?upload=1");
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message || "프로필 저장 중 오류가 발생했습니다.");
+      setSubmitting(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !shouldResume || resumeStartedRef.current) return;
+    const stored = sessionStorage.getItem(ONBOARDING_DRAFT_KEY);
+    if (!stored) return;
+    resumeStartedRef.current = true;
+    try { void saveAndPublish(JSON.parse(stored)); }
+    catch { sessionStorage.removeItem(ONBOARDING_DRAFT_KEY); setSubmitting(false); }
+  }, [isLoggedIn, shouldResume, saveAndPublish]);
 
   // Auto-suggest a POPOK address from the display name so step 1 rarely
   // requires the user to think about it — still fully editable, and the
@@ -147,51 +188,24 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
   };
 
   const handleComplete = async () => {
+    const payload = buildPayload();
+    if (isLoggedIn) {
+      await saveAndPublish(payload);
+      return;
+    }
+    sessionStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(payload));
     setSubmitting(true);
-    try {
-      const res = await fetch("/api/artists/onboard", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          displayName,
-          name_en: displayNameEn,
-          username,
-          genre,
-          role,
-          bio: aiProfileData?.artist?.bio || null,
-          bio_short: aiProfileData?.artist?.bio_short || null,
-          works: aiProfileData?.works || [],
-          affiliations: aiProfileData?.affiliations || [],
-          current_activity: aiProfileData?.current_activity || [],
-          awards: aiProfileData?.awards || [],
-          competitions: aiProfileData?.competitions || [],
-          education: aiProfileData?.education || [],
-          links: aiProfileData?.links || [],
-          review_links: aiProfileData?.review_links || []
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        analytics.signUp("google");
-        if (data.artistId) {
-          analytics.portfolioCreated(data.artistId);
-        }
-        // V2 (feature/home-feed-v2): land straight in upload mode, not the
-        // plain dashboard — see MyPopokClient's `?upload=1` handling.
-        router.push("/my-popok?upload=1");
-        router.refresh();
-      } else {
-        alert(data.error || "온보딩 저장 중 오류가 발생했습니다.");
-        setSubmitting(false);
-      }
-    } catch (err: any) {
-      alert("서버 연결에 실패했습니다: " + err.message);
+    const supabase = createBrowserSupabaseClient();
+    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
+    callbackUrl.searchParams.set("redirect", "/onboarding?resume=1");
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: callbackUrl.toString() } });
+    if (error) {
+      alert(`Google 로그인 중 오류가 발생했습니다: ${error.message}`);
       setSubmitting(false);
     }
   };
 
-  const GENRE_OPTIONS = ["현대무용", "발레", "한국무용", "음악", "미술", "배우"];
+  const GENRE_OPTIONS = ["무용", "현대무용", "발레", "한국무용", "음악", "미술", "배우"];
 
   return (
     <div style={{
@@ -283,11 +297,6 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
               }}
               autoFocus
             />
-
-            <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
-              English name (optional)
-            </label>
-            <input lang="en" type="text" value={displayNameEn} onChange={(e) => setDisplayNameEn(e.target.value)} placeholder="e.g. Gildong Hong" style={{ width: "100%", padding: "14px 16px", border: "1.5px solid var(--border)", borderRadius: "12px", fontSize: "1rem", marginBottom: "20px" }} />
 
             <label style={{ display: "block", fontSize: "0.78rem", fontWeight: 700, color: "var(--ink-muted)", marginBottom: "6px" }}>
               English name (optional)
@@ -495,37 +504,26 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
           />
         )}
 
-        {/* STEP 4: complete */}
+        {/* STEP 4: card preview, then authenticate and publish */}
         {step === 4 && (
           <div style={{ textAlign: "center" }}>
-            <div style={{
-              fontSize: "3rem",
-              marginBottom: "16px",
-              animation: "float1 4s ease-in-out infinite"
-            }}>
-              🎉
-            </div>
             <h2 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--navy)", marginBottom: "8px" }}>
-              내 작업 공간이 준비됐어요!
+              카드가 이렇게 만들어져요
             </h2>
             <p style={{ fontSize: "0.88rem", color: "var(--ink-muted)", marginBottom: "28px", lineHeight: 1.5 }}>
-              <strong>{displayName}</strong> 님, 이제 사진만 올리면<br />
-              포퐄이 작업과 이력을 정리해드려요.
+              내용을 확인한 뒤 Google로 연결하면 바로 저장·공개됩니다.
             </p>
-            <div style={{
-              background: "#FFFFFF",
-              padding: "16px",
-              borderRadius: "12px",
-              border: "1px dashed var(--border-dark)",
-              textAlign: "left",
-              fontSize: "0.88rem",
-              marginBottom: "32px"
-            }}>
-              <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>유형:</span> <strong>개인 예술가</strong></div>
-              <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>주소:</span> <strong>popok.kr/{username}</strong></div>
-              <div style={{ marginBottom: "6px" }}><span style={{ color: "var(--ink-muted)" }}>장르:</span> <strong>{genre}</strong></div>
-              <div><span style={{ color: "var(--ink-muted)" }}>역할:</span> <strong>{role}</strong></div>
+            <div style={{ maxWidth: "310px", margin: "0 auto 18px" }}>
+              <PopokCard
+                name={displayName}
+                nameEn={displayNameEn || undefined}
+                genre={genre}
+                instagram={null}
+                id={username || "preview"}
+                slug={username || "preview"}
+              />
             </div>
+            <p style={{ margin: 0, color: "var(--ink-muted)", fontSize: ".72rem" }}>카드를 눌러 뒷면도 확인해보세요. 공개 후 사진과 활동 이력을 추가할 수 있어요.</p>
           </div>
         )}
 
@@ -579,7 +577,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName }: {
                   cursor: submitting ? "not-allowed" : "pointer"
                 }}
               >
-                {submitting ? "생성 중..." : "사진 올리러 가기"}
+                {submitting ? (isLoggedIn ? "저장·공개 중..." : "Google 연결 중...") : (isLoggedIn ? "저장하고 공개하기" : "Google로 로그인하고 공개하기")}
               </button>
             )}
           </div>

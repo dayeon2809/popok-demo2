@@ -28,6 +28,128 @@
   --urgent-soft: #FBECEA;
 }
 
+/* Home: opportunities entry and live community totals */
+.home-opportunity-section,
+.home-community-cta {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.home-opportunity-section {
+  padding-top: 64px;
+  border-top: 1px solid var(--border);
+}
+.home-opportunity-card {
+  min-height: 200px;
+  padding: clamp(28px, 4vw, 42px);
+  border: 1.5px solid var(--navy);
+  border-radius: 20px;
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.home-opportunity-copy { min-width: 0; }
+.home-opportunity-eyebrow,
+.home-community-eyebrow {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+.home-opportunity-card h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 3.8vw, 2.4rem);
+  line-height: 1.12;
+  letter-spacing: -.03em;
+  font-weight: 950;
+}
+.home-opportunity-breakdown {
+  margin: 16px 0 0;
+  color: rgba(255,255,255,.65);
+  font-size: .9rem;
+  font-weight: 750;
+}
+.home-opportunity-link,
+.home-community-link {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: none;
+  font-size: .85rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform .2s ease, background-color .2s ease;
+}
+.home-opportunity-link:hover,
+.home-community-link:hover { transform: translateY(-2px); }
+.home-opportunity-link:focus-visible,
+.home-community-link:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.home-community-cta { padding-top: 40px; padding-bottom: 80px; }
+.home-community-card {
+  padding: clamp(30px, 5vw, 48px);
+  border: 1.5px solid var(--navy);
+  border-radius: 20px;
+  background: var(--navy);
+  color: #fff;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+.home-community-eyebrow { margin-bottom: 10px; color: var(--accent); }
+.home-community-intro h2 {
+  max-width: 600px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.7rem, 3.8vw, 2.4rem);
+  font-weight: 950;
+  line-height: 1.08;
+  letter-spacing: -.03em;
+}
+.home-community-link { color: #fff; display: inline-flex; align-items: center; gap: 7px; flex: none; font-size: .78rem; font-weight: 800; text-underline-offset: 3px; }
+.home-community-stats { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255,255,255,.24); border-bottom: 1px solid rgba(255,255,255,.18); }
+.home-community-stats > div { padding: 28px 24px 30px 0; }
+.home-community-stats > div + div { padding-left: 32px; border-left: 1px solid rgba(255,255,255,.18); }
+.home-community-stats dt { color: rgba(255,255,255,.62); font-size: .78rem; font-weight: 800; }
+.home-community-stats dd { margin: 12px 0 0; color: #fff; white-space: nowrap; }
+.home-community-stats strong { font-size: clamp(3.5rem, 8vw, 6.5rem); line-height: .9; letter-spacing: -.07em; }
+.home-community-stats strong { color: var(--accent); }
+.home-community-stats span { margin-left: 5px; color: rgba(255,255,255,.72); font-size: .86rem; font-weight: 850; }
+.home-community-footnote { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.home-community-footnote p { margin: 0; color: rgba(255,255,255,.62); font-size: .85rem; font-weight: 650; }
+
+@media (max-width: 720px) {
+  .home-opportunity-section,
+  .home-community-cta { padding-left: 16px; padding-right: 16px; }
+  .home-opportunity-section { padding-top: 48px; }
+  .home-opportunity-card { min-height: 0; padding: 30px 24px; border-radius: 20px; align-items: flex-start; flex-direction: column; }
+  .home-opportunity-eyebrow { margin-bottom: 18px; }
+  .home-opportunity-card h2 { font-size: 2rem; }
+  .home-opportunity-breakdown { margin-top: 18px; line-height: 1.6; }
+  .home-opportunity-link { width: 100%; }
+  .home-community-cta { padding-bottom: 48px; }
+  .home-community-card { padding: 28px 22px; border-radius: 20px; gap: 24px; }
+  .home-community-stats > div { padding: 22px 10px 24px 0; }
+  .home-community-stats > div + div { padding-left: 18px; }
+  .home-community-stats strong { font-size: clamp(3rem, 14vw, 4.5rem); }
+  .home-community-footnote { align-items: flex-start; flex-direction: column; gap: 10px; }
+}
+
+@media (max-width: 420px) {
+  .home-community-stats { grid-template-columns: 1fr; gap: 24px; }
+  .home-community-stats > div { padding: 22px 0; }
+  .home-community-stats > div + div { padding: 0 0 22px; border-left: 0; }
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: #FFFFFF; color: var(--ink); scroll-behavior: smooth; overflow-x: hidden; }
 
