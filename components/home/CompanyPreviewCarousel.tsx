@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Company } from "@/types";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface CompanyPreviewCarouselProps {
   title: string;
@@ -165,7 +166,7 @@ export default function CompanyPreviewCarousel({ title, subtitle, companies, mor
             >
               <div style={{ width: "100%", aspectRatio: "4/3", overflow: "hidden", background: "#EAE6DD", position: "relative" }}>
                 {image ? (
-                  <img src={image} alt={c.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={getListImageUrl(image, 600)} alt={c.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2.4rem", fontWeight: 800, color: "var(--accent-dark)" }}>
                     {c.name.charAt(0)}

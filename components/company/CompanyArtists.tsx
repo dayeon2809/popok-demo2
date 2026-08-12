@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { Company } from "@/types";
 
 interface CompanyArtistsProps {
@@ -108,8 +109,10 @@ export default function CompanyArtists({ company, artists = [] }: CompanyArtists
                 className="artist-profile-card"
               >
                 <img
-                  src={avatarUrl}
+                  src={getListImageUrl(avatarUrl, 96)}
                   alt={artist.name}
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     width: "44px",
                     height: "44px",

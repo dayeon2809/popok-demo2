@@ -1,5 +1,7 @@
 "use client";
 
+import { getListImageUrl } from "@/lib/imageUrls";
+
 interface HeroWork {
   id: string;
   title: string;
@@ -41,7 +43,14 @@ export default function ArtistVisualHero({ work, fallbackImage, artistName, onOp
           }
         `,
       }} />
-      <img src={image} alt={work?.title || artistName} className="artist-visual-hero-img" />
+      {/* Above the fold — stays eager so the hero is not delayed, but still
+          goes through the resize proxy instead of pulling the full original. */}
+      <img
+        src={getListImageUrl(image, 600)}
+        alt={work?.title || artistName}
+        className="artist-visual-hero-img"
+        decoding="async"
+      />
 
       {work && (work.title || work.year || work.role) && (
         <div

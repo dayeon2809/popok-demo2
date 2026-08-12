@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Lightbox from "@/components/Lightbox";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 
@@ -36,7 +37,7 @@ export default function ArtistImageFeed({ images }: ArtistImageFeedProps) {
             }}
           >
             <img
-              src={failedSrcs.has(src) ? FALLBACK_IMAGE : src}
+              src={failedSrcs.has(src) ? FALLBACK_IMAGE : getListImageUrl(src, 600)}
               alt=""
               loading="lazy"
               onError={() => setFailedSrcs((prev) => new Set(prev).add(src))}

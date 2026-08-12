@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
+import { getListImageUrl } from "@/lib/imageUrls";
 import type { Company } from "@/types";
 
 export interface RepresentativeArtist {
@@ -213,9 +214,9 @@ export default function CompanyRepresentativeCard({
 
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", textAlign: "center" }}>
             {representative.profile_image_url ? (
-              <img src={representative.profile_image_url} alt="" className="rep-avatar" />
+              <img src={getListImageUrl(representative.profile_image_url, 128)} alt="" className="rep-avatar" loading="lazy" decoding="async" />
             ) : company.logo_url ? (
-              <img src={company.logo_url} alt="" className="rep-avatar" />
+              <img src={getListImageUrl(company.logo_url, 128)} alt="" className="rep-avatar" loading="lazy" decoding="async" />
             ) : (
               <div className="rep-avatar rep-avatar-fallback">{initials}</div>
             )}
@@ -246,8 +247,10 @@ export default function CompanyRepresentativeCard({
           >
             {company.logo_url && (
               <img
-                src={company.logo_url}
+                src={getListImageUrl(company.logo_url, 32)}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 style={{ width: "16px", height: "16px", borderRadius: "3px", objectFit: "cover", flexShrink: 0 }}
               />
             )}
@@ -319,7 +322,7 @@ export default function CompanyRepresentativeCard({
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", textAlign: "center" }}>
         {company.logo_url ? (
-          <img src={company.logo_url} alt="" className="brand-avatar" />
+          <img src={getListImageUrl(company.logo_url, 128)} alt="" className="brand-avatar" loading="lazy" decoding="async" />
         ) : (
           <div
             className="brand-avatar"

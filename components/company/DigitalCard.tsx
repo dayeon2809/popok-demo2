@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import Link from "next/link";
 import type { Company } from "@/types";
 import { getCompanyPath, getCompanyPublicUrl } from "@/lib/publicProfileUrls";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface DigitalCardProps {
   company: Company;
@@ -166,9 +167,14 @@ export default function DigitalCard({
               position: "relative"
             }}>
               <img
-                src={company.logo_url || company.profile_image_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(company.name)}`}
+                src={getListImageUrl(
+                  company.logo_url || company.profile_image_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(company.name)}`,
+                  600
+                )}
                 alt={company.name}
                 className="popok-card-img"
+                loading="lazy"
+                decoding="async"
                 style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}
               />
               {/* Little Lime Accent Label */}

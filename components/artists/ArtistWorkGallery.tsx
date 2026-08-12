@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 const FALLBACK_IMAGE = "/images/placeholders/cake-placeholder.png";
 const COLLAPSED_HEIGHT = 640;
@@ -99,7 +100,7 @@ function GalleryTile({ item, onSelectWork }: { item: GalleryItem; onSelectWork: 
       }}
     >
       <img
-        src={failed ? FALLBACK_IMAGE : item.src}
+        src={failed ? FALLBACK_IMAGE : getListImageUrl(item.src, 384)}
         alt={work.title}
         loading="lazy"
         onError={() => setFailed(true)}

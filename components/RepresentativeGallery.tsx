@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Lightbox from "@/components/Lightbox";
+import { getListImageUrl } from "@/lib/imageUrls";
 
 interface RepresentativeGalleryProps {
   images: string[] | null | undefined;
@@ -97,7 +98,16 @@ export default function RepresentativeGallery({ images }: RepresentativeGalleryP
             onClick={() => setLightboxIndex(idx)}
             aria-label={`대표 이미지 ${idx + 1} 크게 보기`}
           >
-            <img src={src} alt={`대표 이미지 ${idx + 1}`} loading={idx === 0 ? "eager" : "lazy"} />
+            {/* Grid thumbnails go through the resize proxy. The lightbox below
+                still opens the original, since the proxy caps output at 600px
+                and a zoomed view is user-initiated (rare) rather than loaded
+                for every visitor. */}
+            <img
+              src={getListImageUrl(src, 600)}
+              alt={`대표 이미지 ${idx + 1}`}
+              loading={idx === 0 ? "eager" : "lazy"}
+              decoding="async"
+            />
           </button>
         ))}
       </div>
