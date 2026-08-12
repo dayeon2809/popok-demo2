@@ -39,12 +39,20 @@ const BULK_SCRAPERS = [
 // Never useful in search results, and the admin tree must not be advertised.
 const PRIVATE_PATHS = ["/admin", "/api/", "/my-popok", "/login", "/signup"];
 
+// /api/image is the exception that has to be carved back out. Since the resize
+// proxy was wired into every public surface, it serves the actual photographs
+// on every page — so a blanket Disallow on /api/ would stop Googlebot fetching
+// them while it renders, and the crawler would see pages with no images on
+// them. A more specific Allow wins over a broader Disallow, so this line has
+// to stay ahead of PRIVATE_PATHS above.
+const RENDER_REQUIRED_PATHS = ["/api/image"];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", ...RENDER_REQUIRED_PATHS],
         disallow: PRIVATE_PATHS,
       },
       ...BULK_SCRAPERS.map((userAgent) => ({
