@@ -25,7 +25,7 @@ export default function VisualFeedCard({ item, onCtaClick, ctaHref }: VisualFeed
   const [failed, setFailed] = useState(false);
 
   if (item.kind === "cta") {
-    return <FeedCtaCard href={ctaHref || "/auth"} onClick={onCtaClick} />;
+    return <FeedCtaCard href={ctaHref || "/onboarding"} onClick={onCtaClick} />;
   }
   const isReal = item.source === "real";
   const clickable = isReal && Boolean(item.href);

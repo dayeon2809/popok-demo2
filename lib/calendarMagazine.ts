@@ -29,13 +29,20 @@ function upcomingOnly(items: Performance[], today: string) {
 }
 
 export function selectMagazineCover(items: Performance[], referenceDate = new Date()): Performance | null {
+  return selectMagazineCovers(items, referenceDate, 1)[0] || null;
+}
+
+export function selectMagazineCovers(items: Performance[], referenceDate = new Date(), limit = 4): Performance[] {
   const today = getSeoulToday(referenceDate);
   const candidates = upcomingOnly(items, today).sort((a, b) => (a.startDate || "9999").localeCompare(b.startDate || "9999"));
-  // Editorial selection first, then a POPOK-linked production, then the nearest performance.
-  return candidates.find((item) => item.featured)
-    || candidates.find((item) => item.companyId || item.relatedArtists?.length)
-    || candidates[0]
-    || null;
+  // Editorial selections first, then POPOK-linked productions, then the
+  // nearest performances. Preserve date order inside each priority group.
+  return [...candidates]
+    .sort((a, b) => {
+      const priority = (item: Performance) => item.featured ? 0 : (item.companyId || item.relatedArtists?.length) ? 1 : 2;
+      return priority(a) - priority(b) || (a.startDate || "9999").localeCompare(b.startDate || "9999");
+    })
+    .slice(0, Math.max(1, limit));
 }
 
 export function buildPerformanceShelves(items: Performance[], referenceDate = new Date()): PerformanceShelf[] {

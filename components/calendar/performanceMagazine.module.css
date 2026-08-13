@@ -130,3 +130,119 @@
 .criticGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.criticCard{display:flex;min-height:310px;flex-direction:column;padding:34px;border:1px solid var(--border);border-radius:24px;background:#fff}.criticCard>p{margin:0;color:var(--editorial-blue);font-size:.67rem;font-weight:900;letter-spacing:.12em}.criticCard h2{margin:15px 0 0;color:var(--navy);font-size:clamp(1.35rem,2.5vw,2rem);line-height:1.35;letter-spacing:-.04em}.criticCard blockquote{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin:20px 0 0;color:var(--ink-muted);font-size:.86rem;line-height:1.75}.criticCard>div{display:flex;gap:12px;align-items:center;margin-top:auto;padding-top:26px;color:var(--ink-muted);font-size:.7rem}.criticCard>div a{color:var(--navy);font-weight:850}.criticCard>a{display:inline-block;margin-top:15px;color:var(--navy);font-size:.76rem;font-weight:900}.criticCard:focus-within{outline:3px solid var(--accent);outline-offset:3px}
 .criticCard>.reviewPerformance{display:block;margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--editorial-blue-soft);color:var(--navy)}.reviewPerformance span{display:block;margin-bottom:4px;color:var(--editorial-blue);font-size:.61rem;font-weight:900;letter-spacing:.1em}.reviewPerformance strong{font-size:.8rem;line-height:1.45}.criticCard>.reviewMeta{margin-top:auto;padding-top:26px}
 @media(max-width:700px){.criticGrid{grid-template-columns:1fr}.criticCard{min-height:280px;padding:25px;border-radius:20px}}
+
+/* Keep the magazine's lower sections on the same POPOK type scale used by
+   the rest of the product instead of switching to an oversized editorial face. */
+.page{font-family:inherit}
+.sectionTitle h2{
+  font-family:inherit;
+  font-size:clamp(1.7rem,3.8vw,2.4rem);
+  font-weight:900;
+  line-height:1.15;
+  letter-spacing:-.045em;
+}
+.shelf>h3,.schedule>section>h3{
+  font-family:inherit;
+  font-size:.9rem;
+  letter-spacing:-.01em;
+}
+.newsletter h2{
+  font-family:inherit;
+  font-size:clamp(1.7rem,3.8vw,2.4rem);
+  font-weight:900;
+  line-height:1.15;
+  letter-spacing:-.045em;
+}
+@media(max-width:800px){.sectionTitle h2{font-size:clamp(1.7rem,8vw,2.35rem)}}
+
+/* Featured-performance carousel */
+.coverTrack{
+  display:flex;
+  width:100%;
+  height:100%;
+  transition:transform .7s cubic-bezier(.16,1,.3,1);
+  will-change:transform;
+}
+.coverSlide{
+  position:relative;
+  flex:0 0 100%;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+}
+.coverControls{
+  position:absolute;
+  z-index:4;
+  right:clamp(20px,4vw,54px);
+  bottom:clamp(20px,4vw,42px);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#fff;
+}
+.coverControls>button{
+  width:42px;
+  height:42px;
+  border:1px solid rgba(255,255,255,.55);
+  border-radius:50%;
+  background:rgba(10,17,26,.28);
+  color:#fff;
+  font:inherit;
+  font-size:1rem;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+}
+.coverControls>span{min-width:50px;text-align:center;font-size:.68rem;font-weight:850;letter-spacing:.08em}
+.coverDots{display:flex;align-items:center;gap:6px;margin-right:6px}
+.coverDots button{
+  width:18px;
+  height:3px;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.38);
+  cursor:pointer;
+}
+.coverDots button[aria-current="true"]{width:34px;background:var(--accent)}
+@media(max-width:800px){
+  .coverControls{left:18px;right:18px;justify-content:flex-end}
+  .coverDots{margin-right:auto}
+  .coverControls>button{width:38px;height:38px}
+}
+@media(prefers-reduced-motion:reduce){.coverTrack{transition:none}}
+
+/* Critics' review feed — editorial grid with real profile/review thumbnails. */
+.criticGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--navy);border-left:1px solid var(--navy)}
+.criticCard{
+  min-height:0;
+  padding:22px;
+  border:0;
+  border-right:1px solid var(--navy);
+  border-bottom:1px solid var(--navy);
+  border-radius:0;
+}
+.criticCard>.criticCardTop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:0;color:var(--ink-muted);font-size:.68rem}
+.criticCardTop p{margin:0;color:var(--editorial-blue);font-size:.66rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.criticCardTop time{white-space:nowrap;font-size:.68rem;font-weight:750}
+.criticCard h2{margin:22px 0 0;font-family:inherit;font-size:clamp(1.05rem,1.8vw,1.35rem);font-weight:900;line-height:1.35;letter-spacing:-.035em}
+.criticCard blockquote{-webkit-line-clamp:2;margin:12px 0 0;font-size:.78rem;line-height:1.65}
+.criticCard>.criticThumbnail{display:block;position:relative;aspect-ratio:16/10;overflow:hidden;margin:24px 0 0;padding:0;border-radius:18px;background:var(--bg-warm);color:var(--ink-muted);text-decoration:none}
+.criticThumbnail img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+.criticThumbnail:hover img{transform:scale(1.025)}
+.criticThumbnail>span{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:18px;font-size:.68rem;font-weight:900;letter-spacing:.1em}
+.criticThumbnail>span b{font-size:2rem;letter-spacing:-.06em;color:var(--navy)}
+.criticCard>.reviewPerformance{display:block;margin:14px 0 0;padding:11px 13px}
+.criticCard>.reviewMeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);font-size:.7rem}
+.criticCard>.reviewMeta a:last-child{margin-left:auto;color:var(--navy);font-weight:900;text-decoration:none}
+@media(max-width:900px){.criticGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.criticGrid{grid-template-columns:1fr}.criticCard{padding:18px}.criticCard>.criticThumbnail{border-radius:16px}}
+@media(prefers-reduced-motion:reduce){.criticThumbnail img{transition:none}.criticThumbnail:hover img{transform:none}}
+
+/* Calendar genre palette: every event bar inside a day cell carries its own
+   genre colour, including musical and unclassified entries. */
+.dayLink[data-genre="dance"]{background:#fff0f2}.dayLink[data-genre="dance"] i{background:#e85f73}
+.dayLink[data-genre="music"]{background:#edf3ff}.dayLink[data-genre="music"] i{background:#4f7fd5}
+.dayLink[data-genre="theater"]{background:#f6effa}.dayLink[data-genre="theater"] i{background:#9563b5}
+.dayLink[data-genre="musical"]{background:#fff3e7}.dayLink[data-genre="musical"] i{background:#e48736}
+.dayLink[data-genre="traditional"]{background:#edf8f3}.dayLink[data-genre="traditional"] i{background:#318f68}
+.dayLink[data-genre="unclassified"]{background:#f1f1ef}.dayLink[data-genre="unclassified"] i{background:#858984}

@@ -89,7 +89,7 @@ export default function HomeClientV2({
   // Upload panel.
   const handleUploadClick = () => {
     const uploadPath = "/my-popok?upload=1";
-    router.push(isLoggedIn ? uploadPath : `/auth?redirect=${encodeURIComponent(uploadPath)}`);
+    router.push(isLoggedIn ? uploadPath : "/onboarding");
   };
 
   const handleScrollToFeed = () => {

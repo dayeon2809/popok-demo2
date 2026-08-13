@@ -13,7 +13,7 @@ import styles from "./performanceMagazine.module.css";
 
 type Locale = "ko" | "en";
 
-const GENRES: PerformanceGenre[] = ["all", "music", "dance", "theater", "musical", "traditional"];
+const GENRES: PerformanceGenre[] = ["all", "music", "dance", "theater", "musical", "traditional", "unclassified"];
 const genreLabel = { all:{ko:"전체",en:"All"},music:{ko:"음악",en:"Music"},dance:{ko:"무용",en:"Dance"},theater:{ko:"연극",en:"Theatre"},musical:{ko:"뮤지컬",en:"Musical"},traditional:{ko:"국악",en:"Korean Traditional"},unclassified:{ko:"미분류",en:"Unclassified"} } as const;
 
 const copy = {

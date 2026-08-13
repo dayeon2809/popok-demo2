@@ -119,3 +119,53 @@
 /* Same title typography as the About POPOK hero and softer card geometry. */
 .hero h1{font-size:clamp(2.2rem,6vw,3.6rem);line-height:1.25;letter-spacing:-.04em}.opportunityCard{border-radius:24px}.quickCard{border-radius:22px}.aiBanner{border-radius:24px}
 @media(max-width:620px){.hero h1{font-size:clamp(2.2rem,10vw,3.25rem)}.opportunityCard{border-radius:20px}}
+
+/* Opportunity hero: the dark POPOK editorial header used in the approved
+   opportunity-page direction. The live counts and actions remain unchanged. */
+.hero{
+  background:#171411;
+  color:#fff;
+  padding:88px 24px 84px;
+}
+.hero h1{
+  color:#fff;
+  font-size:clamp(2.2rem,6vw,3.6rem);
+  font-weight:900;
+  line-height:1.25;
+  letter-spacing:-.04em;
+}
+.hero h1 :global(.seen-highlight)::after{
+  display:none;
+  animation:none;
+}
+.eyebrowBadge{
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.eyebrowDot{display:none}
+.eyebrowText{
+  color:#91aee8;
+  font-size:.72rem;
+  font-weight:900;
+  letter-spacing:.18em;
+}
+.heroDescription{color:rgba(255,255,255,.68)}
+.primaryButton{border-radius:12px;box-shadow:none}
+.secondaryButton{
+  border-color:rgba(255,255,255,.28);
+  border-radius:12px;
+  color:rgba(255,255,255,.62);
+}
+.statCard{
+  background:#fff;
+  color:#171411;
+  border-color:rgba(255,255,255,.16);
+  box-shadow:none;
+}
+.statCard span,.statCard strong,.statCard p{color:#171411}
+@media(max-width:620px){
+  .hero{padding:64px 18px}
+  .hero h1{font-size:clamp(2.2rem,10vw,3.25rem)}
+}

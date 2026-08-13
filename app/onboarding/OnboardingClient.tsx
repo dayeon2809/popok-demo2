@@ -9,12 +9,15 @@ import { ARTIST_ROLES, getArtistRoleLabel } from "@/lib/artistRoles";
 import { useLanguage } from "@/lib/useLanguage";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import PopokCard from "@/components/PopokCard";
+import { localizePath } from "@/lib/i18n/locale";
 
 const ONBOARDING_DRAFT_KEY = "popok_onboarding_draft_v1";
 
 export default function OnboardingClient({ defaultEmail, defaultDisplayName, isLoggedIn, shouldResume }: { defaultEmail: string; defaultDisplayName: string; isLoggedIn: boolean; shouldResume: boolean }) {
   const router = useRouter();
   const { language } = useLanguage();
+  const en = language === "en";
+  const [profileType, setProfileType] = useState<"individual" | "organization" | null>(shouldResume ? "individual" : null);
 
   // Wizard state
   // /onboarding is now individual-artist-only — organizations apply via
@@ -207,6 +210,59 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName, isL
 
   const GENRE_OPTIONS = ["무용", "현대무용", "발레", "한국무용", "음악", "미술", "배우"];
 
+  if (profileType === null) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "70vh", padding: "24px" }}>
+        <section className="card fade-up" style={{
+          maxWidth: "420px", width: "100%", padding: "48px 32px", textAlign: "center",
+          border: "1.5px solid var(--border)", background: "#FFFFFF", borderRadius: "20px",
+          boxShadow: "0 8px 30px rgba(23, 20, 17, 0.04)",
+        }}>
+          <div style={{ marginBottom: "32px" }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "12px",
+              color: "var(--navy)", fontSize: "2rem", fontWeight: 900, letterSpacing: "-0.04em",
+            }}>
+              POPOK
+              <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--accent)" }} />
+            </div>
+            <p style={{ margin: 0, color: "var(--ink-muted)", fontSize: "0.95rem", lineHeight: 1.5, fontWeight: 500 }}>
+              {en ? <>A lighter way to build your portfolio.<br />Share your artistic practice with one link.</> : <>당신의 포트폴리오를, 더 가볍게.<br />하나의 링크로 예술가의 작업을 연결하세요.</>}
+            </p>
+          </div>
+
+          <div style={{ textAlign: "left" }}>
+            <p style={{ fontSize: "0.8rem", fontWeight: 800, color: "var(--ink-muted)", marginBottom: "12px" }}>
+              {en ? "Which POPOK profile would you like to create?" : "어떤 POPOK을 시작하시겠어요?"}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <button
+              type="button"
+              onClick={() => setProfileType("individual")}
+              style={{ padding: "16px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "#FFFFFF", textAlign: "left", cursor: "pointer", transition: "all 0.15s ease" }}
+            >
+              <div style={{ marginBottom: "4px", color: "var(--navy)", fontSize: "0.95rem", fontWeight: 800 }}>{en ? "Individual artist" : "개인 예술가 (Artist)"}</div>
+              <div style={{ color: "var(--ink-muted)", fontSize: "0.8rem", lineHeight: 1.5 }}>
+                {en ? "Create your artist profile, preview it, and then connect with Google." : "무용수, 안무가, 기획자 등 개인 창작자의 포퐄을 만들어요."}
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(localizePath("/organizations/apply", language))}
+              style={{ padding: "16px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "#FFFFFF", textAlign: "left", cursor: "pointer", transition: "all 0.15s ease" }}
+            >
+              <div style={{ marginBottom: "4px", color: "var(--navy)", fontSize: "0.95rem", fontWeight: 800 }}>{en ? "Organization" : "단체 (Organization)"}</div>
+              <div style={{ color: "var(--ink-muted)", fontSize: "0.8rem", lineHeight: 1.5 }}>
+                {en ? "Apply for a portfolio for your company, collective, or arts project." : "무용단, 기획사, 예술 프로젝트 등 단체 포트폴리오를 신청해요."}
+              </div>
+            </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       display: "flex",
@@ -225,6 +281,25 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName, isL
         boxShadow: "0 10px 40px rgba(23, 20, 17, 0.04)",
         transition: "max-width 0.2s ease"
       }}>
+        {step === 1 && !shouldResume && (
+          <button
+            type="button"
+            onClick={() => setProfileType(null)}
+            style={{
+              display: "block",
+              margin: "0 0 20px",
+              padding: 0,
+              border: 0,
+              background: "transparent",
+              color: "var(--ink-muted)",
+              fontSize: "0.8rem",
+              fontWeight: 750,
+              cursor: "pointer",
+            }}
+          >
+            ← {en ? "Choose a different profile type" : "개인·단체 다시 선택"}
+          </button>
+        )}
         {(
           /* Step indicators */
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "32px", position: "relative" }}>

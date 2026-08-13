@@ -99,7 +99,7 @@ export default function AuthNav() {
   if (!user) {
     return (
       <div className="auth-nav auth-nav-guest" style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-        <Link href="/auth" style={{
+        <Link href="/onboarding" style={{
           textDecoration: "none", fontSize: "0.875rem", fontWeight: 800,
           padding: "10px 20px", borderRadius: "10px",
           display: "inline-flex", alignItems: "center",

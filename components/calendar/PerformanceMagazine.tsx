@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { getPerformanceExternalLink } from "@/lib/performanceLinks";
 import { getCompanyDetailHref } from "@/lib/companyRoute";
-import { buildPerformanceShelves, curateProfiles, selectMagazineCover } from "@/lib/calendarMagazine";
+import { buildPerformanceShelves, curateProfiles, selectMagazineCovers } from "@/lib/calendarMagazine";
 import type { Artist, Company, Performance } from "@/types";
 import ReviewSection, { type MagazineReview } from "./ReviewSection";
 import MagazineImage from "./MagazineImage";
 import MagazineTabs from "./MagazineTabs";
+import MagazineHeroCarousel from "./MagazineHeroCarousel";
 import styles from "./performanceMagazine.module.css";
 import type { ReactNode } from "react";
 
@@ -59,7 +60,7 @@ function PerformanceCard({ performance, locale }: { performance: Performance; lo
 
 export default function PerformanceMagazine({ locale, performances, artists, companies, navigation, discovery }: { locale: Locale; performances: Performance[]; artists: Artist[]; companies: Company[]; navigation?: ReactNode; discovery?: ReactNode }) {
   const t = copy[locale];
-  const cover = selectMagazineCover(performances);
+  const covers = selectMagazineCovers(performances, new Date(), 4);
   const shelves = buildPerformanceShelves(performances);
   const profiles = curateProfiles(artists, companies, performances);
   const reviews: MagazineReview[] = []; // No public review-post model exists yet; keep the section hidden.
@@ -91,10 +92,7 @@ export default function PerformanceMagazine({ locale, performances, artists, com
 
     {navigation}
 
-    {cover ? <section className={styles.cover} aria-label={cover.title}>
-      <div className={styles.coverMedia}>{cover.posterUrl ? <MagazineImage src={cover.posterUrl} alt={`${cover.title} poster`} priority /> : <span aria-hidden="true">POPOK<br />PERFORMANCE</span>}<div className={styles.coverOverlay} /></div>
-      <div className={styles.coverCopy}><p>{cover.featured ? "EDITOR'S PICK" : (cover.category || cover.genre || "PERFORMANCE")}</p><h2>{cover.title}</h2>{cover.description && <span>{cover.description}</span>}<time>{formatDate(cover.startDate, cover.endDate, locale)}{cover.venue ? ` · ${cover.venue}` : ""}</time>{performanceHref(cover) && (performanceHref(cover)!.external ? <a href={performanceHref(cover)!.href} target="_blank" rel="noopener noreferrer">{t.detail} ↗</a> : <Link href={performanceHref(cover)!.href}>{t.detail} →</Link>)}</div>
-    </section> : <div className={styles.heroEmpty}>{t.empty}</div>}
+    {covers.length > 0 ? <MagazineHeroCarousel covers={covers} locale={locale} /> : <div className={styles.heroEmpty}>{t.empty}</div>}
 
     <div className={styles.shell}>
       {shelves.length > 0 ? <section className={styles.section} aria-labelledby="weekly-title"><div className={styles.sectionTitle}><span>{t.weeklySub}</span><h2 id="weekly-title">{t.weekly}</h2></div>{shelves.map((shelf) => <div className={styles.shelf} key={shelf.key}><h3>{t.shelf[shelf.key]}</h3><div className={styles.rail}>{shelf.items.map((performance) => <PerformanceCard key={`${shelf.key}-${performance.id}`} performance={performance} locale={locale} />)}</div></div>)}<Link className={styles.textCta} href={monthlyHref}>{t.all} →</Link></section>

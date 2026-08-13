@@ -325,7 +325,7 @@ export default function Header() {
           })}
           {!user ? (
             <Link
-              href="/auth"
+              href="/onboarding"
               onClick={() => setMenuOpen(false)}
               className="btn-lime"
               style={{

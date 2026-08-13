@@ -113,7 +113,7 @@ export default function ArtistSupportSection() {
         transition={{ duration: 0.5, delay: 0.3 }}
         style={{ marginTop: "28px" }}
       >
-        <Link href="/auth" className="btn-lime" style={{
+        <Link href="/onboarding" className="btn-lime" style={{
           textDecoration: "none",
           padding: "14px 28px",
           borderRadius: "999px",
