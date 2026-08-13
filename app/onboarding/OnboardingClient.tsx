@@ -13,11 +13,11 @@ import { localizePath } from "@/lib/i18n/locale";
 
 const ONBOARDING_DRAFT_KEY = "popok_onboarding_draft_v1";
 
-export default function OnboardingClient({ defaultEmail, defaultDisplayName, isLoggedIn, shouldResume }: { defaultEmail: string; defaultDisplayName: string; isLoggedIn: boolean; shouldResume: boolean }) {
+export default function OnboardingClient({ defaultEmail, defaultDisplayName, isLoggedIn, shouldResume, startAsIndividual = false }: { defaultEmail: string; defaultDisplayName: string; isLoggedIn: boolean; shouldResume: boolean; startAsIndividual?: boolean }) {
   const router = useRouter();
   const { language } = useLanguage();
   const en = language === "en";
-  const [profileType, setProfileType] = useState<"individual" | "organization" | null>(shouldResume ? "individual" : null);
+  const [profileType, setProfileType] = useState<"individual" | "organization" | null>(shouldResume || startAsIndividual ? "individual" : null);
 
   // Wizard state
   // /onboarding is now individual-artist-only — organizations apply via
@@ -238,7 +238,7 @@ export default function OnboardingClient({ defaultEmail, defaultDisplayName, isL
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <button
               type="button"
-              onClick={() => setProfileType("individual")}
+              onClick={() => router.push("/auth?mode=artist")}
               style={{ padding: "16px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "#FFFFFF", textAlign: "left", cursor: "pointer", transition: "all 0.15s ease" }}
             >
               <div style={{ marginBottom: "4px", color: "var(--navy)", fontSize: "0.95rem", fontWeight: 800 }}>{en ? "Individual artist" : "개인 예술가 (Artist)"}</div>
