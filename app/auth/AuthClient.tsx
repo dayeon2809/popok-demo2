@@ -8,14 +8,15 @@ import { localizePath } from "@/lib/i18n/locale";
 
 interface AuthClientProps {
   returnPath?: string | null;
+  initialProfileType?: "artist" | null;
 }
 
-export default function AuthClient({ returnPath }: AuthClientProps) {
+export default function AuthClient({ returnPath, initialProfileType = null }: AuthClientProps) {
   const router = useRouter();
   const { language } = useLanguage();
   const en = language === "en";
   const [loading, setLoading] = useState(false);
-  const [profileType, setProfileType] = useState<"artist" | "organization" | null>(null);
+  const [profileType, setProfileType] = useState<"artist" | "organization" | null>(initialProfileType);
   const supabase = createBrowserSupabaseClient();
 
   const handleGoogleLogin = async () => {
@@ -130,6 +131,9 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
         {/* STEP 2a: 개인 — 기존 Google 로그인 */}
         {profileType === "artist" && (
           <div>
+            <p style={{ margin: "0 0 18px", color: "var(--ink-muted)", fontSize: "0.86rem", lineHeight: 1.6 }}>
+              {en ? "Already have a POPOK account? Sign in with Google." : "이미 POPOK 계정이 있다면 Google로 로그인하세요."}
+            </p>
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
@@ -164,6 +168,28 @@ export default function AuthClient({ returnPath }: AuthClientProps) {
                   <span>{en ? "Continue with Google" : "Google로 계속하기"}</span>
                 </>
               )}
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "22px 0", color: "var(--border-dark)", fontSize: "0.72rem" }}>
+              <span style={{ flex: 1, borderTop: "1px solid var(--border)" }} />
+              <span>{en ? "NEW TO POPOK" : "처음이신가요?"}</span>
+              <span style={{ flex: 1, borderTop: "1px solid var(--border)" }} />
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/onboarding?type=individual")}
+              disabled={loading}
+              className="btn-lime"
+              style={{
+                width: "100%",
+                padding: "14px 20px",
+                borderRadius: "12px",
+                border: "none",
+                fontSize: "0.95rem",
+                fontWeight: 800,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
+            >
+              {en ? "Create my POPOK" : "내 포퐄 만들기"}
             </button>
             <button
               onClick={() => setProfileType(null)}

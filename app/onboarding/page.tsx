@@ -4,8 +4,8 @@ import OnboardingClient from "./OnboardingClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ resume?: string }> }) {
-  const { resume } = await searchParams;
+export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ resume?: string; type?: string }> }) {
+  const { resume, type } = await searchParams;
   const supabase = await createServerSupabaseClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
@@ -35,6 +35,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
       defaultDisplayName={defaultDisplayName}
       isLoggedIn={Boolean(user)}
       shouldResume={resume === "1"}
+      startAsIndividual={type === "individual"}
     />
   );
 }

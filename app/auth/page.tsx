@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function AuthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string }>;
+  searchParams: Promise<{ redirect?: string; mode?: string }>;
 }) {
-  const { redirect: redirectParam } = await searchParams;
+  const { redirect: redirectParam, mode } = await searchParams;
   const returnPath = isSafeRelativeRedirect(redirectParam) ? redirectParam! : null;
 
   const supabase = await createServerSupabaseClient();
@@ -33,5 +33,5 @@ export default async function AuthPage({
     }
   }
 
-  return <AuthClient returnPath={returnPath} />;
+  return <AuthClient returnPath={returnPath} initialProfileType={mode === "artist" ? "artist" : null} />;
 }
