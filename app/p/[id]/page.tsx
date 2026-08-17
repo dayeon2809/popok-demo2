@@ -1,4 +1,5 @@
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { PUBLIC_CARD_COLUMNS, toPublicCardRecord, type PublicCardRecord } from "@/lib/publicCardRecord";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ClientCard from "./client-card";
@@ -14,11 +15,14 @@ export default async function CardResultPage({ params }: Props) {
   const decodedId = decodeURIComponent(id).trim();
 
   const supabase = getSupabaseServer();
-  let record = null;
+  let record: PublicCardRecord | null = null;
 
   try {
     const numericId = Number(decodedId);
-    let query = supabase.from("submissions").select("*");
+    // select("*") 였다. 이 페이지는 service role 키로 읽으므로 RLS 가 걸러 주지
+    // 않고, 읽은 행은 그대로 클라이언트 컴포넌트로 넘어간다 — email·claim_code·
+    // additional_requests 까지 RSC 페이로드에 실려 나갔다. lib/publicCardRecord.ts 참조.
+    let query = supabase.from("submissions").select(PUBLIC_CARD_COLUMNS);
 
     if (!isNaN(numericId)) {
       query = query.eq("id", numericId);
@@ -36,7 +40,7 @@ export default async function CardResultPage({ params }: Props) {
       console.error("[CardResultPage] Supabase error:", error);
     }
     
-    record = data;
+    record = toPublicCardRecord(data);
   } catch (err) {
     console.error("[CardResultPage] Query error:", err);
   }

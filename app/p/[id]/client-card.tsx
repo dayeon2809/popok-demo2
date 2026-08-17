@@ -14,7 +14,6 @@ interface Props {
     name: string;
     genre: string | null;
     instagram: string | null;
-    created_at: string | null;
     profile_image_url?: string | null;
     profile_image_urls?: Array<string> | null;
     motion_video_url?: string | null;
