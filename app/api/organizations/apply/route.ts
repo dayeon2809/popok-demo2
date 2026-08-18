@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { checkRateLimit, clientRateLimitKey, rateLimitedResponse } from "@/lib/simpleRateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// TODO: rate limit this public endpoint if abuse is observed (no rate-limit infra in this project yet)
+// 로그인 없이 신청을 받는 공개 엔드포인트다. 예전에는 "요청 제한 인프라가 아직
+// 없다"는 TODO 만 있었는데, lib/simpleRateLimit.ts 가 생겼으므로 채운다.
+const APPLY_WINDOW_MS = 10 * 60 * 1000;
+const APPLY_MAX = 5;
 
 // The resume file itself is uploaded separately through POST /api/upload
 // (type=organization-resume) before this route is ever called — this route
@@ -37,6 +41,12 @@ function getString(formData: FormData, key: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(clientRateLimitKey(req, "organizations-apply"), {
+    windowMs: APPLY_WINDOW_MS,
+    max: APPLY_MAX,
+  });
+  if (!limit.allowed) return rateLimitedResponse(limit.retryAfterMs);
+
   try {
     const formData = await req.formData();
 

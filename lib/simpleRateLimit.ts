@@ -48,3 +48,37 @@ export function checkRateLimit(key: string, { windowMs, max }: { windowMs: numbe
 
   return { allowed: true, retryAfterMs: 0 };
 }
+
+/**
+ * 요청자를 가리키는 rate limit 키를 만든다.
+ *
+ * Vercel 뒤에서는 실제 IP 가 x-forwarded-for 맨 앞에 온다. 헤더는 위조될 수
+ * 있으므로 이것은 엄밀한 신원이 아니라 남용을 늦추기 위한 최선의 근사다.
+ * 같은 규칙을 라우트마다 다시 쓰지 않도록 여기에 둔다.
+ */
+export function clientRateLimitKey(
+  req: { headers: { get(name: string): string | null } },
+  prefix: string
+): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const ip = forwardedFor?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+  return `${prefix}:${ip}`;
+}
+
+/** 429 응답 한 벌. 라우트마다 문구와 헤더를 다시 쓰지 않도록. */
+export function rateLimitedResponse(retryAfterMs: number): Response {
+  return new Response(
+    JSON.stringify({
+      success: false,
+      error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.",
+      code: "RATE_LIMITED",
+    }),
+    {
+      status: 429,
+      headers: {
+        "content-type": "application/json",
+        "Retry-After": String(Math.ceil(retryAfterMs / 1000)),
+      },
+    }
+  );
+}

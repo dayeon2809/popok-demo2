@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient, getSupabaseServer } from "@/lib/supabaseServer";
+import { checkRateLimit, clientRateLimitKey, rateLimitedResponse } from "@/lib/simpleRateLimit";
 
 export const dynamic = "force-dynamic";
 
+// 로그인은 필요하지만, 한 계정이 단체 소유권 신청을 무한히 넣을 이유는 없다.
+const CLAIM_WINDOW_MS = 10 * 60 * 1000;
+const CLAIM_MAX = 10;
+
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(clientRateLimitKey(req, "company-claim"), {
+    windowMs: CLAIM_WINDOW_MS,
+    max: CLAIM_MAX,
+  });
+  if (!limit.allowed) return rateLimitedResponse(limit.retryAfterMs);
+
   try {
     const supabaseUserClient = await createServerSupabaseClient();
     const { data: { user }, error: authError } = await supabaseUserClient.auth.getUser();

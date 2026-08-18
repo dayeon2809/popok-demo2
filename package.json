@@ -24,6 +24,7 @@
     "test:public-card": "node --test --experimental-strip-types tests/publicCardRecord.test.ts",
     "test:upload-policy": "node --test --experimental-strip-types tests/uploadPolicy.test.ts",
     "test:admin-api-auth": "node --test --experimental-strip-types tests/adminApiAuth.test.ts",
+    "test:rate-limits": "node --test --experimental-strip-types tests/rateLimits.test.ts",
     "test:opportunities": "node --test --experimental-strip-types tests/opportunities/*.test.ts",
     "opportunities:crawl": "node --experimental-strip-types scripts/opportunities-crawl.ts",
     "opportunities:artnuri:bulk": "node --experimental-strip-types scripts/artnuri-bulk-publish.ts",

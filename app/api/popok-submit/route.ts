@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { isSupportedMotionVideoUrl } from "@/lib/videoLinks";
+import { checkRateLimit, clientRateLimitKey, rateLimitedResponse } from "@/lib/simpleRateLimit";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,17 @@ function generateClaimCode(): string {
   return `poc_${randomHex}`;
 }
 
+// 로그인 없이 행을 만드는 공개 폼이라 상한이 없으면 그대로 스팸 통로가 된다.
+const SUBMIT_WINDOW_MS = 10 * 60 * 1000;
+const SUBMIT_MAX = 5;
+
 export async function POST(req: NextRequest) {
+  const limit = checkRateLimit(clientRateLimitKey(req, "popok-submit"), {
+    windowMs: SUBMIT_WINDOW_MS,
+    max: SUBMIT_MAX,
+  });
+  if (!limit.allowed) return rateLimitedResponse(limit.retryAfterMs);
+
   try {
     let body: any;
     try {
