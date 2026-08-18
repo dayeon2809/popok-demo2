@@ -1,20 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import { getSupabaseServer } from "@/lib/supabaseServer";
+import { getSupabaseServer, createServerSupabaseClient } from "@/lib/supabaseServer";
 import { detectResumeFileExtension, mimeTypeForExtension } from "@/lib/resumeFileTypes";
+import { isAdminAuthenticated } from "@/lib/admin";
+import { checkRateLimit } from "@/lib/simpleRateLimit";
+import {
+  decideImageUpload,
+  ORG_RESUME_BUCKET,
+  RESUME_MAX_FILE_SIZE,
+} from "@/lib/uploadPolicy";
 
 export const dynamic = "force-dynamic";
 
 const UPLOAD_FAILURE_MESSAGE = "이미지 업로드에 실패했어요. 다시 시도해주세요.";
 const RESUME_UPLOAD_FAILURE_MESSAGE = "파일 업로드에 실패했어요. 다시 시도해주세요.";
-const RESUME_MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB — matches organizations/apply's resume limit
-
 // Organization application resumes go to their own private bucket (never
 // the public "artist-media" bucket logos use) so a public URL is never
 // generated for them — only the storage path, which is later read back via
 // a short-lived signed URL in /api/admin/organization-applications/[id]/resume.
-const ORG_RESUME_BUCKET = "org-applications";
+// The bucket name and the size cap now live in lib/uploadPolicy.ts alongside
+// the image rules, so there is one place that says what this route accepts.
 const ORG_RESUME_PATH_PREFIX = "organizations/resumes";
+
+// This endpoint writes with the service role key, so nothing downstream
+// limits how often it can be called. Without a ceiling a single client can
+// fill the bucket — that is storage cost and egress, not just clutter.
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_UPLOADS = 60;
+
+function getClientKey(req: NextRequest): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const ip = forwardedFor?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+  return `upload:${ip}`;
+}
+
+/**
+ * 관리자 세션이거나 로그인한 사용자면 true.
+ *
+ * 관리자 화면은 Supabase 로그인 없이 별도 비밀번호 세션으로 들어오므로 둘 다 본다.
+ */
+async function isAuthenticatedRequest(): Promise<boolean> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) return true;
+  } catch {
+    // 세션이 없거나 쿠키를 읽지 못한 경우 — 관리자 세션을 마저 확인한다.
+  }
+  return isAdminAuthenticated();
+}
 
 function devError(label: string, err: unknown) {
   if (process.env.NODE_ENV !== "production") {
@@ -22,23 +56,18 @@ function devError(label: string, err: unknown) {
   }
 }
 
-// Storage object key에는 영문 소문자 / 숫자 / 하이픈 / 언더스코어 / 슬래시만 남기고,
-// 사용자가 입력한 이름 등 원본 문자열이 섞여 들어와도 항상 안전한 경로만 생성되도록 한다.
-function sanitizeStoragePath(input: string): string {
-  return input
-    .toLowerCase()
-    .split("/")
-    .map((segment) =>
-      segment
-        .replace(/[^a-z0-9\-_]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-+|-+$/g, "")
-    )
-    .filter(Boolean)
-    .join("/");
-}
-
 export async function POST(req: NextRequest) {
+  const rateLimit = checkRateLimit(getClientKey(req), {
+    windowMs: RATE_LIMIT_WINDOW_MS,
+    max: RATE_LIMIT_MAX_UPLOADS,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, error: "업로드 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.", code: "RATE_LIMITED" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rateLimit.retryAfterMs / 1000)) } }
+    );
+  }
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
@@ -61,21 +90,33 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // 버킷·경로·용량·형식·로그인 여부를 한 번에 판단한다. 규칙은 lib/uploadPolicy.ts.
+    // 확장자와 Content-Type 은 브라우저가 신고한 값이 아니라 파일 앞머리에서 정해진다.
+    const decision = decideImageUpload({
+      bucket,
+      path: rawPathPrefix,
+      declaredMime: file.type || "",
+      size: file.size,
+      head: new Uint8Array(bytes.slice(0, 16)),
+      isAuthenticated: await isAuthenticatedRequest(),
+    });
+
+    if (!decision.ok) {
+      return NextResponse.json({ success: false, error: decision.error }, { status: decision.status });
+    }
+
     const supabase = getSupabaseServer();
 
     // 파일명은 사용자가 올린 원본 파일명을 절대 사용하지 않고 랜덤 UUID로 대체한다.
-    const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-    const safeFileName = `${randomUUID()}.${fileExt}`;
-
-    const pathPrefix = sanitizeStoragePath(rawPathPrefix) || "submissions";
-    const filePath = `${pathPrefix}/${safeFileName}`;
+    const safeFileName = `${randomUUID()}.${decision.extension}`;
+    const filePath = `${decision.pathPrefix}/${safeFileName}`;
 
     const { error } = await supabase.storage
-      .from(bucket)
+      .from(decision.bucket)
       .upload(filePath, buffer, {
-        contentType: file.type,
+        contentType: decision.contentType,
         cacheControl: "31536000",
-        upsert: true,
+        upsert: false,
       });
 
     if (error) {
@@ -88,7 +129,7 @@ export async function POST(req: NextRequest) {
 
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from(bucket)
+      .from(decision.bucket)
       .getPublicUrl(filePath);
 
     return NextResponse.json({
