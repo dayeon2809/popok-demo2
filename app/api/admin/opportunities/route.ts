@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { checkAdminAuth } from "@/lib/adminAuth";
+import { requireAdminApi } from "@/lib/admin";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { normalizeOpportunity } from "@/lib/opportunities/normalize";
 
 export const dynamic = "force-dynamic";
-export async function GET(req: NextRequest) { if (!checkAdminAuth(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(req: NextRequest) { const adminError = await requireAdminApi(); if (adminError) return adminError;
   const q = new URL(req.url).searchParams; let query = getSupabaseServer().from("opportunities" as never).select("*").order("created_at", { ascending: false }).limit(200);
   const source = q.get("source"); const status = q.get("status");
   if (source) query = query.eq("source", source); if (status) query = query.eq("publication_status", status);
   if (q.get("search")) query = query.or(`title.ilike.%${q.get("search")?.replace(/[%_,]/g, "") }%,organization.ilike.%${q.get("search")?.replace(/[%_,]/g, "")}%`);
   const { data, error } = await query; return error ? NextResponse.json({ error: error.message }, { status: 500 }) : NextResponse.json({ data }); }
 
-export async function POST(req: NextRequest) { if (!checkAdminAuth(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); const body = await req.json();
+export async function POST(req: NextRequest) { const adminError = await requireAdminApi(); if (adminError) return adminError; const body = await req.json();
   if (!body.title?.trim() || !body.organization?.trim() || !body.sourceUrl?.trim()) return NextResponse.json({ error: "제목, 기관명, 지원 링크는 필수입니다." }, { status: 400 });
   const now = new Date().toISOString(); const row = normalizeOpportunity({ source: "manual", externalId: null, sourceUrl: body.sourceUrl, canonicalSourceUrl: body.sourceUrl, originalPublisherUrl: body.sourceUrl,
     ingestionType: "manual", title: body.title, normalizedTitle: "", organization: body.organization, normalizedOrganization: "", opportunityType: body.opportunityType ?? "other",
