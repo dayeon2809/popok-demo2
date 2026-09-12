@@ -44,10 +44,11 @@ export default function HomeClient({
   const heroArtist = baseArtists.find((artist) => artist.name.replace(/\s/g, "") === "최지안") || baseArtists[0] || null;
 
   const activeArtists = useMemo(() => {
-    return [...baseArtists]
+    return baseArtists
+      .filter((artist) => artist.id !== heroArtist?.id)
       .sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
       .slice(0, 6);
-  }, [baseArtists]);
+  }, [baseArtists, heroArtist]);
 
   const heroCta = getHeroCta(isLoggedIn, myArtistSlug);
 
